@@ -2,6 +2,8 @@
 """
 import argparse
 import vtk
+import os
+from timeit import default_timer as timer
 
 
 def warp(filename: str, component: str, scale: float, axis: int):
@@ -35,13 +37,25 @@ def warp(filename: str, component: str, scale: float, axis: int):
     writer.Write()
 
 
+def traverse(folder: str, action: callable):
+    """Traverse all the VTU files in a folder and all its subfolders.
+    """
+    for filename in os.listdir(folder):
+        f = os.path.join(folder, filename)
+        if os.path.isfile(f):
+            if f[-4:] == '.vtu':
+                action(f)
+        else:
+            traverse(f, action)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog = 'python3 warp_vtu.py',
         description = 'Warp the mesh by shifting nodes.')
-    parser.add_argument('--filename',
+    parser.add_argument('--folder',
         default='./', type=str,
-        help='which vtu file to be warped')
+        help='which folder to be traversed')
     parser.add_argument('--axis',
         choices=['x', 'y', 'z'],
         default='z',
@@ -61,4 +75,11 @@ if __name__ == "__main__":
         axis = 2
     else:
         assert  args.axis == 'x'
-    warp(args.filename, args.component, args.scale, axis)
+    def warp_serial(filename):
+        print(filename)
+        warp(filename, args.component, +args.scale, axis)
+        warp(filename, args.component, -args.scale, axis)
+    start = timer()
+    traverse(args.folder, lambda f: warp_serial(f))
+    end = timer()
+    print('The serial version costs', end - start, 'sec.')
