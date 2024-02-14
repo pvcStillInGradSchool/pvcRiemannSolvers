@@ -182,7 +182,7 @@ class LegendreDG(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'LegendreDG'
         if verbose:
-            my_name += r' ($p=$' + f'{self.degree()})'
+            my_name += f'(p={self.degree()})'
         return my_name
 
 
@@ -198,7 +198,7 @@ class DGonUniformRoots(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'DGonUniformRoots'
         if verbose:
-            my_name += r' ($p=$' + f'{self.degree()})'
+            my_name += f'(p={self.degree()})'
         return my_name
 
 
@@ -214,7 +214,7 @@ class DGonLegendreRoots(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'DGonLegendreRoots'
         if verbose:
-            my_name += r' ($p=$' + f'{self.degree()})'
+            my_name += f'(p={self.degree()})'
         return my_name
 
 
@@ -230,7 +230,7 @@ class DGonLobattoRoots(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'DGonLobattoRoots'
         if verbose:
-            my_name += r' ($p=$' + f'{self.degree()})'
+            my_name += f'(p={self.degree()})'
         return my_name
 
 
