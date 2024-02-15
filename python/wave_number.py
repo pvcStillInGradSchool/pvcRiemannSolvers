@@ -56,6 +56,50 @@ class WaveNumberDisplayer:
                 matrix[:, col] /= np.exp(1j * i_element * kappa_h)
         return matrices[-1]
 
+    def get_spatial_matrix_fast(self, scheme: spatial.FiniteElement, kappa_h: float):
+        """Get the spatial matrix of a FiniteElement scheme.
+
+        This version is fast since it uses the fact that
+            r_curr(u_curr, u_prev, u_next) = s_curr * u_curr
+                                           + s_prev * u_prev
+                                           + s_next * u_next
+        """
+        assert isinstance(scheme, spatial.FiniteElement)
+        # kappa_h = k_int * 2 * np.pi / scheme.length() * scheme.delta_x(0)
+        n_term = scheme.degree() + 1
+        i_curr = self._n_element // 2
+        i_prev = i_curr - 1
+        i_next = i_curr + 1
+        s_curr = np.zeros((n_term, n_term), dtype=complex)
+        s_prev = np.zeros((n_term, n_term), dtype=complex)
+        s_next = np.zeros((n_term, n_term), dtype=complex)
+        first = i_curr * n_term
+        last = first + n_term
+        global_column = np.ndarray(n_term * scheme.n_element(),
+            dtype=complex)
+        for col in range(n_term):
+            # build s_curr[:, col] from residual_j(|k⟩, |0⟩, |0⟩)
+            global_column[:] = 0
+            global_column[i_curr * n_term + col] = 1
+            scheme.set_solution_column(global_column)
+            global_column = scheme.get_residual_column()
+            s_curr[:, col] = global_column[first:last]
+            # build s_prev[:, col] from residual_j(|0⟩, |k⟩, |0⟩)
+            global_column[:] = 0
+            global_column[i_prev * n_term + col] = 1
+            scheme.set_solution_column(global_column)
+            global_column = scheme.get_residual_column()
+            s_prev[:, col] = global_column[first:last]
+            # build s_next[:, col] from residual_j(|0⟩, |0⟩, |k⟩)
+            global_column[:] = 0
+            global_column[i_next * n_term + col] = 1
+            scheme.set_solution_column(global_column)
+            global_column = scheme.get_residual_column()
+            s_next[:, col] = global_column[first:last]
+        s_curr += s_prev * np.exp(-1j * kappa_h)
+        s_curr += s_next * np.exp(+1j * kappa_h)
+        return s_curr
+
     def get_modified_wavenumbers(self, scheme: spatial.FiniteElement,
             sampled_wavenumbers: np.ndarray):
         """Get the eigenvalues of a scheme at a given set of wavenumbers.
@@ -65,7 +109,7 @@ class WaveNumberDisplayer:
         modified_wavenumbers = np.ndarray((n_sample, n_term), dtype=complex)
         for i_sample in range(n_sample):
             kappa_h = sampled_wavenumbers[i_sample]
-            matrix = self.get_spatial_matrix(scheme, kappa_h)
+            matrix = self.get_spatial_matrix_fast(scheme, kappa_h)
             matrix *= 1j * scheme.delta_x(0) / self._a
             modified_wavenumbers[i_sample, :] = np.linalg.eigvals(matrix)
         return modified_wavenumbers
