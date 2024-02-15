@@ -39,8 +39,7 @@ class WaveNumberDisplayer:
         for col in range(n_term):
             u_tilde = np.zeros(n_term)
             u_tilde[col] = 1
-            global_column = np.ndarray(n_term * scheme.n_element(),
-                dtype=complex)
+            global_column = np.ndarray(scheme.n_dof(), dtype=complex)
             for i_element in range(scheme.n_element()):
                 first = i_element * n_term
                 last = first + n_term
@@ -75,8 +74,7 @@ class WaveNumberDisplayer:
         s_next = np.zeros((n_term, n_term), dtype=complex)
         first = i_curr * n_term
         last = first + n_term
-        global_column = np.ndarray(n_term * scheme.n_element(),
-            dtype=complex)
+        global_column = np.ndarray(scheme.n_dof(), dtype=complex)
         for col in range(n_term):
             # build s_curr[:, col] from residual_j(|k⟩, |0⟩, |0⟩)
             global_column[:] = 0
