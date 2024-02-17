@@ -247,17 +247,19 @@ class WaveNumberDisplayer:
                              physical_eigvals.imag/scale,
                              label=scheme.name(), linestyle=linestyles[i][1])
                     i += 1
-        x_max = np.max(degrees) + 1
-        sampled_wavenumbers = np.linspace(0, x_max, n_sample)
+        degree = np.max(degrees)
+        kh_max = (degree + 1) * np.pi
+        sampled_wavenumbers = np.linspace(0, kh_max, n_sample)
+        scale = (degree * compressed + 1) * np.pi
         exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
-        if compressed:
-            sampled_wavenumbers /= x_max
         plt.subplot(2,1,1)
-        plt.plot(sampled_wavenumbers, exact.real, '-', label='Exact')
+        plt.plot(sampled_wavenumbers/scale, exact.real/scale,
+                 '-', label='Exact')
         plt.grid()
         plt.legend(handlelength=4)
         plt.subplot(2,1,2)
-        plt.plot(sampled_wavenumbers, exact.imag, '-', label='Exact')
+        plt.plot(sampled_wavenumbers/scale, exact.imag/scale,
+                 '-', label='Exact')
         plt.grid()
         plt.legend(handlelength=4)
         plt.tight_layout()
