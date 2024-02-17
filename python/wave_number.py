@@ -16,10 +16,20 @@ class WaveNumberDisplayer:
 
     def __init__(self, x_left, x_right, n_element) -> None:
         self._a = 1.0
+        self._b = 0.1
         self._riemann = riemann.LinearAdvection(self._a, complex)
         self._x_left = x_left
         self._x_right = x_right
         self._n_element = n_element
+        self._h = (x_right - x_left) / n_element
+        self._reynolds = self._a * self._h / self._b
+
+    def get_exact_modified_wavenumbers(self, sampled_wavenumbers: np.ndarray):
+        n_sample = len(sampled_wavenumbers)
+        exact = np.ndarray(n_sample, dtype=complex)
+        exact.real = sampled_wavenumbers
+        exact.imag = -sampled_wavenumbers**2 / self._reynolds
+        return exact
 
     def build_scheme(self, Method, degree: int, g: concept.Polynomial):
         assert issubclass(Method, spatial.FiniteElement)
@@ -148,6 +158,7 @@ class WaveNumberDisplayer:
         xticks_ticks = xticks_labels * np.pi
         kh_min, kh_max = xticks_ticks[0], xticks_ticks[-1]
         sampled_wavenumbers = np.linspace(kh_min, kh_max, n_sample)
+        exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
         scheme = self.build_scheme(Method, degree, g)
         modified_wavenumbers = self.get_modified_wavenumbers(
             scheme, sampled_wavenumbers)
@@ -159,7 +170,7 @@ class WaveNumberDisplayer:
         plt.xlabel(r'$\kappa h\,/\,\pi$')
         plt.plot(sampled_wavenumbers, modified_wavenumbers.real, 'k.')
         plt.plot(sampled_wavenumbers, physical_eigvals.real, 'ro', label='Physical')
-        plt.plot([kh_min, kh_max], [kh_min, kh_max], '-', label='Exact')
+        plt.plot(sampled_wavenumbers, exact.real, '-', label='Exact')
         plt.xticks(xticks_ticks, xticks_labels)
         plt.grid()
         plt.legend()
@@ -168,7 +179,7 @@ class WaveNumberDisplayer:
         plt.xlabel(r'$\kappa h\,/\,\pi$')
         plt.plot(sampled_wavenumbers, modified_wavenumbers.imag, 'k.')
         plt.plot(sampled_wavenumbers, physical_eigvals.imag, 'ro', label='Physical')
-        plt.plot([kh_min, kh_max], [0, 0], '-', label='Exact')
+        plt.plot(sampled_wavenumbers, exact.imag, '-', label='Exact')
         plt.xticks(xticks_ticks, xticks_labels)
         plt.grid()
         plt.legend()
@@ -236,13 +247,17 @@ class WaveNumberDisplayer:
                              physical_eigvals.imag/scale,
                              label=scheme.name(), linestyle=linestyles[i][1])
                     i += 1
-        x_max = np.max(degrees) * (not compressed) + 1
+        x_max = np.max(degrees) + 1
+        sampled_wavenumbers = np.linspace(0, x_max, n_sample)
+        exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
+        if compressed:
+            sampled_wavenumbers /= x_max
         plt.subplot(2,1,1)
-        plt.plot([0, x_max], [0, x_max], '-', label='Exact')
+        plt.plot(sampled_wavenumbers, exact.real, '-', label='Exact')
         plt.grid()
         plt.legend(handlelength=4)
         plt.subplot(2,1,2)
-        plt.plot([0, x_max], [0, 0], '-', label='Exact')
+        plt.plot(sampled_wavenumbers, exact.imag, '-', label='Exact')
         plt.grid()
         plt.legend(handlelength=4)
         plt.tight_layout()
