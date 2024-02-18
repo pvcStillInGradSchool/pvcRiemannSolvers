@@ -153,6 +153,11 @@ class WaveNumberDisplayer:
             g: concept.Polynomial, n_sample: int):
         """Plot the tilde-kappa_h - kappa_h curves for a given scheme.
         """
+        print("plot_modified_wavenumbers")
+        print("  Method =", Method)
+        print("  degree =", degree)
+        print("  g =", g)
+        print("  n_sample =", n_sample)
         xticks_labels = np.linspace(-degree-1, degree+1, 2*degree+3, dtype=int)
         # xticks_labels = np.linspace(0, degree+1, degree+2, dtype=int)
         xticks_ticks = xticks_labels * np.pi
@@ -202,6 +207,13 @@ class WaveNumberDisplayer:
 
     def compare_wave_numbers(self, methods, degrees, degree_to_corrections,
             n_sample: int, compressed: bool, name: str):
+        print("compare_wave_numbers")
+        print("  methods =", methods)
+        print("  degrees =", degrees)
+        print("  degree_to_corrections =", degree_to_corrections)
+        print("  n_sample =", n_sample)
+        print("  compressed =", compressed)
+        print("  name =", name)
         linestyles = [
             ('dotted',                (0, (1, 1))),
             ('loosely dotted',        (0, (1, 4))),
