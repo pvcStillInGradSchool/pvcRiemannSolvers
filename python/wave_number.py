@@ -17,7 +17,7 @@ class WaveNumberDisplayer:
     def __init__(self, x_left, x_right, n_element) -> None:
         self._a = 1.0
         self._b = 0.1
-        self._riemann = riemann.LinearAdvection(self._a, complex)
+        self._riemann = riemann.LinearAdvectionDiffusion(self._a, self._b, complex)
         self._x_left = x_left
         self._x_right = x_right
         self._n_element = n_element

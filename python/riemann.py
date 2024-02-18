@@ -119,8 +119,8 @@ class LinearAdvection(Solver):
 
 class LinearAdvectionDiffusion(LinearAdvection):
 
-    def __init__(self, a_const, b_const):
-        e = equation.LinearAdvectionDiffusion(a_const, b_const)
+    def __init__(self, a_const, b_const, value_type=float):
+        e = equation.LinearAdvectionDiffusion(a_const, b_const, value_type)
         Solver.__init__(self, e)
 
     def equation(self) -> equation.LinearAdvectionDiffusion:
