@@ -13,6 +13,11 @@ class Solver(concept.RiemannSolver):
     # DDG constants:
     _beta_0, _beta_1 = 3.0, 1.0 / 12
 
+    def diffusive_name(self) -> str:
+        beta_0 = r'$\beta_0$' + f'={Solver._beta_0}'
+        beta_1 = r'$\beta_1$' + f'={Solver._beta_1:.2g}'
+        return f'DDG({beta_0}, {beta_1})'
+
     def __init__(self, equation: concept.Equation) -> None:
         super().__init__(equation)
         self._value_left = None

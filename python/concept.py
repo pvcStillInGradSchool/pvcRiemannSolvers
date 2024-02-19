@@ -479,6 +479,11 @@ class RiemannSolver(abc.ABC):
         """
 
     @abc.abstractmethod
+    def diffusive_name(self) -> str:
+        """Get the string representation of the diffusive solver.
+        """
+
+    @abc.abstractmethod
     def get_interface_flux_and_bjump(self, left, right):
         """Get the value of (F - G) and half-jump of b = nu*U on the interface.
         
