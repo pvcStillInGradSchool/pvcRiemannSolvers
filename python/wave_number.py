@@ -16,19 +16,21 @@ class WaveNumberDisplayer:
 
     def __init__(self, x_left, x_right, n_element) -> None:
         self._a = 1.0
-        self._b = 0.1
-        self._riemann = riemann.LinearAdvectionDiffusion(self._a, self._b, complex)
+        self._riemann = riemann.LinearAdvectionDiffusion(self._a, 1e-3, complex)
         self._x_left = x_left
         self._x_right = x_right
         self._n_element = n_element
         self._h = (x_right - x_left) / n_element
-        self._reynolds = self._a * self._h / self._b
+
+    def get_reynolds(self):
+        b = self._riemann.equation().get_diffusive_coeff()
+        return self._a * self._h / b
 
     def get_exact_modified_wavenumbers(self, sampled_wavenumbers: np.ndarray):
         n_sample = len(sampled_wavenumbers)
         exact = np.ndarray(n_sample, dtype=complex)
         exact.real = sampled_wavenumbers
-        exact.imag = -sampled_wavenumbers**2 / self._reynolds
+        exact.imag = -sampled_wavenumbers**2 / self.get_reynolds()
         return exact
 
     def build_scheme(self, Method, degree: int, g: concept.Polynomial):
@@ -279,6 +281,83 @@ class WaveNumberDisplayer:
         # plt.show()
         plt.savefig(f'{name}.svg')
 
+    def compare_diffusive_schemes(self, method, degree, degree_to_correction,
+            n_sample: int, compressed: bool, name: str):
+        print("compare_diffusive_schemes")
+        print("  method =", method)
+        print("  degree =", degree)
+        print("  degree_to_correction =", degree_to_correction)
+        print("  n_sample =", n_sample)
+        print("  compressed =", compressed)
+        print("  name =", name)
+        linestyles = [
+            ('dotted',                (0, (1, 1))),
+            ('loosely dotted',        (0, (1, 4))),
+            ('dashed',                (0, (4, 4))),
+            ('densely dashed',        (0, (4, 1))),
+            ('loosely dashed',        (0, (4, 8))),
+            ('long dash with offset', (4, (8, 2))),
+            ('dashdotted',            (0, (2, 4, 1, 4))),
+            ('densely dashdotted',    (0, (2, 1, 1, 1))),
+            ('loosely dashdotted',    (0, (2, 8, 1, 8))),
+            ('dashdotdotted',         (0, (2, 4, 1, 4, 1, 4))),
+            ('densely dashdotdotted', (0, (2, 1, 1, 1, 1, 1))),
+            ('loosely dashdotdotted', (0, (2, 8, 1, 8, 1, 8))),]
+        if compressed:
+            divisor = r'$(N\pi)$'
+        else:
+            divisor = r'$\pi$'
+        plt.figure(figsize=(6,9))
+        plt.subplot(2,1,1)
+        plt.ylabel(r'$\Re(\tilde{\kappa}h)\,/\,$'+divisor)
+        plt.xlabel(r'$\kappa h\,/\,$'+divisor)
+        plt.subplot(2,1,2)
+        plt.ylabel(r'$\Im(\tilde{\kappa}h)\,/\,$'+divisor)
+        plt.xlabel(r'$\kappa h\,/\,$'+divisor)
+        i = 0
+        g = degree_to_correction(degree)
+        scheme = self.build_scheme(method, degree, g)
+        kh_max = (degree + 1) * np.pi
+        sampled_wavenumbers = np.linspace(0, kh_max, n_sample)
+        scale = (degree * compressed + 1) * np.pi
+        backup = (riemann.Solver._beta_0, riemann.Solver._beta_1)
+        print(backup)
+        for beta_0 in (0.5, 2.0, 4.0):
+            riemann.Solver._beta_0 = beta_0
+            for beta_1 in (0.0, 1.0/12, 1.0):
+                riemann.Solver._beta_1 = beta_1
+                modified_wavenumbers = self.get_modified_wavenumbers(
+                    scheme, sampled_wavenumbers)
+                physical_eigvals = self.get_physical_mode(
+                    sampled_wavenumbers, modified_wavenumbers)
+                plt.subplot(2,1,1)
+                plt.plot(sampled_wavenumbers/scale,
+                          physical_eigvals.real/scale,
+                          label=self._riemann.diffusive_name(),
+                          linestyle=linestyles[i][1])
+                plt.subplot(2,1,2)
+                plt.plot(sampled_wavenumbers/scale,
+                          physical_eigvals.imag/scale,
+                          label=self._riemann.diffusive_name(),
+                          linestyle=linestyles[i][1])
+                i += 1
+        riemann.Solver._beta_0, riemann.Solver._beta_1 = backup
+        print(self._riemann._beta_0, self._riemann._beta_1)
+        exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
+        plt.subplot(2,1,1)
+        plt.plot(sampled_wavenumbers/scale, exact.real/scale,
+                 '-', label='Exact')
+        plt.grid()
+        plt.legend(handlelength=4)
+        plt.subplot(2,1,2)
+        plt.plot(sampled_wavenumbers/scale, exact.imag/scale,
+                 '-', label='Exact')
+        plt.grid()
+        plt.legend(handlelength=4)
+        plt.tight_layout()
+        # plt.show()
+        plt.savefig(f'{name}.svg')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='python3 wave_number.py')
@@ -343,3 +422,6 @@ if __name__ == '__main__':
     wnd.compare_wave_numbers([spatial.FRonLobattoRoots],
         [5], degree_to_corrections,
         args.n_sample, args.compressed, 'HuynhFR')
+    wnd.compare_diffusive_schemes(spatial.FRonLobattoRoots,
+        3, degree_to_corrections[1],
+        args.n_sample, args.compressed, 'CompareDDG')
