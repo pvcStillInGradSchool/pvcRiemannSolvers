@@ -320,8 +320,9 @@ class WaveNumberDisplayer:
         kh_max = (degree + 1) * np.pi
         sampled_wavenumbers = np.linspace(0, kh_max, n_sample)
         scale = (degree * compressed + 1) * np.pi
-        backup = (riemann.Solver._beta_0, riemann.Solver._beta_1)
-        print(backup)
+        b_backup = self._riemann.equation()._b
+        beta_backup = (riemann.Solver._beta_0, riemann.Solver._beta_1)
+        print(b_backup, beta_backup)
         for beta_0 in (0.5, 2.0, 4.0):
             riemann.Solver._beta_0 = beta_0
             for beta_1 in (0.0, 1.0/12, 1.0):
@@ -330,6 +331,13 @@ class WaveNumberDisplayer:
                     scheme, sampled_wavenumbers)
                 physical_eigvals = self.get_physical_mode(
                     sampled_wavenumbers, modified_wavenumbers)
+                # minus the value given by LinearAdvection
+                self._riemann.equation()._b = 0
+                modified_wavenumbers = self.get_modified_wavenumbers(
+                    scheme, sampled_wavenumbers)
+                physical_eigvals -= self.get_physical_mode(
+                    sampled_wavenumbers, modified_wavenumbers)
+                self._riemann.equation()._b = b_backup
                 plt.subplot(2,1,1)
                 plt.plot(sampled_wavenumbers/scale,
                           physical_eigvals.real/scale,
@@ -341,11 +349,13 @@ class WaveNumberDisplayer:
                           label=self._riemann.diffusive_name(),
                           linestyle=linestyles[i][1])
                 i += 1
-        riemann.Solver._beta_0, riemann.Solver._beta_1 = backup
-        print(self._riemann._beta_0, self._riemann._beta_1)
+        riemann.Solver._beta_0, riemann.Solver._beta_1 = beta_backup
+        print(self._riemann.equation()._b,
+            (self._riemann._beta_0, self._riemann._beta_1))
         exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
         plt.subplot(2,1,1)
-        plt.plot(sampled_wavenumbers/scale, exact.real/scale,
+        plt.title(f'{scheme.name()}, Re = {self.get_reynolds()}')
+        plt.plot(sampled_wavenumbers/scale, 0 * exact.real/scale,
                  '-', label='Exact')
         plt.grid()
         plt.legend(handlelength=4)
