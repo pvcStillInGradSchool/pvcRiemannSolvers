@@ -173,6 +173,7 @@ class WaveNumberDisplayer:
             modified_wavenumbers)
         plt.figure(figsize=(6,9))
         plt.subplot(3,1,1)
+        plt.title(f'{scheme.name()}\nRe={self.get_reynolds()}')
         plt.ylabel(r'$\Re(\tilde{\kappa}h)$')
         plt.xlabel(r'$\kappa h\,/\,\pi$')
         plt.plot(sampled_wavenumbers, modified_wavenumbers.real, 'k.')
@@ -268,6 +269,7 @@ class WaveNumberDisplayer:
         scale = (degree * compressed + 1) * np.pi
         exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
         plt.subplot(2,1,1)
+        plt.title(f'Re={self.get_reynolds()}')
         plt.plot(sampled_wavenumbers/scale, exact.real/scale,
                  '-', label='Exact')
         plt.grid()
@@ -354,7 +356,7 @@ class WaveNumberDisplayer:
             (self._riemann._beta_0, self._riemann._beta_1))
         exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
         plt.subplot(2,1,1)
-        plt.title(f'{scheme.name()}, Re = {self.get_reynolds()}')
+        plt.title(f'{scheme.name()}\nRe = {self.get_reynolds()}')
         plt.plot(sampled_wavenumbers/scale, 0 * exact.real/scale,
                  '-', label='Exact')
         plt.grid()
