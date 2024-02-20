@@ -8,6 +8,7 @@ import concept
 import coordinate
 import expansion
 import element
+import polynomial
 
 
 class FiniteVolume(concept.SpatialScheme):
@@ -241,6 +242,13 @@ class DGonLobattoRoots(DiscontinuousGalerkin):
 class FluxReconstruction(FiniteElement):
     """An mid-level class that defines common methods for all FR schemes.
     """
+
+    def __init__(self, riemann: concept.RiemannSolver, degree: int,
+            n_element: int, x_left: float, x_right: float, ElementType):
+        FiniteElement.__init__(self, riemann, degree,
+            n_element, x_left, x_right, ElementType)
+        g = polynomial.Huynh(degree + 1, n_lump=2)
+        self.add_correction_function(g)
 
     def get_flux_value(self, point):
         curr = self.get_element_index(point)
