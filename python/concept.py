@@ -19,6 +19,10 @@ class Polynomial(abc.ABC):
         """Degree of the polynomial.
         """
 
+    def p_str(self) -> str:
+        p = r'$p$'
+        return f'{p}={self.degree()}'
+
     @abc.abstractmethod
     def local_to_value(self, x_local):
         """Evaluate the polynomial and return-by-value the result.

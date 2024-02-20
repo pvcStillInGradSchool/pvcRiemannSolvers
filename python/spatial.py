@@ -39,6 +39,10 @@ class FiniteElement(concept.SpatialScheme):
         assert_almost_equal(x_left_i, x_right)
         self.link_neighbors()
 
+    def p_str(self) -> str:
+        p = r'$p$'
+        return f'{p}={self.degree()}'
+
     def n_dof(self):
         return self.n_element() * self.get_element_by_index(0).n_dof()
 
@@ -182,7 +186,7 @@ class LegendreDG(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'LegendreDG'
         if verbose:
-            my_name += f'(p={self.degree()})'
+            my_name += f'({self.p_str()})'
         return my_name
 
 
@@ -198,7 +202,7 @@ class DGonUniformRoots(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'DGonUniformRoots'
         if verbose:
-            my_name += f'(p={self.degree()})'
+            my_name += f'({self.p_str()})'
         return my_name
 
 
@@ -214,7 +218,7 @@ class DGonLegendreRoots(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'DGonLegendreRoots'
         if verbose:
-            my_name += f'(p={self.degree()})'
+            my_name += f'({self.p_str()})'
         return my_name
 
 
@@ -230,7 +234,7 @@ class DGonLobattoRoots(DiscontinuousGalerkin):
     def name(self, verbose=True):
         my_name = 'DGonLobattoRoots'
         if verbose:
-            my_name += f'(p={self.degree()})'
+            my_name += f'({self.p_str()})'
         return my_name
 
 
@@ -260,8 +264,9 @@ class FluxReconstruction(FiniteElement):
             e = self.get_element_by_index(i)
             e.add_correction_function(g)
 
-    def _info(self):
-        return f'g={self._elements[0]._correction.name()}'
+    def g_str(self):
+        g = r'$g$'
+        return f'{g}={self.get_element_by_index(0)._correction.name()}'
 
 
 class FRonUniformRoots(FluxReconstruction):
@@ -276,7 +281,7 @@ class FRonUniformRoots(FluxReconstruction):
     def name(self, verbose=True):
         my_name = 'FRonUniformRoots'
         if verbose:
-            my_name += f'({self._info()})'
+            my_name += f'({self.g_str()})'
         return my_name
 
 
@@ -292,7 +297,7 @@ class FRonLegendreRoots(FluxReconstruction):
     def name(self, verbose=True):
         my_name = 'FRonLegendreRoots'
         if verbose:
-            my_name += f'({self._info()})'
+            my_name += f'({self.g_str()})'
         return my_name
 
 
@@ -308,7 +313,7 @@ class FRonLobattoRoots(FluxReconstruction):
     def name(self, verbose=True):
         my_name = 'FRonLobattoRoots'
         if verbose:
-            my_name += f'({self._info()})'
+            my_name += f'({self.g_str()})'
         return my_name
 
 
@@ -324,7 +329,7 @@ class LegendreFR(FluxReconstruction):
     def name(self, verbose=True):
         my_name = 'LegendreFR'
         if verbose:
-            my_name += f'({self._info()})'
+            my_name += f'({self.g_str()})'
         return my_name
 
 
