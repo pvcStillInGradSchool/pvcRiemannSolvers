@@ -112,14 +112,12 @@ class Converter<Scalar, 3> {
 
 template <std::floating_point ScalarType, int kDimensions>
 class FluxTuple : public Tuple<ScalarType, kDimensions> {
-  using Mat5x1 = algebra::Matrix<ScalarType, 5, 1>;
-
  public:
   // Types:
   using Base = Tuple<ScalarType, kDimensions>;
   using Scalar = typename Base::Scalar;
   using Vector = typename Base::Vector;
-  using FluxMatrix = algebra::Matrix<Scalar, 5, kDimensions>;
+  using FluxMatrix = algebra::Matrix<Scalar, kDimensions + 2, kDimensions>;
 
   // Constructors:
   using Base::Base;
