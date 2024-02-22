@@ -27,6 +27,25 @@ TEST_F(TestTypes, TestTuples) {
   EXPECT_EQ(primitive.momentum(), Vector(+0.3, -0.4));
   EXPECT_DOUBLE_EQ(primitive.GetDynamicPressure(), rho * (u*u + v*v) / 2);
 }
+TEST_F(TestTypes, TestIdealGasProperties) {
+  using Scalar = double;
+  using Gas = IdealGas<Scalar, 1.4>;
+  Scalar density = 1.293;
+  Scalar pressure = 101325;
+  Scalar temperature = pressure / density / Gas::R();
+  EXPECT_NEAR(temperature, 273.15, 1e-0);
+  EXPECT_EQ(Gas::GetSpeedOfSound(temperature),
+      Gas::GetSpeedOfSound(density, pressure));
+  Scalar mach = 0.2;
+  Scalar factor = 1 + Gas::GammaMinusOneOverTwo() * mach * mach;
+  Scalar total_temperature = temperature * factor;
+  EXPECT_EQ(Gas::TotalTemperatureToTemperature(mach, total_temperature),
+      temperature);
+  Scalar total_pressure = pressure *
+      std::pow(factor, Gas::GammaOverGammaMinusOne());
+  EXPECT_EQ(Gas::TotalPressureToPressure(mach, total_pressure),
+      pressure);
+}
 TEST_F(TestTypes, TestConverters) {
   auto rho{0.1}, u{+0.2}, v{-0.2}, p{0.3};
   auto primitive = Primitives<double, 2>{rho, u, v, p};

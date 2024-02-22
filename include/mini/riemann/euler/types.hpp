@@ -205,6 +205,9 @@ class IdealGas {
 
  public:
   // Constants:
+  static constexpr Scalar R() {
+    return 287.05;
+  }
   static constexpr Scalar Gamma() {
     return kGamma;
   }
@@ -236,12 +239,31 @@ class IdealGas {
     return 2 / GammaMinusOne();
   }
   // Converters:
+  static constexpr Scalar GetSpeedOfSound(Scalar temperature) {
+    return (temperature > 0) ? std::sqrt(Gamma() * R() * temperature) : 0;
+  }
+  static constexpr Scalar GetSpeedOfSound(Scalar rho, Scalar p) {
+    return (rho > 0 && p > 0) ? std::sqrt(Gamma() * p / rho) : 0;
+  }
   template <int kDimensions>
   static Scalar GetSpeedOfSound(Primitives<Scalar, kDimensions> const& state) {
-    // SetZeroIfNegative(state);
-    return state.rho() <= 0 || state.p() <= 0 ?
-        0 : std::sqrt(Gamma() * state.p() / state.rho());
+    return GetSpeedOfSound(state.rho(), state.p());
   }
+
+  static constexpr Scalar GetMachFactor(Scalar mach) {
+    return 1 + GammaMinusOneOverTwo() * mach * mach;
+  }
+  static constexpr Scalar TotalTemperatureToTemperature(Scalar mach,
+      Scalar total_temperature) {
+    auto factor = GetMachFactor(mach);
+    return total_temperature / factor;
+  }
+  static constexpr Scalar TotalPressureToPressure(Scalar mach,
+      Scalar total_pressure) {
+    auto factor = std::pow(GetMachFactor(mach), GammaOverGammaMinusOne());
+    return total_pressure / factor;
+  }
+
   template <int kDimensions>
   static Primitives<Scalar, kDimensions> ConservativeToPrimitive(
       Conservatives<Scalar, kDimensions> const &conservative) {
