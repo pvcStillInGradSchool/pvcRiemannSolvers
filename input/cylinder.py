@@ -86,6 +86,15 @@ if __name__ == '__main__':
     gmsh.model.geo.synchronize()
     gmsh.model.occ.synchronize()
 
+    gmsh.model.addPhysicalGroup(dim=2, tags=[4], name="Left")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[5], name="Right")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[6], name="Top")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[3], name="Bottom")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[1,2,52], name="Back")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[11,13,44], name="Front")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[53], name="Wall")
+    gmsh.model.addPhysicalGroup(dim=3, tags=[1,2,3], name="Fluid")
+
     gmsh.model.mesh.generate(3)
 
     # Launch the GUI to see the model:

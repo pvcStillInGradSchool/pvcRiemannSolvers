@@ -52,6 +52,15 @@ if __name__ == '__main__':
         gmsh.model.mesh.setTransfiniteCurve(tag, ny + 1, "Progression", ratio)
     gmsh.model.mesh.setTransfiniteSurface(5)
     gmsh.model.mesh.setRecombine(2, 5)
+
+    gmsh.model.addPhysicalGroup(dim=2, tags=[26], name="Left")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[18], name="Right")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[22], name="Top")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[14], name="Bottom")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[5], name="Back")
+    gmsh.model.addPhysicalGroup(dim=2, tags=[27], name="Front")
+    gmsh.model.addPhysicalGroup(dim=3, tags=[1], name="Fluid")
+
     gmsh.model.mesh.generate(3)
 
     # Launch the GUI to see the model:
