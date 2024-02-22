@@ -131,6 +131,18 @@ class NavierStokes {
   }
 };
 
+template <typename G>
+typename NavierStokes<G>::Scalar NavierStokes<G>::R_;
+
+template <typename G>
+typename NavierStokes<G>::Scalar NavierStokes<G>::mu_;
+
+template <typename G>
+typename NavierStokes<G>::Scalar NavierStokes<G>::zeta_;
+
+template <typename G>
+typename NavierStokes<G>::Scalar NavierStokes<G>::kappa_;
+
 }  // namespace diffusive
 }  // namespace riemann
 }  // namespace mini
