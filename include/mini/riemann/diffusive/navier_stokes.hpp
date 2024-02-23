@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "mini/algebra/eigen.hpp"
-#include "mini/riemann/euler.hpp"
+#include "mini/riemann/euler/types.hpp"
 #include "mini/constant/index.hpp"
 
 namespace mini {
@@ -19,13 +19,14 @@ class NavierStokes {
  public:
   static constexpr int kDimensions = 3;
   static constexpr int kComponents = 5;
-  using Gas = G
+  using Gas = G;
   using Scalar = typename Gas::Scalar;
   using Gradient = algebra::Matrix<Scalar, kDimensions, kComponents>;
-  using FluxMatrix = algebra::Matrix<Scalar, kComponents, kDimensions>;
   using Flux = euler::FluxTuple<Scalar, kDimensions>;
-  using Conservative = euler::Conservatives<Scalar, kComponents>;
-  using Primitive = euler::Primitive<Scalar, kComponents>;
+  using FluxMatrix = typename Flux::FluxMatrix;
+  using FluxVector = algebra::Vector<Scalar, kComponents>;
+  using Conservative = euler::Conservatives<Scalar, kDimensions>;
+  using Primitive = euler::Primitives<Scalar, kDimensions>;
   using Vector = typename Primitive::Vector;
   using Tensor = algebra::Vector<Scalar, 6>;
 
@@ -115,9 +116,10 @@ class NavierStokes {
   }
 
   static void MinusViscousFlux(Conservative const &c_val, Gradient const &c_grad,
-      Vector const &normal, Flux *flux) {
+      Vector const &normal, FluxVector *flux_vector) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
     Tensor tau = GetViscousStressTensor(p_grad);
+    auto *flux = static_cast<Flux *>(flux_vector);
     auto &flux_momentum = flux->momentum();
     flux_momentum[X] -= Dot(tau[XX], tau[XY], tau[XZ], normal);
     flux_momentum[Y] -= Dot(tau[YX], tau[YY], tau[YZ], normal);
