@@ -47,29 +47,35 @@ class NavierStokes {
       Conservative const &c_val, Gradient const &c_grad) {
     auto p_val = Gas::ConservativeToPrimitive(c_val);
     Gradient p_grad;
-    auto &grad_u = p_grad.col(X);
-    auto &grad_v = p_grad.col(Y);
-    auto &grad_w = p_grad.col(Z);
+    auto &&grad_u = p_grad.col(X);
+    auto &&grad_v = p_grad.col(Y);
+    auto &&grad_w = p_grad.col(Z);
     auto &grad_rho = c_grad.col(0);
     auto &grad_rho_u = c_grad.col(1 + X);
     auto &grad_rho_v = c_grad.col(1 + Y);
     auto &grad_rho_w = c_grad.col(1 + Z);
-    auto [rho, u, v, w, p] = p_val;
+    auto rho = p_val.mass();
+    auto u = p_val.momentumX();
+    auto v = p_val.momentumY();
+    auto w = p_val.momentumZ();
+    auto p = p_val.energy();
     grad_u = (grad_rho_u - u * grad_rho) / rho;
     grad_v = (grad_rho_v - v * grad_rho) / rho;
     grad_w = (grad_rho_w - w * grad_rho) / rho;
-    auto [rho_u, rho_v, rho_w] = c_val.momentum();
-    auto &grad_p = p_grad.col(3);
+    auto rho_u = c_val.momentumX();
+    auto rho_v = c_val.momentumY();
+    auto rho_w = c_val.momentumZ();
+    auto &&grad_p = p_grad.col(3);
     grad_p  = u * grad_rho_u + rho_u * grad_u;
     grad_p += v * grad_rho_v + rho_v * grad_v;
     grad_p += w * grad_rho_w + rho_w * grad_w;
     grad_p *= -0.5;
     grad_p += c_grad.col(4);
     grad_p *= Gas::GammaMinusOne();
-    auto &grad_T = p_grad.col(4);
+    auto &&grad_T = p_grad.col(4);
     grad_T = grad_p / rho - (p / (rho * rho)) * grad_rho;
     grad_T /= R_;
-    return p_grad;
+    return {p_val, p_grad};
   }
 
   static Tensor GetViscousStressTensor(Gradient const &p_grad) {
@@ -81,9 +87,9 @@ class NavierStokes {
     tau[XX] = 2 * mu_ * grad_u[X] + zeta_ * div_uvw;
     tau[YY] = 2 * mu_ * grad_v[Y] + zeta_ * div_uvw;
     tau[ZZ] = 2 * mu_ * grad_w[Z] + zeta_ * div_uvw;
-    tau[XY] = mu_ * (grad_u[Y] + grad_v[X])
-    tau[YZ] = mu_ * (grad_v[Z] + grad_w[Y])
-    tau[ZX] = mu_ * (grad_w[X] + grad_u[Z])
+    tau[XY] = mu_ * (grad_u[Y] + grad_v[X]);
+    tau[YZ] = mu_ * (grad_v[Z] + grad_w[Y]);
+    tau[ZX] = mu_ * (grad_w[X] + grad_u[Z]);
     return tau;
   }
 
@@ -98,17 +104,17 @@ class NavierStokes {
     Tensor tau = GetViscousStressTensor(p_grad);
     auto const &uvw = p_val.momentum();
     auto const &grad_T = p_grad.col(4);
-    auto &flux_x = flux->col(X);
+    auto &&flux_x = flux->col(X);
     flux_x[1] -= tau[XX];
     flux_x[2] -= tau[XY];
     flux_x[3] -= tau[XZ];
-    flux_z[4] -= Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa_ * grad_T[X];
-    auto &flux_y = flux->col(Y);
+    flux_x[4] -= Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa_ * grad_T[X];
+    auto &&flux_y = flux->col(Y);
     flux_y[1] -= tau[YX];
     flux_y[2] -= tau[YY];
     flux_y[3] -= tau[YZ];
     flux_y[4] -= Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa_ * grad_T[Y];
-    auto &flux_z = flux->col(Z);
+    auto &&flux_z = flux->col(Z);
     flux_z[1] -= tau[ZX];
     flux_z[2] -= tau[ZY];
     flux_z[3] -= tau[ZZ];
