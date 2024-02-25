@@ -30,15 +30,19 @@ class NavierStokes {
   using Vector = typename Primitive::Vector;
   using Tensor = algebra::Vector<Scalar, 6>;
 
-  static void SetProperty(Scalar mu, Scalar kappa) {
-    mu_ = mu;
-    zeta_ = -2.0 / 3 * mu;  // Stokes' hypothesis
+  static void SetProperty(Scalar nu, Scalar kappa) {
+    nu_ = nu;
     kappa_ = kappa;
   }
 
+  static std::pair<Scalar, Scalar> GetViscosity(Scalar rho) {
+    Scalar mu = nu_ * rho;
+    Scalar zeta = -2.0 / 3 * mu;  // Stokes' hypothesis
+    return {mu, zeta};
+  }
+
  protected:
-  static Scalar mu_;
-  static Scalar zeta_;
+  static Scalar nu_;
   static Scalar kappa_;
 
   static std::pair<Primitive, Gradient> ConservativeToPrimitive(
@@ -76,18 +80,19 @@ class NavierStokes {
     return {p_val, p_grad};
   }
 
-  static Tensor GetViscousStressTensor(Gradient const &p_grad) {
+  static Tensor GetViscousStressTensor(Gradient const &p_grad, Scalar rho) {
     Tensor tau;
     const auto &grad_u = p_grad.col(X);
     const auto &grad_v = p_grad.col(Y);
     const auto &grad_w = p_grad.col(Z);
     auto div_uvw = grad_u[X] + grad_v[Y] + grad_w[Z];
-    tau[XX] = 2 * mu_ * grad_u[X] + zeta_ * div_uvw;
-    tau[YY] = 2 * mu_ * grad_v[Y] + zeta_ * div_uvw;
-    tau[ZZ] = 2 * mu_ * grad_w[Z] + zeta_ * div_uvw;
-    tau[XY] = mu_ * (grad_u[Y] + grad_v[X]);
-    tau[YZ] = mu_ * (grad_v[Z] + grad_w[Y]);
-    tau[ZX] = mu_ * (grad_w[X] + grad_u[Z]);
+    auto [mu, zeta] = GetViscosity(rho);
+    tau[XX] = 2 * mu * grad_u[X] + zeta * div_uvw;
+    tau[YY] = 2 * mu * grad_v[Y] + zeta * div_uvw;
+    tau[ZZ] = 2 * mu * grad_w[Z] + zeta * div_uvw;
+    tau[XY] = mu * (grad_u[Y] + grad_v[X]);
+    tau[YZ] = mu * (grad_v[Z] + grad_w[Y]);
+    tau[ZX] = mu * (grad_w[X] + grad_u[Z]);
     return tau;
   }
 
@@ -99,7 +104,7 @@ class NavierStokes {
   static void MinusViscousFlux(Conservative const &c_val, Gradient const &c_grad,
       FluxMatrix *flux) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
-    Tensor tau = GetViscousStressTensor(p_grad);
+    Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
     auto const &uvw = p_val.momentum();
     auto const &grad_T = p_grad.col(4);
     auto &&flux_x = flux->col(X);
@@ -122,7 +127,7 @@ class NavierStokes {
   static void MinusViscousFlux(Conservative const &c_val, Gradient const &c_grad,
       Vector const &normal, FluxVector *flux_vector) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
-    Tensor tau = GetViscousStressTensor(p_grad);
+    Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
     auto *flux = static_cast<Flux *>(flux_vector);
     auto &flux_momentum = flux->momentum();
     flux_momentum[X] -= Dot(tau[XX], tau[XY], tau[XZ], normal);
@@ -138,10 +143,7 @@ class NavierStokes {
 };
 
 template <typename G>
-typename NavierStokes<G>::Scalar NavierStokes<G>::mu_;
-
-template <typename G>
-typename NavierStokes<G>::Scalar NavierStokes<G>::zeta_;
+typename NavierStokes<G>::Scalar NavierStokes<G>::nu_;
 
 template <typename G>
 typename NavierStokes<G>::Scalar NavierStokes<G>::kappa_;
