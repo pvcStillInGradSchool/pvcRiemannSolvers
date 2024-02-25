@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
   >;
   using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
   Riemann::SetBetaValues(2.0, 1.0 / 12);
+  Riemann::SetProperty(/* nu = */1.57e-5, /* prandtl = */0.708);
 
   /* Partition the mesh. */
   if (i_core == 0 && n_parts_prev != n_core) {

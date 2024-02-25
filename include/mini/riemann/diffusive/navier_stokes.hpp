@@ -30,9 +30,9 @@ class NavierStokes {
   using Vector = typename Primitive::Vector;
   using Tensor = algebra::Vector<Scalar, 6>;
 
-  static void SetProperty(Scalar nu, Scalar kappa) {
+  static void SetProperty(Scalar nu, Scalar prandtl) {
     nu_ = nu;
-    kappa_ = kappa;
+    prandtl_ = prandtl;
   }
 
   static std::pair<Scalar, Scalar> GetViscosity(Scalar rho) {
@@ -41,9 +41,15 @@ class NavierStokes {
     return {mu, zeta};
   }
 
+  static Scalar GetThermalConductivity(Scalar rho) {
+    Scalar c_p = Gas::R() * Gas::GammaOverGammaMinusOne();
+    Scalar mu = nu_ * rho;
+    return mu * c_p / prandtl_;
+  }
+
  protected:
   static Scalar nu_;
-  static Scalar kappa_;
+  static Scalar prandtl_;
 
   static std::pair<Primitive, Gradient> ConservativeToPrimitive(
       Conservative const &c_val, Gradient const &c_grad) {
@@ -115,23 +121,24 @@ class NavierStokes {
       FluxMatrix *flux) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
     Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
+    Scalar kappa = GetThermalConductivity(c_val.mass());
     auto const &uvw = p_val.momentum();
     auto const &grad_T = p_grad.col(4);
     auto &&flux_x = flux->col(X);
     flux_x[1] -= tau[XX];
     flux_x[2] -= tau[XY];
     flux_x[3] -= tau[XZ];
-    flux_x[4] -= Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa_ * grad_T[X];
+    flux_x[4] -= Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
     auto &&flux_y = flux->col(Y);
     flux_y[1] -= tau[YX];
     flux_y[2] -= tau[YY];
     flux_y[3] -= tau[YZ];
-    flux_y[4] -= Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa_ * grad_T[Y];
+    flux_y[4] -= Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
     auto &&flux_z = flux->col(Z);
     flux_z[1] -= tau[ZX];
     flux_z[2] -= tau[ZY];
     flux_z[3] -= tau[ZZ];
-    flux_z[4] -= Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa_ * grad_T[Z];
+    flux_z[4] -= Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
   }
 
   static void MinusViscousFlux(Conservative const &c_val, Gradient const &c_grad,
@@ -145,9 +152,10 @@ class NavierStokes {
     flux_momentum[Z] -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
     auto const &grad_T = p_grad.col(4);
     auto const &uvw = p_val.momentum();
-    auto work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa_ * grad_T[X];
-    auto work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa_ * grad_T[Y];
-    auto work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa_ * grad_T[Z];
+    Scalar kappa = GetThermalConductivity(c_val.mass());
+    auto work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
+    auto work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
+    auto work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
     flux->energy() -= Dot(work_x, work_y, work_z, normal);
   }
 };
@@ -156,7 +164,7 @@ template <typename G>
 typename NavierStokes<G>::Scalar NavierStokes<G>::nu_;
 
 template <typename G>
-typename NavierStokes<G>::Scalar NavierStokes<G>::kappa_;
+typename NavierStokes<G>::Scalar NavierStokes<G>::prandtl_;
 
 }  // namespace diffusive
 }  // namespace riemann
