@@ -49,13 +49,20 @@ class NavierStokes {
       Conservative const &c_val, Gradient const &c_grad) {
     auto p_val = Gas::ConservativeToPrimitive(c_val);
     Gradient p_grad;
-    auto &&grad_u = p_grad.col(X);
-    auto &&grad_v = p_grad.col(Y);
-    auto &&grad_w = p_grad.col(Z);
+    constexpr int U = 1 + X;
+    constexpr int V = 1 + Y;
+    constexpr int W = 1 + Z;
+    constexpr int E = 4;
+    constexpr int P = 4;
+    constexpr int T = 4;
+    auto &&grad_u = p_grad.col(U);
+    auto &&grad_v = p_grad.col(V);
+    auto &&grad_w = p_grad.col(W);
     auto &grad_rho = c_grad.col(0);
-    auto &grad_rho_u = c_grad.col(1 + X);
-    auto &grad_rho_v = c_grad.col(1 + Y);
-    auto &grad_rho_w = c_grad.col(1 + Z);
+    auto &grad_rho_u = c_grad.col(U);
+    auto &grad_rho_v = c_grad.col(V);
+    auto &grad_rho_w = c_grad.col(W);
+    p_grad.col(0) = grad_rho;
     auto rho = p_val.mass();
     auto u = p_val.momentumX();
     auto v = p_val.momentumY();
@@ -67,14 +74,14 @@ class NavierStokes {
     auto rho_u = c_val.momentumX();
     auto rho_v = c_val.momentumY();
     auto rho_w = c_val.momentumZ();
-    auto &&grad_p = p_grad.col(3);
+    auto &&grad_p = p_grad.col(P);
     grad_p  = u * grad_rho_u + rho_u * grad_u;
     grad_p += v * grad_rho_v + rho_v * grad_v;
     grad_p += w * grad_rho_w + rho_w * grad_w;
     grad_p *= -0.5;
-    grad_p += c_grad.col(4);
+    grad_p += c_grad.col(E);
     grad_p *= Gas::GammaMinusOne();
-    auto &&grad_T = p_grad.col(4);
+    auto &&grad_T = p_grad.col(T);
     grad_T = grad_p / rho - (p / (rho * rho)) * grad_rho;
     grad_T /= Gas::R();
     return {p_val, p_grad};
@@ -82,9 +89,12 @@ class NavierStokes {
 
   static Tensor GetViscousStressTensor(Gradient const &p_grad, Scalar rho) {
     Tensor tau;
-    const auto &grad_u = p_grad.col(X);
-    const auto &grad_v = p_grad.col(Y);
-    const auto &grad_w = p_grad.col(Z);
+    constexpr int U = 1 + X;
+    constexpr int V = 1 + Y;
+    constexpr int W = 1 + Z;
+    const auto &grad_u = p_grad.col(U);
+    const auto &grad_v = p_grad.col(V);
+    const auto &grad_w = p_grad.col(W);
     auto div_uvw = grad_u[X] + grad_v[Y] + grad_w[Z];
     auto [mu, zeta] = GetViscosity(rho);
     tau[XX] = 2 * mu * grad_u[X] + zeta * div_uvw;
