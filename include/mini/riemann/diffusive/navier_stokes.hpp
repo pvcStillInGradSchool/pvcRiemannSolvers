@@ -30,15 +30,13 @@ class NavierStokes {
   using Vector = typename Primitive::Vector;
   using Tensor = algebra::Vector<Scalar, 6>;
 
-  static void SetProperty(Scalar R, Scalar mu, Scalar kappa) {
-    R_ = R;
+  static void SetProperty(Scalar mu, Scalar kappa) {
     mu_ = mu;
     zeta_ = -2.0 / 3 * mu;  // Stokes' hypothesis
     kappa_ = kappa;
   }
 
  protected:
-  static Scalar R_;
   static Scalar mu_;
   static Scalar zeta_;
   static Scalar kappa_;
@@ -74,7 +72,7 @@ class NavierStokes {
     grad_p *= Gas::GammaMinusOne();
     auto &&grad_T = p_grad.col(4);
     grad_T = grad_p / rho - (p / (rho * rho)) * grad_rho;
-    grad_T /= R_;
+    grad_T /= Gas::R();
     return {p_val, p_grad};
   }
 
@@ -138,9 +136,6 @@ class NavierStokes {
     flux->energy() -= Dot(work_x, work_y, work_z, normal);
   }
 };
-
-template <typename G>
-typename NavierStokes<G>::Scalar NavierStokes<G>::R_;
 
 template <typename G>
 typename NavierStokes<G>::Scalar NavierStokes<G>::mu_;
