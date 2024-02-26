@@ -29,7 +29,8 @@ TEST_F(TestTypes, TestTuples) {
 }
 TEST_F(TestTypes, TestIdealGasProperties) {
   using Scalar = double;
-  using Gas = IdealGas<Scalar, 1.4>;
+  Scalar constexpr kGamma = 1.4;
+  using Gas = IdealGas<Scalar, kGamma>;
   Scalar density = 1.293;
   Scalar pressure = 101325;
   Scalar temperature = pressure / density / Gas::R();
@@ -45,6 +46,8 @@ TEST_F(TestTypes, TestIdealGasProperties) {
       std::pow(factor, Gas::GammaOverGammaMinusOne());
   EXPECT_EQ(Gas::TotalPressureToPressure(mach, total_pressure),
       pressure);
+  EXPECT_NEAR(Gas::Cp() / Gas::Cv(), kGamma, 1e-15);
+  EXPECT_NEAR(Gas::Cp(), 1005, 1e0);
 }
 TEST_F(TestTypes, TestConverters) {
   auto rho{0.1}, u{+0.2}, v{-0.2}, p{0.3};

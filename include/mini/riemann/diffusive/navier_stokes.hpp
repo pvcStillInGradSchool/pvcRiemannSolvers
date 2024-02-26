@@ -42,9 +42,8 @@ class NavierStokes {
   }
 
   static Scalar GetThermalConductivity(Scalar rho) {
-    Scalar c_p = Gas::R() * Gas::GammaOverGammaMinusOne();
     Scalar mu = nu_ * rho;
-    return mu * c_p / prandtl_;
+    return mu * Gas::Cp() / prandtl_;
   }
 
  protected:

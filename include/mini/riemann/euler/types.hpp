@@ -236,6 +236,12 @@ class IdealGas {
   static constexpr Scalar GammaMinusOneUnderTwo() {
     return 2 / GammaMinusOne();
   }
+  static constexpr Scalar Cv() {
+    return R() * OneOverGammaMinusOne();
+  }
+  static constexpr Scalar Cp() {
+    return R() * GammaOverGammaMinusOne();
+  }
   // Converters:
   static constexpr Scalar GetSpeedOfSound(Scalar temperature) {
     return (temperature > 0) ? std::sqrt(Gamma() * R() * temperature) : 0;
