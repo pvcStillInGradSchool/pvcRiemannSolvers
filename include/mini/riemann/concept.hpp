@@ -72,13 +72,27 @@ template <Convective C, Diffusive D>
 class ConvectionDiffusion : public C, public D {
  public:
   static constexpr int kDimensions = C::kDimensions;
+  static_assert(kDimensions == D::kDimensions);
+
   static constexpr int kComponents = C::kComponents;
-  using Scalar = typename D::Scalar;
-  using Vector = typename D::Vector;
-  using Conservative = typename D::Conservative;
+  static_assert(kComponents == D::kComponents);
+
+  using Scalar = typename C::Scalar;
+  static_assert(std::is_same_v<Scalar, typename D::Scalar>);
+
+  using Vector = typename C::Vector;
+  static_assert(std::is_same_v<Vector, typename D::Vector>);
+
+  using Conservative = typename C::Conservative;
+  static_assert(std::is_same_v<Conservative, typename D::Conservative>);
+
+  using FluxMatrix = typename C::FluxMatrix;
+  static_assert(std::is_same_v<FluxMatrix, typename D::FluxMatrix>);
+
+  using Flux = typename C::Flux;
+  static_assert(std::is_same_v<Flux, typename D::Flux>);
+
   using Gradient = typename D::Gradient;
-  using FluxMatrix = typename D::FluxMatrix;
-  using Flux = typename D::Flux;
 };
 
 }  // namespace riemann
