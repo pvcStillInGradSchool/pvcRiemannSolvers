@@ -278,6 +278,25 @@ class Lobatto : public General<Part> {
       }
     }
   }
+  void ApplySlidingWall(Column *residual) const override {
+    for (const auto &[name, func] : this->sliding_wall_) {
+      for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &holder = face.holder();
+        auto *holder_data = this->AddCellDataOffset(residual, holder.id());
+        auto const &holder_cache = holder_cache_[face.id()];
+        auto const &gauss = face.gauss();
+        assert(kFaceQ == gauss.CountPoints());
+        for (int f = 0; f < kFaceQ; ++f) {
+          auto &holder_flux_point = holder_cache[f];
+          Value wall_value = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value f_holder = Base::GetFluxOnSlidingWall(face.riemann(f),
+              wall_value, holder.projection(), holder_flux_point);
+          f_holder *= holder_flux_point.g_prime;
+          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+        }
+      }
+    }
+  }
   void ApplySupersonicOutlet(Column *residual) const override {
     for (const auto &name : this->supersonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {

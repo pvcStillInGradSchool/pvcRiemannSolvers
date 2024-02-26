@@ -370,6 +370,32 @@ class General : public spatial::FiniteElement<Part> {
     }
   }
   template <typename Cache>
+  static Value GetFluxOnSlidingWall(Riemann const &riemann,
+      Value const &wall_value,
+      const Projection &holder_projection, Cache const &holder_cache)
+      requires(!mini::riemann::Diffusive<Riemann>) {
+  }
+  template <typename Cache>
+  static Value GetFluxOnSlidingWall(Riemann const &riemann,
+      Value const &wall_value,
+      const Projection &holder_projection, Cache const &holder_cache)
+      requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
+    Value u_holder = holder_projection.GetValue(holder_cache.ijk);
+    Value f_upwind = riemann.GetFluxOnSolidWall(u_holder);
+    auto du_local_holder = holder_projection.GetLocalGradient(holder_cache.ijk);
+    auto du_holder = holder_projection.GetGlobalGradient(
+        u_holder, du_local_holder, holder_cache.ijk);
+    auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
+    Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
+    const auto &normal = riemann.normal();
+    assert(Collinear(normal, holder_cache.normal));
+    Riemann::MinusViscousFluxOnSlidingWall(wall_value,
+        u_holder, du_holder, normal, &f_upwind);
+    Value f_holder = f_upwind * holder_cache.scale;
+    f_holder -= f_mat_holder * holder_cache.normal;
+    return f_holder;
+  }
+  template <typename Cache>
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
       const Projection &holder_projection, Cache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {

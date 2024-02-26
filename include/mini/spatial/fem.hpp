@@ -198,6 +198,12 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     log() << fullname() << "::ApplySupersonicInlet\n";
     log() << residual->squaredNorm() << "\n";
 #endif
+    this->ApplySlidingWall(residual);
+#ifdef ENABLE_LOGGING
+    log() << residual->squaredNorm() << "\n";
+    log() << fullname() << "::ApplySlidingWall\n";
+    log() << residual->squaredNorm() << "\n";
+#endif
     this->ApplySupersonicInlet(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
