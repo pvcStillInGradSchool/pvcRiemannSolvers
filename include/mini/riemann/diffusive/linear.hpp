@@ -22,7 +22,8 @@ class Anisotropic {
   static constexpr int kComponents = K;
   using Scalar = S;
   using Vector = algebra::Vector<Scalar, kDimensions>;
-  using Conservative = algebra::Vector<Scalar, kComponents>;
+  using Value = algebra::Vector<Scalar, kComponents>;
+  using Conservative = Value;
   using Gradient = algebra::Matrix<Scalar, kDimensions, kComponents>;
   using FluxMatrix = algebra::Matrix<Scalar, kComponents, kDimensions>;
   using Flux = Conservative;
@@ -51,6 +52,12 @@ class Anisotropic {
     *flux -= (normal[X] * nu_x_) * gradient.row(X);
     *flux -= (normal[Y] * nu_y_) * gradient.row(Y);
     *flux -= (normal[Z] * nu_z_) * gradient.row(Z);
+  }
+
+  static void MinusViscousFluxOnSlidingWall(Value const &wall_value,
+      Conservative const &c_val, Gradient const &c_grad,
+      Vector const &normal, Flux *flux) {
+    MinusViscousFlux(c_val, c_grad, normal, flux);
   }
 };
 template <typename S, int K>

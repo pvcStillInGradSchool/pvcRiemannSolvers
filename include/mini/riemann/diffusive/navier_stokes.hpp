@@ -24,7 +24,8 @@ class NavierStokes {
   using Gradient = algebra::Matrix<Scalar, kDimensions, kComponents>;
   using Flux = euler::FluxTuple<Scalar, kDimensions>;
   using FluxMatrix = typename Flux::FluxMatrix;
-  using FluxVector = algebra::Vector<Scalar, kComponents>;
+  using Value = algebra::Vector<Scalar, kComponents>;
+  using FluxVector = Value;
   using Conservative = euler::Conservatives<Scalar, kDimensions>;
   using Primitive = euler::Primitives<Scalar, kDimensions>;
   using Vector = typename Primitive::Vector;
@@ -151,6 +152,29 @@ class NavierStokes {
     flux_momentum[Z] -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
     auto const &grad_T = p_grad.col(4);
     auto const &uvw = p_val.momentum();
+    Scalar kappa = GetThermalConductivity(c_val.mass());
+    auto work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
+    auto work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
+    auto work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
+    flux->energy() -= Dot(work_x, work_y, work_z, normal);
+  }
+
+  static void MinusViscousFluxOnSlidingWall(Value const &wall_value,
+      Conservative const &c_val, Gradient const &c_grad,
+      Vector const &normal, FluxVector *flux_vector) {
+    auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
+    Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
+    auto *flux = static_cast<Flux *>(flux_vector);
+    auto &flux_momentum = flux->momentum();
+    flux_momentum[X] -= Dot(tau[XX], tau[XY], tau[XZ], normal);
+    flux_momentum[Y] -= Dot(tau[YX], tau[YY], tau[YZ], normal);
+    flux_momentum[Z] -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
+    constexpr int U = 1 + X;
+    constexpr int V = 1 + Y;
+    constexpr int W = 1 + Z;
+    constexpr int T = 4;
+    Vector uvw{ wall_value[U], wall_value[V], wall_value[W] };
+    Vector grad_T = normal * wall_value[T];
     Scalar kappa = GetThermalConductivity(c_val.mass());
     auto work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
     auto work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
