@@ -230,6 +230,9 @@ class IdealGas {
   static constexpr Scalar GammaOverGammaMinusOne() {
     return Gamma() / GammaMinusOne();
   }
+  static constexpr Scalar GammaMinusOneOverGamma() {
+    return GammaMinusOne() / Gamma();
+  }
   static constexpr Scalar GammaMinusOneOverTwo() {
     return GammaMinusOne() / 2;
   }
@@ -266,6 +269,20 @@ class IdealGas {
       Scalar total_pressure) {
     auto factor = std::pow(GetMachFactor(mach), GammaOverGammaMinusOne());
     return total_pressure / factor;
+  }
+  static constexpr Scalar GetMachFromTemperatureRatio(Scalar ratio) {
+    return std::sqrt((ratio - 1) / GammaMinusOneOverTwo());
+  }
+  static constexpr Scalar GetMachFromTemperature(Scalar temperature,
+      Scalar total_temperature) {
+    Scalar ratio = total_temperature / temperature;
+    return GetMachFromTemperatureRatio(ratio);
+  }
+  static constexpr Scalar GetMachFromPressure(Scalar pressure,
+      Scalar total_pressure) {
+    Scalar ratio = total_pressure / pressure;
+    ratio = std::pow(ratio, GammaMinusOneOverGamma());
+    return GetMachFromTemperatureRatio(ratio);
   }
 
   template <int kDimensions>

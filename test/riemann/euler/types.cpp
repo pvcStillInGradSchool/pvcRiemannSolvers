@@ -48,6 +48,10 @@ TEST_F(TestTypes, TestIdealGasProperties) {
       pressure);
   EXPECT_NEAR(Gas::Cp() / Gas::Cv(), kGamma, 1e-15);
   EXPECT_NEAR(Gas::Cp(), 1005, 1e0);
+  EXPECT_NEAR(Gas::GetMachFromPressure(pressure, total_pressure),
+      mach, 1e-16);
+  EXPECT_NEAR(Gas::GetMachFromTemperature(temperature, total_temperature),
+      mach, 1e-16);
 }
 TEST_F(TestTypes, TestConverters) {
   auto rho{0.1}, u{+0.2}, v{-0.2}, p{0.3};
