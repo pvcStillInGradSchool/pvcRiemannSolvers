@@ -134,6 +134,30 @@ class Euler {
     return flux;
   }
   Flux GetFluxOnSubsonicInlet(Conservative const& conservative_i,
+      Value const& given_value) const {
+    Primitive primitive = Gas::ConservativeToPrimitive(conservative_i);
+    auto p = primitive.energy();
+    auto mach = Gas::GetMachFromPressure(p, given_value[0]);
+    auto T = Gas::TotalTemperatureToTemperature(mach, given_value[4]);
+    auto rho = p / Gas::R() / T;
+    primitive.mass() = rho;
+    primitive.energy() = p;
+    auto uvw = mach * Gas::GetSpeedOfSound(T);
+    auto v_cos = given_value[2];
+    auto w_cos = given_value[3];
+    // At any point of an inlet, the normal vector always points outward,
+    // but the fluid always flows in, thus a negative sign is needed:
+    auto u_cos = -std::sqrt(1 - v_cos * v_cos - w_cos * w_cos);
+    primitive.momentumX() = uvw * u_cos;
+    primitive.momentumY() = uvw * v_cos;
+    primitive.momentumZ() = uvw * w_cos;
+    // GlobalToNormal(&primitive);
+    auto flux = unrotated_euler_.GetFlux(primitive);
+    NormalToGlobal(&flux);
+    std::cout << mach << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";
+    return flux;
+  }
+  Flux GetFluxOnSubsonicInletOld(Conservative const& conservative_i,
       Conservative const& conservative_o) const {
     auto primitive_i = Gas::ConservativeToPrimitive(conservative_i);
     auto primitive_o = Gas::ConservativeToPrimitive(conservative_o);
@@ -154,6 +178,15 @@ class Euler {
     return flux;
   }
   Flux GetFluxOnSubsonicOutlet(Conservative const& conservative_i,
+      Value const& given_value) const {
+    Primitive primitive = Gas::ConservativeToPrimitive(conservative_i);
+    primitive.energy() = given_value[4];
+    GlobalToNormal(&primitive);
+    auto flux = unrotated_euler_.GetFlux(primitive);
+    NormalToGlobal(&flux);
+    return flux;
+  }
+  Flux GetFluxOnSubsonicOutletOld(Conservative const& conservative_i,
       Conservative const& conservative_o) const {
     auto primitive_i = Gas::ConservativeToPrimitive(conservative_i);
     auto primitive_o = Gas::ConservativeToPrimitive(conservative_o);
