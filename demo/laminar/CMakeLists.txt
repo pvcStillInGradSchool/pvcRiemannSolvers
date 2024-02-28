@@ -1,4 +1,5 @@
 set (cases
+  cavity
   plate
 )
 foreach (case ${cases})
