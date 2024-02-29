@@ -9,6 +9,7 @@
 #include "pcgnslib.h"
 
 #include "mini/constant/index.hpp"
+#include "mini/geometry/pi.hpp"
 #include "mini/mesh/shuffler.hpp"
 #include "mini/mesh/vtk.hpp"
 #include "mini/riemann/concept.hpp"
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]) {
   }
   MPI_Barrier(MPI_COMM_WORLD);
 
-  constexpr int kDegrees = 3;
+  constexpr int kDegrees = 2;
   constexpr int kComponents = Riemann::kComponents;
 #ifdef DGFEM
   using Projection = mini::polynomial::Projection<Scalar,
@@ -128,10 +129,18 @@ int main(int argc, char* argv[]) {
       "EnergyStagnationDensity"});
 
   /* Set initial conditions. */
-  Scalar rho_given = 1.0;
-  Scalar p_given = 1.0;
+  Scalar rho_given = 1.29;
+  Scalar angle = 30.0;
+  auto [cos, sin] = mini::geometry::CosSin(angle);
+  Scalar u_given = rho_given * cos;
+  Scalar v_given = rho_given * 0.0;
+  Scalar w_given = rho_given * sin;
+  Scalar p_given = 101325;
   auto initial_condition = [&](const Global& xyz){
-    auto primitive = Primitive(rho_given, 0.0, 0.0, 0.0, p_given);
+    auto primitive = Primitive(rho_given, u_given, v_given, w_given, p_given);
+    if (xyz[mini::constant::index::Y] < 0.9999) {
+      primitive.momentum().setZero();
+    }
     Value value = Gas::PrimitiveToConservative(primitive);
     return value;
   };
@@ -182,13 +191,13 @@ int main(int argc, char* argv[]) {
   auto temporal = Temporal();
 
   /* Set boundary conditions. */
-  Scalar u_given = 1.0, v_given = 0.0, w_given = 0.0;
+  Scalar temperature_gradient = 0.0;
   auto moving = [&](const Global& xyz, double t){
     Value value;
     value[1] = u_given;
     value[2] = v_given;
     value[3] = w_given;
-    value[4] = 0;  // interpreted as temperature gradient
+    value[4] = temperature_gradient;
     return value;
   };
   auto fixed = [&](const Global& xyz, double t){
@@ -196,7 +205,7 @@ int main(int argc, char* argv[]) {
     value[1] = 0;
     value[2] = 0;
     value[3] = 0;
-    value[4] = 0;  // interpreted as temperature gradient
+    value[4] = temperature_gradient;
     return value;
   };
   assert(suffix == "hexa");
