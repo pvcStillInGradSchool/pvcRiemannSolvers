@@ -143,45 +143,41 @@ class NavierStokes {
     flux_z[4] -= Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
   }
 
-  static void MinusViscousFlux(Conservative const &c_val, Gradient const &c_grad,
-      Vector const &normal, FluxVector *flux_vector) {
-    auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
-    Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
-    auto *flux = static_cast<Flux *>(flux_vector);
+ protected:
+  static void MinusViscousFlux(Scalar rho, Gradient const &p_grad,
+      Vector const &normal, Vector const &uvw, Vector const &grad_T,
+      Flux *flux) {
+    Tensor tau = GetViscousStressTensor(p_grad, rho);
     auto &flux_momentum = flux->momentum();
     flux_momentum[X] -= Dot(tau[XX], tau[XY], tau[XZ], normal);
     flux_momentum[Y] -= Dot(tau[YX], tau[YY], tau[YZ], normal);
     flux_momentum[Z] -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
-    auto const &grad_T = p_grad.col(4);
-    auto const &uvw = p_val.momentum();
-    Scalar kappa = GetThermalConductivity(c_val.mass());
+    Scalar kappa = GetThermalConductivity(rho);
     auto work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
     auto work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
     auto work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
     flux->energy() -= Dot(work_x, work_y, work_z, normal);
   }
 
+ public:
+  static void MinusViscousFlux(Conservative const &c_val, Gradient const &c_grad,
+      Vector const &normal, FluxVector *flux_vector) {
+    auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
+    auto *flux = static_cast<Flux *>(flux_vector);
+    auto const &grad_T = p_grad.col(4);
+    auto const &uvw = p_val.momentum();
+    MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
+  }
+
   static void MinusViscousFluxOnSlidingWall(Value const &wall_value,
       Conservative const &c_val, Gradient const &c_grad,
       Vector const &normal, FluxVector *flux_vector) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
-    Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
     auto *flux = static_cast<Flux *>(flux_vector);
-    auto &flux_momentum = flux->momentum();
-    flux_momentum[X] -= Dot(tau[XX], tau[XY], tau[XZ], normal);
-    flux_momentum[Y] -= Dot(tau[YX], tau[YY], tau[YZ], normal);
-    flux_momentum[Z] -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
-    constexpr int U = 1 + X;
-    constexpr int V = 1 + Y;
-    constexpr int W = 1 + Z;
-    constexpr int T = 4;
-    Vector uvw{ wall_value[U], wall_value[V], wall_value[W] };
-    Vector grad_T = normal * wall_value[T];
-    Scalar kappa = GetThermalConductivity(c_val.mass());
-    auto work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
-    auto work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
-    auto work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
-    flux->energy() -= Dot(work_x, work_y, work_z, normal);
+    auto const &wall_value_ref = static_cast<Primitive const &>(wall_value);
+    auto const &uvw = wall_value_ref.momentum();
+    Vector grad_T = normal * wall_value_ref.energy();
+    MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
   }
 };
 
