@@ -125,13 +125,16 @@ TEST_F(TestTypes, TestIdealGasViscosity) {
     EXPECT_NE(flux_vector[V], 0.0);
     EXPECT_NE(flux_vector[W], 0.0);
     EXPECT_NE(flux_vector[E], 0.0);
-    EXPECT_NEAR(normal.dot(flux_matrix.row(V)), flux_vector[V], 1e-16);
-    EXPECT_NEAR(normal.dot(flux_matrix.row(W)), flux_vector[W], 1e-15);
-    EXPECT_NEAR(normal.dot(flux_matrix.row(E)), flux_vector[E], 1e-12);
     EXPECT_NEAR(normal.dot(flux_matrix.row(U)), flux_vector[U], 1e-16);
     EXPECT_NEAR(normal.dot(flux_matrix.row(V)), flux_vector[V], 1e-16);
     EXPECT_NEAR(normal.dot(flux_matrix.row(W)), flux_vector[W], 1e-15);
     EXPECT_NEAR(normal.dot(flux_matrix.row(E)), flux_vector[E], 1e-12);
+    Primitive wall_value = primitive_got;
+    wall_value.energy() = normal.dot(grad_T);
+    flux_vector = -flux_vector;
+    NS::MinusViscousFluxOnSlidingWall(wall_value,
+        conservative_given, conservative_grad_given, normal, &flux_vector);
+    EXPECT_NEAR(flux_vector.norm(), 0.0, 1e-11);
   }
 }
 TEST_F(TestTypes, TestConverters) {
