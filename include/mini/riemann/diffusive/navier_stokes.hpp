@@ -51,6 +51,7 @@ class NavierStokes {
   static Scalar nu_;
   static Scalar prandtl_;
 
+ public:
   static std::pair<Primitive, Gradient> ConservativeToPrimitive(
       Conservative const &c_val, Gradient const &c_grad) {
     auto p_val = Gas::ConservativeToPrimitive(c_val);
@@ -112,6 +113,7 @@ class NavierStokes {
     return tau;
   }
 
+ protected:
   static Scalar Dot(Scalar x,  Scalar y, Scalar z, Vector const &v) {
     return v[X] * x + v[Y] * y + v[Z] * z;
   }
