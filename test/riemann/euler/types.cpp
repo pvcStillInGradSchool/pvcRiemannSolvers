@@ -72,6 +72,8 @@ TEST_F(TestTypes, TestIdealGasViscosity) {
   using Gradient = typename NS::Gradient;
   using Vector = typename NS::Vector;
   using Tensor = typename NS::Tensor;
+  using FluxMatrix = typename NS::FluxMatrix;
+  using FluxVector = typename NS::FluxVector;
   Scalar nu = 0.01, prandtl = 0.7;
   NS::SetProperty(nu, prandtl);
   std::srand(31415926);
@@ -109,6 +111,27 @@ TEST_F(TestTypes, TestIdealGasViscosity) {
     grad_got += grad_rho * (u * u + v * v + w * w) / 2;
     grad_got += rho * (grad_u * u + grad_v * v + grad_w * w);
     EXPECT_NEAR((grad_got - conservative_grad_given.col(E)).norm(), 0.0, 1e-9);
+    // flux_matrix * vector == flux_vector
+    FluxMatrix flux_matrix; flux_matrix.setZero();
+    FluxVector flux_vector; flux_vector.setZero();
+    NS::MinusViscousFlux(conservative_given, conservative_grad_given,
+        &flux_matrix);
+    Vector normal = Vector::Random().normalized();
+    EXPECT_NEAR(normal.norm(), 1.0, 1e-15);
+    NS::MinusViscousFlux(conservative_given, conservative_grad_given, normal,
+        &flux_vector);
+    EXPECT_EQ(flux_vector[0], 0.0);
+    EXPECT_NE(flux_vector[U], 0.0);
+    EXPECT_NE(flux_vector[V], 0.0);
+    EXPECT_NE(flux_vector[W], 0.0);
+    EXPECT_NE(flux_vector[E], 0.0);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(V)), flux_vector[V], 1e-16);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(W)), flux_vector[W], 1e-15);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(E)), flux_vector[E], 1e-12);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(U)), flux_vector[U], 1e-16);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(V)), flux_vector[V], 1e-16);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(W)), flux_vector[W], 1e-15);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(E)), flux_vector[E], 1e-12);
   }
 }
 TEST_F(TestTypes, TestConverters) {
