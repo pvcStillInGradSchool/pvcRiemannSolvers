@@ -60,7 +60,7 @@ int Main(int argc, char* argv[], IC ic, BC bc, Source source) {
   if (argc > 7) {
     i_frame = std::atoi(argv[7]);
   }
-  int n_parts_prev = 0;
+  int n_parts_prev = n_core;
   if (argc > 8) {
     n_parts_prev = std::atoi(argv[8]);
   }
