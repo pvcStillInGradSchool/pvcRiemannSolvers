@@ -30,14 +30,29 @@ using Scalar = double;
 
 /* Define the Navier--Stokes equation. */
 constexpr int kDimensions = 3;
+
+extern template class mini::riemann::euler::IdealGas<Scalar, 1.4>;
 using Gas = mini::riemann::euler::IdealGas<Scalar, 1.4>;
+
+extern template class mini::riemann::euler::Primitives<Scalar, kDimensions>;
 using Primitive = mini::riemann::euler::Primitives<Scalar, kDimensions>;
+
+extern template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 using Conservative = mini::riemann::euler::Conservatives<Scalar, kDimensions>;
+
+extern template class mini::riemann::euler::Exact<Gas, kDimensions>;
 using Unrotated = mini::riemann::euler::Exact<Gas, kDimensions>;
+
+extern template class mini::riemann::rotated::Euler<Unrotated>;
 using Convection = mini::riemann::rotated::Euler<Unrotated>;
-using Diffusion = mini::riemann::diffusive::DirectDG<
-    mini::riemann::diffusive::NavierStokes<Gas>
->;
+
+extern template class mini::riemann::diffusive::NavierStokes<Gas>;
+using NavierStokes =  mini::riemann::diffusive::NavierStokes<Gas>;
+
+extern template class mini::riemann::diffusive::DirectDG<NavierStokes>;
+using Diffusion = mini::riemann::diffusive::DirectDG<NavierStokes>;
+
+extern template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 
 /* Define spatial discretization. */

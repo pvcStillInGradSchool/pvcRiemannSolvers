@@ -13,6 +13,16 @@
 
 #include "shockless.hpp"
 
+template class mini::riemann::euler::IdealGas<Scalar, 1.4>;
+template class mini::riemann::euler::Primitives<Scalar, kDimensions>;
+template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
+template class mini::riemann::euler::Exact<Gas, kDimensions>;
+template class mini::riemann::rotated::Euler<Unrotated>;
+template class mini::riemann::diffusive::NavierStokes<Gas>;
+template class mini::riemann::diffusive::DirectDG<NavierStokes>;
+template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
+
+
 int Main(int argc, char* argv[], IC ic, BC bc) {
   MPI_Init(NULL, NULL);
   int n_core, i_core;
