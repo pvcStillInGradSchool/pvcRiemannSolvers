@@ -19,14 +19,14 @@ class Hllc;
 template <class GasType>
 class Hllc<GasType, 1> {
  public:
-  constexpr static int kComponents = 3;
   constexpr static int kDimensions = 1;
+  constexpr static int kComponents = kDimensions + 2;
   // Types:
   using Gas = GasType;
   using Scalar = typename Gas::Scalar;
-  using Flux = FluxTuple<Scalar, 1>;
-  using Conservative = Conservatives<Scalar, 1>;
-  using Primitive = Primitives<Scalar, 1>;
+  using Flux = FluxTuple<Scalar, kDimensions>;
+  using Conservative = Conservatives<Scalar, kDimensions>;
+  using Primitive = Primitives<Scalar, kDimensions>;
   using Vector = typename Primitive::Vector;
   using Speed = Scalar;
   // Get F on T Axia
@@ -100,14 +100,14 @@ class Hllc<GasType, 1> {
 template <class GasType>
 class Hllc<GasType, 2> {
  public:
-  constexpr static int kComponents = 4;
   constexpr static int kDimensions = 2;
+  constexpr static int kComponents = kDimensions + 2;
   // Types:
   using Gas = GasType;
   using Scalar = typename Gas::Scalar;
-  using Flux = FluxTuple<Scalar, 2>;
-  using Conservative = Conservatives<Scalar, 2>;
-  using Primitive = Primitives<Scalar, 2>;
+  using Flux = FluxTuple<Scalar, kDimensions>;
+  using Conservative = Conservatives<Scalar, kDimensions>;
+  using Primitive = Primitives<Scalar, kDimensions>;
   using Vector = typename Primitive::Vector;
   using Speed = Scalar;
   // Get F on T Axia
