@@ -65,7 +65,6 @@ TEST_F(TestHllc, TestBlastFromRight) {
               solver.GetFlux({0.575113, -6.196328, 46.09504}));
 }
 
-
 class TestHllc2d : public ::testing::Test {
  protected:
   using Solver = Hllc<IdealGas<double, 1.4>, 2>;
@@ -78,7 +77,7 @@ class TestHllc2d : public ::testing::Test {
     EXPECT_LE(ratio(lhs.mass(), rhs.mass()), 0.05);
     EXPECT_LE(ratio(lhs.energy(), rhs.energy()), 0.05);
     EXPECT_LE(ratio(lhs.momentumX(), rhs.momentumX()), 0.25);
-    EXPECT_LE(ratio(lhs.momentumY(), rhs.momentumY()), 0.05);
+    EXPECT_LE(ratio(lhs.momentumY(), rhs.momentumY()), 0.02);
   }
 };
 TEST_F(TestHllc2d, TestSod) {
@@ -106,6 +105,50 @@ TEST_F(TestHllc2d, TestBlastFromRight) {
   Primitive right{1.0, 0.0, v_right, 1e+2};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({0.575113, -6.196328, v_right, 46.09504}));
+}
+
+class TestHllc3d : public ::testing::Test {
+ protected:
+  using Solver = Hllc<IdealGas<double, 1.4>, 3>;
+  using Primitive = Solver::Primitive;
+  using Speed = Solver::Scalar;
+  using Flux = Solver::Flux;
+  Solver solver;
+  Speed v__left{1.5}, v_right{2.5};
+  Speed w__left{3.5}, w_right{4.5};
+  static void CompareFlux(Flux const& lhs, Flux const& rhs) {
+    EXPECT_LE(ratio(lhs.mass(), rhs.mass()), 0.05);
+    EXPECT_LE(ratio(lhs.energy(), rhs.energy()), 0.05);
+    EXPECT_LE(ratio(lhs.momentumX(), rhs.momentumX()), 0.25);
+    EXPECT_LE(ratio(lhs.momentumY(), rhs.momentumY()), 0.02);
+    EXPECT_LE(ratio(lhs.momentumZ(), rhs.momentumZ()), 0.02);
+  }
+};
+TEST_F(TestHllc3d, TestSod) {
+  Primitive  left{1.000, 0.0, v__left, w__left, 1.0};
+  Primitive right{0.125, 0.0, v_right, w_right, 0.1};
+  CompareFlux(solver.GetFluxUpwind(left, right),
+      solver.GetFlux({0.426319, +0.927453, v__left, w__left, 0.303130}));
+  CompareFlux(solver.GetFluxUpwind(right, left),
+      solver.GetFlux({0.426319, -0.927453, v__left, w__left, 0.303130}));
+}
+TEST_F(TestHllc3d, TestShockCollision) {
+  Primitive  left{5.99924, 19.5975, v__left, w__left, 460.894};
+  Primitive right{5.99242, 6.19633, v_right, w_right, 46.0950};
+  CompareFlux(solver.GetFluxUpwind(left, right),
+      solver.GetFlux({5.99924, 19.5975, v__left, w__left, 460.894}));
+}
+TEST_F(TestHllc3d, TestBlastFromLeft) {
+  Primitive  left{1.0, 0.0, v__left, w__left, 1e+3};
+  Primitive right{1.0, 0.0, v_right, w_right, 1e-2};
+  CompareFlux(solver.GetFluxUpwind(left, right),
+      solver.GetFlux({0.575062, 19.59745, v__left, w__left, 460.8938}));
+}
+TEST_F(TestHllc3d, TestBlastFromRight) {
+  Primitive  left{1.0, 0.0, v__left, w__left, 1e-2};
+  Primitive right{1.0, 0.0, v_right, w_right, 1e+2};
+  CompareFlux(solver.GetFluxUpwind(left, right),
+      solver.GetFlux({0.575113, -6.196328, v_right, w_right, 46.09504}));
 }
 
 }  // namespace euler
