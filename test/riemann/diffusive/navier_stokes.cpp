@@ -7,20 +7,12 @@
 
 #include "mini/riemann/euler/types.hpp"
 #include "mini/riemann/diffusive/navier_stokes.hpp"
+#include "mini/polynomial/hexahedron.hpp"
 
 class TestRiemannDiffusiveNavierStokes : public ::testing::Test {
  public:
-  static double rand_f() {
-    return -1 + 2 * std::rand() / (1.0 + RAND_MAX);
-  }
-  static double disturb(double x) {
-    return x * (1 + rand_f() * 0.05);
-  }
-};
-TEST_F(TestRiemannDiffusiveNavierStokes, TestIdealGasViscosity) {
   using Scalar = double;
-  Scalar constexpr kGamma = 1.4;
-  using Gas = mini::riemann::euler::IdealGas<Scalar, kGamma>;
+  using Gas = mini::riemann::euler::IdealGas<Scalar, 1.4>;
   using NS = mini::riemann::diffusive::NavierStokes<Gas>;
   using Primitive = typename NS::Primitive;
   using Conservative = typename NS::Conservative;
@@ -29,7 +21,17 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestIdealGasViscosity) {
   using Tensor = typename NS::Tensor;
   using FluxMatrix = typename NS::FluxMatrix;
   using FluxVector = typename NS::FluxVector;
+  static constexpr int U = 1, V = 2, W = 3, E = 4;
   Scalar nu = 0.01, prandtl = 0.7;
+
+  static double rand_f() {
+    return -1 + 2 * std::rand() / (1.0 + RAND_MAX);
+  }
+  static double disturb(double x) {
+    return x * (1 + rand_f() * 0.05);
+  }
+};
+TEST_F(TestRiemannDiffusiveNavierStokes, TestGradientConversions) {
   NS::SetProperty(nu, prandtl);
   std::srand(31415926);
   for (int i = 1 << 10; i >= 0; --i) {
@@ -45,7 +47,6 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestIdealGasViscosity) {
         conservative_given, conservative_grad_given);
     EXPECT_NEAR((primitive_got - primitive_given).norm(), 0.0, 1e-10);
     Vector grad_rho = conservative_grad_given.col(0);
-    constexpr int U = 1, V = 2, W = 3, E = 4;
     Vector grad_got;
     // grad(rho * u)
     Vector grad_u = primitive_grad_got.col(U);
@@ -66,6 +67,23 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestIdealGasViscosity) {
     grad_got += grad_rho * (u * u + v * v + w * w) / 2;
     grad_got += rho * (grad_u * u + grad_v * v + grad_w * w);
     EXPECT_NEAR((grad_got - conservative_grad_given.col(E)).norm(), 0.0, 1e-9);
+  }
+}
+TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
+  NS::SetProperty(nu, prandtl);
+  std::srand(31415926);
+  for (int i = 1 << 10; i >= 0; --i) {
+    Scalar rho = disturb(1.29);
+    Scalar u = disturb(10.0);
+    Scalar v = disturb(20.0);
+    Scalar w = disturb(30.0);
+    Scalar p = disturb(101325);
+    auto primitive_given = Primitive(rho, u, v, w, p);
+    auto conservative_given = Gas::PrimitiveToConservative(primitive_given);
+    Gradient conservative_grad_given = Gradient::Random();
+    auto [primitive_got, primitive_grad_got] = NS::ConservativeToPrimitive(
+        conservative_given, conservative_grad_given);
+    Vector grad_T = primitive_grad_got.col(E);
     // flux_matrix * vector == flux_vector
     FluxMatrix flux_matrix; flux_matrix.setZero();
     FluxVector flux_vector; flux_vector.setZero();
