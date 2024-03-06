@@ -5,8 +5,11 @@
 
 #include "gtest/gtest.h"
 
+#include "mini/constant/index.hpp"
 #include "mini/riemann/euler/types.hpp"
 #include "mini/riemann/diffusive/navier_stokes.hpp"
+#include "mini/geometry/hexahedron.hpp"
+#include "mini/gauss/hexahedron.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 
 class TestRiemannDiffusiveNavierStokes : public ::testing::Test {
@@ -108,6 +111,72 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
     NS::MinusViscousFluxOnSlidingWall(wall_value,
         conservative_given, conservative_grad_given, normal, &flux_vector);
     EXPECT_NEAR(flux_vector.norm(), 0.0, 1e-11);
+  }
+}
+TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
+  using Lagrange = mini::geometry::Hexahedron8<Scalar>;
+  // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
+  using GaussX = mini::gauss::Lobatto<Scalar, 3>;
+  using Interpolation = mini::polynomial::Hexahedron<GaussX, GaussX, GaussX,
+      NS::kComponents, true>;
+  using Basis = typename Interpolation::Basis;
+  using Gauss = typename Interpolation::Gauss;
+  using Coeff = typename Interpolation::Coeff;
+  using Value = typename Interpolation::Value;
+  using Global = typename Gauss::Global;
+  // build a hexa-gauss and a Lagrange basis on it
+  auto a = 2.0, b = 3.0, c = 4.0;
+  auto lagrange = Lagrange {
+    Global(-a, -b, -c), Global(+a, -b, -c),
+    Global(+a, +b, -c), Global(-a, +b, -c),
+    Global(-a, -b, +c), Global(+a, -b, +c),
+    Global(+a, +b, +c), Global(-a, +b, +c),
+  };
+  auto gauss = Gauss(lagrange);
+  auto interp = Interpolation(gauss);
+  // build a vector function and its interpolation
+  Scalar rho = 1.29, p = 101325;
+  NS::SetProperty(nu, prandtl);
+  auto [mu, zeta] = NS::GetViscosity(rho);
+  std::srand(31415926);
+  Scalar u_0 = rand_f(), du_dx = rand_f(), du_dy = rand_f(), du_dz = rand_f();
+  Scalar v_0 = rand_f(), dv_dx = rand_f(), dv_dy = rand_f(), dv_dz = rand_f();
+  Scalar w_0 = rand_f(), dw_dx = rand_f(), dw_dy = rand_f(), dw_dz = rand_f();
+  Scalar div_uvw = du_dx + dv_dy + dw_dz;
+  EXPECT_GT(std::abs(du_dx), 1e-2);
+  EXPECT_GT(std::abs(du_dy), 1e-2);
+  EXPECT_GT(std::abs(du_dz), 1e-2);
+  EXPECT_GT(std::abs(dv_dx), 1e-2);
+  EXPECT_GT(std::abs(dv_dy), 1e-2);
+  EXPECT_GT(std::abs(dv_dz), 1e-2);
+  EXPECT_GT(std::abs(dw_dx), 1e-2);
+  EXPECT_GT(std::abs(dw_dy), 1e-2);
+  EXPECT_GT(std::abs(dw_dz), 1e-2);
+  using namespace mini::constant::index;
+  auto func = [&](Global const& xyz) {
+    Scalar x = xyz[X], y = xyz[Y], z = xyz[Z];
+    Scalar u = u_0 + du_dx * x + du_dy * y + du_dz * z;
+    Scalar v = v_0 + dv_dx * x + dv_dy * y + dv_dz * z;
+    Scalar w = w_0 + dw_dx * x + dw_dy * y + dw_dz * z;
+    Primitive primitive{ rho, u, v, w , p };
+    return Gas::PrimitiveToConservative(primitive);
+  };
+  interp.Approximate(func);
+  // test values on nodes
+  for (int ijk = 0; ijk < Basis::N; ++ijk) {
+    auto conservative_value = interp.GetValue(ijk);
+    auto conservative_grad_local = interp.GetLocalGradient(ijk);
+    auto conservative_grad = interp.GetGlobalGradient(
+        conservative_value, conservative_grad_local, ijk);
+    auto [pimitive_value, primitive_grad] = NS::ConservativeToPrimitive(
+        conservative_value, conservative_grad);
+    Tensor tau = NS::GetViscousStressTensor(primitive_grad, rho);
+    EXPECT_NEAR(tau[XY], mu * (du_dy + dv_dx), 1e-16);
+    EXPECT_NEAR(tau[YZ], mu * (dv_dz + dw_dy), 1e-16);
+    EXPECT_NEAR(tau[ZX], mu * (dw_dx + du_dz), 1e-16);
+    EXPECT_NEAR(tau[XX], mu * (du_dx * 4./3 - (dv_dy + dw_dz) * 2./3), 1e-16);
+    EXPECT_NEAR(tau[YY], mu * (dv_dy * 4./3 - (du_dx + dw_dz) * 2./3), 1e-16);
+    EXPECT_NEAR(tau[ZZ], mu * (dw_dz * 4./3 - (du_dx + dv_dy) * 2./3), 1e-16);
   }
 }
 
