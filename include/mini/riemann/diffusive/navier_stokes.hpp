@@ -169,7 +169,7 @@ class NavierStokes {
     MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
   }
 
-  static void MinusViscousFluxOnSlidingWall(Value const &wall_value,
+  static void MinusViscousFluxOnNoSlipWall(Value const &wall_value,
       Conservative const &c_val, Gradient const &c_grad,
       Vector const &normal, FluxVector *flux_vector) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);

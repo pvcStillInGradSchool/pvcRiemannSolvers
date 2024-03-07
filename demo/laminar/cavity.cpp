@@ -42,10 +42,10 @@ auto fixed = [](const Global& xyz, double t){
 
 void MyBC(const std::string &suffix, Spatial *spatial) {
   assert(suffix == "hexa");
-  spatial->SetSlidingWall("4_S_26", fixed);   // Left
-  spatial->SetSlidingWall("4_S_18", fixed);  // Right
-  spatial->SetSlidingWall("4_S_22", moving);  // Top
-  spatial->SetSlidingWall("4_S_14", fixed);  // Bottom
+  spatial->SetNoSlipWall("4_S_26", fixed);   // Left
+  spatial->SetNoSlipWall("4_S_18", fixed);  // Right
+  spatial->SetNoSlipWall("4_S_22", moving);  // Top
+  spatial->SetNoSlipWall("4_S_14", fixed);  // Bottom
   spatial->SetSolidWall("4_S_5");   // Back
   spatial->SetSolidWall("4_S_27");  // Front
 }

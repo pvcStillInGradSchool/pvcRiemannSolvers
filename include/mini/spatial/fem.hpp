@@ -55,7 +55,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   std::vector<std::string> supersonic_outlet_, solid_wall_;
   using Function = std::function<Value(const Global &, double)>;
   std::unordered_map<std::string, Function> supersonic_inlet_,
-      subsonic_inlet_, subsonic_outlet_, smart_boundary_, sliding_wall_;
+      subsonic_inlet_, subsonic_outlet_, smart_boundary_, no_slip_wall_;
 
   Part *part_ptr_;
   double t_curr_;
@@ -140,8 +140,8 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     subsonic_outlet_[name] = func;
   }
   template <typename Callable>
-  void SetSlidingWall(const std::string &name, Callable &&func) {
-    sliding_wall_[name] = func;
+  void SetNoSlipWall(const std::string &name, Callable &&func) {
+    no_slip_wall_[name] = func;
   }
   void SetSolidWall(const std::string &name) {
     solid_wall_.emplace_back(name);
@@ -198,10 +198,10 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     log() << fullname() << "::ApplySupersonicInlet\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplySlidingWall(residual);
+    this->ApplyNoSlipWall(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::ApplySlidingWall\n";
+    log() << fullname() << "::ApplyNoSlipWall\n";
     log() << residual->squaredNorm() << "\n";
 #endif
     this->ApplySupersonicInlet(residual);
@@ -263,7 +263,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   }
   virtual void AddFluxOnLocalFaces(Column *residual) const = 0;
   virtual void AddFluxOnGhostFaces(Column *residual) const = 0;
-  virtual void ApplySlidingWall(Column *residual) const {
+  virtual void ApplyNoSlipWall(Column *residual) const {
   }
   virtual void ApplySolidWall(Column *residual) const = 0;
   virtual void ApplySupersonicInlet(Column *residual) const = 0;

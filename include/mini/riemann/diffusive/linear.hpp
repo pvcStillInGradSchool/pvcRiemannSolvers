@@ -54,7 +54,7 @@ class Anisotropic {
     *flux -= (normal[Z] * nu_z_) * gradient.row(Z);
   }
 
-  static void MinusViscousFluxOnSlidingWall(Value const &wall_value,
+  static void MinusViscousFluxOnNoSlipWall(Value const &wall_value,
       Conservative const &c_val, Gradient const &c_grad,
       Vector const &normal, Flux *flux) {
     MinusViscousFlux(c_val, c_grad, normal, flux);
