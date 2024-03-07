@@ -144,8 +144,8 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   void ApplySmartBoundary(Column *residual) const override {
     base().ApplySmartBoundary(residual);
   }
-  void ApplySolidWall(Column *residual) const override {
-    base().ApplySolidWall(residual);
+  void ApplyInviscidWall(Column *residual) const override {
+    base().ApplyInviscidWall(residual);
   }
   void ApplySubsonicInlet(Column *residual) const override {
     base().ApplySubsonicInlet(residual);

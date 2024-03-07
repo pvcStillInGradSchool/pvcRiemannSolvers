@@ -54,8 +54,8 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   spatial->SetSubsonicOutlet("4_S_18", outlet);  // Right
   spatial->SetSubsonicOutlet("4_S_22", outlet);  // Top
   spatial->SetNoSlipWall("4_S_14", bottom);  // Bottom
-  spatial->SetSolidWall("4_S_5");   // Back
-  spatial->SetSolidWall("4_S_27");  // Front
+  spatial->SetInviscidWall("4_S_5");   // Back
+  spatial->SetInviscidWall("4_S_27");  // Front
 }
 
 int main(int argc, char* argv[]) {

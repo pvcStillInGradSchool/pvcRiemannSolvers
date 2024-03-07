@@ -105,8 +105,8 @@ class General : public spatial::FiniteElement<Part> {
   }
 
  protected:  // virtual methods that might be overriden in subclasses
-  void ApplySolidWall(Column *residual) const override {
-    for (const auto &name : this->solid_wall_) {
+  void ApplyInviscidWall(Column *residual) const override {
+    for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
         const auto &holder = face.holder();
@@ -114,7 +114,7 @@ class General : public spatial::FiniteElement<Part> {
         for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
           const auto &coord = gauss.GetGlobalCoord(q);
           Value u_holder = holder.GlobalToValue(coord);
-          Value flux = face.riemann(q).GetFluxOnSolidWall(u_holder);
+          Value flux = face.riemann(q).GetFluxOnInviscidWall(u_holder);
           flux *= gauss.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
           holder.projection().MinusCoeff(prod, holder_data);

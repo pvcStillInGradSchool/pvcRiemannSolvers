@@ -19,9 +19,9 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   spatial->SetSubsonicInlet("4_S_4", given_state);  // Bottom
   spatial->SetSubsonicOutlet("4_S_6", given_state);  // Right
   spatial->SetSubsonicOutlet("4_S_7", given_state);  // Top
-  spatial->SetSolidWall("4_S_9");  // Front
-  spatial->SetSolidWall("4_S_3");  // Back
-  spatial->SetSolidWall("4_S_8");  // Cylinder
+  spatial->SetInviscidWall("4_S_9");  // Front
+  spatial->SetInviscidWall("4_S_3");  // Back
+  spatial->SetInviscidWall("4_S_8");  // Cylinder
 }
 
 int main(int argc, char* argv[]) {

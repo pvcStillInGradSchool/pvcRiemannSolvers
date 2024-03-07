@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
   auto spatial = Spatial(&part, limiter);
   spatial.SetSmartBoundary("4_S_27", moving);  // Top
   spatial.SetSmartBoundary("4_S_31", moving);  // Left
-  spatial.SetSolidWall("4_S_1");   // Back
+  spatial.SetInviscidWall("4_S_1");   // Back
   spatial.SetSubsonicInlet("4_S_32", moving);  // Front
   spatial.SetSupersonicInlet("4_S_19", moving);  // Bottom
   spatial.SetSubsonicOutlet("4_S_23", moving);  // Right
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
   auto spatial = Spatial(&part);
   spatial.SetSmartBoundary("4_S_27", moving);  // Top
   spatial.SetSmartBoundary("4_S_31", moving);  // Left
-  spatial.SetSolidWall("4_S_1");   // Back
+  spatial.SetInviscidWall("4_S_1");   // Back
   spatial.SetSubsonicInlet("4_S_32", moving);  // Front
   spatial.SetSupersonicInlet("4_S_19", moving);  // Bottom
   spatial.SetSubsonicOutlet("4_S_23", moving);  // Right
@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
   auto spatial = Spatial(&part);
   spatial.SetSmartBoundary("4_S_27", moving);  // Top
   spatial.SetSmartBoundary("4_S_31", moving);  // Left
-  spatial.SetSolidWall("4_S_1");   // Back
+  spatial.SetInviscidWall("4_S_1");   // Back
   spatial.SetSubsonicInlet("4_S_32", moving);  // Front
   spatial.SetSupersonicInlet("4_S_19", moving);  // Bottom
   spatial.SetSubsonicOutlet("4_S_23", moving);  // Right
@@ -223,11 +223,11 @@ int main(int argc, char* argv[]) {
       *residual *= -1.0;
       this->FEM::AddFluxOnGhostFaces(residual);
     }
-    void ApplySolidWall(Column *residual) const override {
+    void ApplyInviscidWall(Column *residual) const override {
       residual->setZero();
-      this->SEM::ApplySolidWall(residual);
+      this->SEM::ApplyInviscidWall(residual);
       *residual *= -1.0;
-      this->FEM::ApplySolidWall(residual);
+      this->FEM::ApplyInviscidWall(residual);
     }
     void ApplySupersonicInlet(Column *residual) const override {
       residual->setZero();
@@ -263,7 +263,7 @@ int main(int argc, char* argv[]) {
   auto test = Test(&part);
   test.SetSmartBoundary("4_S_27", moving);  // Top
   test.SetSmartBoundary("4_S_31", moving);  // Left
-  test.SetSolidWall("4_S_1");   // Back
+  test.SetInviscidWall("4_S_1");   // Back
   test.SetSubsonicInlet("4_S_32", moving);  // Front
   test.SetSupersonicInlet("4_S_19", moving);  // Bottom
   test.SetSubsonicOutlet("4_S_23", moving);  // Right
@@ -288,8 +288,8 @@ int main(int argc, char* argv[]) {
   MPI_Barrier(MPI_COMM_WORLD);
 
   time_begin = MPI_Wtime();
-  test.ApplySolidWall(&column);
-  std::printf("ApplySolidWall.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
+  test.ApplyInviscidWall(&column);
+  std::printf("ApplyInviscidWall.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
   

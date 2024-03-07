@@ -52,7 +52,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   using Column = typename Temporal::Column;
 
  protected:
-  std::vector<std::string> supersonic_outlet_, solid_wall_;
+  std::vector<std::string> supersonic_outlet_, inviscid_wall_;
   using Function = std::function<Value(const Global &, double)>;
   std::unordered_map<std::string, Function> supersonic_inlet_,
       subsonic_inlet_, subsonic_outlet_, smart_boundary_, no_slip_wall_;
@@ -143,8 +143,8 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   void SetNoSlipWall(const std::string &name, Callable &&func) {
     no_slip_wall_[name] = func;
   }
-  void SetSolidWall(const std::string &name) {
-    solid_wall_.emplace_back(name);
+  void SetInviscidWall(const std::string &name) {
+    inviscid_wall_.emplace_back(name);
   }
   void SetSupersonicOutlet(const std::string &name) {
     supersonic_outlet_.emplace_back(name);
@@ -189,10 +189,10 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   void AddFluxOnBoundaries(Column *residual) const {
 #ifdef ENABLE_LOGGING
     log() << "Enter " << fullname() << "::AddFluxOnBoundaries\n";
-    log() << fullname() << "::ApplySolidWall\n";
+    log() << fullname() << "::ApplyInviscidWall\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplySolidWall(residual);
+    this->ApplyInviscidWall(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
     log() << fullname() << "::ApplySupersonicInlet\n";
@@ -265,7 +265,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   virtual void AddFluxOnGhostFaces(Column *residual) const = 0;
   virtual void ApplyNoSlipWall(Column *residual) const {
   }
-  virtual void ApplySolidWall(Column *residual) const = 0;
+  virtual void ApplyInviscidWall(Column *residual) const = 0;
   virtual void ApplySupersonicInlet(Column *residual) const = 0;
   virtual void ApplySupersonicOutlet(Column *residual) const = 0;
   virtual void ApplySubsonicInlet(Column *residual) const = 0;

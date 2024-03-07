@@ -20,26 +20,26 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   if (suffix == "tetra") {
     spatial->SetSmartBoundary("3_S_42", state_left);  // Left
     spatial->SetSmartBoundary("3_S_20", state_right);  // Right
-    spatial->SetSolidWall("3_S_1");
-    spatial->SetSolidWall("3_S_2");
-    spatial->SetSolidWall("3_S_24");
-    spatial->SetSolidWall("3_S_38");
-    spatial->SetSolidWall("3_S_29");
-    spatial->SetSolidWall("3_S_51");
-    spatial->SetSolidWall("3_S_16");
-    spatial->SetSolidWall("3_S_46");
+    spatial->SetInviscidWall("3_S_1");
+    spatial->SetInviscidWall("3_S_2");
+    spatial->SetInviscidWall("3_S_24");
+    spatial->SetInviscidWall("3_S_38");
+    spatial->SetInviscidWall("3_S_29");
+    spatial->SetInviscidWall("3_S_51");
+    spatial->SetInviscidWall("3_S_16");
+    spatial->SetInviscidWall("3_S_46");
   } else {
     assert(suffix == "hexa");
     spatial->SetSmartBoundary("4_S_42", state_left);  // Left
     spatial->SetSmartBoundary("4_S_20", state_right);  // Right
-    spatial->SetSolidWall("4_S_1");
-    spatial->SetSolidWall("4_S_2");
-    spatial->SetSolidWall("4_S_24");
-    spatial->SetSolidWall("4_S_38");
-    spatial->SetSolidWall("4_S_29");
-    spatial->SetSolidWall("4_S_51");
-    spatial->SetSolidWall("4_S_16");
-    spatial->SetSolidWall("4_S_46");
+    spatial->SetInviscidWall("4_S_1");
+    spatial->SetInviscidWall("4_S_2");
+    spatial->SetInviscidWall("4_S_24");
+    spatial->SetInviscidWall("4_S_38");
+    spatial->SetInviscidWall("4_S_29");
+    spatial->SetInviscidWall("4_S_51");
+    spatial->SetInviscidWall("4_S_16");
+    spatial->SetInviscidWall("4_S_46");
   }
 }
 

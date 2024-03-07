@@ -346,8 +346,8 @@ class General : public spatial::FiniteElement<Part> {
       }
     }
   }
-  void ApplySolidWall(Column *residual) const override {
-    for (const auto &name : this->solid_wall_) {
+  void ApplyInviscidWall(Column *residual) const override {
+    for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &holder = face.holder();
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -357,7 +357,7 @@ class General : public spatial::FiniteElement<Part> {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value f_upwind = face.riemann(f).GetFluxOnSolidWall(u_holder);
+          Value f_upwind = face.riemann(f).GetFluxOnInviscidWall(u_holder);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
@@ -383,7 +383,7 @@ class General : public spatial::FiniteElement<Part> {
       const Projection &holder_projection, Cache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Value u_holder = holder_projection.GetValue(holder_cache.ijk);
-    Value f_upwind = riemann.GetFluxOnSolidWall(u_holder);
+    Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
     auto du_local_holder = holder_projection.GetLocalGradient(holder_cache.ijk);
     auto du_holder = holder_projection.GetGlobalGradient(
         u_holder, du_local_holder, holder_cache.ijk);

@@ -22,11 +22,11 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   spatial->SetSupersonicInlet("3_S_8", exhaust);
   spatial->SetSubsonicInlet("3_S_1", ambient);
   spatial->SetSupersonicOutlet("3_S_7");
-  spatial->SetSolidWall("3_S_2");
-  spatial->SetSolidWall("3_S_3");
-  spatial->SetSolidWall("3_S_4");
-  spatial->SetSolidWall("3_S_5");
-  spatial->SetSolidWall("3_S_6");
+  spatial->SetInviscidWall("3_S_2");
+  spatial->SetInviscidWall("3_S_3");
+  spatial->SetInviscidWall("3_S_4");
+  spatial->SetInviscidWall("3_S_5");
+  spatial->SetInviscidWall("3_S_6");
 }
 
 int main(int argc, char* argv[]) {

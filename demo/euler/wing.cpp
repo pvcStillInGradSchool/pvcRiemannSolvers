@@ -20,13 +20,13 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   // Right
   spatial->SetSubsonicOutlet("3_S_15", given_state);
   // Top & Bottom
-  spatial->SetSolidWall("3_S_12");
-  spatial->SetSolidWall("3_S_14");
+  spatial->SetInviscidWall("3_S_12");
+  spatial->SetInviscidWall("3_S_14");
   // Front & Back
-  spatial->SetSolidWall("3_S_7");
-  spatial->SetSolidWall("3_S_9");
-  spatial->SetSolidWall("3_S_11");
-  spatial->SetSolidWall("3_S_13");
+  spatial->SetInviscidWall("3_S_7");
+  spatial->SetInviscidWall("3_S_9");
+  spatial->SetInviscidWall("3_S_11");
+  spatial->SetInviscidWall("3_S_13");
 }
 
 int main(int argc, char* argv[]) {

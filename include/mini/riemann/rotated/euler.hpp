@@ -119,7 +119,7 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
-  Flux GetFluxOnSolidWall(Conservative const& conservative) const {
+  Flux GetFluxOnInviscidWall(Conservative const& conservative) const {
     auto primitive = Gas::ConservativeToPrimitive(conservative);
     Flux flux; flux.setZero();
     flux.momentumX() = primitive.p();

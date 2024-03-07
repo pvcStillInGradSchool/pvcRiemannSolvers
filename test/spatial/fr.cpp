@@ -32,7 +32,7 @@ void TestSpatialFR::SetUp() {
 template <typename Spatial>
 auto GetResidualColumn(Spatial &spatial, Part &part) {
   spatial.SetSmartBoundary("4_S_31", moving);  // Left
-  spatial.SetSolidWall("4_S_1");   // Back
+  spatial.SetInviscidWall("4_S_1");   // Back
   spatial.SetSubsonicInlet("4_S_32", moving);  // Front
   spatial.SetSubsonicOutlet("4_S_23", moving);  // Right
   spatial.SetSupersonicInlet("4_S_27", moving);  // Top

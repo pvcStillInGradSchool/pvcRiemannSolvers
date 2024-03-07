@@ -193,8 +193,8 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplySolidWall(Column *residual) const override {
-    for (const auto &name : this->solid_wall_) {
+  void ApplyInviscidWall(Column *residual) const override {
+    for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
         const auto &holder = face.holder();
@@ -203,7 +203,7 @@ class Lobatto : public General<Part> {
         for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_holder = holder.projection().GetValue(c_holder);
-          Value flux = face.riemann(f).GetFluxOnSolidWall(u_holder);
+          Value flux = face.riemann(f).GetFluxOnInviscidWall(u_holder);
           flux *= gauss.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
         }

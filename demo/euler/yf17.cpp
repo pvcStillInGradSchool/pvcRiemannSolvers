@@ -24,16 +24,16 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   spatial->SetSupersonicInlet("exhaust", exhaust);
   spatial->SetSubsonicOutlet("downstream", upstream);
   spatial->SetSubsonicOutlet("intake", upstream);
-  spatial->SetSolidWall("intake ramp");
+  spatial->SetInviscidWall("intake ramp");
   spatial->SetSubsonicInlet("lower", upstream);
   spatial->SetSubsonicOutlet("upper", upstream);
-  spatial->SetSolidWall("strake");
-  spatial->SetSolidWall("vertical tail");
-  spatial->SetSolidWall("horizontal tail");
-  spatial->SetSolidWall("side");
-  spatial->SetSolidWall("wing");
-  spatial->SetSolidWall("fuselage");
-  spatial->SetSolidWall("symmetry");
+  spatial->SetInviscidWall("strake");
+  spatial->SetInviscidWall("vertical tail");
+  spatial->SetInviscidWall("horizontal tail");
+  spatial->SetInviscidWall("side");
+  spatial->SetInviscidWall("wing");
+  spatial->SetInviscidWall("fuselage");
+  spatial->SetInviscidWall("symmetry");
 }
 
 int main(int argc, char* argv[]) {

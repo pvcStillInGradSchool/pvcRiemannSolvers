@@ -59,7 +59,7 @@ class Simple {
     auto raw_flux = unrotated_simple_.GetFluxUpwind(left, right);
     return ConvertToFlux(raw_flux);
   }
-  Flux GetFluxOnSolidWall(const Conservative& state) const {
+  Flux GetFluxOnInviscidWall(const Conservative& state) const {
     Flux flux;
     flux.setZero();
     return flux;

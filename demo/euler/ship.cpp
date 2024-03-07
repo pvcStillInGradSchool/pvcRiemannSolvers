@@ -22,32 +22,32 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   spatial->SetSmartBoundary("3_S_38"/* Top */, given_state);
   spatial->SetSmartBoundary("3_S_39"/* Back */, given_state);
   // bottom
-  spatial->SetSolidWall("3_S_27"/* fine */);
-  spatial->SetSolidWall("3_S_40"/* coarse */);
+  spatial->SetInviscidWall("3_S_27"/* fine */);
+  spatial->SetInviscidWall("3_S_40"/* coarse */);
   // tower
-  spatial->SetSolidWall("3_S_13");
-  spatial->SetSolidWall("3_S_14");
-  spatial->SetSolidWall("3_S_15");
-  spatial->SetSolidWall("3_S_16");
-  spatial->SetSolidWall("3_S_18");
+  spatial->SetInviscidWall("3_S_13");
+  spatial->SetInviscidWall("3_S_14");
+  spatial->SetInviscidWall("3_S_15");
+  spatial->SetInviscidWall("3_S_16");
+  spatial->SetInviscidWall("3_S_18");
   // nose
-  spatial->SetSolidWall("3_S_21");
-  spatial->SetSolidWall("3_S_22");
-  spatial->SetSolidWall("3_S_23");
+  spatial->SetInviscidWall("3_S_21");
+  spatial->SetInviscidWall("3_S_22");
+  spatial->SetInviscidWall("3_S_23");
   // body
-  spatial->SetSolidWall("3_S_28");
-  spatial->SetSolidWall("3_S_29");
-  spatial->SetSolidWall("3_S_30");
-  spatial->SetSolidWall("3_S_35");
-  spatial->SetSolidWall("3_S_42");
-  spatial->SetSolidWall("3_S_43");
-  spatial->SetSolidWall("3_S_44");
-  spatial->SetSolidWall("3_S_45");
+  spatial->SetInviscidWall("3_S_28");
+  spatial->SetInviscidWall("3_S_29");
+  spatial->SetInviscidWall("3_S_30");
+  spatial->SetInviscidWall("3_S_35");
+  spatial->SetInviscidWall("3_S_42");
+  spatial->SetInviscidWall("3_S_43");
+  spatial->SetInviscidWall("3_S_44");
+  spatial->SetInviscidWall("3_S_45");
   // deck
-  spatial->SetSolidWall("3_S_2");
-  spatial->SetSolidWall("3_S_6");
-  spatial->SetSolidWall("3_S_33");
-  spatial->SetSolidWall("3_S_34");
+  spatial->SetInviscidWall("3_S_2");
+  spatial->SetInviscidWall("3_S_6");
+  spatial->SetInviscidWall("3_S_33");
+  spatial->SetInviscidWall("3_S_34");
 }
 
 int main(int argc, char* argv[]) {

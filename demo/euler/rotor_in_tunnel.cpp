@@ -16,10 +16,10 @@ auto given_state = [](const Global& xyz, double t){
 
 void MyBC(const std::string &suffix, Spatial *spatial) {
   spatial->SetSubsonicInlet("3_S_13"/* Left */, given_state);
-  spatial->SetSolidWall("3_S_14"/* Bottom */);
-  spatial->SetSolidWall("3_S_15"/* Front */);
-  spatial->SetSolidWall("3_S_16"/* Top */);
-  spatial->SetSolidWall("3_S_17"/* Back */);
+  spatial->SetInviscidWall("3_S_14"/* Bottom */);
+  spatial->SetInviscidWall("3_S_15"/* Front */);
+  spatial->SetInviscidWall("3_S_16"/* Top */);
+  spatial->SetInviscidWall("3_S_17"/* Back */);
   spatial->SetSubsonicOutlet("3_S_18"/* Right */, given_state);
 }
 

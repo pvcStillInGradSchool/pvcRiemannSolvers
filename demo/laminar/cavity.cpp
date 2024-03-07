@@ -46,8 +46,8 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
   spatial->SetNoSlipWall("4_S_18", fixed);  // Right
   spatial->SetNoSlipWall("4_S_22", moving);  // Top
   spatial->SetNoSlipWall("4_S_14", fixed);  // Bottom
-  spatial->SetSolidWall("4_S_5");   // Back
-  spatial->SetSolidWall("4_S_27");  // Front
+  spatial->SetInviscidWall("4_S_5");   // Back
+  spatial->SetInviscidWall("4_S_27");  // Front
 }
 
 int main(int argc, char* argv[]) {
