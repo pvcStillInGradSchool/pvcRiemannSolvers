@@ -162,7 +162,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
       assert(data == column.data() + column.size()
           || data == AddCellDataOffset(column, i_cell + 1));
     }
-    SetValueNoSlipWalls();
+    this->SetValueNoSlipWalls();
   }
   Column GetSolutionColumn() const override {
     auto column = Column(cell_data_size_);

@@ -82,6 +82,10 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   part.SetFieldNames({"Density", "MomentumX", "MomentumY", "MomentumZ",
       "EnergyStagnationDensity"});
 
+  auto spatial = Spatial(&part);
+  /* Set boundary conditions. */
+  bc(suffix, &spatial);
+
   /* Initialization. */
   if (argc == 7) {
     if (i_core == 0) {
@@ -91,6 +95,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     for (Cell *cell_ptr : part.GetLocalCellPointers()) {
       cell_ptr->Approximate(ic);
     }
+    (&spatial)->SetValueNoSlipWalls();
     if (i_core == 0) {
       std::printf("[Done] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
@@ -114,13 +119,8 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     }
   }
 
-  auto spatial = Spatial(&part);
-
   /* Define the temporal solver. */
   auto temporal = Temporal();
-
-  /* Set boundary conditions. */
-  bc(suffix, &spatial);
 
   /* Main Loop */
   auto wtime_start = MPI_Wtime();

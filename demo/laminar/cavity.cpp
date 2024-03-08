@@ -13,11 +13,7 @@ Scalar w_given = rho_given * cos_sin.second;
 Scalar p_given = 101325 / 1.29;
 
 Value MyIC(const Global &xyz) {
-  auto primitive = Primitive(rho_given, u_given, v_given, w_given, p_given);
-  if (xyz[mini::constant::index::Y] < 0.9999) {
-    primitive.momentum().setZero();
-  }
-  Value value = Gas::PrimitiveToConservative(primitive);
+  Value value{ rho_given, 0, 0, 0, p_given / Gas::GammaMinusOne() };
   return value;
 }
 
