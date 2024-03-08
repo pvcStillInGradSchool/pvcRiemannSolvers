@@ -257,6 +257,10 @@ class Hexahedron {
   Value GetValue(int i) const requires(kLocal) {
     return coeff_.col(i) / jacobian_det_[i];
   }
+  void SetValue(int i, Value const &value) requires(kLocal) {
+    coeff_.col(i) = value;  // value in physical space
+    coeff_.col(i) *= jacobian_det_[i];  // value in parametric space
+  }
   /**
    * @brief Get the value of \f$ u(x,y,z) \f$ at a Gaussian point.
    * 
@@ -267,6 +271,9 @@ class Hexahedron {
    */
   Value GetValue(int i) const requires(!kLocal) {
     return coeff_.col(i);
+  }
+  void SetValue(int i, Value const &value) requires(!kLocal) {
+    coeff_.col(i) = value;
   }
   Mat1xN GlobalToBasisValues(Global const &global) const {
     Local local = lagrange().GlobalToLocal(global);
@@ -497,18 +504,10 @@ class Hexahedron {
     return gauss().lagrange();
   }
   template <typename Callable>
-  void Approximate(Callable &&global_to_value) requires(kLocal) {
+  void Approximate(Callable &&global_to_value) {
     for (int ijk = 0; ijk < N; ++ijk) {
-      auto &global = gauss_ptr_->GetGlobalCoord(ijk);
-      coeff_.col(ijk) = global_to_value(global);  // value in physical space
-      coeff_.col(ijk) *= jacobian_det_[ijk];  // value in parametric space
-    }
-  }
-  template <typename Callable>
-  void Approximate(Callable &&global_to_value) requires(!kLocal) {
-    for (int ijk = 0; ijk < N; ++ijk) {
-      auto &global = gauss_ptr_->GetGlobalCoord(ijk);
-      coeff_.col(ijk) = global_to_value(global);  // value in physical space
+      const auto &global = gauss_ptr_->GetGlobalCoord(ijk);
+      SetValue(ijk, global_to_value(global));
     }
   }
   const Scalar *GetCoeffFrom(const Scalar *input) {
