@@ -179,6 +179,16 @@ class NavierStokes {
     Vector grad_T = normal * wall_value_ref.energy();
     MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
   }
+
+  static void SetValueOnNoSlipFace(Value const &wall_value, Value *value) {
+    auto &primitive = static_cast<Primitive const &>(wall_value);
+    auto *conservative = static_cast<Conservative *>(value);
+    Scalar rho = conservative->mass();
+    Scalar kinetic_old = conservative->momentum().squaredNorm() / rho;
+    Scalar kinetic_new = primitive.momentum().squaredNorm() * rho;
+    conservative->momentum() = rho * primitive.momentum();
+    conservative->energy() += (kinetic_new - kinetic_old) / 2;
+  }
 };
 
 template <typename G>

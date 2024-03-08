@@ -59,6 +59,10 @@ class Anisotropic {
       Vector const &normal, Flux *flux) {
     MinusViscousFlux(c_val, c_grad, normal, flux);
   }
+
+  static void SetValueOnNoSlipFace(Value const &wall_value, Value *value) {
+    *value = wall_value;
+  }
 };
 template <typename S, int K>
 typename Anisotropic<S, K>::Scalar Anisotropic<S, K>::nu_x_;
