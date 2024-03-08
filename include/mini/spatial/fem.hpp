@@ -189,46 +189,46 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   void AddFluxOnBoundaries(Column *residual) const {
 #ifdef ENABLE_LOGGING
     log() << "Enter " << fullname() << "::AddFluxOnBoundaries\n";
-    log() << fullname() << "::ApplyInviscidWall\n";
+    log() << fullname() << "::AddFluxOnInviscidWalls\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplyInviscidWall(residual);
+    this->AddFluxOnInviscidWalls(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::ApplySupersonicInlet\n";
+    log() << fullname() << "::AddFluxOnSupersonicInlets\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplyNoSlipWall(residual);
+    this->AddFluxOnNoSlipWalls(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::ApplyNoSlipWall\n";
+    log() << fullname() << "::AddFluxOnNoSlipWalls\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplySupersonicInlet(residual);
+    this->AddFluxOnSupersonicInlets(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::ApplySupersonicOutlet\n";
+    log() << fullname() << "::AddFluxOnSupersonicOutlets\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplySupersonicOutlet(residual);
+    this->AddFluxOnSupersonicOutlets(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::ApplySubsonicInlet\n";
+    log() << fullname() << "::AddFluxOnSubsonicInlets\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplySubsonicInlet(residual);
+    this->AddFluxOnSubsonicInlets(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::ApplySubsonicOutlet\n";
+    log() << fullname() << "::AddFluxOnSubsonicOutlets\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplySubsonicOutlet(residual);
+    this->AddFluxOnSubsonicOutlets(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::ApplySmartBoundary\n";
+    log() << fullname() << "::AddFluxOnSmartBoundaries\n";
     log() << residual->squaredNorm() << "\n";
 #endif
-    this->ApplySmartBoundary(residual);
+    this->AddFluxOnSmartBoundaries(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
     log() << "Leave " << fullname() << "::AddFluxOnBoundaries\n";
@@ -263,14 +263,14 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   }
   virtual void AddFluxOnLocalFaces(Column *residual) const = 0;
   virtual void AddFluxOnGhostFaces(Column *residual) const = 0;
-  virtual void ApplyNoSlipWall(Column *residual) const {
+  virtual void AddFluxOnNoSlipWalls(Column *residual) const {
   }
-  virtual void ApplyInviscidWall(Column *residual) const = 0;
-  virtual void ApplySupersonicInlet(Column *residual) const = 0;
-  virtual void ApplySupersonicOutlet(Column *residual) const = 0;
-  virtual void ApplySubsonicInlet(Column *residual) const = 0;
-  virtual void ApplySubsonicOutlet(Column *residual) const = 0;
-  virtual void ApplySmartBoundary(Column *residual) const = 0;
+  virtual void AddFluxOnInviscidWalls(Column *residual) const = 0;
+  virtual void AddFluxOnSupersonicInlets(Column *residual) const = 0;
+  virtual void AddFluxOnSupersonicOutlets(Column *residual) const = 0;
+  virtual void AddFluxOnSubsonicInlets(Column *residual) const = 0;
+  virtual void AddFluxOnSubsonicOutlets(Column *residual) const = 0;
+  virtual void AddFluxOnSmartBoundaries(Column *residual) const = 0;
 
  public:
   static FluxMatrix GetFluxMatrix(const Projection &projection, int q)

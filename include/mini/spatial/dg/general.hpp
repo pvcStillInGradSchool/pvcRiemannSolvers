@@ -105,7 +105,7 @@ class General : public spatial::FiniteElement<Part> {
   }
 
  protected:  // virtual methods that might be overriden in subclasses
-  void ApplyInviscidWall(Column *residual) const override {
+  void AddFluxOnInviscidWalls(Column *residual) const override {
     for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -122,7 +122,7 @@ class General : public spatial::FiniteElement<Part> {
       }
     }
   }
-  void ApplySupersonicOutlet(Column *residual) const override {
+  void AddFluxOnSupersonicOutlets(Column *residual) const override {
     for (const auto &name : this->supersonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -139,7 +139,7 @@ class General : public spatial::FiniteElement<Part> {
       }
     }
   }
-  void ApplySupersonicInlet(Column *residual) const override {
+  void AddFluxOnSupersonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->supersonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -156,7 +156,7 @@ class General : public spatial::FiniteElement<Part> {
       }
     }
   }
-  void ApplySubsonicInlet(Column *residual) const override {
+  void AddFluxOnSubsonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -174,7 +174,7 @@ class General : public spatial::FiniteElement<Part> {
       }
     }
   }
-  void ApplySubsonicOutlet(Column *residual) const override {
+  void AddFluxOnSubsonicOutlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -192,7 +192,7 @@ class General : public spatial::FiniteElement<Part> {
       }
     }
   }
-  void ApplySmartBoundary(Column *residual) const override {
+  void AddFluxOnSmartBoundaries(Column *residual) const override {
     for (auto &[name, func] : this->smart_boundary_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();

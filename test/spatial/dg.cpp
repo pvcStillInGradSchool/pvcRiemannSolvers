@@ -223,41 +223,41 @@ int main(int argc, char* argv[]) {
       *residual *= -1.0;
       this->FEM::AddFluxOnGhostFaces(residual);
     }
-    void ApplyInviscidWall(Column *residual) const override {
+    void AddFluxOnInviscidWalls(Column *residual) const override {
       residual->setZero();
-      this->SEM::ApplyInviscidWall(residual);
+      this->SEM::AddFluxOnInviscidWalls(residual);
       *residual *= -1.0;
-      this->FEM::ApplyInviscidWall(residual);
+      this->FEM::AddFluxOnInviscidWalls(residual);
     }
-    void ApplySupersonicInlet(Column *residual) const override {
+    void AddFluxOnSupersonicInlets(Column *residual) const override {
       residual->setZero();
-      this->SEM::ApplySupersonicInlet(residual);
+      this->SEM::AddFluxOnSupersonicInlets(residual);
       *residual *= -1.0;
-      this->FEM::ApplySupersonicInlet(residual);
+      this->FEM::AddFluxOnSupersonicInlets(residual);
     }
-    void ApplySupersonicOutlet(Column *residual) const override {
+    void AddFluxOnSupersonicOutlets(Column *residual) const override {
       residual->setZero();
-      this->SEM::ApplySupersonicOutlet(residual);
+      this->SEM::AddFluxOnSupersonicOutlets(residual);
       *residual *= -1.0;
-      this->FEM::ApplySupersonicOutlet(residual);
+      this->FEM::AddFluxOnSupersonicOutlets(residual);
     }
-    void ApplySubsonicInlet(Column *residual) const override {
+    void AddFluxOnSubsonicInlets(Column *residual) const override {
       residual->setZero();
-      this->SEM::ApplySubsonicInlet(residual);
+      this->SEM::AddFluxOnSubsonicInlets(residual);
       *residual *= -1.0;
-      this->FEM::ApplySubsonicInlet(residual);
+      this->FEM::AddFluxOnSubsonicInlets(residual);
     }
-    void ApplySubsonicOutlet(Column *residual) const override {
+    void AddFluxOnSubsonicOutlets(Column *residual) const override {
       residual->setZero();
-      this->SEM::ApplySubsonicOutlet(residual);
+      this->SEM::AddFluxOnSubsonicOutlets(residual);
       *residual *= -1.0;
-      this->FEM::ApplySubsonicOutlet(residual);
+      this->FEM::AddFluxOnSubsonicOutlets(residual);
     }
-    void ApplySmartBoundary(Column *residual) const override {
+    void AddFluxOnSmartBoundaries(Column *residual) const override {
       residual->setZero();
-      this->SEM::ApplySmartBoundary(residual);
+      this->SEM::AddFluxOnSmartBoundaries(residual);
       *residual *= -1.0;
-      this->FEM::ApplySmartBoundary(residual);
+      this->FEM::AddFluxOnSmartBoundaries(residual);
     }
   };
   auto test = Test(&part);
@@ -288,38 +288,38 @@ int main(int argc, char* argv[]) {
   MPI_Barrier(MPI_COMM_WORLD);
 
   time_begin = MPI_Wtime();
-  test.ApplyInviscidWall(&column);
-  std::printf("ApplyInviscidWall.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
+  test.AddFluxOnInviscidWalls(&column);
+  std::printf("AddFluxOnInviscidWalls.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
   
   time_begin = MPI_Wtime();
-  test.ApplySupersonicInlet(&column);
-  std::printf("ApplySupersonicInlet.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
+  test.AddFluxOnSupersonicInlets(&column);
+  std::printf("AddFluxOnSupersonicInlets.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
   
   time_begin = MPI_Wtime();
-  test.ApplySupersonicOutlet(&column);
-  std::printf("ApplySupersonicOutlet.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
+  test.AddFluxOnSupersonicOutlets(&column);
+  std::printf("AddFluxOnSupersonicOutlets.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
 
   time_begin = MPI_Wtime();
-  test.ApplySubsonicInlet(&column);
-  std::printf("ApplySubsonicInlet.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
+  test.AddFluxOnSubsonicInlets(&column);
+  std::printf("AddFluxOnSubsonicInlets.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
 
   time_begin = MPI_Wtime();
-  test.ApplySubsonicOutlet(&column);
-  std::printf("ApplySubsonicOutlet.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
+  test.AddFluxOnSubsonicOutlets(&column);
+  std::printf("AddFluxOnSubsonicOutlets.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
 
   time_begin = MPI_Wtime();
-  test.ApplySmartBoundary(&column);
-  std::printf("ApplySmartBoundary.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
+  test.AddFluxOnSmartBoundaries(&column);
+  std::printf("AddFluxOnSmartBoundaries.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
 }

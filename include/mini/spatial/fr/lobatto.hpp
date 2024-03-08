@@ -257,7 +257,7 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplyInviscidWall(Column *residual) const override {
+  void AddFluxOnInviscidWalls(Column *residual) const override {
     for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &holder = face.holder();
@@ -278,7 +278,7 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplyNoSlipWall(Column *residual) const override {
+  void AddFluxOnNoSlipWalls(Column *residual) const override {
     for (const auto &[name, func] : this->no_slip_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &holder = face.holder();
@@ -297,7 +297,7 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplySupersonicOutlet(Column *residual) const override {
+  void AddFluxOnSupersonicOutlets(Column *residual) const override {
     for (const auto &name : this->supersonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &holder = face.holder();
@@ -316,7 +316,7 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplySupersonicInlet(Column *residual) const override {
+  void AddFluxOnSupersonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->supersonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -339,7 +339,7 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplySubsonicInlet(Column *residual) const override {
+  void AddFluxOnSubsonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -362,7 +362,7 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplySubsonicOutlet(Column *residual) const override {
+  void AddFluxOnSubsonicOutlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();
@@ -385,7 +385,7 @@ class Lobatto : public General<Part> {
       }
     }
   }
-  void ApplySmartBoundary(Column *residual) const override {
+  void AddFluxOnSmartBoundaries(Column *residual) const override {
     for (auto &[name, func] : this->smart_boundary_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
         const auto &gauss = face.gauss();

@@ -141,23 +141,23 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   void AddFluxOnLocalFaces(Column *residual) const override {
     base().AddFluxOnLocalFaces(residual);
   }
-  void ApplySmartBoundary(Column *residual) const override {
-    base().ApplySmartBoundary(residual);
+  void AddFluxOnSmartBoundaries(Column *residual) const override {
+    base().AddFluxOnSmartBoundaries(residual);
   }
-  void ApplyInviscidWall(Column *residual) const override {
-    base().ApplyInviscidWall(residual);
+  void AddFluxOnInviscidWalls(Column *residual) const override {
+    base().AddFluxOnInviscidWalls(residual);
   }
-  void ApplySubsonicInlet(Column *residual) const override {
-    base().ApplySubsonicInlet(residual);
+  void AddFluxOnSubsonicInlets(Column *residual) const override {
+    base().AddFluxOnSubsonicInlets(residual);
   }
-  void ApplySubsonicOutlet(Column *residual) const override {
-    base().ApplySubsonicOutlet(residual);
+  void AddFluxOnSubsonicOutlets(Column *residual) const override {
+    base().AddFluxOnSubsonicOutlets(residual);
   }
-  void ApplySupersonicInlet(Column *residual) const override {
-    base().ApplySupersonicInlet(residual);
+  void AddFluxOnSupersonicInlets(Column *residual) const override {
+    base().AddFluxOnSupersonicInlets(residual);
   }
-  void ApplySupersonicOutlet(Column *residual) const override {
-    base().ApplySupersonicOutlet(residual);
+  void AddFluxOnSupersonicOutlets(Column *residual) const override {
+    base().AddFluxOnSupersonicOutlets(residual);
   }
 };
 
