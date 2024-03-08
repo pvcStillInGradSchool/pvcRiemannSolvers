@@ -166,6 +166,10 @@ struct Face {
     assert(holder_);
     return *holder_;
   }
+  Cell *holder_ptr() {
+    assert(holder_);
+    return holder_;
+  }
   Cell const &sharer() const {
     assert(sharer_);
     return *sharer_;
@@ -1373,6 +1377,19 @@ class Part {
     return ghost_faces_ | std::views::transform(t);
   }
   /**
+   * @brief Get a range of `(Face *)` for `Face`s on a given `Section`.
+   * 
+   * @param name the name of the `Section`
+   * @return std::ranges::input_range the range of `Face`s
+   */
+  std::ranges::input_range auto
+  GetBoundaryFacePointers(std::string const &name) {
+    cgns::ShiftedVector<std::unique_ptr<Face>> &faces
+        = *name_to_faces_.at(name);
+    auto t = [](auto &uptr) -> Face * { return uptr.get(); };
+    return faces | std::views::transform(t);
+  }
+  /**
    * @brief Get a range of `(const Face &)` for `Face`s on a given `Section`.
    * 
    * @param name the name of the `Section`
@@ -1380,9 +1397,8 @@ class Part {
    */
   std::ranges::input_range auto
   GetBoundaryFaces(std::string const &name) const {
-    cgns::ShiftedVector<std::unique_ptr<Face>> const &faces
-        = *name_to_faces_.at(name);
-    auto t = [](auto &uptr) -> const Face & { return *uptr; };
+    auto const &faces = const_cast<Part *>(this)->GetBoundaryFacePointers(name);
+    auto t = [](const Face *ptr) -> const Face & { return *ptr; };
     return faces | std::views::transform(t);
   }
   /**
