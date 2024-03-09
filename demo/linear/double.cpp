@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
   );
 
   /* Partition the mesh. */
-  if (i_core == 0 && n_parts_prev != n_core) {
+  if (i_core == 0 && (argc == 7 || n_parts_prev != n_core)) {
     using Shuffler = mini::mesh::Shuffler<idx_t, Scalar>;
     Shuffler::PartitionAndShuffle(case_name, old_file_name, n_core);
   }

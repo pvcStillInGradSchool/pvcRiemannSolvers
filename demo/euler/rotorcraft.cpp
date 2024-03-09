@@ -72,7 +72,7 @@ int Main(int argc, char* argv[], IC ic, BC bc, Source source) {
   auto time_begin = MPI_Wtime();
 
   /* Partition the mesh. */
-  if (i_core == 0 && n_parts_prev != n_core) {
+  if (i_core == 0 && (argc == 7 || n_parts_prev != n_core)) {
     using Shuffler = mini::mesh::Shuffler<idx_t, double>;
     Shuffler::PartitionAndShuffle(output_path, old_file_name, n_core);
   }
