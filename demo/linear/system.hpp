@@ -42,6 +42,8 @@ using Diffusion = mini::riemann::diffusive::DirectDG<
 extern template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 
+using Jacobian = typename Convection::Jacobian;
+
 /* Define spatial discretization. */
 constexpr int kDegrees = 2;
 using Gx = mini::gauss::Lobatto<Scalar, kDegrees + 1>;
