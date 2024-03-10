@@ -34,8 +34,8 @@ class Multiple {
     Flux flux; flux.setZero();
     for (int k = 0; k < K; ++k) {
       const auto &state = (eigen_values_[k] > 0 ? left : right);
-      auto temp = eigen_cols_.row(k).dot(state) * eigen_values_[k];
-      flux += eigen_rows_.col(k) * temp;
+      auto temp = eigen_rows_.row(k).dot(state) * eigen_values_[k];
+      flux += eigen_cols_.col(k) * temp;
     }
     return flux;
   }
@@ -48,8 +48,8 @@ class Multiple {
   void Decompose() {
     auto solver = Eigen::EigenSolver<Matrix>(a_const_);
     eigen_values_ = solver.eigenvalues().real();
-    eigen_rows_ = solver.eigenvectors().real();
-    eigen_cols_ = eigen_rows_.inverse();
+    eigen_cols_ = solver.eigenvectors().real();
+    eigen_rows_ = eigen_cols_.inverse();
   }
 
   Matrix eigen_rows_;
@@ -66,6 +66,14 @@ class Multiple {
   }
   const Matrix& R() const {
     return eigen_cols_;
+  }
+  Matrix eigvals() const {
+    Matrix eigvals;
+    eigvals.setZero();
+    for (int k = 0; k < K; k++) {
+      eigvals(k, k) = eigen_values_[k];
+    }
+    return eigvals;
   }
 };
 
