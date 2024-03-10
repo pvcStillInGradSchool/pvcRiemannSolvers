@@ -1,4 +1,6 @@
 //  Copyright 2024 PEI Weicheng
+#include <iostream>
+
 #include "mini/constant/index.hpp"
 #include "mini/geometry/pi.hpp"
 #include "system.hpp"
@@ -16,6 +18,13 @@ constexpr Scalar pi = mini::geometry::pi();
 constexpr Scalar k_x = n_x * pi / l_x;
 constexpr Scalar k_y = n_y * pi / l_y;
 constexpr Scalar k_z = n_z * pi / l_z;
+
+// viscosity in each direction:
+constexpr Scalar half_life = 1.0;  // i.e. exp(-beta * half_life) == 0.5
+constexpr Scalar beta = std::log(2.0) / half_life;
+constexpr Scalar b_x = beta / k_x / k_x;
+constexpr Scalar b_y = beta / k_y / k_y;
+constexpr Scalar b_z = beta / k_z / k_z;
 
 Value MyIC(const Global &xyz) {
   Scalar u = std::sin(k_x * xyz[mini::constant::index::X]);
@@ -44,7 +53,7 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
 
 int main(int argc, char* argv[]) {
   Riemann::SetBetaValues(2.0, 1.0 / 12);
-  Riemann::SetDiffusionCoefficient(/* nu = */0.05);
+  Riemann::SetDiffusionCoefficient(b_x, b_y, b_z);
   Jacobian a; a.setZero();
   Riemann::SetConvectionCoefficient(a, a, a);
   return Main(argc, argv, MyIC, MyBC);

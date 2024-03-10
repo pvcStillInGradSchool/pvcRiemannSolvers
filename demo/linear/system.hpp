@@ -34,10 +34,13 @@ extern template class mini::riemann::rotated::Multiple<
 using Convection = mini::riemann::rotated::Multiple<
     Scalar, kComponents, kDimensions>;
 
-extern template class mini::riemann::diffusive::DirectDG<
-    mini::riemann::diffusive::Isotropic<Scalar, kComponents>>;
-using Diffusion = mini::riemann::diffusive::DirectDG<
-    mini::riemann::diffusive::Isotropic<Scalar, kComponents>>;
+extern template class mini::riemann::diffusive::Anisotropic<
+    Scalar, kComponents>;
+using Viscosity = mini::riemann::diffusive::Anisotropic<
+    Scalar, kComponents>;
+
+extern template class mini::riemann::diffusive::DirectDG<Viscosity>;
+using Diffusion = mini::riemann::diffusive::DirectDG<Viscosity>;
 
 extern template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
