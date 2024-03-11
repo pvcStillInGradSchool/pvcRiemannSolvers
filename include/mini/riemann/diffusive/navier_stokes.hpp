@@ -50,26 +50,27 @@ class NavierStokes {
  protected:
   static Scalar nu_;
   static Scalar prandtl_;
+  static constexpr int kMass = 0;
+  static constexpr int U = 1 + X;
+  static constexpr int V = 1 + Y;
+  static constexpr int W = 1 + Z;
+  static constexpr int kEnergy = 4;
+  static constexpr int kPressure = 4;
+  static constexpr int kTemperature = 4;
 
  public:
   static std::pair<Primitive, Gradient> ConservativeToPrimitive(
       Conservative const &c_val, Gradient const &c_grad) {
     auto p_val = Gas::ConservativeToPrimitive(c_val);
     Gradient p_grad;
-    constexpr int U = 1 + X;
-    constexpr int V = 1 + Y;
-    constexpr int W = 1 + Z;
-    constexpr int E = 4;
-    constexpr int P = 4;
-    constexpr int T = 4;
     auto &&grad_u = p_grad.col(U);
     auto &&grad_v = p_grad.col(V);
     auto &&grad_w = p_grad.col(W);
-    auto &grad_rho = c_grad.col(0);
+    auto &grad_rho = c_grad.col(kMass);
     auto &grad_rho_u = c_grad.col(U);
     auto &grad_rho_v = c_grad.col(V);
     auto &grad_rho_w = c_grad.col(W);
-    p_grad.col(0) = grad_rho;
+    p_grad.col(kMass) = grad_rho;
     auto rho = p_val.mass();
     auto u = p_val.momentumX();
     auto v = p_val.momentumY();
@@ -81,14 +82,14 @@ class NavierStokes {
     auto rho_u = c_val.momentumX();
     auto rho_v = c_val.momentumY();
     auto rho_w = c_val.momentumZ();
-    auto &&grad_p = p_grad.col(P);
+    auto &&grad_p = p_grad.col(kPressure);
     grad_p  = u * grad_rho_u + rho_u * grad_u;
     grad_p += v * grad_rho_v + rho_v * grad_v;
     grad_p += w * grad_rho_w + rho_w * grad_w;
     grad_p *= -0.5;
-    grad_p += c_grad.col(E);
+    grad_p += c_grad.col(kEnergy);
     grad_p *= Gas::GammaMinusOne();
-    auto &&grad_T = p_grad.col(T);
+    auto &&grad_T = p_grad.col(kTemperature);
     grad_T = grad_p / rho - (p / (rho * rho)) * grad_rho;
     grad_T /= Gas::R();
     return {p_val, p_grad};
@@ -96,9 +97,6 @@ class NavierStokes {
 
   static Tensor GetViscousStressTensor(Gradient const &p_grad, Scalar rho) {
     Tensor tau;
-    constexpr int U = 1 + X;
-    constexpr int V = 1 + Y;
-    constexpr int W = 1 + Z;
     const auto &grad_u = p_grad.col(U);
     const auto &grad_v = p_grad.col(V);
     const auto &grad_w = p_grad.col(W);
@@ -125,22 +123,22 @@ class NavierStokes {
     Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
     Scalar kappa = GetThermalConductivity(c_val.mass());
     auto const &uvw = p_val.momentum();
-    auto const &grad_T = p_grad.col(4);
+    auto const &grad_T = p_grad.col(kTemperature);
     auto &&flux_x = flux->col(X);
-    flux_x[1] -= tau[XX];
-    flux_x[2] -= tau[XY];
-    flux_x[3] -= tau[XZ];
-    flux_x[4] -= Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
+    flux_x[U] -= tau[XX];
+    flux_x[V] -= tau[XY];
+    flux_x[W] -= tau[XZ];
+    flux_x[kEnergy] -= Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
     auto &&flux_y = flux->col(Y);
-    flux_y[1] -= tau[YX];
-    flux_y[2] -= tau[YY];
-    flux_y[3] -= tau[YZ];
-    flux_y[4] -= Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
+    flux_y[U] -= tau[YX];
+    flux_y[V] -= tau[YY];
+    flux_y[W] -= tau[YZ];
+    flux_y[kEnergy] -= Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
     auto &&flux_z = flux->col(Z);
-    flux_z[1] -= tau[ZX];
-    flux_z[2] -= tau[ZY];
-    flux_z[3] -= tau[ZZ];
-    flux_z[4] -= Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
+    flux_z[U] -= tau[ZX];
+    flux_z[V] -= tau[ZY];
+    flux_z[W] -= tau[ZZ];
+    flux_z[kEnergy] -= Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
   }
 
  protected:
