@@ -10,6 +10,7 @@ foreach(lib ${libs})
 endforeach(lib ${libs})
 
 set (cases
+  diffusion
   cavity
   plate
 )
