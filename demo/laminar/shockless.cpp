@@ -16,7 +16,7 @@
 template class mini::riemann::euler::IdealGas<Scalar, 1.4>;
 template class mini::riemann::euler::Primitives<Scalar, kDimensions>;
 template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
-template class mini::riemann::euler::Exact<Gas, kDimensions>;
+template class mini::riemann::euler::Hllc<Gas, kDimensions>;
 template class mini::riemann::rotated::Euler<Unrotated>;
 template class mini::riemann::diffusive::NavierStokes<Gas>;
 template class mini::riemann::diffusive::DirectDG<NavierStokes>;

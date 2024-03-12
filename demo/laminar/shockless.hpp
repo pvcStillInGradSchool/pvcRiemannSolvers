@@ -14,6 +14,7 @@
 #include "mini/riemann/concept.hpp"
 #include "mini/riemann/euler/types.hpp"
 #include "mini/riemann/euler/ausm.hpp"
+#include "mini/riemann/euler/hllc.hpp"
 #include "mini/riemann/euler/exact.hpp"
 #include "mini/riemann/rotated/euler.hpp"
 #include "mini/riemann/diffusive/navier_stokes.hpp"
@@ -40,8 +41,8 @@ using Primitive = mini::riemann::euler::Primitives<Scalar, kDimensions>;
 extern template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 using Conservative = mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 
-extern template class mini::riemann::euler::Exact<Gas, kDimensions>;
-using Unrotated = mini::riemann::euler::Exact<Gas, kDimensions>;
+extern template class mini::riemann::euler::Hllc<Gas, kDimensions>;
+using Unrotated = mini::riemann::euler::Hllc<Gas, kDimensions>;
 
 extern template class mini::riemann::rotated::Euler<Unrotated>;
 using Convection = mini::riemann::rotated::Euler<Unrotated>;

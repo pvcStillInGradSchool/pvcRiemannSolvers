@@ -27,8 +27,9 @@ class Hllc {
   using Vector = typename Primitive::Vector;
   using Speed = Scalar;
   // Get F on T Axia
-  Flux GetFluxUpwind(const Primitive& left, const Primitive& right) {
-    Initialize(left, right);
+  Flux GetFluxUpwind(const Primitive& left, const Primitive& right) const {
+    auto *non_const_this = const_cast<Hllc *>(this);
+    non_const_this->Initialize(left, right);
     Flux flux;
     if (0.0 <= wave_left_) {
       flux = GetFlux(left);
@@ -66,7 +67,7 @@ class Hllc {
                   (left.rho() * (wave_left_  -  left.u()) -
                   right.rho() * (wave_right_ - right.u()));
   }
-  double GetQ(Scalar const& p_estimate, Scalar const& p_k) {
+  static double GetQ(Scalar const& p_estimate, Scalar const& p_k) {
     if (p_estimate <= p_k) {
       return 1.0;
     } else {
@@ -90,7 +91,7 @@ class Hllc {
     conservative->momentumY() = rho * primitive.v();
     conservative->momentumZ() = rho * primitive.w();
   }
-  Flux GetStarFlux(const Primitive& state, Speed const& wave_k) {
+  Flux GetStarFlux(const Primitive& state, Speed const& wave_k) const {
     Flux flux = GetFlux(state);
     Conservative u_k = Gas::PrimitiveToConservative(state);
     double energy = u_k.energy();
