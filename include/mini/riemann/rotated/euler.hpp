@@ -154,7 +154,7 @@ class Euler {
     // GlobalToNormal(&primitive);
     auto flux = unrotated_euler_.GetFlux(primitive);
     NormalToGlobal(&flux);
-    std::cout << mach << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";
+    // std::cout << mach << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";
     return flux;
   }
   Flux GetFluxOnSubsonicInletOld(Conservative const& conservative_i,
