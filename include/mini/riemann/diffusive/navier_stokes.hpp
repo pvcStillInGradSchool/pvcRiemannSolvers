@@ -124,25 +124,26 @@ class NavierStokes {
     Scalar kappa = GetThermalConductivity(c_val.mass());
     auto const &uvw = p_val.momentum();
     auto const &grad_T = p_grad.col(kTemperature);
+    flux->row(kEnergy) -= kappa * grad_T;
     auto &&flux_x = flux->col(X);
     flux_x[U] -= tau[XX];
     flux_x[V] -= tau[XY];
     flux_x[W] -= tau[XZ];
-    flux_x[kEnergy] -= Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
+    flux_x[kEnergy] -= Dot(tau[XX], tau[XY], tau[XZ], uvw);
     auto &&flux_y = flux->col(Y);
     flux_y[U] -= tau[YX];
     flux_y[V] -= tau[YY];
     flux_y[W] -= tau[YZ];
-    flux_y[kEnergy] -= Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
+    flux_y[kEnergy] -= Dot(tau[YX], tau[YY], tau[YZ], uvw);
     auto &&flux_z = flux->col(Z);
     flux_z[U] -= tau[ZX];
     flux_z[V] -= tau[ZY];
     flux_z[W] -= tau[ZZ];
-    flux_z[kEnergy] -= Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
+    flux_z[kEnergy] -= Dot(tau[ZX], tau[ZY], tau[ZZ], uvw);
   }
 
  protected:
-  static void MinusViscousFlux(Scalar rho, Gradient const &p_grad,
+  static void _MinusViscousFlux(Scalar rho, Gradient const &p_grad,
       Vector const &normal, Vector const &uvw, Vector const &grad_T,
       Flux *flux) {
     Tensor tau = GetViscousStressTensor(p_grad, rho);
@@ -151,10 +152,11 @@ class NavierStokes {
     flux_momentum[Y] -= Dot(tau[YX], tau[YY], tau[YZ], normal);
     flux_momentum[Z] -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
     Scalar kappa = GetThermalConductivity(rho);
-    auto work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw) + kappa * grad_T[X];
-    auto work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw) + kappa * grad_T[Y];
-    auto work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw) + kappa * grad_T[Z];
-    flux->energy() -= Dot(work_x, work_y, work_z, normal);
+    Scalar work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw);
+    Scalar work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw);
+    Scalar work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw);
+    flux->energy() -= Dot(work_x, work_y, work_z, normal)
+            + kappa * Dot(grad_T[X], grad_T[Y], grad_T[Z], normal);
   }
 
  public:
@@ -164,7 +166,7 @@ class NavierStokes {
     auto *flux = static_cast<Flux *>(flux_vector);
     auto const &grad_T = p_grad.col(4);
     auto const &uvw = p_val.momentum();
-    MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
+    _MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
   }
 
   static void MinusViscousFluxOnNoSlipWall(Value const &wall_value,
@@ -186,7 +188,7 @@ class NavierStokes {
     p_grad(Z, U) += normal[Z] * penalty[X];
     p_grad(Z, V) += normal[Z] * penalty[Y];
     p_grad(Z, W) += normal[Z] * penalty[Z];
-    MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
+    _MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
   }
 
   static void SetValueOnNoSlipFace(Value const &wall_value, Value *value) {
