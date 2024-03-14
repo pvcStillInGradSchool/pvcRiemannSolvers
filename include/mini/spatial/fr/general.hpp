@@ -371,7 +371,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
-      Value const &wall_value,
+      Scalar distance, Value const &wall_value,
       const Projection &holder_projection, Cache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value value;
@@ -379,7 +379,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
-      Value const &wall_value,
+      Scalar distance, Value const &wall_value,
       const Projection &holder_projection, Cache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Value u_holder = holder_projection.GetValue(holder_cache.ijk);
@@ -392,7 +392,7 @@ class General : public spatial::FiniteElement<Part> {
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
     Riemann::MinusViscousFluxOnNoSlipWall(wall_value,
-        u_holder, du_holder, normal, &f_upwind);
+        u_holder, du_holder, normal, distance, &f_upwind);
     Value f_holder = f_upwind * holder_cache.scale;
     f_holder -= f_mat_holder * holder_cache.normal;
     return f_holder;

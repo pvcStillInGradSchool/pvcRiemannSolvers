@@ -313,11 +313,14 @@ class Lobatto : public General<Part> {
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto const &holder_cache = holder_cache_[face.id()];
         auto const &gauss = face.gauss();
+        auto const &direction = face.HolderToSharer();
         assert(kFaceQ == gauss.CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
           Value wall_value = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Scalar distance = direction.dot(face.riemann(f).normal());        assert(distance > 0);
           Value f_holder = Base::GetFluxOnNoSlipWall(face.riemann(f),
+              distance,
               wall_value, holder.projection(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);

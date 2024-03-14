@@ -169,12 +169,23 @@ class NavierStokes {
 
   static void MinusViscousFluxOnNoSlipWall(Value const &wall_value,
       Conservative const &c_val, Gradient const &c_grad,
-      Vector const &normal, FluxVector *flux_vector) {
+      Vector const &normal, Scalar distance, FluxVector *flux_vector) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
     auto *flux = static_cast<Flux *>(flux_vector);
     auto const &wall_value_ref = static_cast<Primitive const &>(wall_value);
     auto const &uvw = wall_value_ref.momentum();
     Vector grad_T = normal * wall_value_ref.energy();
+    // modify gradient of speed by DDG:
+    Vector penalty = 2.0 / distance * (uvw - p_val.momentum());
+    p_grad(X, U) += normal[X] * penalty[X];
+    p_grad(X, V) += normal[X] * penalty[Y];
+    p_grad(X, W) += normal[X] * penalty[Z];
+    p_grad(Y, U) += normal[Y] * penalty[X];
+    p_grad(Y, V) += normal[Y] * penalty[Y];
+    p_grad(Y, W) += normal[Y] * penalty[Z];
+    p_grad(Z, U) += normal[Z] * penalty[X];
+    p_grad(Z, V) += normal[Z] * penalty[Y];
+    p_grad(Z, W) += normal[Z] * penalty[Z];
     MinusViscousFlux(c_val.mass(), p_grad, normal, uvw, grad_T, flux);
   }
 

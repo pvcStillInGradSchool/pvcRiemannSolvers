@@ -56,7 +56,7 @@ class Anisotropic {
 
   static void MinusViscousFluxOnNoSlipWall(Value const &wall_value,
       Conservative const &c_val, Gradient const &c_grad,
-      Vector const &normal, Flux *flux) {
+      Vector const &normal, Scalar distance, Flux *flux) {
     MinusViscousFlux(c_val, c_grad, normal, flux);
   }
 
