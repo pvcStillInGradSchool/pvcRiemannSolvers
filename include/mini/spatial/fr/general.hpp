@@ -391,8 +391,9 @@ class General : public spatial::FiniteElement<Part> {
     Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
+    Scalar value_penalty = Riemann::GetValuePenalty(distance);
     Riemann::MinusViscousFluxOnNoSlipWall(wall_value,
-        u_holder, du_holder, normal, distance, &f_upwind);
+        u_holder, du_holder, normal, value_penalty, &f_upwind);
     Value f_holder = f_upwind * holder_cache.scale;
     f_holder -= f_mat_holder * holder_cache.normal;
     return f_holder;

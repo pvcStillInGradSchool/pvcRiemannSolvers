@@ -35,7 +35,7 @@ class DirectDG : public DiffusionModel {
     // add the average of Gradient
     Gradient common_gradient = (left_gradient + right_gradient) / 2;
     // add the penalty of Value jump
-    normal *= beta_0_ / distance;
+    normal *= GetValuePenalty(distance);
     Conservative value_jump = right_value - left_value;
     common_gradient.row(X) += normal[X] * value_jump;
     common_gradient.row(Y) += normal[Y] * value_jump;
@@ -67,6 +67,10 @@ class DirectDG : public DiffusionModel {
   static void SetBetaValues(Scalar beta_0, Scalar beta_1) {
     beta_0_ = beta_0;
     beta_1_ = beta_1;
+  }
+
+  static Scalar GetValuePenalty(Scalar distance) {
+    return beta_0_ / distance;
   }
 };
 template <typename DiffusionModel>
