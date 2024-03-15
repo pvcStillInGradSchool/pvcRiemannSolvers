@@ -74,7 +74,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestGradientConversions) {
   }
 }
 
-TEST_F(TestRiemannDiffusiveNavierStokes, TestSetValueOnNoSlipFace) {
+TEST_F(TestRiemannDiffusiveNavierStokes, TestSetValueOnNoSlipWall) {
   NS::SetProperty(nu, prandtl);
   std::srand(31415926);
   for (int i = 1 << 10; i >= 0; --i) {
@@ -86,7 +86,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestSetValueOnNoSlipFace) {
     auto primitive = Primitive(rho, u, v, w, p);
     auto conservative = Gas::PrimitiveToConservative(primitive);
     Value wall_value = Value::Random();
-    NS::SetValueOnNoSlipFace(wall_value, &conservative);
+    NS::SetValueOnNoSlipWall(wall_value, &conservative);
     EXPECT_EQ(rho, conservative.mass());
     EXPECT_EQ(rho * wall_value[U], conservative.momentumX());
     EXPECT_EQ(rho * wall_value[V], conservative.momentumY());

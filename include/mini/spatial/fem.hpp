@@ -162,7 +162,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
       assert(data == column.data() + column.size()
           || data == AddCellDataOffset(column, i_cell + 1));
     }
-    // this->SetValueNoSlipWalls();
+    // this->SetValueOnNoSlipWalls();
   }
   Column GetSolutionColumn() const override {
     auto column = Column(cell_data_size_);
@@ -264,7 +264,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   }
   virtual void AddFluxOnLocalFaces(Column *residual) const = 0;
   virtual void AddFluxOnGhostFaces(Column *residual) const = 0;
-  virtual void SetValueNoSlipWalls() {
+  virtual void SetValueOnNoSlipWalls() {
   }
   virtual void AddFluxOnNoSlipWalls(Column *residual) const {
   }

@@ -280,10 +280,10 @@ class Lobatto : public General<Part> {
   }
 
  protected:
-  void _SetValueNoSlipWalls()
+  void _SetValueOnNoSlipWalls()
       requires(!mini::riemann::Diffusive<Riemann>) {
   }
-  void _SetValueNoSlipWalls()
+  void _SetValueOnNoSlipWalls()
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     for (const auto &[name, func] : this->no_slip_wall_) {
       for (Face *face_ptr : this->part_ptr()->GetBoundaryFacePointers(name)) {
@@ -295,7 +295,7 @@ class Lobatto : public General<Part> {
           auto &holder_flux_point = holder_cache[f];
           Value u_holder = holder_projection.GetValue(holder_flux_point.ijk);
           Value wall_value = func(gauss.GetGlobalCoord(f), this->t_curr_);
-          Riemann::SetValueOnNoSlipFace(wall_value, &u_holder);
+          Riemann::SetValueOnNoSlipWall(wall_value, &u_holder);
           holder_projection.SetValue(holder_flux_point.ijk, u_holder);
         }
       }
@@ -303,8 +303,8 @@ class Lobatto : public General<Part> {
   }
 
  public:
-  void SetValueNoSlipWalls() override {
-    _SetValueNoSlipWalls();
+  void SetValueOnNoSlipWalls() override {
+    _SetValueOnNoSlipWalls();
   }
   void AddFluxOnNoSlipWalls(Column *residual) const override {
     for (const auto &[name, func] : this->no_slip_wall_) {

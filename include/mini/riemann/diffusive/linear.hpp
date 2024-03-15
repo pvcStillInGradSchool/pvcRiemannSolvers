@@ -60,7 +60,7 @@ class Anisotropic {
     MinusViscousFlux(c_val, c_grad, normal, flux);
   }
 
-  static void SetValueOnNoSlipFace(Value const &wall_value, Value *value) {
+  static void SetValueOnNoSlipWall(Value const &wall_value, Value *value) {
     *value = wall_value;
   }
 };

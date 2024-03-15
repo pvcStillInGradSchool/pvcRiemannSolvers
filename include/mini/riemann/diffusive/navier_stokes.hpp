@@ -191,7 +191,7 @@ class NavierStokes {
         wall_value_ref.energy(), flux);
   }
 
-  static void SetValueOnNoSlipFace(Value const &wall_value, Value *value) {
+  static void SetValueOnNoSlipWall(Value const &wall_value, Value *value) {
     auto &primitive = static_cast<Primitive const &>(wall_value);
     auto *conservative = static_cast<Conservative *>(value);
     Scalar rho = conservative->mass();

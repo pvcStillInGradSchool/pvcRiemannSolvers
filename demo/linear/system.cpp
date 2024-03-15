@@ -90,7 +90,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     for (Cell *cell_ptr : part.GetLocalCellPointers()) {
       cell_ptr->Approximate(ic);
     }
-    (&spatial)->SetValueNoSlipWalls();
+    (&spatial)->SetValueOnNoSlipWalls();
     if (i_core == 0) {
       std::printf("[Done] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
