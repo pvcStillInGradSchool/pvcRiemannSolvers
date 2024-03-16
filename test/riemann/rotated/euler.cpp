@@ -1,9 +1,11 @@
 // Copyright 2019 PEI Weicheng and YANG Minghao
 
+#include <cstdlib>
 #include <vector>
 
 #include "gtest/gtest.h"
 
+#include "mini/geometry/pi.hpp"
 #include "mini/riemann/euler/types.hpp"
 #include "mini/riemann/euler/exact.hpp"
 #include "mini/riemann/rotated/euler.hpp"
@@ -21,6 +23,12 @@ class TestRotatedEuler : public ::testing::Test {
     } else {
       EXPECT_NEAR(y / x, 1, eps);
     }
+  }
+  static double rand_f() {
+    return -1 + 2 * std::rand() / (1.0 + RAND_MAX);
+  }
+  static double disturb(double x) {
+    return x * (1 + rand_f() * 0.05);
   }
 };
 TEST_F(TestRotatedEuler, Test2dConverter) {
@@ -109,6 +117,31 @@ TEST_F(TestRotatedEuler, Test3dSolver) {
       solver.GetFlux({0.426319, +0.927453, v__left, w__left, 0.303130}));
   CompareFlux(solver.GetFluxUpwind(right_c, left_c),
       solver.GetFlux({0.426319, -0.927453, v__left, w__left, 0.303130}));
+
+  std::srand(31415926);
+  for (int i = 1 << 10; i > 0; --i) {
+    Scalar angle = 180 * rand_f();
+    auto [cos, sin] = mini::geometry::CosSin(angle);
+    frame[1] = { 0, cos, +sin };
+    frame[2] = { 0, -sin, cos };
+    solver.Rotate(frame);
+    Scalar rho = disturb(1.29);
+    Scalar u = 10 * rand_f();
+    Scalar v = 20 * rand_f();
+    Scalar w = 30 * rand_f();
+    Scalar p = disturb(101325);
+    Primitive left{rho, u, v, w, p};
+    auto left_c  = Gas::PrimitiveToConservative(left);
+    auto right_c = left_c;
+    right_c.momentumX() = -left_c.momentumX();
+    auto flux = solver.GetFluxOnInviscidWall(left_c);
+    CompareFlux(solver.GetFluxUpwind(left_c, right_c), flux);
+    EXPECT_EQ(0.0, flux.mass());
+    EXPECT_NEAR(1.0, flux.momentumX() / p, 1e-1);
+    EXPECT_EQ(0.0, flux.momentumY());
+    EXPECT_EQ(0.0, flux.momentumZ());
+    EXPECT_EQ(0.0, flux.energy());
+  }
 }
 
 }  // namespace rotated

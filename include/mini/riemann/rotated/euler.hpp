@@ -120,9 +120,12 @@ class Euler {
     return flux;
   }
   Flux GetFluxOnInviscidWall(Conservative const& conservative) const {
-    auto primitive = Gas::ConservativeToPrimitive(conservative);
-    Flux flux; flux.setZero();
-    flux.momentumX() = primitive.p();
+    auto left__primitive = Gas::ConservativeToPrimitive(conservative);
+    GlobalToNormal(&left__primitive);
+    auto right_primitive = left__primitive;
+    right_primitive.momentumX() = -left__primitive.momentumX();
+    auto flux = unrotated_euler_.GetFluxUpwind(
+        left__primitive, right_primitive);
     NormalToGlobal(&flux);
     return flux;
   }
