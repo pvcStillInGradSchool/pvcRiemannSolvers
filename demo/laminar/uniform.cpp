@@ -13,7 +13,7 @@ constexpr Scalar temperature_infty = Gas::TotalTemperatureToTemperature(
 constexpr Scalar density_infty = pressure_infty / temperature_infty / Gas::R();
 constexpr Scalar uvw_infty = mach_infty *
     Gas::GetSpeedOfSound(density_infty, pressure_infty);
-constexpr Scalar v_cos = 0.0, w_cos = 0.0;
+constexpr Scalar v_cos = 0.3, w_cos = 0.4;
 constexpr Scalar u_cos = std::sqrt(1 - v_cos * v_cos - w_cos * w_cos);
 static_assert(std::abs(u_cos * u_cos + v_cos * v_cos + w_cos * w_cos - 1) < 1e-8);
 constexpr Scalar u_infty = uvw_infty * u_cos;
@@ -46,8 +46,8 @@ auto outlet = [](const Global& xyz, double t){
 void MyBC(const std::string &suffix, Spatial *spatial) {
   assert(suffix == "hexa");
   spatial->SetSubsonicInlet("4_S_26", inlet);   // Left
-  spatial->SetSubsonicOutlet("4_S_14", outlet);  // Bottom
-  spatial->SetSubsonicOutlet("4_S_5", outlet);   // Back
+  spatial->SetSubsonicInlet("4_S_14", inlet);  // Bottom
+  spatial->SetSubsonicInlet("4_S_5", inlet);   // Back
   spatial->SetSubsonicOutlet("4_S_18", outlet);  // Right
   spatial->SetSubsonicOutlet("4_S_22", outlet);  // Top
   spatial->SetSubsonicOutlet("4_S_27", outlet);  // Front
