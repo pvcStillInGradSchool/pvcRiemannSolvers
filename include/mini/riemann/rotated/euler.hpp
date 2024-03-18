@@ -138,8 +138,7 @@ class Euler {
   }
 
  private:
-  static Scalar SolveQuadraticEquation(Scalar a, Scalar b, Scalar c) {
-    auto b_half = b * 0.5;
+  static Scalar GetTheLargerSolution(Scalar a, Scalar b_half, Scalar c) {
     auto sqrt_delta = std::sqrt(b_half * b_half - a * c);
     auto x_1 = (-b_half + sqrt_delta) / a;
     auto x_2 = (-b_half - sqrt_delta) / a;
@@ -162,11 +161,14 @@ class Euler {
     auto square_of = [](Scalar x) { return x * x; };
     auto square_of_A = square_of(A);
     auto gamma_times_R = Gas::Gamma() * Gas::R();
-    auto c_boundary = SolveQuadraticEquation(
+    auto c_boundary = GetTheLargerSolution(
+        /* the a in (a x^2 + b x + c = 0) */
         square_of_A + Gas::GammaMinusOneUnderTwo(),
-        2 * riemann_inside,
-        Gas::GammaMinusOneOverTwo() * square_of(riemann_inside) -
-        square_of_A * gamma_times_R * T_total);
+        /* 1/2 of the b in (a x^2 + b x + c = 0) */
+        riemann_inside,
+        /* the c in (a x^2 + b x + c = 0) */
+        Gas::GammaMinusOneOverTwo() * square_of(riemann_inside)
+            - square_of_A * gamma_times_R * T_total);
     auto T_boundary = square_of(c_boundary) / gamma_times_R;
     auto mach_boundary = Gas::GetMachFromTemperature(T_boundary, T_total);
     auto p_total = given_value[0];
