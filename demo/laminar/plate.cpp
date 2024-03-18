@@ -24,13 +24,13 @@ Value MyIC(const Global &xyz) {
 };
 
 /* Set boundary conditions. */
-Scalar alpha_infty = 0.0, beta_infty = 0.0;
+Scalar u_cos = 1.0, v_cos = 0.0, w_cos = 0.0;
 auto inlet = [](const Global& xyz, double t){
   Value value;
   value[0] = total_pressure_infty;
-  value[1] = u_infty;
-  value[2] = alpha_infty;
-  value[3] = beta_infty;
+  value[1] = u_cos;
+  value[2] = v_cos;
+  value[3] = w_cos;
   value[4] = total_temperature_infty;
   return value;
 };

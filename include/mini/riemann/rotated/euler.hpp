@@ -146,15 +146,13 @@ class Euler {
     primitive.mass() = rho;
     primitive.energy() = p;
     auto uvw = mach * Gas::GetSpeedOfSound(T);
+    auto u_cos = given_value[1];
     auto v_cos = given_value[2];
     auto w_cos = given_value[3];
-    // At any point of an inlet, the normal vector always points outward,
-    // but the fluid always flows in, thus a negative sign is needed:
-    auto u_cos = -std::sqrt(1 - v_cos * v_cos - w_cos * w_cos);
     primitive.momentumX() = uvw * u_cos;
     primitive.momentumY() = uvw * v_cos;
     primitive.momentumZ() = uvw * w_cos;
-    // GlobalToNormal(&primitive);
+    GlobalToNormal(&primitive);
     auto flux = unrotated_euler_.GetFlux(primitive);
     NormalToGlobal(&flux);
     // std::cout << mach << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";

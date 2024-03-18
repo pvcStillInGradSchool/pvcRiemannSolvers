@@ -31,7 +31,7 @@ Value MyIC(const Global &xyz) {
 auto inlet = [](const Global& xyz, double t){
   Value value;
   value[0] = total_pressure_infty;
-  value[1] = uvw_infty;
+  value[1] = u_cos;
   value[2] = v_cos;
   value[3] = w_cos;
   value[4] = total_temperature_infty;
