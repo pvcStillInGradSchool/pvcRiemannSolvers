@@ -136,26 +136,52 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
+
+ private:
+  static Scalar SolveQuadraticEquation(Scalar a, Scalar b, Scalar c) {
+    auto b_half = b * 0.5;
+    auto sqrt_delta = std::sqrt(b_half * b_half - a * c);
+    auto x_1 = (-b_half + sqrt_delta) / a;
+    auto x_2 = (-b_half - sqrt_delta) / a;
+    return std::max(x_1, x_2);
+  }
+
+ public:
   Flux GetFluxOnSubsonicInlet(Conservative const& conservative_i,
       Value const& given_value) const {
     Primitive primitive = Gas::ConservativeToPrimitive(conservative_i);
-    auto p = primitive.energy();
-    auto mach = Gas::GetMachFromPressure(p, given_value[0]);
-    auto T = Gas::TotalTemperatureToTemperature(mach, given_value[4]);
-    auto rho = p / Gas::R() / T;
-    primitive.mass() = rho;
-    primitive.energy() = p;
-    auto uvw = mach * Gas::GetSpeedOfSound(T);
+    auto c_inside = Gas::GetSpeedOfSound(primitive);
+    GlobalToNormal(&primitive);
+    auto riemann_inside = -primitive.momentumX()
+        - c_inside * Gas::GammaMinusOneUnderTwo();
     auto u_cos = given_value[1];
     auto v_cos = given_value[2];
     auto w_cos = given_value[3];
+    auto T_total = given_value[4];
+    auto A = a(X) * u_cos + a(Y) * v_cos + a(Z) * w_cos;
+    auto square_of = [](Scalar x) { return x * x; };
+    auto square_of_A = square_of(A);
+    auto gamma_times_R = Gas::Gamma() * Gas::R();
+    auto c_boundary = SolveQuadraticEquation(
+        square_of_A + Gas::GammaMinusOneUnderTwo(),
+        2 * riemann_inside,
+        Gas::GammaMinusOneOverTwo() * square_of(riemann_inside) -
+        square_of_A * gamma_times_R * T_total);
+    auto T_boundary = square_of(c_boundary) / gamma_times_R;
+    auto mach_boundary = Gas::GetMachFromTemperature(T_boundary, T_total);
+    auto p_total = given_value[0];
+    auto p_boundary = Gas::TotalPressureToPressure(mach_boundary, p_total);
+    primitive.energy() = p_boundary;
+    primitive.mass() = p_boundary / Gas::R() / T_boundary;
+    auto uvw = mach_boundary * c_boundary;
     primitive.momentumX() = uvw * u_cos;
     primitive.momentumY() = uvw * v_cos;
     primitive.momentumZ() = uvw * w_cos;
     GlobalToNormal(&primitive);
+    assert(primitive.momentumX() <= 0.0);
     auto flux = unrotated_euler_.GetFlux(primitive);
     NormalToGlobal(&flux);
-    // std::cout << mach << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";
+    // std::cout << mach_boundary << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";
     return flux;
   }
   Flux GetFluxOnSubsonicInletOld(Conservative const& conservative_i,
