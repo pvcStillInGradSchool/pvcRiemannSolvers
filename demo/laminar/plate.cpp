@@ -16,9 +16,13 @@ auto u_infty = mach_infty *
     Gas::GetSpeedOfSound(density_infty, pressure_infty);
 
 Value MyIC(const Global &xyz) {
+  auto x = xyz[mini::constant::index::X];
   auto y = xyz[mini::constant::index::Y];
+  auto u_bottom = u_infty * (1 - x / 0.2);
+  auto du_dy = (u_infty - u_bottom) / 0.02;
+  auto u = du_dy * y + u_bottom;
   auto primitive = Primitive(density_infty,
-      u_infty * (y / 0.02), 0.0, 0.0, pressure_infty);
+      u, 0.0, 0.0, pressure_infty);
   Value value = Gas::PrimitiveToConservative(primitive);
   return value;
 };
