@@ -303,9 +303,6 @@ class Lobatto : public General<Part> {
   }
 
  public:
-  void SetValueOnNoSlipWalls() override {
-    _SetValueOnNoSlipWalls();
-  }
   void AddFluxOnNoSlipWalls(Column *residual) const override {
     for (const auto &[name, func] : this->no_slip_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {

@@ -264,8 +264,6 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   }
   virtual void AddFluxOnLocalFaces(Column *residual) const = 0;
   virtual void AddFluxOnGhostFaces(Column *residual) const = 0;
-  virtual void SetValueOnNoSlipWalls() {
-  }
   virtual void AddFluxOnNoSlipWalls(Column *residual) const {
   }
   virtual void AddFluxOnInviscidWalls(Column *residual) const = 0;
