@@ -28,12 +28,32 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n: int):
     gmsh.model.mesh.generate(1)
     gmsh.model.geo.synchronize()
     nodeTags, nodeCoords, nodeParams = gmsh.model.mesh.getNodes(1, 1, True)
+    nodeXs = nodeCoords[0:len(nodeCoords):3]
+    nodeYs = nodeCoords[1:len(nodeCoords):3]
+    nodeZs = nodeCoords[2:len(nodeCoords):3]
+    def shift(a: np.ndarray):
+        """Convert
+            inner nodes | left end | right end
+          to
+            left end | inner nodes | right end
+        """
+        n = len(a)
+        left_val = a[-2]
+        for i in range(n - 2, 0, -1):
+            a[i] = a[i - 1]
+        a[0] = left_val
+    shift(nodeTags)
+    shift(nodeXs)
+    shift(nodeYs)
+    shift(nodeZs)
+    shift(nodeParams)
     for i in range(len(nodeTags)):
-        c = i * 3
-        x = nodeCoords[c]
-        y = nodeCoords[c + 1]
-        z = nodeCoords[c + 2]
-        print(i, nodeTags[i], nodeParams[i], x, y, z)
+        print(i, nodeTags[i], nodeParams[i], nodeXs[i], nodeYs[i], nodeZs[i])
+        if i > 1:
+            param_ratio = (nodeParams[i] - nodeParams[i - 1]) / (nodeParams[i - 1] - nodeParams[i - 2])
+            assert np.abs(ratio - param_ratio) < 1e-6
+            x_ratio = (nodeXs[i] - nodeXs[i - 1]) / (nodeXs[i - 1] - nodeXs[i - 2])
+            assert np.abs(ratio - x_ratio) < 1e-6
 
     gmsh.finalize()
 
