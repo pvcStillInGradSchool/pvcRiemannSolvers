@@ -4,21 +4,21 @@ import numpy as np
 from scipy import optimize as opt
 
 
-def get_ratio(y_0: float, y_n: float, dy_0: float, n_layer: int):
-    """Get the value of `a` such that `dy_0 == y[1] - y[0]` and `a == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n_layer + 1)`.
+def get_thickness_ratio(y_0: float, y_n: float, dy_0: float, n_layer: int):
+    """Get the value of `h_ratio` such that `dy_0 == y[1] - y[0]` and `h_ratio == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n_layer + 1)`.
     """
-    def f(a: float):
-        val = (a**n_layer - 1) / (a - 1) - ((y_n - y_0) / dy_0)
+    def f(h_ratio: float):
+        val = (h_ratio**n_layer - 1) / (h_ratio - 1) - ((y_n - y_0) / dy_0)
         return val
-    def df(a: float):
-        return n_layer * a**(n_layer - 1) / (a - 1) - (a**n_layer - 1) / (a - 1)
+    def df(h_ratio: float):
+        return n_layer * h_ratio**(n_layer - 1) / (h_ratio - 1) - (h_ratio**n_layer - 1) / (h_ratio - 1)
     return opt.newton(f, x0=1.01, fprime=df, tol=1e-15)
 
 
-def get_first_layer(y_0: float, y_n: float, a: float, n_layer: int):
-    """Get the value of `dy_0 == y[1] - y[0]` such that `a == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n_layer + 1)`.
+def get_first_layer_thickness(y_0: float, y_n: float, h_ratio: float, n_layer: int):
+    """Get the value of `dy_0 == y[1] - y[0]` such that `h_ratio == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n_layer + 1)`.
     """
-    return (y_n - y_0) * (a - 1) / (a**n_layer - 1)
+    return (y_n - y_0) * (h_ratio - 1) / (h_ratio**n_layer - 1)
 
 
 def demo_gmsh(y_0: float, y_n: float, dy_0: float, n_layer: int):
@@ -29,7 +29,7 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n_layer: int):
     gmsh.model.geo.addLine(1, 2)
     gmsh.model.geo.synchronize()
 
-    ratio = get_ratio(y_0, y_n, dy_0, n_layer)
+    ratio = get_thickness_ratio(y_0, y_n, dy_0, n_layer)
     gmsh.model.mesh.setTransfiniteCurve(1, n_layer + 1, "Progression", ratio)
     gmsh.model.mesh.generate(1)
     gmsh.model.geo.synchronize()
@@ -68,12 +68,12 @@ y_0 = 0.0
 y_n = 0.02
 dy_0 = 1e-5
 n_layer = 64
-a = get_ratio(y_0, y_n, dy_0, n_layer)
-print(f'a = {a}')
-print(dy_0, get_first_layer(y_0, y_n, a, n_layer))
+h_ratio = get_thickness_ratio(y_0, y_n, dy_0, n_layer)
+print(f'h_ratio = {h_ratio}')
+print(dy_0, get_first_layer_thickness(y_0, y_n, h_ratio, n_layer))
 
 powers = np.arange(0, n_layer + 1)
-y = y_0 + (a**powers - 1) / (a - 1) * dy_0
+y = y_0 + (h_ratio**powers - 1) / (h_ratio - 1) * dy_0
 y_n = y[-1]
 print(f'y_0 = {y_0}')
 print(f'y_n = {y_n}')
