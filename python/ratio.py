@@ -15,6 +15,12 @@ def get_ratio(y_0: float, y_n: float, dy_0: float, n: int):
     return opt.newton(f, x0=1.01, fprime=df, tol=1e-15)
 
 
+def get_first_layer(y_0: float, y_n: float, a: float, n: int):
+    """Get the value of `dy_0 == y[1] - y[0]` such that `a == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n + 1)`.
+    """
+    return (y_n - y_0) * (a - 1) / (a**n - 1)
+
+
 def demo_gmsh(y_0: float, y_n: float, dy_0: float, n: int):
     gmsh.initialize(sys.argv)
 
@@ -23,7 +29,7 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n: int):
     gmsh.model.geo.addLine(1, 2)
     gmsh.model.geo.synchronize()
 
-    ratio = 1.0833173111684202
+    ratio = get_ratio(y_0, y_n, dy_0, n)
     gmsh.model.mesh.setTransfiniteCurve(1, n + 1, "Progression", ratio)
     gmsh.model.mesh.generate(1)
     gmsh.model.geo.synchronize()
@@ -64,6 +70,7 @@ dy_0 = 1e-5
 n = 64
 a = get_ratio(y_0, y_n, dy_0, n)
 print(f'a = {a}')
+print(dy_0, get_first_layer(y_0, y_n, a, n))
 
 powers = np.arange(0, n + 1)
 y = y_0 + (a**powers - 1) / (a - 1) * dy_0
