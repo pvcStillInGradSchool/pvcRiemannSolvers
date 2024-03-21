@@ -4,24 +4,24 @@ import numpy as np
 from scipy import optimize as opt
 
 
-def get_ratio(y_0: float, y_n: float, dy_0: float, n: int):
-    """Get the value of `a` such that `dy_0 == y[1] - y[0]` and `a == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n + 1)`.
+def get_ratio(y_0: float, y_n: float, dy_0: float, n_layer: int):
+    """Get the value of `a` such that `dy_0 == y[1] - y[0]` and `a == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n_layer + 1)`.
     """
     def f(a: float):
-        val = (a**n - 1) / (a - 1) - ((y_n - y_0) / dy_0)
+        val = (a**n_layer - 1) / (a - 1) - ((y_n - y_0) / dy_0)
         return val
     def df(a: float):
-        return n * a**(n - 1) / (a - 1) - (a**n - 1) / (a - 1)
+        return n_layer * a**(n_layer - 1) / (a - 1) - (a**n_layer - 1) / (a - 1)
     return opt.newton(f, x0=1.01, fprime=df, tol=1e-15)
 
 
-def get_first_layer(y_0: float, y_n: float, a: float, n: int):
-    """Get the value of `dy_0 == y[1] - y[0]` such that `a == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n + 1)`.
+def get_first_layer(y_0: float, y_n: float, a: float, n_layer: int):
+    """Get the value of `dy_0 == y[1] - y[0]` such that `a == (y[i+1] - y[i]) / (y[i] - y[i-1])` for all `i` in `range(0, n_layer + 1)`.
     """
-    return (y_n - y_0) * (a - 1) / (a**n - 1)
+    return (y_n - y_0) * (a - 1) / (a**n_layer - 1)
 
 
-def demo_gmsh(y_0: float, y_n: float, dy_0: float, n: int):
+def demo_gmsh(y_0: float, y_n: float, dy_0: float, n_layer: int):
     gmsh.initialize(sys.argv)
 
     gmsh.model.geo.addPoint(y_0, 0, 0)
@@ -29,8 +29,8 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n: int):
     gmsh.model.geo.addLine(1, 2)
     gmsh.model.geo.synchronize()
 
-    ratio = get_ratio(y_0, y_n, dy_0, n)
-    gmsh.model.mesh.setTransfiniteCurve(1, n + 1, "Progression", ratio)
+    ratio = get_ratio(y_0, y_n, dy_0, n_layer)
+    gmsh.model.mesh.setTransfiniteCurve(1, n_layer + 1, "Progression", ratio)
     gmsh.model.mesh.generate(1)
     gmsh.model.geo.synchronize()
     nodeTags, nodeCoords, nodeParams = gmsh.model.mesh.getNodes(1, 1, True)
@@ -67,15 +67,15 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n: int):
 y_0 = 0.0
 y_n = 0.02
 dy_0 = 1e-5
-n = 64
-a = get_ratio(y_0, y_n, dy_0, n)
+n_layer = 64
+a = get_ratio(y_0, y_n, dy_0, n_layer)
 print(f'a = {a}')
-print(dy_0, get_first_layer(y_0, y_n, a, n))
+print(dy_0, get_first_layer(y_0, y_n, a, n_layer))
 
-powers = np.arange(0, n + 1)
+powers = np.arange(0, n_layer + 1)
 y = y_0 + (a**powers - 1) / (a - 1) * dy_0
 y_n = y[-1]
 print(f'y_0 = {y_0}')
 print(f'y_n = {y_n}')
 
-demo_gmsh(y_0, y_n, dy_0, n)
+demo_gmsh(y_0, y_n, dy_0, n_layer)
