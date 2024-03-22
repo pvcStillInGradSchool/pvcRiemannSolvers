@@ -2,6 +2,7 @@ import gmsh
 import sys
 import numpy as np
 import argparse
+from thickness_ratio import get_thickness_ratio
 
 
 if __name__ == '__main__':
@@ -18,7 +19,8 @@ if __name__ == '__main__':
     x, y, z = 0, 0, 0
     lx, ly, lz = 0.2, 0.02, 0.1  # length of domain in each direction
     nx, ny, nz = 32, 16, 2 + 1  # number of cells in each direction
-    ratio = 1.083317311
+    ratio_x = get_thickness_ratio(0, lx, 1e-4, nx)
+    ratio_y = get_thickness_ratio(0, ly, 1e-5, ny)
 
     gmsh.initialize(sys.argv)
 
@@ -47,9 +49,9 @@ if __name__ == '__main__':
 
     # generate hexahedral mesh
     for tag in (1, 2):
-        gmsh.model.mesh.setTransfiniteCurve(tag, nx + 1, "Progression", ratio)
+        gmsh.model.mesh.setTransfiniteCurve(tag, nx + 1, "Progression", ratio_x)
     for tag in (3, 4):
-        gmsh.model.mesh.setTransfiniteCurve(tag, ny + 1, "Progression", ratio)
+        gmsh.model.mesh.setTransfiniteCurve(tag, ny + 1, "Progression", ratio_y)
     gmsh.model.mesh.setTransfiniteSurface(5)
     gmsh.model.mesh.setRecombine(2, 5)
 
