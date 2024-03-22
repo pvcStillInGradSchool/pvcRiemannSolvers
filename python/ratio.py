@@ -24,8 +24,8 @@ def get_first_layer_thickness(y_0: float, y_n: float, h_ratio: float, n_layer: i
 def demo_gmsh(y_0: float, y_n: float, dy_0: float, n_layer: int):
     gmsh.initialize(sys.argv)
 
-    gmsh.model.geo.addPoint(y_0, 0, 0)
-    gmsh.model.geo.addPoint(y_n, 0, 0)
+    gmsh.model.geo.addPoint(0, y_0, 0)
+    gmsh.model.geo.addPoint(0, y_n, 0)
     gmsh.model.geo.addLine(1, 2)
     gmsh.model.geo.synchronize()
 
@@ -37,6 +37,8 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n_layer: int):
     nodeXs = nodeCoords[0:len(nodeCoords):3]
     nodeYs = nodeCoords[1:len(nodeCoords):3]
     nodeZs = nodeCoords[2:len(nodeCoords):3]
+    assert nodeXs.all() == 0
+    assert nodeZs.all() == 0
     def shift(a: np.ndarray):
         """Convert
             inner nodes | left end | right end
@@ -49,33 +51,32 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n_layer: int):
             a[i] = a[i - 1]
         a[0] = left_val
     shift(nodeTags)
-    shift(nodeXs)
     shift(nodeYs)
-    shift(nodeZs)
     shift(nodeParams)
     for i in range(len(nodeTags)):
-        print(i, nodeTags[i], nodeParams[i], nodeXs[i], nodeYs[i], nodeZs[i])
+        print(i, nodeTags[i], nodeParams[i], nodeYs[i])
         if i > 1:
             param_ratio = (nodeParams[i] - nodeParams[i - 1]) / (nodeParams[i - 1] - nodeParams[i - 2])
             assert np.abs(ratio - param_ratio) < 1e-6
-            x_ratio = (nodeXs[i] - nodeXs[i - 1]) / (nodeXs[i - 1] - nodeXs[i - 2])
-            assert np.abs(ratio - x_ratio) < 1e-6
+            y_ratio = (nodeYs[i] - nodeYs[i - 1]) / (nodeYs[i - 1] - nodeYs[i - 2])
+            assert np.abs(ratio - y_ratio) < 1e-6
 
     gmsh.finalize()
 
 
-y_0 = 0.0
-y_n = 0.02
-dy_0 = 1e-5
-n_layer = 64
-h_ratio = get_thickness_ratio(y_0, y_n, dy_0, n_layer)
-print(f'h_ratio = {h_ratio}')
-print(dy_0, get_first_layer_thickness(y_0, y_n, h_ratio, n_layer))
+if __name__ == '__main__':
+    y_0 = 0.0
+    y_n = 0.02
+    dy_0 = 1e-5
+    n_layer = 64
+    h_ratio = get_thickness_ratio(y_0, y_n, dy_0, n_layer)
+    print(f'h_ratio = {h_ratio}')
+    print(dy_0, get_first_layer_thickness(y_0, y_n, h_ratio, n_layer))
 
-powers = np.arange(0, n_layer + 1)
-y = y_0 + (h_ratio**powers - 1) / (h_ratio - 1) * dy_0
-y_n = y[-1]
-print(f'y_0 = {y_0}')
-print(f'y_n = {y_n}')
+    powers = np.arange(0, n_layer + 1)
+    y = y_0 + (h_ratio**powers - 1) / (h_ratio - 1) * dy_0
+    y_n = y[-1]
+    print(f'y_0 = {y_0}')
+    print(f'y_n = {y_n}')
 
-demo_gmsh(y_0, y_n, dy_0, n_layer)
+    demo_gmsh(y_0, y_n, dy_0, n_layer)
