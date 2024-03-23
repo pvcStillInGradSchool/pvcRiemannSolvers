@@ -146,6 +146,11 @@ class Euler {
   }
 
  public:
+  /**
+   * @brief Get the Flux on subsonic inlet.
+   * 
+   * See "2.7 Subsonic Inflow BC" in Carlson (2011).
+   */
   Flux GetFluxOnSubsonicInlet(Conservative const& conservative_i,
       Value const& given_value) const {
     Primitive primitive = Gas::ConservativeToPrimitive(conservative_i);
@@ -157,6 +162,7 @@ class Euler {
     auto v_cos = given_value[2];
     auto w_cos = given_value[3];
     auto T_total = given_value[4];
+    // TODO(PVC): cache A since it's constant.
     auto A = a(X) * u_cos + a(Y) * v_cos + a(Z) * w_cos;
     auto square_of = [](Scalar x) { return x * x; };
     auto square_of_A = square_of(A);
@@ -206,10 +212,17 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
+  /**
+   * @brief Get the Flux on subsonic outlet.
+   * 
+   * See "2.4 Pressure Outflow BC" in Carlson (2011).
+   */
   Flux GetFluxOnSubsonicOutlet(Conservative const& conservative_i,
       Value const& given_value) const {
     Primitive primitive = Gas::ConservativeToPrimitive(conservative_i);
-    primitive.energy() = given_value[4];
+    auto RT = primitive.p() / primitive.rho();
+    primitive.p() = given_value[4];
+    primitive.rho() = primitive.p() / RT;
     GlobalToNormal(&primitive);
     auto flux = unrotated_euler_.GetFlux(primitive);
     NormalToGlobal(&flux);
