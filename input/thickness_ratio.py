@@ -64,19 +64,41 @@ def demo_gmsh(y_0: float, y_n: float, dy_0: float, n_layer: int):
     gmsh.finalize()
 
 
+def get_layers(y_0: float, y_n: float, h_ratio: float, n_layer: int):
+    powers = np.arange(0, n_layer + 1)
+    dy_0 = get_first_layer_thickness(y_0, y_n, h_ratio, n_layer)
+    y = y_0 + (h_ratio**powers - 1) / (h_ratio - 1) * dy_0
+    return y
+
+
+def coarsen(coarse_level: int, n_layer: int, h_ratio: float) -> tuple[int, float]:
+    n_layer //= 2**coarse_level
+    h_ratio **= 2**coarse_level
+    return n_layer, h_ratio
+
+
 if __name__ == '__main__':
     y_0 = 0.0
     y_n = 0.02
     dy_0 = 1e-5
     n_layer = 64
-    h_ratio = get_thickness_ratio(y_0, y_n, dy_0, n_layer)
-    print(f'h_ratio = {h_ratio}')
-    print(dy_0, get_first_layer_thickness(y_0, y_n, h_ratio, n_layer))
-
-    powers = np.arange(0, n_layer + 1)
-    y = y_0 + (h_ratio**powers - 1) / (h_ratio - 1) * dy_0
-    y_n = y[-1]
-    print(f'y_0 = {y_0}')
-    print(f'y_n = {y_n}')
-
     demo_gmsh(y_0, y_n, dy_0, n_layer)
+
+    h_ratio = get_thickness_ratio(y_0, y_n, dy_0, n_layer)
+    print(f'n_layer = {n_layer}')
+    print(f'h_ratio = {h_ratio}')
+    y_finest = get_layers(y_0, y_n, h_ratio, n_layer)
+    print(f'y = {y_finest}')
+
+    assert 64 == coarsen(0, 64, h_ratio)[0]
+    assert 32 == coarsen(1, 64, h_ratio)[0]
+    assert 16 == coarsen(2, 64, h_ratio)[0]
+    assert 8 == coarsen(3, 64, h_ratio)[0]
+    assert 4 == coarsen(4, 64, h_ratio)[0]
+
+    coarse_level = 2
+    n_layer, h_ratio = coarsen(coarse_level, n_layer, h_ratio)
+    print(f'n_layer = {n_layer}')
+    print(f'h_ratio = {h_ratio}')
+    print(f'y = {get_layers(y_0, y_n, h_ratio, n_layer)}')
+    print(y_finest[0::4])
