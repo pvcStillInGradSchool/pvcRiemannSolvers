@@ -20,10 +20,12 @@ class Interpolation:
     def get_eta(self, x, y) -> float:
         return y / np.sqrt(x * self._nu_over_u_infty)
 
-    def get_u(self, x, y) -> float:
+    def get_dimensionless_u(self, x, y) -> float:
         eta = self.get_eta(x, y)
-        print(eta)
-        return self._u_infty * self._df_spline(eta)
+        return self._df_spline(eta)
+
+    def get_dimensional_u(self, x, y):
+        return self.get_dimensionless_u(x, y) * self._u_infty
 
 
 if __name__ == '__main__':
@@ -34,7 +36,7 @@ if __name__ == '__main__':
     y = np.linspace(0, 0.001, 101)
     print(y)
     eta = solution.get_eta(x, y)
-    u = solution.get_u(x, y)
+    u = solution.get_dimensional_u(x, y)
 
     fig = plt.figure()
     plt.plot(y, u, label=r'$u$')
