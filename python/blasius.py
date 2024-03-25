@@ -41,8 +41,8 @@ if __name__ == '__main__':
     u_infty = 68.3
     nu = 1.57e-5
     solution = Interpolation(u_infty, nu)
-    x = 0.1
-    y = np.linspace(0, 0.001, 101)
+    x = 0.2
+    y = np.linspace(0, 0.002, 101)
     eta = solution.get_eta(x, y)
     u = solution.get_dimensional_u(x, y)
     v = solution.get_dimensional_v(x, y)
@@ -51,12 +51,12 @@ if __name__ == '__main__':
     plt.subplot(1, 2, 1)
     plt.plot(u / u_infty, eta)
     plt.xlabel(r'$u/u_\infty$')
-    plt.ylabel(r'$\eta$')
+    plt.ylabel(r'$\eta = y/\sqrt{\nu x/u_\infty}$')
     plt.grid()
     plt.subplot(1, 2, 2)
-    plt.plot(v, eta)
+    plt.plot(v, y / 0.001)
     plt.xlabel(r'$v$')
-    plt.ylabel(r'$\eta$')
+    plt.ylabel(r'$y / 0.001$')
     plt.grid()
     plt.tight_layout()
     fig.savefig('Blasius.svg')
