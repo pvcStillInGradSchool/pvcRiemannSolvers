@@ -8,10 +8,10 @@ from matplotlib import pyplot as plt
 class Interpolation:
     _data = np.loadtxt('blasius.csv', delimiter=',', skiprows=1)
     _eta = _data[:, 0]
-    _df = _data[:, 1]
-    _eta_times_df_minus_f = _data[:, 2]
-    _df_spline = CubicSpline(_eta, _df, bc_type='not-a-knot')
-    _eta_times_df_minus_f_spline = CubicSpline(_eta, _data[:, 2])
+    _u_data = _data[:, 1]
+    _v_data = _data[:, 2]
+    _u_spline = CubicSpline(_eta, _u_data, bc_type='not-a-knot')
+    _v_spline = CubicSpline(_eta, _v_data, bc_type='not-a-knot')
 
     def __init__(self, u_infty, nu) -> None:
         self._u_infty = u_infty
@@ -23,15 +23,15 @@ class Interpolation:
 
     def get_dimensionless_u(self, x, y) -> float:
         eta = self.get_eta(x, y)
-        return self._df_spline(eta)
+        return self._u_spline(eta)
 
     def get_dimensional_u(self, x, y):
         return self.get_dimensionless_u(x, y) * self._u_infty
 
     def get_dimensionless_v(self, x, y) -> float:
         eta = self.get_eta(x, y)
-        reynolds = x / self._nu_over_u_infty
-        return self._eta_times_df_minus_f_spline(eta) / np.sqrt(reynolds) / 2
+        reynolds_x = x / self._nu_over_u_infty
+        return self._v_spline(eta) / np.sqrt(reynolds_x) / 2
 
     def get_dimensional_v(self, x, y):
         return self.get_dimensionless_v(x, y) * self._u_infty
