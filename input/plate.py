@@ -2,7 +2,7 @@ import gmsh
 import sys
 import numpy as np
 import argparse
-from thickness_ratio import get_thickness_ratio, coarsen
+from thickness_ratio import get_thickness_ratio, coarsen, get_layers
 
 
 if __name__ == '__main__':
@@ -13,19 +13,26 @@ if __name__ == '__main__':
     parser.add_argument('--show', action='store_true')
     parser.add_argument('-o', '--output', default='plate.cgns', type=str,
         help='name of the output file')
+    parser.add_argument('-cx', '--coarseness_x',
+        default=2, type=int,
+        help='coarseness level in the stream-wise direction')
+    parser.add_argument('-cy', '--coarseness_y',
+        default=2, type=int,
+        help='coarseness level in the cross-stream direction')
     args = parser.parse_args()
     print(args)
 
     x, y, z = 0, 0, 0
     l_x, l_y, l_z = 0.2, 0.02, 0.1  # length of domain in each direction
     n_x, n_y, n_z = 64, 64, 2 + 1  # number of cells in each direction
-    c_x, c_y = 0, 2  # coarse levels in each direction
     a_x = get_thickness_ratio(0, l_x, 1e-4, n_x)
     a_y = get_thickness_ratio(0, l_y, 1e-5, n_y)
-    n_x, a_x = coarsen(c_x, n_x, a_x)
+    n_x, a_x = coarsen(args.coarseness_x, n_x, a_x)
     print(n_x, a_x)
-    n_y, a_y = coarsen(c_y, n_y, a_y)
+    print(get_layers(0, l_x, a_x, n_x))
+    n_y, a_y = coarsen(args.coarseness_y, n_y, a_y)
     print(n_y, a_y)
+    print(get_layers(0, l_y, a_y, n_y))
 
     gmsh.initialize(sys.argv)
 
