@@ -51,12 +51,18 @@ auto bottom = [](const Global& xyz, double t){
   value[4] = 0;  // interpreted as temperature gradient
   return value;
 };
+auto far_field = [](const Global& xyz, double t){
+  auto primitive = Primitive(density_infty,
+      u_infty, 0.0, 0.0, pressure_infty);
+  Value value = Gas::PrimitiveToConservative(primitive);
+  return value;
+};
 
 void MyBC(const std::string &suffix, Spatial *spatial) {
   assert(suffix == "hexa");
-  spatial->SetSubsonicInlet("4_S_26", inlet);   // Left
+  spatial->SetSmartBoundary("4_S_26", far_field);   // Left
   spatial->SetSubsonicOutlet("4_S_18", outlet);  // Right
-  spatial->SetSubsonicOutlet("4_S_22", outlet);  // Top
+  spatial->SetSmartBoundary("4_S_22", far_field);  // Top
   spatial->SetNoSlipWall("4_S_14", bottom);  // Bottom
   spatial->SetInviscidWall("4_S_5");   // Back
   spatial->SetInviscidWall("4_S_27");  // Front

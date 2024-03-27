@@ -247,6 +247,7 @@ class Euler {
   }
   Flux GetFluxOnSmartBoundary(Conservative const& conservative_i,
       Conservative const& conservative_o) const {
+    return GetFluxUpwind(conservative_i, conservative_o);
     auto primitive = Gas::ConservativeToPrimitive(conservative_i);
     Scalar a = Gas::GetSpeedOfSound(primitive);
     Scalar u_nu = primitive.momentum().dot(normal());
