@@ -162,7 +162,6 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
       assert(data == column.data() + column.size()
           || data == AddCellDataOffset(column, i_cell + 1));
     }
-    // this->SetValueOnNoSlipWalls();
   }
   Column GetSolutionColumn() const override {
     auto column = Column(cell_data_size_);
@@ -190,19 +189,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   void AddFluxOnBoundaries(Column *residual) const {
 #ifdef ENABLE_LOGGING
     log() << "Enter " << fullname() << "::AddFluxOnBoundaries\n";
-    log() << fullname() << "::AddFluxOnInviscidWalls\n";
-    log() << residual->squaredNorm() << "\n";
-#endif
-    this->AddFluxOnInviscidWalls(residual);
-#ifdef ENABLE_LOGGING
-    log() << residual->squaredNorm() << "\n";
     log() << fullname() << "::AddFluxOnSupersonicInlets\n";
-    log() << residual->squaredNorm() << "\n";
-#endif
-    this->AddFluxOnNoSlipWalls(residual);
-#ifdef ENABLE_LOGGING
-    log() << residual->squaredNorm() << "\n";
-    log() << fullname() << "::AddFluxOnNoSlipWalls\n";
     log() << residual->squaredNorm() << "\n";
 #endif
     this->AddFluxOnSupersonicInlets(residual);
@@ -224,6 +211,18 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     log() << residual->squaredNorm() << "\n";
 #endif
     this->AddFluxOnSubsonicOutlets(residual);
+#ifdef ENABLE_LOGGING
+    log() << residual->squaredNorm() << "\n";
+    log() << fullname() << "::AddFluxOnInviscidWalls\n";
+    log() << residual->squaredNorm() << "\n";
+#endif
+    this->AddFluxOnInviscidWalls(residual);
+#ifdef ENABLE_LOGGING
+    log() << residual->squaredNorm() << "\n";
+    log() << fullname() << "::AddFluxOnNoSlipWalls\n";
+    log() << residual->squaredNorm() << "\n";
+#endif
+    this->AddFluxOnNoSlipWalls(residual);
 #ifdef ENABLE_LOGGING
     log() << residual->squaredNorm() << "\n";
     log() << fullname() << "::AddFluxOnSmartBoundaries\n";
