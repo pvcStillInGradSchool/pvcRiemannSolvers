@@ -151,13 +151,13 @@ class Euler {
    * 
    * See "2.7 Subsonic Inflow BC" in Carlson (2011).
    */
-  Flux GetFluxOnSubsonicInlet(Conservative const& conservative_i,
+  Flux GetFluxOnSubsonicInlet(Conservative const& conservative_interior,
       Value const& given_value) const {
-    Primitive primitive = Gas::ConservativeToPrimitive(conservative_i);
-    auto c_inside = Gas::GetSpeedOfSound(primitive);
+    Primitive primitive = Gas::ConservativeToPrimitive(conservative_interior);
+    auto c_interior = Gas::GetSpeedOfSound(primitive);
     GlobalToNormal(&primitive);
-    auto riemann_inside = -primitive.momentumX()
-        - c_inside * Gas::GammaMinusOneUnderTwo();
+    auto riemann_interior = -primitive.momentumX()
+        - c_interior * Gas::GammaMinusOneUnderTwo();
     auto u_cos = given_value[1];
     auto v_cos = given_value[2];
     auto w_cos = given_value[3];
@@ -171,9 +171,9 @@ class Euler {
         /* the a in (a x^2 + b x + c = 0) */
         square_of_A + Gas::GammaMinusOneUnderTwo(),
         /* 1/2 of the b in (a x^2 + b x + c = 0) */
-        riemann_inside,
+        riemann_interior,
         /* the c in (a x^2 + b x + c = 0) */
-        Gas::GammaMinusOneOverTwo() * square_of(riemann_inside)
+        Gas::GammaMinusOneOverTwo() * square_of(riemann_interior)
             - square_of_A * gamma_times_R * T_total);
     auto T_boundary = square_of(c_boundary) / gamma_times_R;
     auto mach_boundary = Gas::GetMachFromTemperature(T_boundary, T_total);
@@ -192,23 +192,23 @@ class Euler {
     // std::cout << mach_boundary << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";
     return flux;
   }
-  Flux GetFluxOnSubsonicInletOld(Conservative const& conservative_i,
-      Conservative const& conservative_o) const {
-    auto primitive_i = Gas::ConservativeToPrimitive(conservative_i);
-    auto primitive_o = Gas::ConservativeToPrimitive(conservative_o);
-    Primitive primitive_b = primitive_o;
-    Scalar u_nu_o = primitive_o.momentum().dot(normal());
-    Scalar u_nu_i = primitive_i.momentum().dot(normal());
-    Scalar u_nu_jump = u_nu_o - u_nu_i;
-    Scalar a_i = Gas::GetSpeedOfSound(primitive_i);
-    Scalar rho_a_i = primitive_i.rho() * (u_nu_o > 0 ? a_i : -a_i);
-    primitive_b.p() = (primitive_i.p() + primitive_o.p()
-        + rho_a_i * u_nu_jump) * 0.5;
-    Scalar p_jump = primitive_o.p() - primitive_b.p();
-    primitive_b.rho() -= p_jump / (a_i * a_i);
-    primitive_b.momentum() += (p_jump / rho_a_i) * normal();
-    GlobalToNormal(&primitive_b);
-    auto flux = unrotated_euler_.GetFlux(primitive_b);
+  Flux GetFluxOnSubsonicInletOld(Conservative const& conservative_interior,
+      Conservative const& conservative_exterior) const {
+    auto primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
+    auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
+    Primitive primitive_boundary = primitive_exterior;
+    Scalar u_normal_exterior = primitive_exterior.momentum().dot(normal());
+    Scalar u_normal_interior = primitive_interior.momentum().dot(normal());
+    Scalar u_normal_jump = u_normal_exterior - u_normal_interior;
+    Scalar c_interior = Gas::GetSpeedOfSound(primitive_interior);
+    Scalar rho_c_interior = primitive_interior.rho() * (u_normal_exterior > 0 ? c_interior : -c_interior);
+    primitive_boundary.p() = (primitive_interior.p() + primitive_exterior.p()
+        + rho_c_interior * u_normal_jump) * 0.5;
+    Scalar p_jump = primitive_exterior.p() - primitive_boundary.p();
+    primitive_boundary.rho() -= p_jump / (c_interior * c_interior);
+    primitive_boundary.momentum() += (p_jump / rho_c_interior) * normal();
+    GlobalToNormal(&primitive_boundary);
+    auto flux = unrotated_euler_.GetFlux(primitive_boundary);
     NormalToGlobal(&flux);
     return flux;
   }
@@ -217,9 +217,9 @@ class Euler {
    * 
    * See "2.4 Pressure Outflow BC" in Carlson (2011).
    */
-  Flux GetFluxOnSubsonicOutlet(Conservative const& conservative_i,
+  Flux GetFluxOnSubsonicOutlet(Conservative const& conservative_interior,
       Value const& given_value) const {
-    Primitive primitive = Gas::ConservativeToPrimitive(conservative_i);
+    Primitive primitive = Gas::ConservativeToPrimitive(conservative_interior);
     auto RT = primitive.p() / primitive.rho();
     primitive.p() = given_value[4];
     primitive.rho() = primitive.p() / RT;
@@ -228,41 +228,41 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
-  Flux GetFluxOnSubsonicOutletOld(Conservative const& conservative_i,
-      Conservative const& conservative_o) const {
-    auto primitive_i = Gas::ConservativeToPrimitive(conservative_i);
-    auto primitive_o = Gas::ConservativeToPrimitive(conservative_o);
-    Primitive primitive_b = primitive_i;
-    primitive_b.p() = primitive_o.p();
-    Scalar p_jump = primitive_i.p() - primitive_b.p();
-    Scalar a_i = Gas::GetSpeedOfSound(primitive_i);
-    primitive_b.rho() -= p_jump / (a_i * a_i);
-    Scalar u_nu_i = primitive_i.momentum().dot(normal());
-    Scalar rho_a_i = primitive_i.rho() * (u_nu_i > 0 ? a_i : -a_i);
-    primitive_b.momentum() += (p_jump / rho_a_i) * normal();
-    GlobalToNormal(&primitive_b);
-    auto flux = unrotated_euler_.GetFlux(primitive_b);
+  Flux GetFluxOnSubsonicOutletOld(Conservative const& conservative_interior,
+      Conservative const& conservative_exterior) const {
+    auto primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
+    auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
+    Primitive primitive_boundary = primitive_interior;
+    primitive_boundary.p() = primitive_exterior.p();
+    Scalar p_jump = primitive_interior.p() - primitive_boundary.p();
+    Scalar c_interior = Gas::GetSpeedOfSound(primitive_interior);
+    primitive_boundary.rho() -= p_jump / (c_interior * c_interior);
+    Scalar u_normal_interior = primitive_interior.momentum().dot(normal());
+    Scalar rho_c_interior = primitive_interior.rho() * (u_normal_interior > 0 ? c_interior : -c_interior);
+    primitive_boundary.momentum() += (p_jump / rho_c_interior) * normal();
+    GlobalToNormal(&primitive_boundary);
+    auto flux = unrotated_euler_.GetFlux(primitive_boundary);
     NormalToGlobal(&flux);
     return flux;
   }
-  Flux GetFluxOnSmartBoundary(Conservative const& conservative_i,
-      Conservative const& conservative_o) const {
-    return GetFluxUpwind(conservative_i, conservative_o);
-    auto primitive = Gas::ConservativeToPrimitive(conservative_i);
+  Flux GetFluxOnSmartBoundary(Conservative const& conservative_interior,
+      Conservative const& conservative_exterior) const {
+    return GetFluxUpwind(conservative_interior, conservative_exterior);
+    auto primitive = Gas::ConservativeToPrimitive(conservative_interior);
     Scalar a = Gas::GetSpeedOfSound(primitive);
-    Scalar u_nu = primitive.momentum().dot(normal());
+    Scalar u_normal = primitive.momentum().dot(normal());
     Flux flux;
-    if (u_nu < 0) {  // inlet
-      if (u_nu + a < 0) {
-        flux = GetFluxOnSupersonicInlet(conservative_o);
+    if (u_normal < 0) {  // inlet
+      if (u_normal + a < 0) {
+        flux = GetFluxOnSupersonicInlet(conservative_exterior);
       } else {
-        flux = GetFluxOnSubsonicInlet(conservative_i, conservative_o);
+        flux = GetFluxOnSubsonicInlet(conservative_interior, conservative_exterior);
       }
     } else {  // outlet
-      if (u_nu - a > 0) {
-        flux = GetFluxOnSupersonicOutlet(conservative_i);
+      if (u_normal - a > 0) {
+        flux = GetFluxOnSupersonicOutlet(conservative_interior);
       } else {
-        flux = GetFluxOnSubsonicOutlet(conservative_i, conservative_o);
+        flux = GetFluxOnSubsonicOutlet(conservative_interior, conservative_exterior);
       }
     }
     return flux;
