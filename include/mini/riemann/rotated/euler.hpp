@@ -137,15 +137,6 @@ class Euler {
     return flux;
   }
 
- private:
-  static Scalar GetTheLargerSolution(Scalar a, Scalar b_half, Scalar c) {
-    auto sqrt_delta = std::sqrt(b_half * b_half - a * c);
-    auto x_1 = (-b_half + sqrt_delta) / a;
-    auto x_2 = (-b_half - sqrt_delta) / a;
-    return std::max(x_1, x_2);
-  }
-
- public:
   /**
    * @brief Get the Flux on subsonic inlet.
    * 
@@ -167,7 +158,13 @@ class Euler {
     auto square_of = [](Scalar x) { return x * x; };
     auto square_of_A = square_of(A);
     auto gamma_times_R = Gas::Gamma() * Gas::R();
-    auto c_boundary = GetTheLargerSolution(
+    auto larger = [](Scalar a, Scalar b_half, Scalar c) -> Scalar {
+      auto sqrt_delta = std::sqrt(b_half * b_half - a * c);
+      auto x_1 = (-b_half + sqrt_delta) / a;
+      auto x_2 = (-b_half - sqrt_delta) / a;
+      return std::max(x_1, x_2);
+    };
+    auto c_boundary = larger(
         /* the a in (a x^2 + b x + c = 0) */
         square_of_A + Gas::GammaMinusOneUnderTwo(),
         /* 1/2 of the b in (a x^2 + b x + c = 0) */
