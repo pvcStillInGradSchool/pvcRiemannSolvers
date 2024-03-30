@@ -95,8 +95,8 @@ class Euler {
     p[Y] = p_y;
     p[Z] = p_z;
   }
-  static Flux GetFlux(const Primitive& state) {
-    return Base::GetFlux(state);
+  static Flux GetFlux(const Primitive& primitive) {
+    return Base::GetFlux(primitive);
   }
   static FluxMatrix GetFluxMatrix(Conservative const& conservative) {
     return Gas::GetFluxMatrix(conservative);
@@ -108,24 +108,26 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
-  Flux GetFluxUpwind(Conservative const& left,
-      Conservative const& right) const {
-    auto left__primitive = Gas::ConservativeToPrimitive(left);
-    auto right_primitive = Gas::ConservativeToPrimitive(right);
-    GlobalToNormal(&left__primitive);
-    GlobalToNormal(&right_primitive);
+
+  Flux GetFluxUpwind(
+      Conservative const& conservative__left,
+      Conservative const& conservative_right) const {
+    auto primitive__left = Gas::ConservativeToPrimitive(conservative__left);
+    auto primitive_right = Gas::ConservativeToPrimitive(conservative_right);
+    GlobalToNormal(&primitive__left);
+    GlobalToNormal(&primitive_right);
     auto flux = unrotated_euler_.GetFluxUpwind(
-        left__primitive, right_primitive);
+        primitive__left, primitive_right);
     NormalToGlobal(&flux);
     return flux;
   }
   Flux GetFluxOnInviscidWall(Conservative const& conservative) const {
-    auto left__primitive = Gas::ConservativeToPrimitive(conservative);
-    GlobalToNormal(&left__primitive);
-    auto right_primitive = left__primitive;
-    right_primitive.momentumX() = -left__primitive.momentumX();
+    auto primitive__left = Gas::ConservativeToPrimitive(conservative);
+    GlobalToNormal(&primitive__left);
+    auto primitive_right = primitive__left;
+    primitive_right.u() = -primitive__left.u();
     auto flux = unrotated_euler_.GetFluxUpwind(
-        left__primitive, right_primitive);
+        primitive__left, primitive_right);
     NormalToGlobal(&flux);
     return flux;
   }
@@ -144,10 +146,10 @@ class Euler {
    */
   Flux GetFluxOnSubsonicInlet(Conservative const& conservative_interior,
       Value const& given_value) const {
-    Primitive primitive = Gas::ConservativeToPrimitive(conservative_interior);
-    auto c_interior = Gas::GetSpeedOfSound(primitive);
-    GlobalToNormal(&primitive);
-    auto riemann_interior = -primitive.momentumX()
+    Primitive primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
+    auto c_interior = Gas::GetSpeedOfSound(primitive_interior);
+    GlobalToNormal(&primitive_interior);
+    auto riemann_interior = -primitive_interior.u()
         - c_interior * Gas::GammaMinusOneUnderTwo();
     auto u_cos = given_value[1];
     auto v_cos = given_value[2];
@@ -176,20 +178,22 @@ class Euler {
     auto mach_boundary = Gas::GetMachFromTemperature(T_boundary, T_total);
     auto p_total = given_value[0];
     auto p_boundary = Gas::TotalPressureToPressure(mach_boundary, p_total);
-    primitive.energy() = p_boundary;
-    primitive.mass() = p_boundary / Gas::R() / T_boundary;
-    auto uvw = mach_boundary * c_boundary;
-    primitive.momentumX() = uvw * u_cos;
-    primitive.momentumY() = uvw * v_cos;
-    primitive.momentumZ() = uvw * w_cos;
-    GlobalToNormal(&primitive);
-    assert(primitive.momentumX() <= 0.0);
-    auto flux = unrotated_euler_.GetFlux(primitive);
+    auto &primitive_boundary = primitive_interior;
+    primitive_boundary.p() = p_boundary;
+    primitive_boundary.rho() = p_boundary / Gas::R() / T_boundary;
+    auto speed_boundary = mach_boundary * c_boundary;
+    primitive_boundary.u() = u_cos * speed_boundary;
+    primitive_boundary.v() = v_cos * speed_boundary;
+    primitive_boundary.w() = w_cos * speed_boundary;
+    GlobalToNormal(&primitive_boundary);
+    assert(primitive_boundary.u() <= 0.0);
+    auto flux = unrotated_euler_.GetFlux(primitive_boundary);
     NormalToGlobal(&flux);
-    // std::cout << mach_boundary << "\n" << primitive.transpose() << "\n" << flux.transpose() << "\n";
+    // std::cout << mach_boundary << "\n" << primitive_boundary.transpose() << "\n" << flux.transpose() << "\n";
     return flux;
   }
-  Flux GetFluxOnSubsonicInletOld(Conservative const& conservative_interior,
+  Flux GetFluxOnSubsonicInletOld(
+      Conservative const& conservative_interior,
       Conservative const& conservative_exterior) const {
     auto primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
     auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
@@ -242,7 +246,8 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
-  Flux GetFluxOnSmartBoundary(Conservative const& conservative_interior,
+  Flux GetFluxOnSmartBoundary(
+      Conservative const& conservative_interior,
       Conservative const& conservative_exterior) const {
     return GetFluxUpwind(conservative_interior, conservative_exterior);
     auto primitive = Gas::ConservativeToPrimitive(conservative_interior);
