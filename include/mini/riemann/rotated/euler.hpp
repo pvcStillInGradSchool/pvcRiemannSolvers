@@ -61,6 +61,12 @@ class Euler {
   Scalar c(int i) const requires(kDimensions == 3) {
     return c()[i];
   }
+  Flux GlobalPrimitiveToGlobalFlux(Primitive *primitive) const {
+    GlobalToNormal(primitive);
+    auto flux = unrotated_euler_.GetFlux(*primitive);
+    NormalToGlobal(&flux);
+    return flux;
+  }
 
  public:
   void GlobalToNormal(Value* v) const requires(kDimensions == 2) {
@@ -103,10 +109,11 @@ class Euler {
   }
   Flux GetFluxOnSupersonicInlet(Conservative const& conservative) const {
     auto primitive = Gas::ConservativeToPrimitive(conservative);
-    GlobalToNormal(&primitive);
-    auto flux = unrotated_euler_.GetFlux(primitive);
-    NormalToGlobal(&flux);
-    return flux;
+    return GlobalPrimitiveToGlobalFlux(&primitive);
+  }
+  Flux GetFluxOnSupersonicOutlet(Conservative const& conservative) const {
+    auto primitive = Gas::ConservativeToPrimitive(conservative);
+    return GlobalPrimitiveToGlobalFlux(&primitive);
   }
 
   Flux GetFluxUpwind(
@@ -131,13 +138,6 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
-  Flux GetFluxOnSupersonicOutlet(Conservative const& conservative) const {
-    auto primitive = Gas::ConservativeToPrimitive(conservative);
-    GlobalToNormal(&primitive);
-    auto flux = unrotated_euler_.GetFlux(primitive);
-    NormalToGlobal(&flux);
-    return flux;
-  }
 
   /**
    * @brief Get the Flux on subsonic inlet.
@@ -157,6 +157,7 @@ class Euler {
     auto T_total = given_value[4];
     // TODO(PVC): cache A since it's constant.
     auto A = a(X) * u_cos + a(Y) * v_cos + a(Z) * w_cos;
+    assert(A < 0.0);
     auto square_of = [](Scalar x) { return x * x; };
     auto square_of_A = square_of(A);
     auto gamma_times_R = Gas::Gamma() * Gas::R();
@@ -185,12 +186,7 @@ class Euler {
     primitive_boundary.u() = u_cos * speed_boundary;
     primitive_boundary.v() = v_cos * speed_boundary;
     primitive_boundary.w() = w_cos * speed_boundary;
-    GlobalToNormal(&primitive_boundary);
-    assert(primitive_boundary.u() <= 0.0);
-    auto flux = unrotated_euler_.GetFlux(primitive_boundary);
-    NormalToGlobal(&flux);
-    // std::cout << mach_boundary << "\n" << primitive_boundary.transpose() << "\n" << flux.transpose() << "\n";
-    return flux;
+    return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
   Flux GetFluxOnSubsonicInletOld(
       Conservative const& conservative_interior,
@@ -208,10 +204,7 @@ class Euler {
     Scalar p_jump = primitive_exterior.p() - primitive_boundary.p();
     primitive_boundary.rho() -= p_jump / (c_interior * c_interior);
     primitive_boundary.momentum() += (p_jump / rho_c_interior) * normal();
-    GlobalToNormal(&primitive_boundary);
-    auto flux = unrotated_euler_.GetFlux(primitive_boundary);
-    NormalToGlobal(&flux);
-    return flux;
+    return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
   /**
    * @brief Get the Flux on subsonic outlet.
@@ -224,10 +217,7 @@ class Euler {
     auto RT = primitive.p() / primitive.rho();
     primitive.p() = given_value[4];
     primitive.rho() = primitive.p() / RT;
-    GlobalToNormal(&primitive);
-    auto flux = unrotated_euler_.GetFlux(primitive);
-    NormalToGlobal(&flux);
-    return flux;
+    return GlobalPrimitiveToGlobalFlux(&primitive);
   }
   Flux GetFluxOnSubsonicOutletOld(Conservative const& conservative_interior,
       Conservative const& conservative_exterior) const {
@@ -241,10 +231,7 @@ class Euler {
     Scalar u_normal_interior = primitive_interior.momentum().dot(normal());
     Scalar rho_c_interior = primitive_interior.rho() * (u_normal_interior > 0 ? c_interior : -c_interior);
     primitive_boundary.momentum() += (p_jump / rho_c_interior) * normal();
-    GlobalToNormal(&primitive_boundary);
-    auto flux = unrotated_euler_.GetFlux(primitive_boundary);
-    NormalToGlobal(&flux);
-    return flux;
+    return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
   Flux GetFluxOnSmartBoundary(
       Conservative const& conservative_interior,
