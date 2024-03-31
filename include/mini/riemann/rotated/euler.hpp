@@ -101,24 +101,24 @@ class Euler {
     p[Y] = p_y;
     p[Z] = p_z;
   }
-  static Flux GetFlux(const Primitive& primitive) {
+  static Flux GetFlux(Primitive const &primitive) {
     return Base::GetFlux(primitive);
   }
-  static FluxMatrix GetFluxMatrix(Conservative const& conservative) {
+  static FluxMatrix GetFluxMatrix(Conservative const &conservative) {
     return Gas::GetFluxMatrix(conservative);
   }
-  Flux GetFluxOnSupersonicInlet(Conservative const& conservative) const {
-    auto primitive = Gas::ConservativeToPrimitive(conservative);
-    return GlobalPrimitiveToGlobalFlux(&primitive);
+  Flux GetFluxOnSupersonicInlet(Conservative const &conservative_exterior) const {
+    auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
+    return GlobalPrimitiveToGlobalFlux(&primitive_exterior);
   }
-  Flux GetFluxOnSupersonicOutlet(Conservative const& conservative) const {
-    auto primitive = Gas::ConservativeToPrimitive(conservative);
-    return GlobalPrimitiveToGlobalFlux(&primitive);
+  Flux GetFluxOnSupersonicOutlet(Conservative const &conservative_interior) const {
+    auto primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
+    return GlobalPrimitiveToGlobalFlux(&primitive_interior);
   }
 
   Flux GetFluxUpwind(
-      Conservative const& conservative__left,
-      Conservative const& conservative_right) const {
+      Conservative const &conservative__left,
+      Conservative const &conservative_right) const {
     auto primitive__left = Gas::ConservativeToPrimitive(conservative__left);
     auto primitive_right = Gas::ConservativeToPrimitive(conservative_right);
     GlobalToNormal(&primitive__left);
@@ -128,8 +128,8 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
-  Flux GetFluxOnInviscidWall(Conservative const& conservative) const {
-    auto primitive__left = Gas::ConservativeToPrimitive(conservative);
+  Flux GetFluxOnInviscidWall(Conservative const &conservative_interior) const {
+    auto primitive__left = Gas::ConservativeToPrimitive(conservative_interior);
     GlobalToNormal(&primitive__left);
     auto primitive_right = primitive__left;
     primitive_right.u() = -primitive__left.u();
@@ -144,8 +144,8 @@ class Euler {
    * 
    * See "2.7 Subsonic Inflow BC" in Carlson (2011).
    */
-  Flux GetFluxOnSubsonicInlet(Conservative const& conservative_interior,
-      Value const& given_value) const {
+  Flux GetFluxOnSubsonicInlet(Conservative const &conservative_interior,
+      Value const &given_value) const {
     Primitive primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
     auto c_interior = Gas::GetSpeedOfSound(primitive_interior);
     GlobalToNormal(&primitive_interior);
@@ -179,7 +179,7 @@ class Euler {
     auto mach_boundary = Gas::GetMachFromTemperature(T_boundary, T_total);
     auto p_total = given_value[0];
     auto p_boundary = Gas::TotalPressureToPressure(mach_boundary, p_total);
-    auto &primitive_boundary = primitive_interior;
+    auto &primitive_boundary = primitive_interior;  // reuse the memory
     primitive_boundary.p() = p_boundary;
     primitive_boundary.rho() = p_boundary / Gas::R() / T_boundary;
     auto speed_boundary = mach_boundary * c_boundary;
@@ -189,8 +189,8 @@ class Euler {
     return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
   Flux GetFluxOnSubsonicInletOld(
-      Conservative const& conservative_interior,
-      Conservative const& conservative_exterior) const {
+      Conservative const &conservative_interior,
+      Conservative const &conservative_exterior) const {
     auto primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
     auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
     Primitive primitive_boundary = primitive_exterior;
@@ -211,16 +211,18 @@ class Euler {
    * 
    * See "2.4 Pressure Outflow BC" in Carlson (2011).
    */
-  Flux GetFluxOnSubsonicOutlet(Conservative const& conservative_interior,
-      Value const& given_value) const {
-    Primitive primitive = Gas::ConservativeToPrimitive(conservative_interior);
-    auto RT = primitive.p() / primitive.rho();
-    primitive.p() = given_value[4];
-    primitive.rho() = primitive.p() / RT;
-    return GlobalPrimitiveToGlobalFlux(&primitive);
+  Flux GetFluxOnSubsonicOutlet(Conservative const &conservative_interior,
+      Value const &given_value) const {
+    Primitive primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
+    auto RT_interior = primitive_interior.p() / primitive_interior.rho();
+    auto &primitive_boundary = primitive_interior;  // reuse the memory
+    primitive_boundary.p() = given_value[4];
+    primitive_boundary.rho() = primitive_boundary.p() / RT_interior;
+    return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
-  Flux GetFluxOnSubsonicOutletOld(Conservative const& conservative_interior,
-      Conservative const& conservative_exterior) const {
+  Flux GetFluxOnSubsonicOutletOld(
+      Conservative const &conservative_interior,
+      Conservative const &conservative_exterior) const {
     auto primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
     auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
     Primitive primitive_boundary = primitive_interior;
@@ -234,8 +236,8 @@ class Euler {
     return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
   Flux GetFluxOnSmartBoundary(
-      Conservative const& conservative_interior,
-      Conservative const& conservative_exterior) const {
+      Conservative const &conservative_interior,
+      Conservative const &conservative_exterior) const {
     return GetFluxUpwind(conservative_interior, conservative_exterior);
     auto primitive = Gas::ConservativeToPrimitive(conservative_interior);
     Scalar a = Gas::GetSpeedOfSound(primitive);
@@ -265,7 +267,7 @@ class Euler {
 
  public:
   using Matrix = typename EigenMatrices::Mat5x5;
-  void UpdateEigenMatrices(const Conservative& big_u) {
+  void UpdateEigenMatrices(Conservative const &big_u) {
     eigen_matrices_ = EigenMatrices(big_u, a(), b(), c());
   }
   const Matrix& L() const {
