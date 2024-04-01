@@ -146,6 +146,9 @@ class Primitives : public Tuple<ScalarType, kDimensions> {
   Scalar w() const {
     return this->momentumZ();
   }
+  const Vector& velocity() const {
+    return this->momentum();
+  }
   Scalar p() const {
     return this->energy();
   }
@@ -163,6 +166,9 @@ class Primitives : public Tuple<ScalarType, kDimensions> {
   }
   Scalar& p() {
     return this->energy();
+  }
+  Vector& velocity() {
+    return this->momentum();
   }
   Scalar GetDynamicPressure() const {
     auto e_k = u()*u() + (kDimensions < 2 ? 0 : v()*v()

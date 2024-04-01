@@ -216,8 +216,8 @@ class Euler {
     auto primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
     auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
     Primitive primitive_boundary = primitive_exterior;
-    Scalar u_normal_exterior = primitive_exterior.momentum().dot(normal());
-    Scalar u_normal_interior = primitive_interior.momentum().dot(normal());
+    Scalar u_normal_exterior = primitive_exterior.velocity().dot(normal());
+    Scalar u_normal_interior = primitive_interior.velocity().dot(normal());
     Scalar u_normal_jump = u_normal_exterior - u_normal_interior;
     Scalar c_interior = Gas::GetSpeedOfSound(primitive_interior);
     Scalar rho_c_interior = primitive_interior.rho() * (u_normal_exterior > 0 ? c_interior : -c_interior);
@@ -225,7 +225,7 @@ class Euler {
         + rho_c_interior * u_normal_jump) * 0.5;
     Scalar p_jump = primitive_exterior.p() - primitive_boundary.p();
     primitive_boundary.rho() -= p_jump / (c_interior * c_interior);
-    primitive_boundary.momentum() += (p_jump / rho_c_interior) * normal();
+    primitive_boundary.velocity() += (p_jump / rho_c_interior) * normal();
     return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
   /**
@@ -264,9 +264,9 @@ class Euler {
     Scalar p_jump = primitive_interior.p() - primitive_boundary.p();
     Scalar c_interior = Gas::GetSpeedOfSound(primitive_interior);
     primitive_boundary.rho() -= p_jump / (c_interior * c_interior);
-    Scalar u_normal_interior = primitive_interior.momentum().dot(normal());
+    Scalar u_normal_interior = primitive_interior.velocity().dot(normal());
     Scalar rho_c_interior = primitive_interior.rho() * (u_normal_interior > 0 ? c_interior : -c_interior);
-    primitive_boundary.momentum() += (p_jump / rho_c_interior) * normal();
+    primitive_boundary.velocity() += (p_jump / rho_c_interior) * normal();
     return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
   }
   Flux GetFluxOnSmartBoundary(
@@ -275,7 +275,7 @@ class Euler {
     return GetFluxUpwind(conservative_interior, conservative_exterior);
     auto primitive = Gas::ConservativeToPrimitive(conservative_interior);
     Scalar a = Gas::GetSpeedOfSound(primitive);
-    Scalar u_normal = primitive.momentum().dot(normal());
+    Scalar u_normal = primitive.velocity().dot(normal());
     Flux flux;
     if (u_normal < 0) {  // inlet
       if (u_normal + a < 0) {

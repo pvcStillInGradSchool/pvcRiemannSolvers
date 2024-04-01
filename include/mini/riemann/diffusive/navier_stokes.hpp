@@ -71,11 +71,11 @@ class NavierStokes {
     auto &grad_rho_v = c_grad.col(V);
     auto &grad_rho_w = c_grad.col(W);
     p_grad.col(kMass) = grad_rho;
-    auto rho = p_val.mass();
-    auto u = p_val.momentumX();
-    auto v = p_val.momentumY();
-    auto w = p_val.momentumZ();
-    auto p = p_val.energy();
+    auto rho = p_val.rho();
+    auto u = p_val.u();
+    auto v = p_val.v();
+    auto w = p_val.w();
+    auto p = p_val.p();
     grad_u = (grad_rho_u - u * grad_rho) / rho;
     grad_v = (grad_rho_v - v * grad_rho) / rho;
     grad_w = (grad_rho_w - w * grad_rho) / rho;
@@ -122,7 +122,7 @@ class NavierStokes {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
     Tensor tau = GetViscousStressTensor(p_grad, c_val.mass());
     Scalar kappa = GetThermalConductivity(c_val.mass());
-    auto const &uvw = p_val.momentum();
+    auto const &uvw = p_val.velocity();
     auto const &grad_T = p_grad.col(kTemperature);
     flux->row(kEnergy) -= kappa * grad_T;
     auto &&flux_x = flux->col(X);
@@ -163,7 +163,7 @@ class NavierStokes {
       Vector const &normal, FluxVector *flux_vector) {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
     auto *flux = static_cast<Flux *>(flux_vector);
-    auto const &uvw = p_val.momentum();
+    auto const &uvw = p_val.velocity();
     auto const &grad_T = p_grad.col(kTemperature);
     _MinusViscousFlux(c_val.mass(), p_grad, normal, uvw,
         normal.dot(grad_T), flux);
@@ -176,8 +176,8 @@ class NavierStokes {
     auto [p_val, p_grad] = ConservativeToPrimitive(c_val, c_grad);
     auto *flux = static_cast<Flux *>(flux_vector);
     auto const &wall_value_ref = static_cast<Primitive const &>(wall_value);
-    auto const &uvw = wall_value_ref.momentum();
-    Vector penalty = value_penalty * (uvw - p_val.momentum());
+    auto const &uvw = wall_value_ref.velocity();
+    Vector penalty = value_penalty * (uvw - p_val.velocity());
     p_grad(X, U) += normal[X] * penalty[X];
     p_grad(X, V) += normal[X] * penalty[Y];
     p_grad(X, W) += normal[X] * penalty[Z];
@@ -196,8 +196,8 @@ class NavierStokes {
     auto *conservative = static_cast<Conservative *>(value);
     Scalar rho = conservative->mass();
     Scalar kinetic_old = conservative->momentum().squaredNorm() / rho;
-    Scalar kinetic_new = primitive.momentum().squaredNorm() * rho;
-    conservative->momentum() = rho * primitive.momentum();
+    Scalar kinetic_new = primitive.velocity().squaredNorm() * rho;
+    conservative->momentum() = rho * primitive.velocity();
     conservative->energy() += (kinetic_new - kinetic_old) / 2;
   }
 };
