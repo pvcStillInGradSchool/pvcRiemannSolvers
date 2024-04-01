@@ -67,6 +67,21 @@ class Euler {
     NormalToGlobal(&flux);
     return flux;
   }
+  Flux GlobalPrimitivePairToGlobalFlux(
+      Primitive *primitive__left,
+      Primitive *primitive_right) const {
+    GlobalToNormal(primitive__left);
+    GlobalToNormal(primitive_right);
+    return NormalPrimitivePairToGlobalFlux(*primitive__left, *primitive_right);
+  }
+  Flux NormalPrimitivePairToGlobalFlux(
+      Primitive const &primitive__left,
+      Primitive const &primitive_right) const {
+    auto flux = unrotated_euler_.GetFluxUpwind(
+        primitive__left, primitive_right);
+    NormalToGlobal(&flux);
+    return flux;
+  }
 
  public:
   void GlobalToNormal(Value* v) const requires(kDimensions == 2) {
@@ -107,6 +122,9 @@ class Euler {
   static FluxMatrix GetFluxMatrix(Conservative const &conservative) {
     return Gas::GetFluxMatrix(conservative);
   }
+
+// #define SOLVE_RIEMANN_PROBLEM_AT_BOUNDARY_
+
   Flux GetFluxOnSupersonicInlet(Conservative const &conservative_exterior) const {
     auto primitive_exterior = Gas::ConservativeToPrimitive(conservative_exterior);
     return GlobalPrimitiveToGlobalFlux(&primitive_exterior);
@@ -121,22 +139,14 @@ class Euler {
       Conservative const &conservative_right) const {
     auto primitive__left = Gas::ConservativeToPrimitive(conservative__left);
     auto primitive_right = Gas::ConservativeToPrimitive(conservative_right);
-    GlobalToNormal(&primitive__left);
-    GlobalToNormal(&primitive_right);
-    auto flux = unrotated_euler_.GetFluxUpwind(
-        primitive__left, primitive_right);
-    NormalToGlobal(&flux);
-    return flux;
+    return GlobalPrimitivePairToGlobalFlux(&primitive__left, &primitive_right);
   }
   Flux GetFluxOnInviscidWall(Conservative const &conservative_interior) const {
     auto primitive__left = Gas::ConservativeToPrimitive(conservative_interior);
     GlobalToNormal(&primitive__left);
     auto primitive_right = primitive__left;
     primitive_right.u() = -primitive__left.u();
-    auto flux = unrotated_euler_.GetFluxUpwind(
-        primitive__left, primitive_right);
-    NormalToGlobal(&flux);
-    return flux;
+    return NormalPrimitivePairToGlobalFlux(primitive__left, primitive_right);
   }
 
   /**
@@ -179,14 +189,26 @@ class Euler {
     auto mach_boundary = Gas::GetMachFromTemperature(T_boundary, T_total);
     auto p_total = given_value[0];
     auto p_boundary = Gas::TotalPressureToPressure(mach_boundary, p_total);
+    auto speed_boundary = mach_boundary * c_boundary;
+#ifdef SOLVE_RIEMANN_PROBLEM_AT_BOUNDARY_
+    Primitive primitive_boundary {
+        /* primitive_boundary.rho() = */p_boundary / Gas::R() / T_boundary,
+        /* primitive_boundary.u() = */u_cos * speed_boundary,
+        /* primitive_boundary.v() = */v_cos * speed_boundary,
+        /* primitive_boundary.w() = */w_cos * speed_boundary,
+        /* primitive_boundary.p() = */p_boundary };
+    GlobalToNormal(&primitive_boundary);
+    return NormalPrimitivePairToGlobalFlux(
+          primitive_interior, primitive_boundary);
+#else
     auto &primitive_boundary = primitive_interior;  // reuse the memory
     primitive_boundary.p() = p_boundary;
     primitive_boundary.rho() = p_boundary / Gas::R() / T_boundary;
-    auto speed_boundary = mach_boundary * c_boundary;
     primitive_boundary.u() = u_cos * speed_boundary;
     primitive_boundary.v() = v_cos * speed_boundary;
     primitive_boundary.w() = w_cos * speed_boundary;
     return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
+#endif
   }
   Flux GetFluxOnSubsonicInletOld(
       Conservative const &conservative_interior,
@@ -215,10 +237,22 @@ class Euler {
       Value const &given_value) const {
     Primitive primitive_interior = Gas::ConservativeToPrimitive(conservative_interior);
     auto RT_interior = primitive_interior.p() / primitive_interior.rho();
+    auto p_boundary = given_value[4];
+#ifdef SOLVE_RIEMANN_PROBLEM_AT_BOUNDARY_
+    Primitive primitive_boundary {
+        /* primitive_boundary.rho() = */p_boundary / RT_interior,
+        /* primitive_boundary.u() = */primitive_interior.u(),
+        /* primitive_boundary.v() = */primitive_interior.v(),
+        /* primitive_boundary.w() = */primitive_interior.w(),
+        /* primitive_boundary.p() = */p_boundary };
+    return GlobalPrimitivePairToGlobalFlux(
+        &primitive_interior, &primitive_boundary);
+#else
     auto &primitive_boundary = primitive_interior;  // reuse the memory
-    primitive_boundary.p() = given_value[4];
+    primitive_boundary.p() = p_boundary;
     primitive_boundary.rho() = primitive_boundary.p() / RT_interior;
     return GlobalPrimitiveToGlobalFlux(&primitive_boundary);
+#endif
   }
   Flux GetFluxOnSubsonicOutletOld(
       Conservative const &conservative_interior,
