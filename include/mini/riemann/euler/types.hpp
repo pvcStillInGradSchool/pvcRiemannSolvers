@@ -65,6 +65,37 @@ class Tuple : public algebra::Vector<ScalarType, kDimensions+2> {
   Scalar& energy() {
     return (*this)[kDimensions+1];
   }
+
+  static void VelocityToMomentum(Scalar rho, Tuple *tuple)
+      requires(kDimensions == 1) {
+    tuple->momentumX() *= rho;
+  }
+  static void MomentumToVelocity(Scalar rho, Tuple *tuple)
+      requires(kDimensions == 1) {
+    tuple->momentumX() /= rho;
+  }
+  static void VelocityToMomentum(Scalar rho, Tuple *tuple)
+      requires(kDimensions == 2) {
+    tuple->momentumX() *= rho;
+    tuple->momentumY() *= rho;
+  }
+  static void MomentumToVelocity(Scalar rho, Tuple *tuple)
+      requires(kDimensions == 2) {
+    tuple->momentumX() /= rho;
+    tuple->momentumY() /= rho;
+  }
+  static void VelocityToMomentum(Scalar rho, Tuple *tuple)
+      requires(kDimensions == 3) {
+    tuple->momentumX() *= rho;
+    tuple->momentumY() *= rho;
+    tuple->momentumZ() *= rho;
+  }
+  static void MomentumToVelocity(Scalar rho, Tuple *tuple)
+      requires(kDimensions == 3) {
+    tuple->momentumX() /= rho;
+    tuple->momentumY() /= rho;
+    tuple->momentumZ() /= rho;
+  }
 };
 
 template <std::floating_point ScalarType, int kDimensions>
@@ -248,38 +279,14 @@ class IdealGas {
     return GetMachFromTemperatureRatio(ratio);
   }
 
-  static void VelocityToMomentum(Scalar rho, Tuple<Scalar, 1> *tuple) {
-    tuple->momentumX() *= rho;
-  }
-  static void MomentumToVelocity(Scalar rho, Tuple<Scalar, 1> *tuple) {
-    tuple->momentumX() /= rho;
-  }
-  static void VelocityToMomentum(Scalar rho, Tuple<Scalar, 2> *tuple) {
-    tuple->momentumX() *= rho;
-    tuple->momentumY() *= rho;
-  }
-  static void MomentumToVelocity(Scalar rho, Tuple<Scalar, 2> *tuple) {
-    tuple->momentumX() /= rho;
-    tuple->momentumY() /= rho;
-  }
-  static void VelocityToMomentum(Scalar rho, Tuple<Scalar, 3> *tuple) {
-    tuple->momentumX() *= rho;
-    tuple->momentumY() *= rho;
-    tuple->momentumZ() *= rho;
-  }
-  static void MomentumToVelocity(Scalar rho, Tuple<Scalar, 3> *tuple) {
-    tuple->momentumX() /= rho;
-    tuple->momentumY() /= rho;
-    tuple->momentumZ() /= rho;
-  }
-
   template <int kDimensions>
   static Primitives<Scalar, kDimensions> ConservativeToPrimitive(
       Conservatives<Scalar, kDimensions> const &conservative) {
     auto primitive = Primitives<Scalar, kDimensions>(conservative);
     SetZeroIfNegative(&primitive);
     if (primitive.rho()) {
-      MomentumToVelocity(primitive.rho(), &primitive);
+      Tuple<Scalar, kDimensions>::MomentumToVelocity(primitive.rho(),
+          &primitive);
       primitive.energy() -= primitive.GetDynamicPressure();
       primitive.energy() *= GammaMinusOne();
       SetZeroIfNegative(&primitive);
@@ -290,7 +297,8 @@ class IdealGas {
   static Conservatives<Scalar, kDimensions> PrimitiveToConservative(
       Primitives<Scalar, kDimensions> const &primitive) {
     auto conservative = Conservatives<Scalar, kDimensions>(primitive);
-    VelocityToMomentum(primitive.rho(), &conservative);
+    Tuple<Scalar, kDimensions>::VelocityToMomentum(primitive.rho(),
+        &conservative);
     conservative.energy() *= OneOverGammaMinusOne();  // p / (gamma - 1)
     conservative.energy() += primitive.GetDynamicPressure();
     return conservative;
