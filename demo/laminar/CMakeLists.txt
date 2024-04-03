@@ -13,7 +13,7 @@ set (cases
   uniform
   diffusion
   cavity
-  plate
+  blasius
 )
 foreach (case ${cases})
   set(target demo_laminar_${case})
