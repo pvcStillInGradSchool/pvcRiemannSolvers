@@ -95,6 +95,9 @@ if __name__ == '__main__':
     gmsh.model.addPhysicalGroup(dim=2, tags=[53], name="Wall")
     gmsh.model.addPhysicalGroup(dim=3, tags=[1,2,3], name="Fluid")
 
+    gmsh.model.mesh.setRecombine(2, 1)
+    gmsh.model.mesh.setRecombine(2, 2)
+    gmsh.model.mesh.recombine()
     gmsh.model.mesh.generate(3)
 
     # Launch the GUI to see the model:
