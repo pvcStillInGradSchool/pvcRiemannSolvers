@@ -25,7 +25,6 @@ struct Legendre {
   static const Array weights;
   static constexpr int Q = N;
 
- private:
   static Array BuildPoints() requires(Q == 1) {
     return { 0.0 };
   }

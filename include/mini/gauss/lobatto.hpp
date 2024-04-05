@@ -25,7 +25,6 @@ struct Lobatto {
   static const Array weights;
   static constexpr int Q = N;
 
- private:
   static Array BuildPoints() requires(Q == 2) {
     return { -1.0, +1.0 };
   }
