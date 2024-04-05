@@ -14,6 +14,7 @@ set (cases
   diffusion
   cavity
   blasius
+  karman
 )
 foreach (case ${cases})
   set(target demo_laminar_${case})
