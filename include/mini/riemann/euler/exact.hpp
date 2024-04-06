@@ -12,39 +12,6 @@ namespace mini {
 namespace riemann {
 namespace euler {
 
-template <class Primitive, int kDimensions>
-class PassiveScalars;
-
-template <class Primitive>
-class PassiveScalars<Primitive, 1> {
- public:
-  using Scalar = typename Primitive::Scalar;
-  static void Set(Primitive *state, Scalar star_u,
-      const Primitive &left, const Primitive &right) {
-  }
-};
-
-template <class Primitive>
-class PassiveScalars<Primitive, 2> {
- public:
-  using Scalar = typename Primitive::Scalar;
-  static void Set(Primitive *state, Scalar star_u,
-      const Primitive &left, const Primitive &right) {
-    state->v() = star_u > 0 ? left.v() : right.v();
-  }
-};
-
-template <class Primitive>
-class PassiveScalars<Primitive, 3> {
- public:
-  using Scalar = typename Primitive::Scalar;
-  static void Set(Primitive *state, Scalar star_u,
-      const Primitive &left, const Primitive &right) {
-    state->v() = star_u > 0 ? left.v() : right.v();
-    state->w() = star_u > 0 ? left.w() : right.w();
-  }
-};
-
 template <class G, int D>
 class Exact {
  public:
@@ -70,8 +37,7 @@ class Exact {
       const Primitive& right) const {
     auto *non_const_this = const_cast<Exact *>(this);
     auto state = non_const_this->GetPrimitiveUpwind(left, right);
-    PassiveScalars<Primitive, kDimensions>::Set(&state,
-        this->star_u, left, right);
+    SetPassiveScalars(left, right, &state);
     return state;
   }
   // Get F on t-Axis
@@ -80,6 +46,18 @@ class Exact {
   }
 
  private:
+  void SetPassiveScalars(const Primitive &left, const Primitive &right,
+      Primitive *state) const requires(kDimensions == 1) {
+  }
+  void SetPassiveScalars(const Primitive &left, const Primitive &right,
+      Primitive *state) const requires(kDimensions == 2) {
+    state->v() = star_u > 0 ? left.v() : right.v();
+  }
+  void SetPassiveScalars(const Primitive &left, const Primitive &right,
+      Primitive *state) const requires(kDimensions == 3) {
+    state->v() = star_u > 0 ? left.v() : right.v();
+    state->w() = star_u > 0 ? left.w() : right.w();
+  }
   // Get U on t-Axis
   Primitive GetPrimitiveUpwind(const Primitive& left,
       const Primitive& right) {
