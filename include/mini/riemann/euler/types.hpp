@@ -158,11 +158,17 @@ class Primitives : public Tuple<ScalarType, kDimensions> {
   Vector& velocity() {
     return this->momentum();
   }
+  Scalar GetKineticEnergy() const requires(kDimensions == 1) {
+    return 0.5 * (u() * u());
+  }
+  Scalar GetKineticEnergy() const requires(kDimensions == 2) {
+    return 0.5 * (u() * u() + v() * v());
+  }
+  Scalar GetKineticEnergy() const requires(kDimensions == 3) {
+    return 0.5 * (u() * u() + v() * v() + w() * w());
+  }
   Scalar GetDynamicPressure() const {
-    auto e_k = u()*u() + (kDimensions < 2 ? 0 : v()*v()
-        + (kDimensions < 3 ? 0 : w()*w()));
-    e_k *= 0.5;
-    return rho() * e_k;
+    return rho() * GetKineticEnergy();
   }
 };
 

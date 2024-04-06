@@ -47,7 +47,7 @@ class Ausm<GasType, 1> {
     double a = Gas::GetSpeedOfSound(state);
     double mach = state.u() / a;
     double mach_positive = mach;
-    double h = a * a / Gas::GammaMinusOne() + state.u() * state.u() * 0.5;
+    double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = {1, state.u(), h};
     if (mach >= -1 && mach <= 1) {
       mach_positive = (mach + 1) * (mach + 1) * 0.25;
@@ -66,7 +66,7 @@ class Ausm<GasType, 1> {
     double a = Gas::GetSpeedOfSound(state);
     double mach = state.u() / a;
     double mach_negative = mach;
-    double h = a * a / Gas::GammaMinusOne() + state.u() * state.u() * 0.5;
+    double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = {1, state.u(), h};
     if (mach >= -1 && mach <= 1) {
       mach_negative = - (mach - 1) * (mach - 1) * 0.25;
@@ -112,8 +112,7 @@ class Ausm<GasType, 2> {
     double a = Gas::GetSpeedOfSound(state);
     double mach = state.u() / a;
     double mach_positive = mach;
-    double h = a * a / Gas::GammaMinusOne() + state.u() * state.u() * 0.5 +
-                                              state.v() * state.v() * 0.5;
+    double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = {1, state.u(), state.v(), h};
     if (mach >= -1 && mach <= 1) {
       mach_positive = (mach + 1) * (mach + 1) * 0.25;
@@ -132,8 +131,7 @@ class Ausm<GasType, 2> {
     double a = Gas::GetSpeedOfSound(state);
     double mach = state.u() / a;
     double mach_negative = mach;
-    double h = a * a / Gas::GammaMinusOne() + state.u() * state.u() * 0.5 +
-                                              state.v() * state.v() * 0.5;
+    double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = {1, state.u(), state.v(), h};
     if (mach >= -1 && mach <= 1) {
       mach_negative = - (mach - 1) * (mach - 1) * 0.25;
@@ -180,8 +178,7 @@ class Ausm<GasType, 3> {
     double a = Gas::GetSpeedOfSound(state);
     double mach = state.u() / a;
     double mach_positive = mach;
-    double h = a * a / Gas::GammaMinusOne() + state.u() * state.u() * 0.5
-              + state.v() * state.v() * 0.5 + state.w() * state.w() * 0.5;
+    double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = {1, state.u(), state.v(), state.w(), h};
     if (mach >= -1 && mach <= 1) {
       mach_positive = (mach + 1) * (mach + 1) * 0.25;
@@ -200,8 +197,7 @@ class Ausm<GasType, 3> {
     double a = Gas::GetSpeedOfSound(state);
     double mach = state.u() / a;
     double mach_negative = mach;
-    double h = a * a / Gas::GammaMinusOne() + state.u() * state.u() * 0.5
-              + state.v() * state.v() * 0.5 + state.w() * state.w() * 0.5;
+    double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = {1, state.u(), state.v(), state.w(), h};
     if (mach >= -1 && mach <= 1) {
       mach_negative = - (mach - 1) * (mach - 1) * 0.25;
