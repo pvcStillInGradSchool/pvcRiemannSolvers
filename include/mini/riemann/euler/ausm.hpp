@@ -28,29 +28,8 @@ class Ausm {
   using Speed = Scalar;
   // Get F on T Axia
   Flux GetFluxUpwind(const Primitive& left, const Primitive& right) {
-    auto positive = [](Scalar *mach_normal, Scalar *p_normal){
-      Scalar mach = *mach_normal;
-      if (mach >= -1 && mach <= 1) {
-        auto half_mach_plus = (1 + mach) * 0.5;
-        *mach_normal = half_mach_plus * half_mach_plus;
-        *p_normal *= half_mach_plus;
-      } else if (mach < -1) {
-        *mach_normal = 0.0;
-        *p_normal = 0.0;
-      }
-    };
-    auto negative = [](Scalar *mach_normal, Scalar *p_normal){
-      Scalar mach = *mach_normal;
-      if (mach >= -1 && mach <= 1) {
-        auto half_mach_minus = (1 - mach) * 0.5;
-        *mach_normal = -half_mach_minus * half_mach_minus;
-        *p_normal *= half_mach_minus;
-      } else if (mach > 1) {
-        *mach_normal = 0.0;
-        *p_normal = 0.0;
-      }
-    };
-    return GetSignedFlux(left, positive) + GetSignedFlux(right, negative);
+    constexpr bool kPositive = false, kNegative = true;
+    return GetSignedFlux<kPositive>(left) + GetSignedFlux<kNegative>(right);
   }
   // Get F of U
   static Flux GetFlux(const Primitive& state) {
@@ -70,16 +49,24 @@ class Ausm {
       requires(kDimensions == 3) {
     return { 1, primitive.u(), primitive.v(), primitive.w(), enthalpy };
   }
-  template <class SignedOperation>
-  Flux GetSignedFlux(const Primitive& state, SignedOperation &&operation) {
+  template <bool kNegative>
+  Flux GetSignedFlux(const Primitive& state) {
     double a = Gas::GetSpeedOfSound(state);
     double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = BuildFlux(state, h);
-    double mach_normal = state.u() / a;
-    double p_normal = state.p();
-    operation(&mach_normal, &p_normal);
-    flux *= state.rho() * a * mach_normal;
-    flux.momentumX() += p_normal;
+    double mach = state.u() / a;
+    double p = state.p();
+    auto add_sign = [](Scalar x) { return kNegative ? -x : x; };
+    auto signed_mach = (1 + add_sign(mach)) * 0.5;
+    if (mach >= -1 && mach <= 1) {
+      mach = add_sign(signed_mach * signed_mach);
+      p *= signed_mach;
+    } else if (signed_mach < 0) {
+      mach = 0.0;
+      p = 0.0;
+    }
+    flux *= state.rho() * a * mach;
+    flux.momentumX() += p;
     return flux;
   }
 };
