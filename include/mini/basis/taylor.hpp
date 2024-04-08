@@ -25,11 +25,11 @@ namespace basis {
 template <std::floating_point Scalar, int kDimensions, int kDegrees>
 class Taylor;
 
-template <std::floating_point Scalar, int kDegree>
-class Taylor<Scalar, 1, kDegree> {
+template <std::floating_point Scalar, int kDegrees>
+class Taylor<Scalar, 1, kDegrees> {
  public:
   // the maximum degree of members in this basis
-  static constexpr int P = kDegree;
+  static constexpr int P = kDegrees;
 
   // the number of terms in this basis
   static constexpr int N = P + 1;
