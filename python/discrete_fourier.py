@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 import spatial
 import riemann
 import temporal
+from plot_settings import line_styles
 
 
 class DiscreteFourierAnalysis:
@@ -75,15 +76,6 @@ class DiscreteFourierAnalysis:
         return reduced_wavenumbers, modified_wavenumbers
 
     def plot(self, schemes, labels, xticks_ticks, xticks_labels):
-        linestyles = [
-            ('densely dotted',        (0, (1, 1))),
-            ('long dash with offset', (5, (10, 3))),
-            ('dashed',                (0, (5, 5))),
-            ('densely dashed',        (0, (5, 1))),
-            ('dashdotted',            (0, (3, 5, 1, 5))),
-            ('densely dashdotted',    (0, (3, 1, 1, 1))),
-            ('dashdotdotted',         (0, (3, 5, 1, 5, 1, 5))),
-            ('densely dashdotdotted', (0, (3, 1, 1, 1, 1, 1)))]
         kh_max = xticks_ticks[-1]
         plt.figure()
         plt.subplot(2,1,1)
@@ -104,10 +96,10 @@ class DiscreteFourierAnalysis:
             # modified /= (i + 2)
             plt.subplot(2,1,1)
             plt.plot(reduced, modified.real, label=labels[i],
-                linestyle=linestyles[i][1])
+                linestyle=line_styles[i][1])
             plt.subplot(2,1,2)
             plt.plot(reduced, modified.imag, label=labels[i],
-                linestyle=linestyles[i][1])
+                linestyle=line_styles[i][1])
         plt.subplot(2,1,1)
         plt.legend(loc='upper left')
         plt.subplot(2,1,2)

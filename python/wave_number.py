@@ -8,6 +8,7 @@ import concept
 import spatial
 import riemann
 from polynomial import Huynh, Vincent
+from plot_settings import line_styles
 
 
 class WaveNumberDisplayer:
@@ -217,19 +218,6 @@ class WaveNumberDisplayer:
         print("  n_sample =", n_sample)
         print("  compressed =", compressed)
         print("  name =", name)
-        linestyles = [
-            ('dotted',                (0, (1, 1))),
-            ('loosely dotted',        (0, (1, 4))),
-            ('dashed',                (0, (4, 4))),
-            ('densely dashed',        (0, (4, 1))),
-            ('loosely dashed',        (0, (4, 8))),
-            ('long dash with offset', (4, (8, 2))),
-            ('dashdotted',            (0, (2, 4, 1, 4))),
-            ('densely dashdotted',    (0, (2, 1, 1, 1))),
-            ('loosely dashdotted',    (0, (2, 8, 1, 8))),
-            ('dashdotdotted',         (0, (2, 4, 1, 4, 1, 4))),
-            ('densely dashdotdotted', (0, (2, 1, 1, 1, 1, 1))),
-            ('loosely dashdotdotted', (0, (2, 8, 1, 8, 1, 8))),]
         if compressed:
             divisor = r'$(N\pi)$'
         else:
@@ -257,11 +245,11 @@ class WaveNumberDisplayer:
                     plt.subplot(2,1,1)
                     plt.plot(sampled_wavenumbers/scale,
                              physical_eigvals.real/scale,
-                             label=scheme.name(), linestyle=linestyles[i][1])
+                             label=scheme.name(), linestyle=line_styles[i][1])
                     plt.subplot(2,1,2)
                     plt.plot(sampled_wavenumbers/scale,
                              physical_eigvals.imag/scale,
-                             label=scheme.name(), linestyle=linestyles[i][1])
+                             label=scheme.name(), linestyle=line_styles[i][1])
                     i += 1
         degree = np.max(degrees)
         kh_max = (degree + 1) * np.pi
@@ -292,19 +280,6 @@ class WaveNumberDisplayer:
         print("  n_sample =", n_sample)
         print("  compressed =", compressed)
         print("  name =", name)
-        linestyles = [
-            ('dotted',                (0, (1, 1))),
-            ('loosely dotted',        (0, (1, 4))),
-            ('dashed',                (0, (4, 4))),
-            ('densely dashed',        (0, (4, 1))),
-            ('loosely dashed',        (0, (4, 8))),
-            ('long dash with offset', (4, (8, 2))),
-            ('dashdotted',            (0, (2, 4, 1, 4))),
-            ('densely dashdotted',    (0, (2, 1, 1, 1))),
-            ('loosely dashdotted',    (0, (2, 8, 1, 8))),
-            ('dashdotdotted',         (0, (2, 4, 1, 4, 1, 4))),
-            ('densely dashdotdotted', (0, (2, 1, 1, 1, 1, 1))),
-            ('loosely dashdotdotted', (0, (2, 8, 1, 8, 1, 8))),]
         if compressed:
             divisor = r'$(N\pi)$'
         else:
@@ -344,12 +319,12 @@ class WaveNumberDisplayer:
                 plt.plot(sampled_wavenumbers/scale,
                           physical_eigvals.real/scale,
                           label=self._riemann.diffusive_name(),
-                          linestyle=linestyles[i][1])
+                          linestyle=line_styles[i][1])
                 plt.subplot(2,1,2)
                 plt.plot(sampled_wavenumbers/scale,
                           physical_eigvals.imag/scale,
                           label=self._riemann.diffusive_name(),
-                          linestyle=linestyles[i][1])
+                          linestyle=line_styles[i][1])
                 i += 1
         riemann.Solver._beta_0, riemann.Solver._beta_1 = beta_backup
         print(self._riemann.equation()._b,

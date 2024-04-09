@@ -8,7 +8,7 @@ import equation
 import riemann
 import spatial
 import temporal
-
+from plot_settings import line_styles
 
 
 class LinearAdvection(object):
@@ -54,11 +54,6 @@ class LinearAdvection(object):
         return dg_solution, fr_solution
 
     def animate(self, t_start: float, t_stop: float,  n_step: int):
-        linestyles = [
-            ('densely dotted',        (0, (1, 1))),
-            ('long dash with offset', (5, (10, 3))),
-            ('densely dashdotted',    (0, (3, 1, 1, 1))),
-        ]
         delta_x = self._delta_x
         delta_t = (t_stop - t_start) / n_step
         cfl = self.a_max() * delta_t / delta_x
@@ -75,9 +70,9 @@ class LinearAdvection(object):
         exact_points = np.linspace(self._x_left, self._x_right, 1001)
         approx_points = np.linspace(self._x_left, self._x_right, 101)
         expect_line, = plt.plot([], [], 'r-', label='Exact')
-        dg_line, = plt.plot([], [], linestyle=linestyles[0][1],
+        dg_line, = plt.plot([], [], linestyle=line_styles[0][1],
             label=f'LegendreDG{self._degree+1}')
-        fr_line, = plt.plot([], [], linestyle=linestyles[1][1],
+        fr_line, = plt.plot([], [], linestyle=line_styles[1][1],
             label=f'LagrangeFR{self._degree+1}')
         # initialize animation
         def init_func():
