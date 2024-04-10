@@ -55,16 +55,17 @@ class ProjectionWrapper;
 /**
  * @brief A vector-valued function projected onto an given orthonormal basis.
  * 
- * @tparam Scalar the data type of scalar components
+ * @tparam S the data type of scalar components
  * @tparam kDimensions the dimension of the underlying physical space
  * @tparam kDegrees the degree of completeness
  * @tparam kComponents the number of function components
  */
-template <std::floating_point Scalar, int kDimensions, int kDegrees,
+template <std::floating_point S, int kDimensions, int kDegrees,
     int kComponents>
 class Projection {
  public:
   static constexpr bool kLocal = false;
+  using Scalar = S;
   using Wrapper = ProjectionWrapper<Scalar, kDimensions, kDegrees, kComponents>;
   using Basis = basis::OrthoNormal<Scalar, kDimensions, kDegrees>;
   using Taylor = typename Basis::Taylor;
@@ -189,16 +190,17 @@ class Projection {
  * 
  * The object is light-weighted in the sense that it holds a pointer to a `basis::OrthoNormal` object and assumes the basis does not change in the lifetime of this object.
  * 
- * @tparam Scalar the data type of scalar components
+ * @tparam S the data type of scalar components
  * @tparam kDimensions the dimension of the underlying physical space
  * @tparam kDegrees the degree of completeness
  * @tparam kComponents the number of function components
  */
-template <std::floating_point Scalar, int kDimensions, int kDegrees,
+template <std::floating_point S, int kDimensions, int kDegrees,
     int kComponents>
 class ProjectionWrapper {
  public:
-  using Base = Projection<Scalar, kDimensions, kDegrees, kComponents>;
+  using Base = Projection<S, kDimensions, kDegrees, kComponents>;
+  using Scalar = typename Base::Scalar;
   using Basis = typename Base::Basis;
   using Taylor = typename Base::Taylor;
   static constexpr int N = Base::N;

@@ -13,15 +13,97 @@
 #include <utility>
 #include <vector>
 
+#include "mini/basis/taylor.hpp"
+
 namespace mini {
 namespace limiter {
 namespace weno {
+
+template <std::floating_point Scalar, int kComponents, int kDegrees>
+class Smoothness {
+  static constexpr int X{1}, Y{2}, Z{3};
+  static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
+  static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
+  static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
+
+ public:
+  static constexpr int K = kComponents;
+  static constexpr int N = basis::Taylor<Scalar, 3, kDegrees>::N;
+  using MatKx1 = algebra::Matrix<Scalar, K, 1>;
+  using MatKxN = algebra::Matrix<Scalar, K, N>;
+
+  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
+      requires(kDegrees == 0) {
+    MatKx1 smoothness; smoothness.setZero();
+    return smoothness;
+  }
+
+  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
+      requires(kDegrees == 1) {
+    MatKx1 smoothness = integral.col(X);
+    smoothness += integral.col(Y);
+    smoothness += integral.col(Z);
+    return smoothness;
+  }
+
+  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
+      requires(kDegrees == 2) {
+    auto w1  // weight of 1st-order partial derivatives
+        = std::pow(volume, 2./3-1);
+    MatKx1 smoothness = integral.col(X);
+    smoothness += integral.col(Y);
+    smoothness += integral.col(Z);
+    smoothness *= w1;
+    auto w2  // weight of 2nd-order partial derivatives
+        = std::pow(volume, 4./3-1);
+    smoothness += integral.col(XX) * w2;
+    smoothness += integral.col(XY) * w2;
+    smoothness += integral.col(XZ) * w2;
+    smoothness += integral.col(YY) * w2;
+    smoothness += integral.col(YZ) * w2;
+    smoothness += integral.col(ZZ) * w2;
+    return smoothness;
+  }
+  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
+      requires(kDegrees == 3) {
+    auto w1  // weight of 1st-order partial derivatives
+        = std::pow(volume, 2./3-1);
+    MatKx1 smoothness = integral.col(X);
+    smoothness += integral.col(Y);
+    smoothness += integral.col(Z);
+    smoothness *= w1;
+    auto w2  // weight of 2nd-order partial derivatives
+        = std::pow(volume, 4./3-1);
+    smoothness += integral.col(XX) * w2;
+    smoothness += integral.col(XY) * w2;
+    smoothness += integral.col(XZ) * w2;
+    smoothness += integral.col(YY) * w2;
+    smoothness += integral.col(YZ) * w2;
+    smoothness += integral.col(ZZ) * w2;
+    auto w3  // weight of 3rd-order partial derivatives
+        = volume;  // = std::pow(volume, 6./3-1);
+    smoothness += integral.col(XXX) * w3;
+    smoothness += integral.col(XXY) * w3;
+    smoothness += integral.col(XXZ) * w3;
+    smoothness += integral.col(XYY) * w3;
+    smoothness += integral.col(XYZ) * w3;
+    smoothness += integral.col(XZZ) * w3;
+    smoothness += integral.col(YYY) * w3;
+    smoothness += integral.col(YYZ) * w3;
+    smoothness += integral.col(YZZ) * w3;
+    smoothness += integral.col(ZZZ) * w3;
+    return smoothness;
+  }
+};
 
 template <typename Projection>
 auto GetSmoothness(const Projection &proj) {
   using Coeff = typename Projection::Coeff;
   using Global = typename Projection::Global;
   using Taylor = typename Projection::Taylor;
+  using Scalar = typename Projection::Scalar;
+  constexpr int K = Projection::K;
+  constexpr int P = Projection::P;
   auto mat_pdv_func = [&proj](Global const &xyz) {
     auto local = xyz; local -= proj.center();
     auto mat_pdv = Taylor::GetPdvValue(local, proj.GetCoeffOnTaylorBasis());
@@ -30,7 +112,7 @@ auto GetSmoothness(const Projection &proj) {
   };
   auto integral = gauss::Integrate(mat_pdv_func, proj.gauss());
   auto volume = proj.basis().Measure();
-  return Taylor::GetSmoothness(integral, volume);
+  return Smoothness<Scalar, K, P>::GetSmoothness(integral, volume);
 }
 
 template <typename Cell>

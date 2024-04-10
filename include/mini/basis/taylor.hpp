@@ -150,15 +150,6 @@ class Taylor<Scalar, 3, kDegrees> {
     return res;
   }
 
-  template <int K>
-  static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
-      requires(kDegrees == 0) {
-    using MatKx1 = algebra::Matrix<Scalar, K, 1>;
-    MatKx1 smoothness; smoothness.setZero();
-    return smoothness;
-  }
-
   static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 1) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     MatNx1 col = { 1, x, y, z };
@@ -183,17 +174,6 @@ class Taylor<Scalar, 3, kDegrees> {
     // pdv_z
     res.col(2) = coeff.col(Z);
     return res;
-  }
-
-  template <int K>
-  static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
-      requires(kDegrees == 1) {
-    using MatKx1 = algebra::Matrix<Scalar, K, 1>;
-    MatKx1 smoothness = integral.col(X);
-    smoothness += integral.col(Y);
-    smoothness += integral.col(Z);
-    return smoothness;
   }
 
   static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 2) {
@@ -263,29 +243,6 @@ class Taylor<Scalar, 3, kDegrees> {
     return res;
   }
 
-  template <int K>
-  static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
-      requires(kDegrees == 2) {
-    using MatKx1 = algebra::Matrix<Scalar, K, 1>;
-    auto w1  // weight of 1st-order partial derivatives
-        = std::pow(volume, 2./3-1);
-    MatKx1 smoothness = integral.col(X);
-    smoothness += integral.col(Y);
-    smoothness += integral.col(Z);
-    smoothness *= w1;
-    auto w2  // weight of 2nd-order partial derivatives
-        = std::pow(volume, 4./3-1);
-    smoothness += integral.col(XX) * w2;
-    smoothness += integral.col(XY) * w2;
-    smoothness += integral.col(XZ) * w2;
-    smoothness += integral.col(YY) * w2;
-    smoothness += integral.col(YZ) * w2;
-    smoothness += integral.col(ZZ) * w2;
-    return smoothness;
-  }
-
- public:
   static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
@@ -445,40 +402,6 @@ class Taylor<Scalar, 3, kDegrees> {
     res.col(2) += coeff.col(YZZ) * (2 * yz);
     res.col(2) += coeff.col(ZZZ) * (3 * zz);
     return res;
-  }
-
-  template <int K>
-  static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
-      requires(kDegrees == 3) {
-    using MatKx1 = algebra::Matrix<Scalar, K, 1>;
-    auto w1  // weight of 1st-order partial derivatives
-        = std::pow(volume, 2./3-1);
-    MatKx1 smoothness = integral.col(X);
-    smoothness += integral.col(Y);
-    smoothness += integral.col(Z);
-    smoothness *= w1;
-    auto w2  // weight of 2nd-order partial derivatives
-        = std::pow(volume, 4./3-1);
-    smoothness += integral.col(XX) * w2;
-    smoothness += integral.col(XY) * w2;
-    smoothness += integral.col(XZ) * w2;
-    smoothness += integral.col(YY) * w2;
-    smoothness += integral.col(YZ) * w2;
-    smoothness += integral.col(ZZ) * w2;
-    auto w3  // weight of 3rd-order partial derivatives
-        = volume;  // = std::pow(volume, 6./3-1);
-    smoothness += integral.col(XXX) * w3;
-    smoothness += integral.col(XXY) * w3;
-    smoothness += integral.col(XXZ) * w3;
-    smoothness += integral.col(XYY) * w3;
-    smoothness += integral.col(XYZ) * w3;
-    smoothness += integral.col(XZZ) * w3;
-    smoothness += integral.col(YYY) * w3;
-    smoothness += integral.col(YYZ) * w3;
-    smoothness += integral.col(YZZ) * w3;
-    smoothness += integral.col(ZZZ) * w3;
-    return smoothness;
   }
 };
 
