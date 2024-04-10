@@ -114,62 +114,62 @@ class Taylor<Scalar, 2, kDegrees> {
   }
 };
 
-template <std::floating_point Scalar>
-class Taylor<Scalar, 3, 0> {
+template <std::floating_point Scalar, int kDegrees>
+class Taylor<Scalar, 3, kDegrees> {
+  static constexpr int GetN() {
+    return ((kDegrees + 3) * (kDegrees + 2) * (kDegrees + 1)) / 6;
+  }
+
  public:
-  static constexpr int N = 1;  // the number of components
+  static constexpr int N = GetN();  // the number of components
   using MatNx1 = algebra::Matrix<Scalar, N, 1>;
+  using MatNx3 = algebra::Matrix<Scalar, N, 3>;
   using Coord = algebra::Matrix<Scalar, 3, 1>;
 
-  static MatNx1 GetValue(const Coord &xyz) {
+  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 0) {
     MatNx1 col; col(0, 0) = 1;
     return col;
   }
 
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff) {
+  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+      requires(kDegrees == 0) {
     MatKxN res; res.setZero();
     return res;
   }
 
   template <int K>
   static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) {
+      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 0) {
     algebra::Matrix<Scalar, K, 3> res; res.setZero();
     return res;
   }
 
   template <int K>
   static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume) {
+      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
+      requires(kDegrees == 0) {
     using MatKx1 = algebra::Matrix<Scalar, K, 1>;
     MatKx1 smoothness; smoothness.setZero();
     return smoothness;
   }
-};
 
-template <std::floating_point Scalar>
-class Taylor<Scalar, 3, 1> {
- public:
-  static constexpr int N = 4;  // the number of components
-  using MatNx1 = algebra::Matrix<Scalar, N, 1>;
-  using MatNx3 = algebra::Matrix<Scalar, N, 3>;
-  using Coord = algebra::Matrix<Scalar, 3, 1>;
-
-  static MatNx1 GetValue(const Coord &xyz) {
+  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 1) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     MatNx1 col = { 1, x, y, z };
     return col;
   }
+
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff) {
+  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+      requires(kDegrees == 1) {
     MatKxN res = coeff; res.col(0).setZero();
     return res;
   }
 
   template <int K>
   static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) {
+      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 1) {
     algebra::Matrix<Scalar, K, 3> res;
     // pdv_x
     res.col(0) = coeff.col(1);
@@ -182,30 +182,24 @@ class Taylor<Scalar, 3, 1> {
 
   template <int K>
   static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume) {
+      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
+      requires(kDegrees == 1) {
     using MatKx1 = algebra::Matrix<Scalar, K, 1>;
     MatKx1 smoothness = integral.col(1);
     smoothness += integral.col(2);
     smoothness += integral.col(3);
     return smoothness;
   }
-};
 
-template <std::floating_point Scalar>
-class Taylor<Scalar, 3, 2> {
- public:
-  static constexpr int N = 10;  // the number of components
-  using MatNx1 = algebra::Matrix<Scalar, N, 1>;
-  using MatNx3 = algebra::Matrix<Scalar, N, 3>;
-  using Coord = algebra::Matrix<Scalar, 3, 1>;
-
-  static MatNx1 GetValue(const Coord &xyz) {
+  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 2) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     MatNx1 col = { 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
     return col;
   }
+
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff) {
+  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+      requires(kDegrees == 2) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     MatKxN res = coeff; res.col(0).setZero();
     // pdv_x
@@ -243,7 +237,7 @@ class Taylor<Scalar, 3, 2> {
 
   template <int K>
   static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) {
+      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 2) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     algebra::Matrix<Scalar, K, 3> res;
     // pdv_x
@@ -266,7 +260,8 @@ class Taylor<Scalar, 3, 2> {
 
   template <int K>
   static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume) {
+      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
+      requires(kDegrees == 2) {
     using MatKx1 = algebra::Matrix<Scalar, K, 1>;
     auto w1  // weight of 1st-order partial derivatives
         = std::pow(volume, 2./3-1);
@@ -284,22 +279,15 @@ class Taylor<Scalar, 3, 2> {
     smoothness += integral.col(9) * w2;
     return smoothness;
   }
-};
 
-template <std::floating_point Scalar>
-class Taylor<Scalar, 3, 3> {
+ private:
   static constexpr int X{1}, Y{2}, Z{3};
   static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
   static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
   static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
 
  public:
-  static constexpr int N = 20;  // the number of components
-  using MatNx1 = algebra::Matrix<Scalar, N, 1>;
-  using MatNx3 = algebra::Matrix<Scalar, N, 3>;
-  using Coord = algebra::Matrix<Scalar, 3, 1>;
-
-  static MatNx1 GetValue(const Coord &xyz) {
+  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
     MatNx1 col = { 1, x, y, z, xx, xy, xz, yy, yz, zz,
@@ -307,8 +295,10 @@ class Taylor<Scalar, 3, 3> {
         y * yy, y * yz, y * zz, z * zz };
     return col;
   }
+
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff) {
+  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+      requires(kDegrees == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
     MatKxN res = coeff; res.col(0).setZero();
@@ -418,7 +408,7 @@ class Taylor<Scalar, 3, 3> {
 
   template <int K>
   static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) {
+      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
     algebra::Matrix<Scalar, K, 3> res;
@@ -463,7 +453,8 @@ class Taylor<Scalar, 3, 3> {
 
   template <int K>
   static auto GetSmoothness(
-      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume) {
+      const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
+      requires(kDegrees == 3) {
     using MatKx1 = algebra::Matrix<Scalar, K, 1>;
     auto w1  // weight of 1st-order partial derivatives
         = std::pow(volume, 2./3-1);
