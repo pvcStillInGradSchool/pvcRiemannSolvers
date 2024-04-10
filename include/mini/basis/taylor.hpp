@@ -120,6 +120,11 @@ class Taylor<Scalar, 3, kDegrees> {
     return ((kDegrees + 3) * (kDegrees + 2) * (kDegrees + 1)) / 6;
   }
 
+  static constexpr int X{1}, Y{2}, Z{3};
+  static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
+  static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
+  static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
+
  public:
   static constexpr int N = GetN();  // the number of components
   using MatNx1 = algebra::Matrix<Scalar, N, 1>;
@@ -172,11 +177,11 @@ class Taylor<Scalar, 3, kDegrees> {
       const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 1) {
     algebra::Matrix<Scalar, K, 3> res;
     // pdv_x
-    res.col(0) = coeff.col(1);
+    res.col(0) = coeff.col(X);
     // pdv_y
-    res.col(1) = coeff.col(2);
+    res.col(1) = coeff.col(Y);
     // pdv_z
-    res.col(2) = coeff.col(3);
+    res.col(2) = coeff.col(Z);
     return res;
   }
 
@@ -185,9 +190,9 @@ class Taylor<Scalar, 3, kDegrees> {
       const algebra::Matrix<Scalar, K, N> &integral, Scalar volume)
       requires(kDegrees == 1) {
     using MatKx1 = algebra::Matrix<Scalar, K, 1>;
-    MatKx1 smoothness = integral.col(1);
-    smoothness += integral.col(2);
-    smoothness += integral.col(3);
+    MatKx1 smoothness = integral.col(X);
+    smoothness += integral.col(Y);
+    smoothness += integral.col(Z);
     return smoothness;
   }
 
@@ -203,35 +208,35 @@ class Taylor<Scalar, 3, kDegrees> {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     MatKxN res = coeff; res.col(0).setZero();
     // pdv_x
-    assert(res.col(1) == coeff.col(1));
-    res.col(1) += coeff.col(4) * (2 * x);
-    res.col(1) += coeff.col(5) * y;
-    res.col(1) += coeff.col(6) * z;
+    assert(res.col(X) == coeff.col(X));
+    res.col(X) += coeff.col(XX) * (2 * x);
+    res.col(X) += coeff.col(XY) * y;
+    res.col(X) += coeff.col(XZ) * z;
     // pdv_y
-    assert(res.col(2) == coeff.col(2));
-    res.col(2) += coeff.col(5) * x;
-    res.col(2) += coeff.col(7) * (2 * y);
-    res.col(2) += coeff.col(8) * z;
+    assert(res.col(Y) == coeff.col(Y));
+    res.col(Y) += coeff.col(XY) * x;
+    res.col(Y) += coeff.col(YY) * (2 * y);
+    res.col(Y) += coeff.col(YZ) * z;
     // pdv_z
-    assert(res.col(3) == coeff.col(3));
-    res.col(3) += coeff.col(6) * x;
-    res.col(3) += coeff.col(8) * y;
-    res.col(3) += coeff.col(9) * (2 * z);
+    assert(res.col(Z) == coeff.col(Z));
+    res.col(Z) += coeff.col(XZ) * x;
+    res.col(Z) += coeff.col(YZ) * y;
+    res.col(Z) += coeff.col(ZZ) * (2 * z);
     // pdv_xx
-    res.col(4) += coeff.col(4);
-    assert(res.col(4) == coeff.col(4) * 2);
+    res.col(XX) += coeff.col(XX);
+    assert(res.col(XX) == coeff.col(XX) * 2);
     // pdv_xy
-    assert(res.col(5) == coeff.col(5));
+    assert(res.col(XY) == coeff.col(XY));
     // pdv_xz
-    assert(res.col(6) == coeff.col(6));
+    assert(res.col(XZ) == coeff.col(XZ));
     // pdv_yy
-    res.col(7) += coeff.col(7);
-    assert(res.col(7) == coeff.col(7) * 2);
+    res.col(YY) += coeff.col(YY);
+    assert(res.col(YY) == coeff.col(YY) * 2);
     // pdv_yz
-    assert(res.col(8) == coeff.col(8));
+    assert(res.col(YZ) == coeff.col(YZ));
     // pdv_zz
-    res.col(9) += coeff.col(9);
-    assert(res.col(9) == coeff.col(9) * 2);
+    res.col(ZZ) += coeff.col(ZZ);
+    assert(res.col(ZZ) == coeff.col(ZZ) * 2);
     return res;
   }
 
@@ -241,20 +246,20 @@ class Taylor<Scalar, 3, kDegrees> {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     algebra::Matrix<Scalar, K, 3> res;
     // pdv_x
-    res.col(0) = coeff.col(1);
-    res.col(0) += coeff.col(4) * (2 * x);
-    res.col(0) += coeff.col(5) * y;
-    res.col(0) += coeff.col(6) * z;
+    res.col(0) = coeff.col(X);
+    res.col(0) += coeff.col(XX) * (2 * x);
+    res.col(0) += coeff.col(XY) * y;
+    res.col(0) += coeff.col(XZ) * z;
     // pdv_y
-    res.col(1) = coeff.col(2);
-    res.col(1) += coeff.col(5) * x;
-    res.col(1) += coeff.col(7) * (2 * y);
-    res.col(1) += coeff.col(8) * z;
+    res.col(1) = coeff.col(Y);
+    res.col(1) += coeff.col(XY) * x;
+    res.col(1) += coeff.col(YY) * (2 * y);
+    res.col(1) += coeff.col(YZ) * z;
     // pdv_z
-    res.col(2) = coeff.col(3);
-    res.col(2) += coeff.col(6) * x;
-    res.col(2) += coeff.col(8) * y;
-    res.col(2) += coeff.col(9) * (2 * z);
+    res.col(2) = coeff.col(Z);
+    res.col(2) += coeff.col(XZ) * x;
+    res.col(2) += coeff.col(YZ) * y;
+    res.col(2) += coeff.col(ZZ) * (2 * z);
     return res;
   }
 
@@ -265,26 +270,20 @@ class Taylor<Scalar, 3, kDegrees> {
     using MatKx1 = algebra::Matrix<Scalar, K, 1>;
     auto w1  // weight of 1st-order partial derivatives
         = std::pow(volume, 2./3-1);
-    MatKx1 smoothness = integral.col(1);
-    smoothness += integral.col(2);
-    smoothness += integral.col(3);
+    MatKx1 smoothness = integral.col(X);
+    smoothness += integral.col(Y);
+    smoothness += integral.col(Z);
     smoothness *= w1;
     auto w2  // weight of 2nd-order partial derivatives
         = std::pow(volume, 4./3-1);
-    smoothness += integral.col(4) * w2;
-    smoothness += integral.col(5) * w2;
-    smoothness += integral.col(6) * w2;
-    smoothness += integral.col(7) * w2;
-    smoothness += integral.col(8) * w2;
-    smoothness += integral.col(9) * w2;
+    smoothness += integral.col(XX) * w2;
+    smoothness += integral.col(XY) * w2;
+    smoothness += integral.col(XZ) * w2;
+    smoothness += integral.col(YY) * w2;
+    smoothness += integral.col(YZ) * w2;
+    smoothness += integral.col(ZZ) * w2;
     return smoothness;
   }
-
- private:
-  static constexpr int X{1}, Y{2}, Z{3};
-  static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
-  static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
-  static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
 
  public:
   static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 3) {
@@ -412,42 +411,39 @@ class Taylor<Scalar, 3, kDegrees> {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
     algebra::Matrix<Scalar, K, 3> res;
-    int i = 0;
     // pdv_x
-    res.col(i) = coeff.col(X);
-    res.col(i) += coeff.col(XX) * (2 * x);
-    res.col(i) += coeff.col(XY) * y;
-    res.col(i) += coeff.col(XZ) * z;
-    res.col(i) += coeff.col(XXX) * (3 * xx);
-    res.col(i) += coeff.col(XXY) * (2 * xy);
-    res.col(i) += coeff.col(XXZ) * (2 * xz);
-    res.col(i) += coeff.col(XYY) * yy;
-    res.col(i) += coeff.col(XYZ) * yz;
-    res.col(i) += coeff.col(XZZ) * zz;
+    res.col(0) = coeff.col(X);
+    res.col(0) += coeff.col(XX) * (2 * x);
+    res.col(0) += coeff.col(XY) * y;
+    res.col(0) += coeff.col(XZ) * z;
+    res.col(0) += coeff.col(XXX) * (3 * xx);
+    res.col(0) += coeff.col(XXY) * (2 * xy);
+    res.col(0) += coeff.col(XXZ) * (2 * xz);
+    res.col(0) += coeff.col(XYY) * yy;
+    res.col(0) += coeff.col(XYZ) * yz;
+    res.col(0) += coeff.col(XZZ) * zz;
     // pdv_y
-    i++;
-    res.col(i) = coeff.col(Y);
-    res.col(i) += coeff.col(XY) * x;
-    res.col(i) += coeff.col(YY) * (2 * y);
-    res.col(i) += coeff.col(YZ) * z;
-    res.col(i) += coeff.col(XXY) * xx;
-    res.col(i) += coeff.col(XYZ) * xz;
-    res.col(i) += coeff.col(XYY) * (2 * xy);
-    res.col(i) += coeff.col(YYY) * (3 * yy);
-    res.col(i) += coeff.col(YYZ) * (2 * yz);
-    res.col(i) += coeff.col(YZZ) * zz;
+    res.col(1) = coeff.col(Y);
+    res.col(1) += coeff.col(XY) * x;
+    res.col(1) += coeff.col(YY) * (2 * y);
+    res.col(1) += coeff.col(YZ) * z;
+    res.col(1) += coeff.col(XXY) * xx;
+    res.col(1) += coeff.col(XYZ) * xz;
+    res.col(1) += coeff.col(XYY) * (2 * xy);
+    res.col(1) += coeff.col(YYY) * (3 * yy);
+    res.col(1) += coeff.col(YYZ) * (2 * yz);
+    res.col(1) += coeff.col(YZZ) * zz;
     // pdv_z
-    i++;
-    res.col(i) = coeff.col(Z);
-    res.col(i) += coeff.col(XZ) * x;
-    res.col(i) += coeff.col(YZ) * y;
-    res.col(i) += coeff.col(ZZ) * (2 * z);
-    res.col(i) += coeff.col(XXZ) * xx;
-    res.col(i) += coeff.col(XYZ) * xy;
-    res.col(i) += coeff.col(XZZ) * (2 * xz);
-    res.col(i) += coeff.col(YYZ) * yy;
-    res.col(i) += coeff.col(YZZ) * (2 * yz);
-    res.col(i) += coeff.col(ZZZ) * (3 * zz);
+    res.col(2) = coeff.col(Z);
+    res.col(2) += coeff.col(XZ) * x;
+    res.col(2) += coeff.col(YZ) * y;
+    res.col(2) += coeff.col(ZZ) * (2 * z);
+    res.col(2) += coeff.col(XXZ) * xx;
+    res.col(2) += coeff.col(XYZ) * xy;
+    res.col(2) += coeff.col(XZZ) * (2 * xz);
+    res.col(2) += coeff.col(YYZ) * yy;
+    res.col(2) += coeff.col(YZZ) * (2 * yz);
+    res.col(2) += coeff.col(ZZZ) * (3 * zz);
     return res;
   }
 
