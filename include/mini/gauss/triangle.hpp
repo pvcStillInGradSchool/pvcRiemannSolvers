@@ -118,33 +118,24 @@ const std::array<Scalar, kPoints>
 Triangle<Scalar, kPhysDim, kPoints>::local_weights_
     = _TriangleBuilder<Scalar, kPhysDim, kPoints>::BuildLocalWeights();
 
-template <std::floating_point Scalar, int kPhysDim>
-class _TriangleBuilder<Scalar, kPhysDim, 1> {
-  static constexpr int kPoints = 1;
+template <std::floating_point Scalar, int kPhysDim, int kPoints>
+class _TriangleBuilder {
   using Local =
       typename Triangle<Scalar, kPhysDim, kPoints>::Local;
 
  public:
-  static constexpr auto BuildLocalCoords() {
+  static constexpr auto BuildLocalCoords() requires(kPoints == 1) {
     Scalar a = .3333333333333333333333333333333333;
     std::array<Local, kPoints> points;
     points[0] = { a, a };
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
+  static constexpr auto BuildLocalWeights() requires(kPoints == 1) {
     std::array<Scalar, kPoints> weights{ 1.0 / 2.0 };
     return weights;
   }
-};
 
-template <std::floating_point Scalar, int kPhysDim>
-class _TriangleBuilder<Scalar, kPhysDim, 3> {
-  static constexpr int kPoints = 3;
-  using Local =
-      typename Triangle<Scalar, kPhysDim, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
+  static constexpr auto BuildLocalCoords() requires(kPoints == 3) {
     std::array<Local, kPoints> points;
     int q = 0;
     // the only S21 orbits
@@ -158,7 +149,7 @@ class _TriangleBuilder<Scalar, kPhysDim, 3> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
+  static constexpr auto BuildLocalWeights() requires(kPoints == 3) {
     std::array<Scalar, kPoints> weights;
     for (int q = 0; q < 3; ++q)
       weights[q] = 1./3.;
@@ -166,16 +157,8 @@ class _TriangleBuilder<Scalar, kPhysDim, 3> {
       weights[q] /= 2.0;
     return weights;
   }
-};
 
-template <std::floating_point Scalar, int kPhysDim>
-class _TriangleBuilder<Scalar, kPhysDim, 6> {
-  static constexpr int kPoints = 6;
-  using Local =
-      typename Triangle<Scalar, kPhysDim, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
+  static constexpr auto BuildLocalCoords() requires(kPoints == 6) {
     std::array<Local, kPoints> points;
     int q = 0;
     // the two S21 orbits
@@ -191,7 +174,7 @@ class _TriangleBuilder<Scalar, kPhysDim, 6> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
+  static constexpr auto BuildLocalWeights() requires(kPoints == 6) {
     std::array<Scalar, kPoints> weights;
     for (int q = 0; q < 3; ++q)
       weights[q] = .22338158967801146569500700843312280;
@@ -201,16 +184,8 @@ class _TriangleBuilder<Scalar, kPhysDim, 6> {
       weights[q] /= 2.0;
     return weights;
   }
-};
 
-template <std::floating_point Scalar, int kPhysDim>
-class _TriangleBuilder<Scalar, kPhysDim, 12> {
-  static constexpr int kPoints = 12;
-  using Local =
-      typename Triangle<Scalar, kPhysDim, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
+  static constexpr auto BuildLocalCoords() requires(kPoints == 12) {
     std::array<Local, kPoints> points;
     int q = 0;
     // the two S21 orbits
@@ -237,7 +212,7 @@ class _TriangleBuilder<Scalar, kPhysDim, 12> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
+  static constexpr auto BuildLocalWeights() requires(kPoints == 12) {
     std::array<Scalar, kPoints> weights;
     for (int q = 0; q < 3; ++q)
       weights[q] = .05084490637020681692093680910686898;
@@ -249,16 +224,8 @@ class _TriangleBuilder<Scalar, kPhysDim, 12> {
       weights[q] /= 2.0;
     return weights;
   }
-};
 
-template <std::floating_point Scalar, int kPhysDim>
-class _TriangleBuilder<Scalar, kPhysDim, 16> {
-  static constexpr int kPoints = 16;
-  using Local =
-      typename Triangle<Scalar, kPhysDim, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
+  static constexpr auto BuildLocalCoords() requires(kPoints == 16) {
     std::array<Local, kPoints> points;
     int q = 0;
     {  // the only S3 orbit
@@ -290,7 +257,7 @@ class _TriangleBuilder<Scalar, kPhysDim, 16> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
+  static constexpr auto BuildLocalWeights() requires(kPoints == 16) {
     std::array<Scalar, kPoints> weights;
     for (int q = 0; q < 1; ++q)
       weights[q] = .14431560767778716825109111048906462;
