@@ -32,7 +32,7 @@ class Wedge : public Cell<Scalar> {
   static constexpr int kPoints = Qt * Qz;
 
  public:
-  using GaussT = _TriangleBuilder<Scalar, 2, Qt>;
+  using GaussT = Triangle<Scalar, 2, Qt>;
   using GaussZ = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qz>, Lobatto<Scalar, Qz> >;
   using Lagrange = geometry::Wedge<Scalar>;
