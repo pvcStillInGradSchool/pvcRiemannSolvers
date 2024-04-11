@@ -18,35 +18,19 @@ namespace gauss {
  * @tparam kBeta  Power of \f$ (1+\xi) \f$ in the integrand.
  */
 template <std::floating_point Scalar, int Q, int kAlpha, int kBeta>
-struct Jacobi;
-
-template <std::floating_point Scalar>
-struct Jacobi<Scalar, 1, 2, 0> {
-  using Array = std::array<Scalar, 1>;
+struct Jacobi {
+  using Array = std::array<Scalar, Q>;
   static const Array points;
   static const Array weights;
-  static Array BuildPoints() {
+
+  static Array BuildPoints() requires(Q == 1 && kAlpha == 2 && kBeta == 0) {
     return { -0.5 };
   }
-  static Array BuildWeights() {
+  static Array BuildWeights() requires(Q == 1 && kAlpha == 2 && kBeta == 0) {
     return { 2.6666666666666665 };
   }
-};
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 1, 2, 0>::Array const
-Jacobi<Scalar, 1, 2, 0>::points =
-Jacobi<Scalar, 1, 2, 0>::BuildPoints();
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 1, 2, 0>::Array const
-Jacobi<Scalar, 1, 2, 0>::weights =
-Jacobi<Scalar, 1, 2, 0>::BuildWeights();
 
-template <std::floating_point Scalar>
-struct Jacobi<Scalar, 2, 2, 0> {
-  using Array = std::array<Scalar, 2>;
-  static const Array points;
-  static const Array weights;
-  static Array BuildPoints() {
+  static Array BuildPoints() requires(Q == 2 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.754970354689117,
       0.08830368802245062
@@ -58,51 +42,23 @@ struct Jacobi<Scalar, 2, 2, 0> {
       0.8062870566386026
     };
   }
-};
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 2, 2, 0>::Array const
-Jacobi<Scalar, 2, 2, 0>::points =
-Jacobi<Scalar, 2, 2, 0>::BuildPoints();
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 2, 2, 0>::Array const
-Jacobi<Scalar, 2, 2, 0>::weights =
-Jacobi<Scalar, 2, 2, 0>::BuildWeights();
 
-template <std::floating_point Scalar>
-struct Jacobi<Scalar, 3, 2, 0> {
-  using Array = std::array<Scalar, 3>;
-  static const Array points;
-  static const Array weights;
-  static Array BuildPoints() {
+  static Array BuildPoints() requires(Q == 3 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.8540119518537006,
       -0.30599246792329643,
       0.41000441977699675
     };
   }
-  static Array BuildWeights() {
+  static Array BuildWeights() requires(Q == 3 && kAlpha == 2 && kBeta == 0) {
     return {
       1.2570908885190917,
       1.169970154078929,
       0.23960562406864572
     };
   }
-};
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 3, 2, 0>::Array const
-Jacobi<Scalar, 3, 2, 0>::points =
-Jacobi<Scalar, 3, 2, 0>::BuildPoints();
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 3, 2, 0>::Array const
-Jacobi<Scalar, 3, 2, 0>::weights =
-Jacobi<Scalar, 3, 2, 0>::BuildWeights();
 
-template <std::floating_point Scalar>
-struct Jacobi<Scalar, 4, 2, 0> {
-  using Array = std::array<Scalar, 4>;
-  static const Array points;
-  static const Array weights;
-  static Array BuildPoints() {
+  static Array BuildPoints() requires(Q == 4 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.9029989011060054,
       -0.5227985248962753,
@@ -110,7 +66,7 @@ struct Jacobi<Scalar, 4, 2, 0> {
       0.5917028357935458
     };
   }
-  static Array BuildWeights() {
+  static Array BuildWeights() requires(Q == 4 && kAlpha == 2 && kBeta == 0) {
     return {
       0.8871073248902219,
       1.1476703183937156,
@@ -118,22 +74,8 @@ struct Jacobi<Scalar, 4, 2, 0> {
       0.08281792599934465
     };
   }
-};
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 4, 2, 0>::Array const
-Jacobi<Scalar, 4, 2, 0>::points =
-Jacobi<Scalar, 4, 2, 0>::BuildPoints();
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 4, 2, 0>::Array const
-Jacobi<Scalar, 4, 2, 0>::weights =
-Jacobi<Scalar, 4, 2, 0>::BuildWeights();
 
-template <std::floating_point Scalar>
-struct Jacobi<Scalar, 5, 2, 0> {
-  using Array = std::array<Scalar, 5>;
-  static const Array points;
-  static const Array weights;
-  static Array BuildPoints() {
+  static Array BuildPoints() requires(Q == 5 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.9308421201635698,
       -0.6530393584566087,
@@ -142,7 +84,7 @@ struct Jacobi<Scalar, 5, 2, 0> {
       0.7021084258940329
     };
   }
-  static Array BuildWeights() {
+  static Array BuildWeights() requires(Q == 5 && kAlpha == 2 && kBeta == 0) {
     return {
       0.6541182742861681,
       1.009591695199291,
@@ -152,14 +94,13 @@ struct Jacobi<Scalar, 5, 2, 0> {
     };
   }
 };
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 5, 2, 0>::Array const
-Jacobi<Scalar, 5, 2, 0>::points =
-Jacobi<Scalar, 5, 2, 0>::BuildPoints();
-template <std::floating_point Scalar>
-typename Jacobi<Scalar, 5, 2, 0>::Array const
-Jacobi<Scalar, 5, 2, 0>::weights =
-Jacobi<Scalar, 5, 2, 0>::BuildWeights();
+template <std::floating_point Scalar, int Q, int A, int B>
+typename Jacobi<Scalar, Q, A, B>::Array const
+Jacobi<Scalar, Q, A, B>::points = Jacobi<Scalar, Q, A, B>::BuildPoints();
+
+template <std::floating_point Scalar, int Q, int A, int B>
+typename Jacobi<Scalar, Q, A, B>::Array const
+Jacobi<Scalar, Q, A, B>::weights = Jacobi<Scalar, Q, A, B>::BuildWeights();
 
 }  // namespace gauss
 }  // namespace mini
