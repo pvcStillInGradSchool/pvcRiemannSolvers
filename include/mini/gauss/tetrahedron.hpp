@@ -22,10 +22,13 @@ namespace gauss {
  * @brief Numerical integrators on tetrahedral elements.
  * 
  * @tparam Scalar  Type of scalar variables.
- * @tparam kPoints  Number of qudrature points.
+ * @tparam kPoints  Number of qudrature points, which must be chosen from { 1, 4, 14, 15, 24, 46 }.
  */
 template <std::floating_point Scalar, int kPoints>
 class Tetrahedron : public Cell<Scalar> {
+  static_assert(kPoints == 1 || kPoints == 4 || kPoints == 14 || kPoints == 15
+      || kPoints == 24 || kPoints == 46);
+
  public:
   using Lagrange = geometry::Tetrahedron<Scalar>;
   using Real = typename Lagrange::Real;

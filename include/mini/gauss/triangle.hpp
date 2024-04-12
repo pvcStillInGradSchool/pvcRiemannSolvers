@@ -22,10 +22,12 @@ namespace gauss {
  * 
  * @tparam Scalar  Type of scalar variables.
  * @tparam kPhysDim  Dimension of the physical space.
- * @tparam kPoints  Number of qudrature points.
+ * @tparam kPoints  Number of qudrature points, which must be chosen from { 1, 3, 6, 12, 16 }.
  */
 template <std::floating_point Scalar, int kPhysDim, int kPoints>
 class Triangle : public Face<Scalar, kPhysDim> {
+  static_assert(kPoints == 1 || kPoints == 3 || kPoints == 6 || kPoints == 12
+      || kPoints == 16);
   static constexpr int D = kPhysDim;
 
  public:

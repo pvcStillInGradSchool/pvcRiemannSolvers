@@ -15,15 +15,17 @@ namespace gauss {
  * @brief Gauss--Lobatto quadrature rules, i.e. \f$ \int_{-1}^{1} f(\xi) \,\mathrm{d}\xi \approx \sum_{q=1}^{Q} w_q f(\xi_q) \f$, in which \f$ \xi_1 = -1 \f$ and \f$ \xi_Q = +1 \f$.
  * 
  * @tparam T  Type of scalar variables.
- * @tparam N  Nnumber of quadrature points.
+ * @tparam N  Nnumber of quadrature points, which must be chosen from { 2, 3, 4, 5, 6 }.
  */
-template <std::floating_point T = double, int N = 4>
+template <std::floating_point T, int N>
 struct Lobatto {
   using Scalar = T;
   using Array = std::array<T, N>;
   static const Array points;
   static const Array weights;
   static constexpr int Q = N;
+
+  static_assert(2 <= Q && Q <= 6);
 
   static Array BuildPoints() requires(Q == 2) {
     return { -1.0, +1.0 };

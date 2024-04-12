@@ -13,7 +13,7 @@ namespace gauss {
  * @brief Gauss--Jacobi quadrature rules, i.e. \f$ \int_{-1}^{1} f(\xi) (1-\xi)^\alpha (1+\xi)^\beta \,\mathrm{d}\xi \approx \sum_{q=1}^{Q} w_q f(\xi_q) \f$
  * 
  * @tparam Scalar  Type of scalar variables.
- * @tparam Q  Nnumber of quadrature points.
+ * @tparam Q  Nnumber of quadrature points, which must be chosen from { 1, 2, 3, 4, 5 }.
  * @tparam kAlpha  Power of \f$ (1-\xi) \f$ in the integrand.
  * @tparam kBeta  Power of \f$ (1+\xi) \f$ in the integrand.
  */
@@ -22,6 +22,8 @@ struct Jacobi {
   using Array = std::array<Scalar, Q>;
   static const Array points;
   static const Array weights;
+
+  static_assert(1 <= Q && Q <= 5);
 
   static Array BuildPoints() requires(Q == 1 && kAlpha == 2 && kBeta == 0) {
     return { -0.5 };
