@@ -92,28 +92,11 @@ class Tetrahedron : public Cell<Scalar> {
   Scalar volume() const final {
     return volume_;
   }
-};
 
-template <std::floating_point Scalar, int kPoints>
-class _TetrahedronBuilder;
-
-template <std::floating_point Scalar, int kPoints>
-const std::array<typename Tetrahedron<Scalar, kPoints>::Local, kPoints>
-Tetrahedron<Scalar, kPoints>::local_coords_
-    = _TetrahedronBuilder<Scalar, kPoints>::BuildLocalCoords();
-
-template <std::floating_point Scalar, int kPoints>
-const std::array<Scalar, kPoints>
-Tetrahedron<Scalar, kPoints>::local_weights_
-    = _TetrahedronBuilder<Scalar, kPoints>::BuildLocalWeights();
-
-template <std::floating_point Scalar, int kPoints>
-class _TetrahedronBuilder {
-  using Local = typename Tetrahedron<Scalar, kPoints>::Local;
+ public:
   using Points = std::array<Local, kPoints>;
   using Weights = std::array<Scalar, kPoints>;
 
- public:
   static constexpr Points BuildLocalCoords() requires(kPoints == 1) {
     Scalar a = 0.25;
     Points points;
@@ -352,6 +335,15 @@ class _TetrahedronBuilder {
     return weights;
   }
 };
+template <std::floating_point Scalar, int kPoints>
+typename Tetrahedron<Scalar, kPoints>::Points const
+Tetrahedron<Scalar, kPoints>::local_coords_
+    = Tetrahedron<Scalar, kPoints>::BuildLocalCoords();
+
+template <std::floating_point Scalar, int kPoints>
+typename Tetrahedron<Scalar, kPoints>::Weights const
+Tetrahedron<Scalar, kPoints>::local_weights_
+    = Tetrahedron<Scalar, kPoints>::BuildLocalWeights();
 
 }  // namespace gauss
 }  // namespace mini
