@@ -107,32 +107,26 @@ const std::array<Scalar, kPoints>
 Tetrahedron<Scalar, kPoints>::local_weights_
     = _TetrahedronBuilder<Scalar, kPoints>::BuildLocalWeights();
 
-template <std::floating_point Scalar>
-class _TetrahedronBuilder<Scalar, 1> {
-  static constexpr int kPoints = 1;
+template <std::floating_point Scalar, int kPoints>
+class _TetrahedronBuilder {
   using Local = typename Tetrahedron<Scalar, kPoints>::Local;
+  using Points = std::array<Local, kPoints>;
+  using Weights = std::array<Scalar, kPoints>;
 
  public:
-  static constexpr auto BuildLocalCoords() {
+  static constexpr Points BuildLocalCoords() requires(kPoints == 1) {
     Scalar a = 0.25;
-    std::array<Local, kPoints> points;
+    Points points;
     points[0] = { a, a, a };
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
-    std::array<Scalar, kPoints> weights{ 1.0 / 6.0 };
+  static constexpr Weights BuildLocalWeights() requires(kPoints == 1) {
+    Weights weights{ 1.0 / 6.0 };
     return weights;
   }
-};
 
-template <std::floating_point Scalar>
-class _TetrahedronBuilder<Scalar, 4> {
-  static constexpr int kPoints = 4;
-  using Local = typename Tetrahedron<Scalar, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
-    std::array<Local, kPoints> points;
+  static constexpr Points BuildLocalCoords() requires(kPoints == 4) {
+    Points points;
     int q = 0;
     // the only S31 orbit
     Scalar a = 0.13819660112501051517954131656343619;
@@ -144,22 +138,15 @@ class _TetrahedronBuilder<Scalar, 4> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
-    std::array<Scalar, kPoints> weights;
+  static constexpr Weights BuildLocalWeights() requires(kPoints == 4) {
+    Weights weights;
     for (int q = 0; q < kPoints; ++q)
       weights[q] = 0.25 / 6.0;
     return weights;
   }
-};
 
-template <std::floating_point Scalar>
-class _TetrahedronBuilder<Scalar, 14> {
-  static constexpr int kPoints = 14;
-  using Local = typename Tetrahedron<Scalar, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
-    std::array<Local, kPoints> points;
+  static constexpr Points BuildLocalCoords() requires(kPoints == 14) {
+    Points points;
     int q = 0;
     // the two S31 orbits
     Scalar a_s31[] = {
@@ -185,8 +172,8 @@ class _TetrahedronBuilder<Scalar, 14> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
-    std::array<Scalar, kPoints> weights;
+  static constexpr Weights BuildLocalWeights() requires(kPoints == 14) {
+    Weights weights;
     for (int q = 0; q < 4; ++q)
       weights[q] = 0.11268792571801585079918565233328633;
     for (int q = 4; q < 8; ++q)
@@ -197,16 +184,9 @@ class _TetrahedronBuilder<Scalar, 14> {
       weights[q] /= 6.0;
     return weights;
   }
-};
 
-template <std::floating_point Scalar>
-class _TetrahedronBuilder<Scalar, 15> {
-  static constexpr int kPoints = 15;
-  using Local = typename Tetrahedron<Scalar, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
-    std::array<Local, kPoints> points;
+  static constexpr Points BuildLocalCoords() requires(kPoints == 15) {
+    Points points;
     int q = 0;
     {  // the only S4 orbit
       Scalar a = 0.25;
@@ -236,8 +216,8 @@ class _TetrahedronBuilder<Scalar, 15> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
-    std::array<Scalar, kPoints> weights;
+  static constexpr Weights BuildLocalWeights() requires(kPoints == 15) {
+    Weights weights;
     for (int q = 0; q < 1; ++q)
       weights[q] = 16.0 / 135.0;
     for (int q = 1; q < 5; ++q)
@@ -250,16 +230,9 @@ class _TetrahedronBuilder<Scalar, 15> {
       weights[q] /= 6.0;
     return weights;
   }
-};
 
-template <std::floating_point Scalar>
-class _TetrahedronBuilder<Scalar, 24> {
-  static constexpr int kPoints = 24;
-  using Local = typename Tetrahedron<Scalar, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
-    std::array<Local, kPoints> points;
+  static constexpr Points BuildLocalCoords() requires(kPoints == 24) {
+    Points points;
     int q = 0;
     // the three S31 orbits
     Scalar a_s31[] = {
@@ -293,8 +266,8 @@ class _TetrahedronBuilder<Scalar, 24> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
-    std::array<Scalar, kPoints> weights;
+  static constexpr Weights BuildLocalWeights() requires(kPoints == 24) {
+    Weights weights;
     for (int q = 0; q < 4; ++q)
       weights[q] = 0.03992275025816749209969062755747998;
     for (int q = 4; q < 8; ++q)
@@ -307,16 +280,9 @@ class _TetrahedronBuilder<Scalar, 24> {
       weights[q] /= 6.0;
     return weights;
   }
-};
 
-template <std::floating_point Scalar>
-class _TetrahedronBuilder<Scalar, 46> {
-  static constexpr int kPoints = 46;
-  using Local = typename Tetrahedron<Scalar, kPoints>::Local;
-
- public:
-  static constexpr auto BuildLocalCoords() {
-    std::array<Local, kPoints> points;
+  static constexpr Points BuildLocalCoords() requires(kPoints == 46) {
+    Points points;
     int q = 0;
     // the four S31 orbits
     Scalar a_s31[] = {
@@ -365,8 +331,8 @@ class _TetrahedronBuilder<Scalar, 46> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr auto BuildLocalWeights() {
-    std::array<Scalar, kPoints> weights;
+  static constexpr Weights BuildLocalWeights() requires(kPoints == 46) {
+    Weights weights;
     for (int q = 0; q < 4; ++q)
       weights[q] = .00639714777990232132145142033517302;
     for (int q = 4; q < 8; ++q)
