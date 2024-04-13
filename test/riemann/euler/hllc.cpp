@@ -19,10 +19,10 @@ double ratio(double x, double y) {
   return std::abs(x - y) / std::max(std::abs(x), std::abs(y));
 }
 
-class TestHllc : public ::testing::Test {
+class TestHartenLaxLeerContact : public ::testing::Test {
  protected:
   using Gas = IdealGas<double, 1.4>;
-  using Solver = Hllc<Gas, 1>;
+  using Solver = HartenLaxLeerContact<Gas, 1>;
   using Primitive = Solver::Primitive;
   using Flux = Solver::Flux;
   Solver solver;
@@ -32,7 +32,7 @@ class TestHllc : public ::testing::Test {
     EXPECT_LE(ratio(lhs.momentumX(), rhs.momentumX()), 0.25);
   }
 };
-TEST_F(TestHllc, TestConsistency) {
+TEST_F(TestHartenLaxLeerContact, TestConsistency) {
   auto rho{0.1}, u{0.2}, p{0.3};
   auto flux = Flux{rho * u, rho * u * u + p, u};
   flux.energy() *= p * Gas::GammaOverGammaMinusOne() + 0.5 * rho * u * u;
@@ -42,32 +42,32 @@ TEST_F(TestHllc, TestConsistency) {
   Flux diff = solver.GetFluxUpwind(state, state) - solver.GetFlux(state);
   EXPECT_NEAR(diff.norm(), 0.0, 1e-16);
 }
-TEST_F(TestHllc, TestSod) {
+TEST_F(TestHartenLaxLeerContact, TestSod) {
   Primitive left{1.0, 0.0, 1.0}, right{0.125, 0.0, 0.1};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({0.426319, +0.927453, 0.303130}));
   CompareFlux(solver.GetFluxUpwind(right, left),
               solver.GetFlux({0.426319, -0.927453, 0.303130}));
 }
-TEST_F(TestHllc, TestShockCollision) {
+TEST_F(TestHartenLaxLeerContact, TestShockCollision) {
   Primitive left{5.99924, 19.5975, 460.894}, right{5.99242, 6.19633, 46.0950};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({5.99924, 19.5975, 460.894}));
 }
-TEST_F(TestHllc, TestBlastFromLeft) {
+TEST_F(TestHartenLaxLeerContact, TestBlastFromLeft) {
   Primitive left{1.0, 0.0, 1000}, right{1.0, 0.0, 0.01};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({0.575062, 19.59745, 460.8938}));
 }
-TEST_F(TestHllc, TestBlastFromRight) {
+TEST_F(TestHartenLaxLeerContact, TestBlastFromRight) {
   Primitive left{1.0, 0.0, 0.01}, right{1.0, 0.0, 100};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({0.575113, -6.196328, 46.09504}));
 }
 
-class TestHllc2d : public ::testing::Test {
+class TestHartenLaxLeerContact2d : public ::testing::Test {
  protected:
-  using Solver = Hllc<IdealGas<double, 1.4>, 2>;
+  using Solver = HartenLaxLeerContact<IdealGas<double, 1.4>, 2>;
   using Primitive = Solver::Primitive;
   using Speed = Solver::Scalar;
   using Flux = Solver::Flux;
@@ -80,7 +80,7 @@ class TestHllc2d : public ::testing::Test {
     EXPECT_LE(ratio(lhs.momentumY(), rhs.momentumY()), 0.02);
   }
 };
-TEST_F(TestHllc2d, TestSod) {
+TEST_F(TestHartenLaxLeerContact2d, TestSod) {
   Primitive  left{1.000, 0.0, v__left, 1.0};
   Primitive right{0.125, 0.0, v_right, 0.1};
   CompareFlux(solver.GetFluxUpwind(left, right),
@@ -88,28 +88,28 @@ TEST_F(TestHllc2d, TestSod) {
   CompareFlux(solver.GetFluxUpwind(right, left),
               solver.GetFlux({0.426319, -0.927453, v__left, 0.303130}));
 }
-TEST_F(TestHllc2d, TestShockCollision) {
+TEST_F(TestHartenLaxLeerContact2d, TestShockCollision) {
   Primitive  left{5.99924, 19.5975, v__left, 460.894};
   Primitive right{5.99242, 6.19633, v_right, 46.0950};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({5.99924, 19.5975, v__left, 460.894}));
 }
-TEST_F(TestHllc2d, TestBlastFromLeft) {
+TEST_F(TestHartenLaxLeerContact2d, TestBlastFromLeft) {
   Primitive  left{1.0, 0.0, v__left, 1e+3};
   Primitive right{1.0, 0.0, v_right, 1e-2};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({0.575062, 19.59745, v__left, 460.8938}));
 }
-TEST_F(TestHllc2d, TestBlastFromRight) {
+TEST_F(TestHartenLaxLeerContact2d, TestBlastFromRight) {
   Primitive  left{1.0, 0.0, v__left, 1e-2};
   Primitive right{1.0, 0.0, v_right, 1e+2};
   CompareFlux(solver.GetFluxUpwind(left, right),
               solver.GetFlux({0.575113, -6.196328, v_right, 46.09504}));
 }
 
-class TestHllc3d : public ::testing::Test {
+class TestHartenLaxLeerContact3d : public ::testing::Test {
  protected:
-  using Solver = Hllc<IdealGas<double, 1.4>, 3>;
+  using Solver = HartenLaxLeerContact<IdealGas<double, 1.4>, 3>;
   using Primitive = Solver::Primitive;
   using Speed = Solver::Scalar;
   using Flux = Solver::Flux;
@@ -124,7 +124,7 @@ class TestHllc3d : public ::testing::Test {
     EXPECT_LE(ratio(lhs.momentumZ(), rhs.momentumZ()), 0.02);
   }
 };
-TEST_F(TestHllc3d, TestSod) {
+TEST_F(TestHartenLaxLeerContact3d, TestSod) {
   Primitive  left{1.000, 0.0, v__left, w__left, 1.0};
   Primitive right{0.125, 0.0, v_right, w_right, 0.1};
   CompareFlux(solver.GetFluxUpwind(left, right),
@@ -132,19 +132,19 @@ TEST_F(TestHllc3d, TestSod) {
   CompareFlux(solver.GetFluxUpwind(right, left),
       solver.GetFlux({0.426319, -0.927453, v__left, w__left, 0.303130}));
 }
-TEST_F(TestHllc3d, TestShockCollision) {
+TEST_F(TestHartenLaxLeerContact3d, TestShockCollision) {
   Primitive  left{5.99924, 19.5975, v__left, w__left, 460.894};
   Primitive right{5.99242, 6.19633, v_right, w_right, 46.0950};
   CompareFlux(solver.GetFluxUpwind(left, right),
       solver.GetFlux({5.99924, 19.5975, v__left, w__left, 460.894}));
 }
-TEST_F(TestHllc3d, TestBlastFromLeft) {
+TEST_F(TestHartenLaxLeerContact3d, TestBlastFromLeft) {
   Primitive  left{1.0, 0.0, v__left, w__left, 1e+3};
   Primitive right{1.0, 0.0, v_right, w_right, 1e-2};
   CompareFlux(solver.GetFluxUpwind(left, right),
       solver.GetFlux({0.575062, 19.59745, v__left, w__left, 460.8938}));
 }
-TEST_F(TestHllc3d, TestBlastFromRight) {
+TEST_F(TestHartenLaxLeerContact3d, TestBlastFromRight) {
   Primitive  left{1.0, 0.0, v__left, w__left, 1e-2};
   Primitive right{1.0, 0.0, v_right, w_right, 1e+2};
   CompareFlux(solver.GetFluxUpwind(left, right),

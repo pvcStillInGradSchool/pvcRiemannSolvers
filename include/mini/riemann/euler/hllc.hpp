@@ -14,7 +14,7 @@ namespace riemann {
 namespace euler {
 
 template <class GasType, int D>
-class Hllc {
+class HartenLaxLeerContact {
  public:
   constexpr static int kDimensions = D;
   constexpr static int kComponents = kDimensions + 2;
@@ -28,7 +28,7 @@ class Hllc {
   using Speed = Scalar;
   // Get F on T Axia
   Flux GetFluxUpwind(const Primitive& left, const Primitive& right) const {
-    auto *non_const_this = const_cast<Hllc *>(this);
+    auto *non_const_this = const_cast<HartenLaxLeerContact *>(this);
     non_const_this->Initialize(left, right);
     Flux flux;
     if (0.0 <= wave_left_) {

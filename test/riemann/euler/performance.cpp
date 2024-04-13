@@ -57,9 +57,9 @@ TEST_F(TestPerformance, TestAusm) {
     run<Ausm<Gas, 1>>();
   }
 }
-TEST_F(TestPerformance, TestHllc) {
+TEST_F(TestPerformance, TestHartenLaxLeerContact) {
   for (int i = 0; i < n; ++i) {
-    run<Hllc<Gas, 1>>();
+    run<HartenLaxLeerContact<Gas, 1>>();
   }
 }
 TEST_F(TestPerformance, TestExact) {

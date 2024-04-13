@@ -41,8 +41,8 @@ using Primitive = mini::riemann::euler::Primitives<Scalar, kDimensions>;
 extern template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 using Conservative = mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 
-extern template class mini::riemann::euler::Hllc<Gas, kDimensions>;
-using Unrotated = mini::riemann::euler::Hllc<Gas, kDimensions>;
+extern template class mini::riemann::euler::HartenLaxLeerContact<Gas, kDimensions>;
+using Unrotated = mini::riemann::euler::HartenLaxLeerContact<Gas, kDimensions>;
 
 extern template class mini::riemann::rotated::Euler<Unrotated>;
 using Convection = mini::riemann::rotated::Euler<Unrotated>;
