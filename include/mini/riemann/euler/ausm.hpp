@@ -14,7 +14,7 @@ namespace riemann {
 namespace euler {
 
 template <class G, int D>
-class Ausm {
+class AdvectionUpstreamSplittingMethod {
  public:
   constexpr static int kComponents = D + 2;
   constexpr static int kDimensions = D;

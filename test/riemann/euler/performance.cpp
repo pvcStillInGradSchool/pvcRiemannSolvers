@@ -52,9 +52,9 @@ class TestPerformance : public ::testing::Test {
   int n = 100'000;
 #endif
 };
-TEST_F(TestPerformance, TestAusm) {
+TEST_F(TestPerformance, TestAdvectionUpstreamSplittingMethod) {
   for (int i = 0; i < n; ++i) {
-    run<Ausm<Gas, 1>>();
+    run<AdvectionUpstreamSplittingMethod<Gas, 1>>();
   }
 }
 TEST_F(TestPerformance, TestHartenLaxLeerContact) {
