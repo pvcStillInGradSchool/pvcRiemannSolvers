@@ -11,15 +11,6 @@
 namespace mini {
 namespace gauss {
 
-template <std::floating_point Scalar, int kPhysDim>
-class Face;
-
-template <std::floating_point Scalar, int kPhysDim>
-struct _NormalFrameBuilder {
-  static void Build(Face<Scalar, kPhysDim> *face) {
-  }
-};
-
 /**
  * @brief Abstract numerical integrators on surface elements.
  * 
@@ -50,11 +41,11 @@ class Face : public Element<Scalar, kPhysDim, 2> {
    * @return const Lagrange &  Reference to the geometry::Face object it uses for coordinate mapping.
    */
   virtual const Lagrange &lagrange() const = 0;
-};
 
-template <std::floating_point Scalar>
-struct _NormalFrameBuilder<Scalar, 3> {
-  static void Build(Face<Scalar, 3> *face) {
+ protected:
+  static void BuildNormalFrames(Face *face) requires(kPhysDim == 2) {
+  }
+  static void BuildNormalFrames(Face *face) requires(kPhysDim == 3) {
     int n = face->CountPoints();
     for (int i = 0; i < n; ++i) {
       auto &local_i = face->GetLocalCoord(i);

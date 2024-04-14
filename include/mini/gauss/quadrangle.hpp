@@ -41,6 +41,7 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   using Frame = typename Lagrange::Frame;
 
  private:
+  using Base = Face<Scalar, kPhysDim>;
   static constexpr int Qx = GaussX::Q;
   static constexpr int Qy = GaussY::Q;
   static constexpr int Q = Qx * Qy;
@@ -123,7 +124,7 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   explicit Quadrangle(Lagrange const &lagrange)
       : lagrange_(&lagrange) {
     area_ = this->BuildQuadraturePoints();
-    _NormalFrameBuilder<Scalar, kPhysDim>::Build(this);
+    Base::BuildNormalFrames(this);
   }
 
   const Lagrange &lagrange() const final {
