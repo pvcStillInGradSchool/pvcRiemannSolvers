@@ -14,18 +14,6 @@
 namespace mini {
 namespace geometry {
 
-template <std::floating_point Scalar, int kPhysDim>
-class Face;
-
-template <std::floating_point Scalar, int kPhysDim>
-struct _NormalFrameBuilder {
-  using Frame = typename Face<Scalar, kPhysDim>::Frame;
-  static Frame Build(const Face<Scalar, kPhysDim> &face,
-      Scalar x_local, Scalar y_local) {
-    return Frame();
-  }
-};
-
 /**
  * @brief Abstract coordinate map on surface elements.
  * 
@@ -62,8 +50,13 @@ class Face : public Element<Scalar, kPhysDim, 2> {
     return jacobian.row(X).cross(jacobian.row(Y)).normalized();
   }
   Frame LocalToNormalFrame(Scalar x_local, Scalar y_local) const {
-    return _NormalFrameBuilder<Scalar, kPhysDim>
-        ::Build(*this, x_local, y_local);
+    Frame frame;
+    auto &normal = frame[X], &tangent = frame[Y], &bitangent = frame[Z];
+    auto jacobian = LocalToJacobian(x_local, y_local);
+    normal = jacobian.row(X).cross(jacobian.row(Y)).normalized();
+    tangent = jacobian.row(X).normalized();
+    bitangent = normal.cross(tangent);
+    return frame;
   }
   Frame LocalToNormalFrame(const Local &xy) const {
     return LocalToNormalFrame(xy[X], xy[Y]);
@@ -91,21 +84,6 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   }
   Jacobian LocalToJacobian(const Local &xy) const final {
     return LocalToJacobian(xy[X], xy[Y]);
-  }
-};
-
-template <std::floating_point Scalar>
-struct _NormalFrameBuilder<Scalar, 3> {
-  using Frame = typename Face<Scalar, 3>::Frame;
-  static Frame Build(const Face<Scalar, 3> &face,
-      Scalar x_local, Scalar y_local) {
-    Frame frame;
-    auto &normal = frame[X], &tangent = frame[Y], &bitangent = frame[Z];
-    auto jacobian = face.LocalToJacobian(x_local, y_local);
-    normal = jacobian.row(X).cross(jacobian.row(Y)).normalized();
-    tangent = jacobian.row(X).normalized();
-    bitangent = normal.cross(tangent);
-    return frame;
   }
 };
 
