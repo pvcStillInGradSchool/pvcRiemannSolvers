@@ -46,7 +46,7 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
   auto lagrange = Lagrange {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4)
   };
-  auto gauss = Gauss(lagrange);
+  auto const gauss = Gauss(lagrange);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);
@@ -82,7 +82,7 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4),
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
   };
-  auto gauss = Gauss(lagrange);
+  auto const gauss = Gauss(lagrange);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);
@@ -119,7 +119,7 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle9) {
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
     Global(2, 2, 2),
   };
-  auto gauss = Gauss(lagrange);
+  auto const gauss = Gauss(lagrange);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);

@@ -32,7 +32,6 @@ class Face : public Element<Scalar, kPhysDim, 2> {
 
   virtual ~Face() noexcept = default;
   virtual const Frame &GetNormalFrame(int i) const = 0;
-  virtual Frame &GetNormalFrame(int i) = 0;
   virtual Scalar area() const = 0;
 
   /**
@@ -52,6 +51,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
       face->GetNormalFrame(i) = face->lagrange().LocalToNormalFrame(local_i);
     }
   }
+  virtual Frame &GetNormalFrame(int i) = 0;
 };
 
 }  // namespace gauss

@@ -38,7 +38,7 @@ TEST_F(TestGaussTriangle, OnMappedElementInThreeDimensionalSpace) {
   auto lagrange = Lagrange {
     Global(0, 0, 2), Global(2, 0, 2), Global(2, 2, 2),
   };
-  auto gauss = Gauss(lagrange);
+  auto const gauss = Gauss(lagrange);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_DOUBLE_EQ(gauss.area(), 2.0);
@@ -73,7 +73,7 @@ TEST_F(TestGaussTriangle, OnQuadraticElementInThreeDimensionalSpace) {
     Global(0, 0, 2), Global(2, 0, 2), Global(2, 2, 2),
     Global(1, 0, 2), Global(2, 1, 2), Global(1, 1, 2),
   };
-  auto gauss = Gauss(lagrange);
+  auto const gauss = Gauss(lagrange);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_DOUBLE_EQ(gauss.area(), 2.0);

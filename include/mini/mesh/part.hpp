@@ -133,7 +133,7 @@ struct Face {
         id_(id) {
     holder_to_sharer_ += sharer ? sharer->center() : center();
     for (int i = 0, n = riemann_.size(); i < n; ++i) {
-      riemann_[i].Rotate(gauss_ptr_->GetNormalFrame(i));
+      riemann_[i].Rotate(gauss().GetNormalFrame(i));
     }
   }
   Face(const Face &) = delete;

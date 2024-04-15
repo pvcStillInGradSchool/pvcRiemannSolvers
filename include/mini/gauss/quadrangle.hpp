@@ -115,6 +115,8 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
     assert(0 <= i && i < CountPoints());
     return normal_frames_[i];
   }
+
+ protected:
   Frame &GetNormalFrame(int i) final {
     assert(0 <= i && i < CountPoints());
     return normal_frames_[i];
