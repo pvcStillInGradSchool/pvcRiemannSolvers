@@ -8,32 +8,18 @@ namespace mini {
 namespace temporal {
 
 template <int kOrders, typename Scalar>
-struct RungeKutta;
-
-template <typename Scalar>
-struct RungeKutta<1, Scalar> : public Solver<Scalar> {
+struct RungeKutta : public Solver<Scalar> {
  private:
   using Base = Solver<Scalar>;
   Euler<Scalar> euler_;
 
- public:
-  using Column = typename Base::Column;
-
-  void Update(System<Scalar> *system, double t_curr, double dt) final {
+  void _Update(System<Scalar> *system, double t_curr, double dt)
+      requires(kOrders == 1) {
     euler_.Update(system, t_curr, dt);
   }
-};
 
-template <typename Scalar>
-struct RungeKutta<2, Scalar> : public Solver<Scalar> {
- private:
-  using Base = Solver<Scalar>;
-  Euler<Scalar> euler_;
-
- public:
-  using Column = typename Base::Column;
-
-  void Update(System<Scalar> *system, double t_curr, double dt) final {
+  void _Update(System<Scalar> *system, double t_curr, double dt)
+      requires(kOrders == 2) {
     auto u_curr = system->GetSolutionColumn();
     euler_.Update(system, t_curr, dt);
     auto u_next = euler_.NextSolution(system, t_curr + dt, dt);
@@ -41,18 +27,9 @@ struct RungeKutta<2, Scalar> : public Solver<Scalar> {
     u_next *= 0.5;
     system->SetSolutionColumn(u_next);
   }
-};
 
-template <typename Scalar>
-struct RungeKutta<3, Scalar> : public Solver<Scalar> {
- private:
-  using Base = Solver<Scalar>;
-  Euler<Scalar> euler_;
-
- public:
-  using Column = typename Base::Column;
-
-  void Update(System<Scalar> *system, double t_curr, double dt) final {
+  void _Update(System<Scalar> *system, double t_curr, double dt)
+      requires(kOrders == 3) {
     auto u_curr = system->GetSolutionColumn();
     euler_.Update(system, t_curr, dt);
     // Now, system->GetSolutionColumn() == U_1st == U_old + R_old * dt
@@ -69,6 +46,13 @@ struct RungeKutta<3, Scalar> : public Solver<Scalar> {
     u_next /= 3;
     // Now, u_next == U_3rd == ((U_2nd + R_2nd * dt) * 2 + U_old) / 3
     system->SetSolutionColumn(u_next);
+  }
+
+ public:
+  using Column = typename Base::Column;
+
+  void Update(System<Scalar> *system, double t_curr, double dt) final {
+    _Update(system, t_curr, dt);
   }
 };
 
