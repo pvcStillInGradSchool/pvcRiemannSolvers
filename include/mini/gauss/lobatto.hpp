@@ -27,35 +27,43 @@ struct Lobatto {
 
   static_assert(2 <= Q && Q <= 6);
 
-  static Array BuildPoints() requires(Q == 2) {
+  static Array BuildPoints() {
+    return _BuildPoints();
+  }
+  static Array BuildWeights() {
+    return _BuildWeights();
+  }
+
+ private:
+  static Array _BuildPoints() requires(Q == 2) {
     return { -1.0, +1.0 };
   }
-  static Array BuildWeights() requires(Q == 2) {
+  static Array _BuildWeights() requires(Q == 2) {
     return { 1.0, 1.0 };
   }
 
-  static Array BuildPoints() requires(Q == 3) {
+  static Array _BuildPoints() requires(Q == 3) {
     return { -1.0, 0.0, +1.0 };
   }
-  static Array BuildWeights() requires(Q == 3) {
+  static Array _BuildWeights() requires(Q == 3) {
     return { 1.0/3, 4.0/3, 1.0/3 };
   }
 
-  static Array BuildPoints() requires(Q == 4) {
+  static Array _BuildPoints() requires(Q == 4) {
     return { -1.0, -std::sqrt(1.0/5), +std::sqrt(1.0/5), +1.0 };
   }
-  static Array BuildWeights() requires(Q == 4) {
+  static Array _BuildWeights() requires(Q == 4) {
     return { 1.0/6, 5.0/6, 5.0/6, 1.0/6 };
   }
 
-  static Array BuildPoints() requires(Q == 5) {
+  static Array _BuildPoints() requires(Q == 5) {
     return { -1.0, -std::sqrt(21.0)/7, 0.0, +std::sqrt(21.0)/7, +1.0 };
   }
-  static Array BuildWeights() requires(Q == 5) {
+  static Array _BuildWeights() requires(Q == 5) {
     return { 0.1, 49.0/90, 32.0/45, 49.0/90, 0.1 };
   }
 
-  static Array BuildPoints() requires(Q == 6) {
+  static Array _BuildPoints() requires(Q == 6) {
     return {
         -1.0,
         -std::sqrt((7 + 2 * std::sqrt(7.0)) / 21),
@@ -65,7 +73,7 @@ struct Lobatto {
         +1.0
     };
   }
-  static Array BuildWeights() requires(Q == 6) {
+  static Array _BuildWeights() requires(Q == 6) {
     return {
         1.0 / 15,
         (14.0 - std::sqrt(7.0)) / 30,

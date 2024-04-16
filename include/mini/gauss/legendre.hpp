@@ -27,28 +27,36 @@ struct Legendre {
 
   static_assert(1 <= Q && Q <= 6);
 
-  static Array BuildPoints() requires(Q == 1) {
+  static Array BuildPoints() {
+    return _BuildPoints();
+  }
+  static Array BuildWeights() {
+    return _BuildWeights();
+  }
+
+ private:
+  static Array _BuildPoints() requires(Q == 1) {
     return { 0.0 };
   }
-  static Array BuildWeights() requires(Q == 1) {
+  static Array _BuildWeights() requires(Q == 1) {
     return { 2.0 };
   }
 
-  static Array BuildPoints() requires(Q == 2) {
+  static Array _BuildPoints() requires(Q == 2) {
     return { -std::sqrt(Scalar(1.0/3.0)), +std::sqrt(Scalar(1.0/3.0)) };
   }
-  static Array BuildWeights() requires(Q == 2) {
+  static Array _BuildWeights() requires(Q == 2) {
     return { 1.0, 1.0 };
   }
 
-  static Array BuildPoints() requires(Q == 3) {
+  static Array _BuildPoints() requires(Q == 3) {
     return { -std::sqrt(Scalar(0.6)), 0.0, +std::sqrt(Scalar(0.6)) };
   }
-  static Array BuildWeights() requires(Q == 3) {
+  static Array _BuildWeights() requires(Q == 3) {
     return { 5.0/9.0, 8.0/9.0, 5.0/9.0 };
   }
 
-  static Array BuildPoints() requires(Q == 4) {
+  static Array _BuildPoints() requires(Q == 4) {
     return {
         -std::sqrt((3 + 2 * std::sqrt(Scalar(1.2))) / 7),
         -std::sqrt((3 - 2 * std::sqrt(Scalar(1.2))) / 7),
@@ -56,7 +64,7 @@ struct Legendre {
         +std::sqrt((3 + 2 * std::sqrt(Scalar(1.2))) / 7),
     };
   }
-  static Array BuildWeights() requires(Q == 4) {
+  static Array _BuildWeights() requires(Q == 4) {
     return {
         (18 - std::sqrt(Scalar(30.0))) / 36,
         (18 + std::sqrt(Scalar(30.0))) / 36,
@@ -65,7 +73,7 @@ struct Legendre {
     };
   }
 
-  static Array BuildPoints() requires(Q == 5) {
+  static Array _BuildPoints() requires(Q == 5) {
     return {
         -std::sqrt((5 + std::sqrt(Scalar(40 / 7.0))) / 9),
         -std::sqrt((5 - std::sqrt(Scalar(40 / 7.0))) / 9),
@@ -74,7 +82,7 @@ struct Legendre {
         +std::sqrt((5 + std::sqrt(Scalar(40 / 7.0))) / 9),
     };
   }
-  static Array BuildWeights() requires(Q == 5) {
+  static Array _BuildWeights() requires(Q == 5) {
     return {
         (322 - 13 * std::sqrt(Scalar(70.0))) / 900,
         (322 + 13 * std::sqrt(Scalar(70.0))) / 900,
@@ -84,7 +92,7 @@ struct Legendre {
     };
   }
 
-  static Array BuildPoints() requires(Q == 6) {
+  static Array _BuildPoints() requires(Q == 6) {
     return {
         -0.932469514203152,
         -0.6612093864662645,
@@ -94,7 +102,7 @@ struct Legendre {
         +0.932469514203152,
     };
   }
-  static Array BuildWeights() requires(Q == 6) {
+  static Array _BuildWeights() requires(Q == 6) {
     return {
         0.17132449237917016,
         0.36076157304813855,

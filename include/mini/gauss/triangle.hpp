@@ -112,18 +112,26 @@ class Triangle : public Face<Scalar, kPhysDim> {
   using Points = std::array<Local, kPoints>;
   using Weights = std::array<Scalar, kPoints>;
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 1) {
+  static constexpr Points BuildLocalCoords() {
+    return _BuildLocalCoords();
+  }
+  static constexpr Weights BuildLocalWeights() {
+    return _BuildLocalWeights();
+  }
+
+ private:
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 1) {
     Scalar a = .3333333333333333333333333333333333;
     Points points;
     points[0] = { a, a };
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 1) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 1) {
     Weights weights{ 1.0 / 2.0 };
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 3) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 3) {
     Points points;
     int q = 0;
     // the only S21 orbits
@@ -137,7 +145,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 3) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 3) {
     Weights weights;
     for (int q = 0; q < 3; ++q)
       weights[q] = 1./3.;
@@ -146,7 +154,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 6) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 6) {
     Points points;
     int q = 0;
     // the two S21 orbits
@@ -162,7 +170,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 6) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 6) {
     Weights weights;
     for (int q = 0; q < 3; ++q)
       weights[q] = .22338158967801146569500700843312280;
@@ -173,7 +181,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 12) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 12) {
     Points points;
     int q = 0;
     // the two S21 orbits
@@ -200,7 +208,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 12) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 12) {
     Weights weights;
     for (int q = 0; q < 3; ++q)
       weights[q] = .05084490637020681692093680910686898;
@@ -213,7 +221,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 16) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 16) {
     Points points;
     int q = 0;
     {  // the only S3 orbit
@@ -245,7 +253,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 16) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 16) {
     Weights weights;
     for (int q = 0; q < 1; ++q)
       weights[q] = .14431560767778716825109111048906462;

@@ -100,18 +100,26 @@ class Tetrahedron : public Cell<Scalar> {
   using Points = std::array<Local, kPoints>;
   using Weights = std::array<Scalar, kPoints>;
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 1) {
+  static constexpr Points BuildLocalCoords() {
+    return _BuildLocalCoords();
+  }
+  static constexpr Weights BuildLocalWeights() {
+    return _BuildLocalWeights();
+  }
+
+ private:
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 1) {
     Scalar a = 0.25;
     Points points;
     points[0] = { a, a, a };
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 1) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 1) {
     Weights weights{ 1.0 / 6.0 };
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 4) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 4) {
     Points points;
     int q = 0;
     // the only S31 orbit
@@ -124,14 +132,14 @@ class Tetrahedron : public Cell<Scalar> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 4) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 4) {
     Weights weights;
     for (int q = 0; q < kPoints; ++q)
       weights[q] = 0.25 / 6.0;
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 14) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 14) {
     Points points;
     int q = 0;
     // the two S31 orbits
@@ -158,7 +166,7 @@ class Tetrahedron : public Cell<Scalar> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 14) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 14) {
     Weights weights;
     for (int q = 0; q < 4; ++q)
       weights[q] = 0.11268792571801585079918565233328633;
@@ -171,7 +179,7 @@ class Tetrahedron : public Cell<Scalar> {
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 15) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 15) {
     Points points;
     int q = 0;
     {  // the only S4 orbit
@@ -202,7 +210,7 @@ class Tetrahedron : public Cell<Scalar> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 15) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 15) {
     Weights weights;
     for (int q = 0; q < 1; ++q)
       weights[q] = 16.0 / 135.0;
@@ -217,7 +225,7 @@ class Tetrahedron : public Cell<Scalar> {
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 24) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 24) {
     Points points;
     int q = 0;
     // the three S31 orbits
@@ -252,7 +260,7 @@ class Tetrahedron : public Cell<Scalar> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 24) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 24) {
     Weights weights;
     for (int q = 0; q < 4; ++q)
       weights[q] = 0.03992275025816749209969062755747998;
@@ -267,7 +275,7 @@ class Tetrahedron : public Cell<Scalar> {
     return weights;
   }
 
-  static constexpr Points BuildLocalCoords() requires(kPoints == 46) {
+  static constexpr Points _BuildLocalCoords() requires(kPoints == 46) {
     Points points;
     int q = 0;
     // the four S31 orbits
@@ -317,7 +325,7 @@ class Tetrahedron : public Cell<Scalar> {
     assert(q == kPoints);
     return points;
   }
-  static constexpr Weights BuildLocalWeights() requires(kPoints == 46) {
+  static constexpr Weights _BuildLocalWeights() requires(kPoints == 46) {
     Weights weights;
     for (int q = 0; q < 4; ++q)
       weights[q] = .00639714777990232132145142033517302;
