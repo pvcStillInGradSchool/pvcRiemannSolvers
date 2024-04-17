@@ -83,83 +83,81 @@ class Taylor<Scalar, 1, kDegrees> {
   }
 };
 
-template <std::floating_point Scalar, int kDegrees>
-class Taylor<Scalar, 2, kDegrees> {
-  static constexpr int GetN() {
-    return ((kDegrees + 2) * (kDegrees + 1)) / 2;
-  }
+template <int D>
+constexpr int GetN(int P);
 
+template <>
+constexpr int GetN<1>(int P) {
+  return 1 + P;
+}
+
+template <int D>
+constexpr int GetN(int P) {
+  return (GetN<D - 1>(P) * (D + P)) / D;
+}
+
+template <std::floating_point Scalar, int kDimensions, int kDegrees>
+class Taylor {
  public:
-  static constexpr int N = GetN();  // the number of components
+  static constexpr int P = kDegrees;
+  static constexpr int D = kDimensions;
+  static constexpr int N = GetN<D>(P);  // the number of components
   using MatNx1 = algebra::Matrix<Scalar, N, 1>;
-  using Coord = algebra::Matrix<Scalar, 2, 1>;
+  using Coord = algebra::Matrix<Scalar, D, 1>;
 
-  static MatNx1 GetValue(const Coord &xy) {
-    return _GetValue(xy);
+  static MatNx1 GetValue(const Coord &coord) {
+    return _GetValue(coord);
   }
 
  private:
-  static MatNx1 _GetValue(const Coord &xy) requires(kDegrees == 1) {
+  static MatNx1 _GetValue(const Coord &xy) requires(kDegrees == 0) {
+    return { 1 };
+  }
+
+  static MatNx1 _GetValue(const Coord &xy)
+      requires(kDimensions == 2 && kDegrees == 1) {
     return { 1, xy[0], xy[1] };
   }
 
-  static MatNx1 _GetValue(const Coord &xy) requires(kDegrees == 2) {
+  static MatNx1 _GetValue(const Coord &xy)
+      requires(kDimensions == 2 && kDegrees == 2) {
     auto x = xy[0], y = xy[1];
     return { 1, x, y, x * x, x * y, y * y };
   }
 
-  static MatNx1 _GetValue(const Coord &xy) requires(kDegrees == 3) {
+  static MatNx1 _GetValue(const Coord &xy)
+      requires(kDimensions == 2 && kDegrees == 3) {
     auto x = xy[0], y = xy[1];
     auto x_x = x * x, x_y = x * y, y_y = y * y;
     return { 1, x, y, x_x, x_y, y_y,
         x_x * x, x_x * y, x * y_y, y * y_y };
   }
-};
 
-template <std::floating_point Scalar, int kDegrees>
-class Taylor<Scalar, 3, kDegrees> {
-  static constexpr int GetN() {
-    return ((kDegrees + 3) * (kDegrees + 2) * (kDegrees + 1)) / 6;
-  }
-
-  static constexpr int X{1}, Y{2}, Z{3};
-  static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
-  static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
-  static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
-
- public:
-  static constexpr int N = GetN();  // the number of components
-  using MatNx1 = algebra::Matrix<Scalar, N, 1>;
-  using MatNx3 = algebra::Matrix<Scalar, N, 3>;
-  using Coord = algebra::Matrix<Scalar, 3, 1>;
-
-  static MatNx1 GetValue(const Coord &xyz) {
-    return _GetValue(xyz);
-  }
-
- private:
-  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 0) {
-    MatNx1 col; col(0, 0) = 1;
-    return col;
-  }
-
-  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 1) {
+  static MatNx1 _GetValue(const Coord &xyz)
+      requires(kDimensions == 3 && kDegrees == 1) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     return { 1, x, y, z };
   }
 
-  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 2) {
+  static MatNx1 _GetValue(const Coord &xyz)
+      requires(kDimensions == 3 && kDegrees == 2) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     return { 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
   }
 
-  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 3) {
+  static MatNx1 _GetValue(const Coord &xyz)
+      requires(kDimensions == 3 && kDegrees == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
     return { 1, x, y, z, xx, xy, xz, yy, yz, zz,
         x * xx, x * xy, x * xz, x * yy, x * yz, x * zz,
         y * yy, y * yz, y * zz, z * zz };
   }
+
+  static constexpr int X{1}, Y{2}, Z{3};
+  static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
+  static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
+  static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
 
  public:
   template <typename MatKxN>
