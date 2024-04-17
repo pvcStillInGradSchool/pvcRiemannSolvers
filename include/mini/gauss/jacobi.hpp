@@ -25,42 +25,42 @@ struct Jacobi {
 
   static_assert(1 <= Q && Q <= 5);
 
-  static Array BuildPoints() {
+  static constexpr Array BuildPoints() {
     return _BuildPoints();
   }
-  static Array BuildWeights() {
+  static constexpr Array BuildWeights() {
     return _BuildWeights();
   }
 
  private:
-  static Array _BuildPoints() requires(Q == 1 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildPoints() requires(Q == 1 && kAlpha == 2 && kBeta == 0) {
     return { -0.5 };
   }
-  static Array _BuildWeights() requires(Q == 1 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildWeights() requires(Q == 1 && kAlpha == 2 && kBeta == 0) {
     return { 2.6666666666666665 };
   }
 
-  static Array _BuildPoints() requires(Q == 2 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildPoints() requires(Q == 2 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.754970354689117,
       0.08830368802245062
     };
   }
-  static Array _BuildWeights() {
+  static constexpr Array _BuildWeights() {
     return {
       1.860379610028064,
       0.8062870566386026
     };
   }
 
-  static Array _BuildPoints() requires(Q == 3 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildPoints() requires(Q == 3 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.8540119518537006,
       -0.30599246792329643,
       0.41000441977699675
     };
   }
-  static Array _BuildWeights() requires(Q == 3 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildWeights() requires(Q == 3 && kAlpha == 2 && kBeta == 0) {
     return {
       1.2570908885190917,
       1.169970154078929,
@@ -68,7 +68,7 @@ struct Jacobi {
     };
   }
 
-  static Array _BuildPoints() requires(Q == 4 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildPoints() requires(Q == 4 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.9029989011060054,
       -0.5227985248962753,
@@ -76,7 +76,7 @@ struct Jacobi {
       0.5917028357935458
     };
   }
-  static Array _BuildWeights() requires(Q == 4 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildWeights() requires(Q == 4 && kAlpha == 2 && kBeta == 0) {
     return {
       0.8871073248902219,
       1.1476703183937156,
@@ -85,7 +85,7 @@ struct Jacobi {
     };
   }
 
-  static Array _BuildPoints() requires(Q == 5 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildPoints() requires(Q == 5 && kAlpha == 2 && kBeta == 0) {
     return {
       -0.9308421201635698,
       -0.6530393584566087,
@@ -94,7 +94,7 @@ struct Jacobi {
       0.7021084258940329
     };
   }
-  static Array _BuildWeights() requires(Q == 5 && kAlpha == 2 && kBeta == 0) {
+  static constexpr Array _BuildWeights() requires(Q == 5 && kAlpha == 2 && kBeta == 0) {
     return {
       0.6541182742861681,
       1.009591695199291,
