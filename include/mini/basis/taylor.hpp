@@ -94,23 +94,25 @@ class Taylor<Scalar, 2, kDegrees> {
   using MatNx1 = algebra::Matrix<Scalar, N, 1>;
   using Coord = algebra::Matrix<Scalar, 2, 1>;
 
-  static MatNx1 GetValue(const Coord &xy) requires(kDegrees == 1) {
-    MatNx1 col = { 1, xy[0], xy[1] };
-    return col;
+  static MatNx1 GetValue(const Coord &xy) {
+    return _GetValue(xy);
   }
 
-  static MatNx1 GetValue(const Coord &xy) requires(kDegrees == 2) {
+ private:
+  static MatNx1 _GetValue(const Coord &xy) requires(kDegrees == 1) {
+    return { 1, xy[0], xy[1] };
+  }
+
+  static MatNx1 _GetValue(const Coord &xy) requires(kDegrees == 2) {
     auto x = xy[0], y = xy[1];
-    MatNx1 col = { 1, x, y, x * x, x * y, y * y };
-    return col;
+    return { 1, x, y, x * x, x * y, y * y };
   }
 
-  static MatNx1 GetValue(const Coord &xy)  requires(kDegrees == 3) {
+  static MatNx1 _GetValue(const Coord &xy) requires(kDegrees == 3) {
     auto x = xy[0], y = xy[1];
     auto x_x = x * x, x_y = x * y, y_y = y * y;
-    MatNx1 col = { 1, x, y, x_x, x_y, y_y,
+    return { 1, x, y, x_x, x_y, y_y,
         x_x * x, x_x * y, x * y_y, y * y_y };
-    return col;
   }
 };
 
@@ -131,11 +133,35 @@ class Taylor<Scalar, 3, kDegrees> {
   using MatNx3 = algebra::Matrix<Scalar, N, 3>;
   using Coord = algebra::Matrix<Scalar, 3, 1>;
 
-  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 0) {
+  static MatNx1 GetValue(const Coord &xyz) {
+    return _GetValue(xyz);
+  }
+
+ private:
+  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 0) {
     MatNx1 col; col(0, 0) = 1;
     return col;
   }
 
+  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 1) {
+    auto x = xyz[0], y = xyz[1], z = xyz[2];
+    return { 1, x, y, z };
+  }
+
+  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 2) {
+    auto x = xyz[0], y = xyz[1], z = xyz[2];
+    return { 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
+  }
+
+  static MatNx1 _GetValue(const Coord &xyz) requires(kDegrees == 3) {
+    auto x = xyz[0], y = xyz[1], z = xyz[2];
+    auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
+    return { 1, x, y, z, xx, xy, xz, yy, yz, zz,
+        x * xx, x * xy, x * xz, x * yy, x * yz, x * zz,
+        y * yy, y * yz, y * zz, z * zz };
+  }
+
+ public:
   template <typename MatKxN>
   static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
       requires(kDegrees == 0) {
@@ -148,12 +174,6 @@ class Taylor<Scalar, 3, kDegrees> {
       const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 0) {
     algebra::Matrix<Scalar, K, 3> res; res.setZero();
     return res;
-  }
-
-  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 1) {
-    auto x = xyz[0], y = xyz[1], z = xyz[2];
-    MatNx1 col = { 1, x, y, z };
-    return col;
   }
 
   template <typename MatKxN>
@@ -174,12 +194,6 @@ class Taylor<Scalar, 3, kDegrees> {
     // pdv_z
     res.col(2) = coeff.col(Z);
     return res;
-  }
-
-  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 2) {
-    auto x = xyz[0], y = xyz[1], z = xyz[2];
-    MatNx1 col = { 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
-    return col;
   }
 
   template <typename MatKxN>
@@ -241,15 +255,6 @@ class Taylor<Scalar, 3, kDegrees> {
     res.col(2) += coeff.col(YZ) * y;
     res.col(2) += coeff.col(ZZ) * (2 * z);
     return res;
-  }
-
-  static MatNx1 GetValue(const Coord &xyz) requires(kDegrees == 3) {
-    auto x = xyz[0], y = xyz[1], z = xyz[2];
-    auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
-    MatNx1 col = { 1, x, y, z, xx, xy, xz, yy, yz, zz,
-        x * xx, x * xy, x * xz, x * yy, x * yz, x * zz,
-        y * yy, y * yz, y * zz, z * zz };
-    return col;
   }
 
   template <typename MatKxN>
