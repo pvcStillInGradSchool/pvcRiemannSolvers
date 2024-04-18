@@ -83,6 +83,8 @@ class Taylor<Scalar, 1, kDegrees> {
   }
 };
 
+namespace {
+
 template <int D>
 constexpr int GetN(int P);
 
@@ -94,6 +96,8 @@ constexpr int GetN<1>(int P) {
 template <int D>
 constexpr int GetN(int P) {
   return (GetN<D - 1>(P) * (D + P)) / D;
+}
+
 }
 
 template <std::floating_point Scalar, int kDimensions, int kDegrees>
