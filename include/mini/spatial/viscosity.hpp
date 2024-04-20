@@ -47,12 +47,14 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   Base *base_ptr_;
 
   using Diffusion = mini::riemann::diffusive::Isotropic<Scalar, Cell::K>;
+  using DiffusionRiemann = mini::riemann::diffusive::DirectDG<Diffusion>;
+
   static FluxMatrix GetDiffusiveFluxMatrix(const Cell &cell, int q) {
     const auto &projection = cell.projection();
     const auto &value = projection.GetValue(q);
     FluxMatrix flux_matrix; flux_matrix.setZero();
     const auto &gradient = projection.GetGlobalGradient(q);
-    Riemann::MinusViscousFlux(value, gradient, &flux_matrix);
+    DiffusionRiemann::MinusViscousFlux(value, gradient, &flux_matrix);
     return flux_matrix;
   }
 
@@ -102,7 +104,7 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
         Coeff residual; residual.setZero();
         base().AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
             residual.data());
-        // Write the residual column intto the matrix:
+        // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
         for (int r = 1; r < Cell::K; ++r) {
           assert((residual.row(r) - residual.row(0)).squaredNorm() == 0);
