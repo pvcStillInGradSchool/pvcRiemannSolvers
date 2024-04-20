@@ -35,6 +35,8 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
   using Projection = typename Base::Projection;
+  using Gauss = typename Projection::Gauss;
+  using Local = typename Gauss::Local;
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;
@@ -82,6 +84,9 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
  protected:  // data for generating artificial viscosity
   std::vector<DampingMatrix> damping_matrices_;
 
+  // [i_cell][i_neighbor][i_node]
+  std::vector<std::vector<std::array<Local, Cell::N>>> local_on_neighbors_;
+
  public:  // methods for generating artificial viscosity
   std::vector<DampingMatrix> BuildDampingMatrices() const {
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
@@ -112,6 +117,27 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
       }
     }
     return matrices;
+  }
+
+  std::vector<std::vector<std::array<Local, Cell::N>>> BuildCoordinates() const {
+    std::vector<std::vector<std::array<Local, Cell::N>>> local_on_neighbors;
+    local_on_neighbors.reserve(part().CountLocalCells());
+    for (Cell *cell_ptr : base_ptr_->part_ptr()->GetLocalCellPointers()) {
+      auto &local_on_neighbors_of_cell_i = local_on_neighbors.emplace_back();
+      int n_neighbor = cell_ptr->adj_cells_.size();
+      local_on_neighbors_of_cell_i.reserve(n_neighbor);
+      for (int i_neighbor = 0; i_neighbor < n_neighbor; ++i_neighbor) {
+        auto &local_on_neighbor_i = local_on_neighbors_of_cell_i.emplace_back();
+        auto const &lagrange_i = cell_ptr->adj_cells_[i_neighbor]->lagrange();
+        for (int i_node = 0; i_node < Cell::N; ++i_node) {
+          auto &xyz = cell_ptr->gauss().GetGlobalCoord(i_node);
+          std::printf("%d %ld %d %d\n", part().mpi_rank(), cell_ptr->id(), i_neighbor, i_node);
+          local_on_neighbor_i[i_node] = lagrange_i.GlobalToLocal(xyz);
+        }
+      }
+    }
+    assert(local_on_neighbors.size() == part().CountLocalCells());
+    return local_on_neighbors;
   }
 
  public:  // override virtual methods defined in Base

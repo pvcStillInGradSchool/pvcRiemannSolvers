@@ -36,7 +36,25 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   auto spatial = Spatial(&part);
   using Viscosity = mini::spatial::EnergyBasedViscosity<Part>;
   auto viscosity = Viscosity(&spatial);
-  auto matrices = viscosity.BuildDampingMatrices();
+  // auto matrices = viscosity.BuildDampingMatrices();
+  std::cout << "[Done] BuildDampingMatrices" << std::endl;
+  auto local_on_neighbors = viscosity.BuildCoordinates();
+  std::cout << "[Done] BuildCoordinates" << std::endl;
+  for (auto &cell_i : part.GetLocalCells()) {
+    int i_cell = cell_i.id();
+    auto &local_on_neighbors_of_cell_i = local_on_neighbors.at(i_cell);
+    int n_neighbor = cell_i.adj_cells_.size();
+    for (int i_neighbor = 0; i_neighbor < n_neighbor; ++i_neighbor) {
+      auto &local_on_neighbor_i = local_on_neighbors_of_cell_i.at(i_neighbor);
+      auto *neighbor_i = cell_i.adj_cells_.at(i_neighbor);
+      for (int i_node = 0; i_node < cell_i.N; ++i_node) {
+        auto &global = cell_i.gauss().GetGlobalCoord(i_node);
+        auto global_from_neighbor
+            = neighbor_i->lagrange().LocalToGlobal(local_on_neighbor_i.at(i_node));
+        EXPECT_NEAR((global - global_from_neighbor).norm(), 0, 1e-10);
+      }
+    }
+  }
 }
 
 // mpirun -n 4 ./part must be run in ../mesh
