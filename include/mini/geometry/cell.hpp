@@ -240,7 +240,7 @@ class Cell : public Element<Scalar, 3, 3> {
       requires std::is_same_v<Global, std::invoke_result_t<Func, Local const &>>
           && std::is_same_v<Jacobian, std::invoke_result_t<MatJ, Local const &>>
   static Global root(Func &&func, Global x, MatJ &&matj, Scalar xtol = 1e-5,
-      int cnt = 128) {
+      Scalar max_res_norm = 0.5, int cnt = 128) {
     Global res;
     Scalar res_norm;
 #ifndef NDEBUG
@@ -253,6 +253,10 @@ class Cell : public Element<Scalar, 3, 3> {
        */
       res = matj(x).transpose().partialPivLu().solve(func(x));
       res_norm = res.norm();
+      if (res_norm > max_res_norm) {
+        res *= (max_res_norm / res_norm);
+        res_norm = max_res_norm;
+      }
 #ifndef NDEBUG
       res_norms.emplace_back(res_norm);
 #endif
