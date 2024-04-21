@@ -243,16 +243,30 @@ class Cell : public Element<Scalar, 3, 3> {
       int cnt = 128) {
     Global res;
     Scalar res_norm;
+#ifndef NDEBUG
+    std::vector<Scalar> res_norms;
+    res_norms.reserve(cnt);
+#endif
     do {
       /**
        * The Jacobian matrix required here is the transpose of the one returned by `Element::LocalToJacobian`.
        */
       res = matj(x).transpose().partialPivLu().solve(func(x));
       res_norm = res.norm();
+#ifndef NDEBUG
+      res_norms.emplace_back(res_norm);
+#endif
       x -= res;
       cnt--;
     } while (cnt && res_norm > xtol);
     if (cnt == 0) {
+#ifndef NDEBUG
+      std::cerr << "res_norms = ";
+      for (auto val : res_norms) {
+        std::cerr << val << ' ';
+      }
+      std::cerr << std::endl;
+#endif
       throw std::runtime_error("Exceed maximum iteration steps.");
     }
     return x;
