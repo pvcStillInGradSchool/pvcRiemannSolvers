@@ -207,7 +207,19 @@ class Cell : public Element<Scalar, 3, 3> {
     auto jac = [this](Local const &xyz_local) {
       return LocalToJacobian(xyz_local);
     };
-    return root(func, hint, jac);
+    Local local;
+    try {
+      local = root(func, hint, jac);
+    } catch(std::runtime_error &e) {
+      std::cerr << "global = " << xyz_global.transpose() << "\n";
+      std::cerr << "global_coords =" << "\n";
+      for (int i = 0; i < this->CountNodes(); ++i) {
+        std::cerr << this->GetGlobalCoord(i).transpose() << "\n";
+      }
+      std::cerr << std::endl;
+      throw e;
+    }
+    return local;
   }
   Local GlobalToLocal(const Global &xyz,
       const Local &hint = Local(0, 0, 0)) const {
