@@ -239,15 +239,22 @@ class Cell : public Element<Scalar, 3, 3> {
   template <typename Func, typename MatJ>
       requires std::is_same_v<Global, std::invoke_result_t<Func, Local const &>>
           && std::is_same_v<Jacobian, std::invoke_result_t<MatJ, Local const &>>
-  static Global root(Func &&func, Global x, MatJ &&matj, Scalar xtol = 1e-5) {
+  static Global root(Func &&func, Global x, MatJ &&matj, Scalar xtol = 1e-5,
+      int cnt = 128) {
     Global res;
+    Scalar res_norm;
     do {
       /**
        * The Jacobian matrix required here is the transpose of the one returned by `Element::LocalToJacobian`.
        */
       res = matj(x).transpose().partialPivLu().solve(func(x));
+      res_norm = res.norm();
       x -= res;
-    } while (res.norm() > xtol);
+      cnt--;
+    } while (cnt && res_norm > xtol);
+    if (cnt == 0) {
+      throw std::runtime_error("Exceed maximum iteration steps.");
+    }
     return x;
   }
 };
