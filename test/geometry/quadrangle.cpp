@@ -11,6 +11,32 @@
 class TestLagrangeQuadrangle : public ::testing::Test {
  protected:
 };
+TEST_F(TestLagrangeQuadrangle, TwoDimensionalQuadrangle4) {
+  using Lagrange = mini::geometry::Quadrangle4<double, 2>;
+  using Coord = typename Lagrange::Global;
+  using Local = typename Lagrange::Local;
+  auto face = Lagrange {
+    Coord(-10, -10), Coord(+10, -10), Coord(+10, +10), Coord(-10, +10),
+  };
+  static_assert(face.CellDim() == 2);
+  static_assert(face.PhysDim() == 2);
+  EXPECT_EQ(face.CountCorners(), 4);
+  EXPECT_EQ(face.CountNodes(), 4);
+  EXPECT_EQ(face.LocalToGlobal(1, 1), Coord(10, 10));
+  EXPECT_EQ(face.LocalToGlobal(1.5, 1.5), Coord(15, 15));
+  EXPECT_EQ(face.LocalToGlobal(3, 4), Coord(30, 40));
+  EXPECT_NEAR(0, (face.GlobalToLocal(30, 40) - Local(3, 4)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(40, 55) - Local(4, 5.5)).norm(), 1e-14);
+  EXPECT_NEAR(0, (face.GlobalToLocal(70, 130) - Local(7, 13)).norm(), 1e-14);
+  EXPECT_NEAR(0, (face.GlobalToLocal(-20, -10) - Local(-2, -1)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(-10, -20) - Local(-1, -2)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(+20, -10) - Local(+2, -1)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(-10, +20) - Local(-1, +2)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(-20, +10) - Local(-2, +1)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(+10, -20) - Local(+1, -2)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(+20, +10) - Local(+2, +1)).norm(), 1e-15);
+  EXPECT_NEAR(0, (face.GlobalToLocal(+10, +20) - Local(+1, +2)).norm(), 1e-15);
+}
 TEST_F(TestLagrangeQuadrangle, ThreeDimensionalQuadrangle4) {
   constexpr int D = 3;
   using Lagrange = mini::geometry::Quadrangle4<double, D>;

@@ -8,6 +8,7 @@
 #include <numeric>
 
 #include <initializer_list>
+#include <iostream>
 #include <vector>
 
 #include "mini/algebra/eigen.hpp"
