@@ -75,6 +75,82 @@ class Element {
     }
     element->_BuildCenter();
   }
+
+  /**
+   * @brief Mimic [`scipy.optimize.root`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root.html).
+   * 
+   * @tparam Func 
+   * @tparam MatJ 
+   * @param func 
+   * @param x 
+   * @param matj 
+   * @param xtol 
+   * @return requires&& 
+   */
+  template <typename Func, typename MatJ>
+      requires std::is_same_v<Global, std::invoke_result_t<Func, Local const &>>
+          && std::is_same_v<Jacobian, std::invoke_result_t<MatJ, Local const &>>
+  static Global root(Func &&func, Global x, MatJ &&matj, Scalar xtol = 1e-5,
+      Scalar max_res_norm = 0.5, int cnt = 128) requires(kCellDim == kPhysDim) {
+    Global res;
+    Scalar res_norm;
+#ifndef NDEBUG
+    std::vector<Scalar> res_norms;
+    res_norms.reserve(cnt);
+#endif
+    do {
+      /**
+       * The Jacobian matrix required here is the transpose of the one returned by `Element::LocalToJacobian`.
+       */
+      res = matj(x).transpose().partialPivLu().solve(func(x));
+      res_norm = res.norm();
+      if (res_norm > max_res_norm) {
+        res *= (max_res_norm / res_norm);
+        res_norm = max_res_norm;
+      }
+#ifndef NDEBUG
+      res_norms.emplace_back(res_norm);
+#endif
+      x -= res;
+      cnt--;
+    } while (cnt && res_norm > xtol);
+    if (cnt == 0) {
+#ifndef NDEBUG
+      std::cerr << "res_norms = ";
+      for (auto val : res_norms) {
+        std::cerr << val << ' ';
+      }
+      std::cerr << std::endl;
+#endif
+      throw std::runtime_error("Exceed maximum iteration steps.");
+    }
+    return x;
+  }
+
+ public:
+  Local GlobalToLocal(const Global &global, const Local &hint) const
+      requires(kCellDim == kPhysDim) {
+    auto func = [this, &global](Local const &local) {
+      auto res = LocalToGlobal(local);
+      return res -= global;
+    };
+    auto jac = [this](Local const &local) {
+      return LocalToJacobian(local);
+    };
+    Local local;
+    try {
+      local = root(func, hint, jac);
+    } catch(std::runtime_error &e) {
+      std::cerr << "global = " << global.transpose() << "\n";
+      std::cerr << "global_coords =" << "\n";
+      for (int i = 0; i < this->CountNodes(); ++i) {
+        std::cerr << this->GetGlobalCoord(i).transpose() << "\n";
+      }
+      std::cerr << std::endl;
+      throw e;
+    }
+    return local;
+  }
 };
 
 }  // namespace geometry
