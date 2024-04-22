@@ -44,6 +44,30 @@ TEST_F(TestLagrangeHexahedron8, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(70, 130, 60) - Coord(7, 13, 6)).norm(),
       1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(-20, -10, -10) - Coord(-2, -1, -1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(-10, -20, -10) - Coord(-1, -2, -1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(-10, -10, -20) - Coord(-1, -1, -2)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(+20, -10, -10) - Coord(+2, -1, -1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(-10, +20, -10) - Coord(-1, +2, -1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(-10, -10, +20) - Coord(-1, -1, +2)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(-20, +10, +10) - Coord(-2, +1, +1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(+10, -20, +10) - Coord(+1, -2, +1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(+10, +10, -20) - Coord(+1, +1, -2)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(+20, +10, +10) - Coord(+2, +1, +1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(+10, +20, +10) - Coord(+1, +2, +1)).norm(),
+      1e-10);
+  EXPECT_NEAR(0, (hexa.GlobalToLocal(+10, +10, +20) - Coord(+1, +1, +2)).norm(),
+      1e-10);
   mini::geometry::Cell<typename Lagrange::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
