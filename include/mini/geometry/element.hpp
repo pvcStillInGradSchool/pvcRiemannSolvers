@@ -96,8 +96,8 @@ class Element {
     Global res;
     Scalar res_norm;
 #ifndef NDEBUG
-    std::vector<Scalar> res_norms;
-    res_norms.reserve(cnt);
+    std::vector<Local> x_history;
+    x_history.reserve(cnt);
 #endif
     do {
       /**
@@ -109,17 +109,17 @@ class Element {
         res *= (max_res_norm / res_norm);
         res_norm = max_res_norm;
       }
-#ifndef NDEBUG
-      res_norms.emplace_back(res_norm);
-#endif
       x -= res;
       cnt--;
+#ifndef NDEBUG
+      x_history.emplace_back(x);
+#endif
     } while (cnt && res_norm > xtol);
     if (cnt == 0) {
 #ifndef NDEBUG
-      std::cerr << "res_norms = ";
-      for (auto val : res_norms) {
-        std::cerr << val << ' ';
+      std::cerr << "x_history =\n";
+      for (int i = 0; i < x_history.size(); ++i) {
+        std::cerr << i << ": " << x_history[i].transpose() << "\n";
       }
       std::cerr << std::endl;
 #endif
