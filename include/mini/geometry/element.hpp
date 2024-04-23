@@ -119,7 +119,7 @@ class Element {
 #ifndef NDEBUG
       std::cerr << "x_history =\n";
       for (int i = 0; i < x_history.size(); ++i) {
-        std::cerr << i << ": " << x_history[i].transpose() << "\n";
+        std::cerr << x_history[i].transpose() << "\n";
       }
       std::cerr << std::endl;
 #endif
