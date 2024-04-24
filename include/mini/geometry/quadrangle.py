@@ -51,7 +51,22 @@ class Quadrangle4():
             tail = self.local_to_global((xi, +10))
             x = (head[0], tail[0])
             y = (head[-1], tail[-1])
-            plt.plot(x, y, color=('c', rgba[i]), label=f'{xi_str} = {xi}')
+            if i % 2:
+                plt.plot(x, y, color=('c', rgba[i]), linestyle='--')
+            else:
+                plt.plot(x, y, color=('c', rgba[i]), label=f'{xi_str} = {xi}')
+            i += 1
+        i = 0
+        eta_str = r'$\eta$'
+        for eta in eta_range:
+            head = self.local_to_global((-10, eta))
+            tail = self.local_to_global((+10, eta))
+            x = (head[0], tail[0])
+            y = (head[-1], tail[-1])
+            if i % 2:
+                plt.plot(x, y, color=('k', rgba[i]), linestyle='--')
+            else:
+                plt.plot(x, y, color=('k', rgba[i]), label=f'{eta_str} = {eta}')
             i += 1
 
 
