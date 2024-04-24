@@ -129,8 +129,8 @@ class Element {
   }
 
  public:
-  Local GlobalToLocal(const Global &global, const Local &hint) const
-      requires(kCellDim == kPhysDim) {
+  Local GlobalToLocal(const Global &global,
+      const Local &hint = Local::Zero()) const requires(kCellDim == kPhysDim) {
     auto func = [this, &global](Local const &local) {
       auto res = LocalToGlobal(local);
       return res -= global;

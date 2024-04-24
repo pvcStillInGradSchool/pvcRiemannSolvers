@@ -197,10 +197,15 @@ class Cell : public Element<Scalar, 3, 3> {
     return det_hess;
   }
 
+  Local GlobalToLocal(const Global &xyz_global,
+      const Local &hint = Local(0, 0, 0)) const {
+    return this->Base::GlobalToLocal(xyz_global, hint);
+  }
+
   Local GlobalToLocal(Scalar x_global, Scalar y_global, Scalar z_global,
       const Local &hint = Local(0, 0, 0)) const {
     Global xyz_global = {x_global, y_global, z_global};
-    return this->Base::GlobalToLocal(xyz_global, hint);
+    return GlobalToLocal(xyz_global, hint);
   }
 
   /**

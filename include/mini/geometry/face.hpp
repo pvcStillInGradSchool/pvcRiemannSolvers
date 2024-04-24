@@ -86,10 +86,15 @@ class Face : public Element<Scalar, kPhysDim, 2> {
     return LocalToJacobian(xy[X], xy[Y]);
   }
 
+  Local GlobalToLocal(const Global &xy_global,
+      const Local &hint = Local(0, 0)) const {
+    return this->Base::GlobalToLocal(xy_global, hint);
+  }
+
   Local GlobalToLocal(Scalar x_global, Scalar y_global,
       const Local &hint = Local(0, 0)) const {
     Global xy_global = {x_global, y_global};
-    return this->Base::GlobalToLocal(xy_global, hint);
+    return GlobalToLocal(xy_global, hint);
   }
 };
 
