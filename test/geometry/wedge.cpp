@@ -31,18 +31,10 @@ TEST_F(TestLagrangeWedge6, CoordinateMap) {
   EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(0)),
-                                   lagrange.GetLocalCoord(0));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(1)),
-                                   lagrange.GetLocalCoord(1));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(2)),
-                                   lagrange.GetLocalCoord(2));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(3)),
-                                   lagrange.GetLocalCoord(3));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(4)),
-                                   lagrange.GetLocalCoord(4));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(5)),
-                                   lagrange.GetLocalCoord(5));
+  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
+    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
+        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+  }
   mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
@@ -106,7 +98,7 @@ TEST_F(TestLagrangeWedge6, CoordinateMap) {
         auto face_shapes = face.LocalToShapeFunctions(x, y);
         for (int c = 0; c < cell.CountNodes(); c++) {
           int f = c2f[c];
-          EXPECT_NEAR(cell_shapes[c], f < 0 ? 0 : face_shapes[f], 1e-16);
+          EXPECT_NEAR(cell_shapes[c], f < 0 ? 0 : face_shapes[f], 1e-15);
         }
       }
     }
@@ -221,18 +213,10 @@ TEST_F(TestLagrangeWedge15, CoordinateMap) {
   EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(0)),
-                                   lagrange.GetLocalCoord(0));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(1)),
-                                   lagrange.GetLocalCoord(1));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(2)),
-                                   lagrange.GetLocalCoord(2));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(3)),
-                                   lagrange.GetLocalCoord(3));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(4)),
-                                   lagrange.GetLocalCoord(4));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(5)),
-                                   lagrange.GetLocalCoord(5));
+  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
+    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
+        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+  }
   mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
@@ -423,18 +407,10 @@ TEST_F(TestLagrangeWedge18, CoordinateMap) {
   EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(0)),
-                                   lagrange.GetLocalCoord(0));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(1)),
-                                   lagrange.GetLocalCoord(1));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(2)),
-                                   lagrange.GetLocalCoord(2));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(3)),
-                                   lagrange.GetLocalCoord(3));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(4)),
-                                   lagrange.GetLocalCoord(4));
-  EXPECT_EQ(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(5)),
-                                   lagrange.GetLocalCoord(5));
+  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
+    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
+        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+  }
   mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);

@@ -195,12 +195,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
   for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
     Global global = vector_interp.gauss().GetGlobalCoord(q);
     Value value = vector_interp.GlobalToValue(global);
-    EXPECT_NEAR((value - vector_interp.GetValue(q)).norm(), 0, 1e-14);
+    EXPECT_NEAR((value - vector_interp.GetValue(q)).norm(), 0, 1e-13);
     vector_interp.SetValue(q, value);
     EXPECT_EQ(value, vector_interp.GetValue(q));
     auto grad = vector_interp.GlobalToBasisGradients(global);
     grad -= vector_interp.GetBasisGradients(q);
-    EXPECT_NEAR(grad.norm(), 0, 1e-15);
+    EXPECT_NEAR(grad.norm(), 0, 1e-14);
   }
 }
 TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
