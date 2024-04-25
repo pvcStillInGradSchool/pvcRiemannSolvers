@@ -5,6 +5,7 @@
 #include <concepts>
 
 #include <cassert>
+#include <cmath>
 #include <numeric>
 
 #include <initializer_list>
@@ -98,6 +99,7 @@ class Element {
 #ifndef NDEBUG
     std::vector<Local> x_history;
     x_history.reserve(cnt);
+    x_history.emplace_back(x);
 #endif
     do {
       /**
@@ -115,7 +117,7 @@ class Element {
       x_history.emplace_back(x);
 #endif
     } while (cnt && res_norm > xtol);
-    if (cnt == 0) {
+    if (cnt == 0 || std::isnan(res_norm)) {
 #ifndef NDEBUG
       std::cerr << "x_history =\n";
       for (int i = 0; i < x_history.size(); ++i) {

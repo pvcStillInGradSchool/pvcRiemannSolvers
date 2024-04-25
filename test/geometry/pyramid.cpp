@@ -32,8 +32,9 @@ TEST_F(TestLagrangePyramid5, CoordinateMap) {
   EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
-  for (int i_node = 0; i_node < lagrange.CountNodes() - 1; ++i_node) {
+  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
     if (i_node == 4) {
+      EXPECT_ANY_THROW(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node)));
       continue;
     }
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
@@ -226,8 +227,9 @@ TEST_F(TestLagrangePyramid13, CoordinateMap) {
   EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
   EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
-  for (int i_node = 0; i_node < lagrange.CountNodes() - 1; ++i_node) {
+  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
     if (i_node == 4) {
+      EXPECT_ANY_THROW(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node)));
       continue;
     }
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
@@ -438,6 +440,7 @@ TEST_F(TestLagrangePyramid14, CoordinateMap) {
   EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
   for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
     if (i_node == 4) {
+      EXPECT_ANY_THROW(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node)));
       continue;
     }
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))

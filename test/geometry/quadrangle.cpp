@@ -36,6 +36,11 @@ TEST_F(TestLagrangeQuadrangle, TwoDimensionalQuadrangle4) {
   EXPECT_NEAR(0, (face.GlobalToLocal(+10, -20) - Local(+1, -2)).norm(), 1e-15);
   EXPECT_NEAR(0, (face.GlobalToLocal(+20, +10) - Local(+2, +1)).norm(), 1e-15);
   EXPECT_NEAR(0, (face.GlobalToLocal(+10, +20) - Local(+1, +2)).norm(), 1e-15);
+  face = Lagrange {
+    Coord(2.00000, 1.000000), Coord(1.94313, 0.878607),
+    Coord(2.00493, 0.845382), Coord(2.06283, 0.874438),
+  };
+  EXPECT_ANY_THROW(face.GlobalToLocal(2.05723, 0.777978));
 }
 TEST_F(TestLagrangeQuadrangle, ThreeDimensionalQuadrangle4) {
   constexpr int D = 3;

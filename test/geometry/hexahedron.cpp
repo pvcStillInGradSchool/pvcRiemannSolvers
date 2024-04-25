@@ -108,6 +108,13 @@ TEST_F(TestLagrangeHexahedron8, CoordinateMap) {
       EXPECT_EQ(shapes[j], i == j);
     }
   }
+  hexa = Lagrange {
+    Coord(2.00000, 1.000000, 0.0), Coord(1.94313, 0.878607, 0.0),
+    Coord(2.00493, 0.845382, 0.0), Coord(2.06283, 0.874438, 0.0),
+    Coord(2.00000, 1.000000, 0.1), Coord(1.94313, 0.878607, 0.1),
+    Coord(2.00493, 0.845382, 0.1), Coord(2.06283, 0.874438, 0.1),
+  };
+  EXPECT_ANY_THROW(hexa.GlobalToLocal(2.05723, 0.777978, 0));
 }
 TEST_F(TestLagrangeHexahedron8, GetJacobianGradient) {
   std::srand(31415926);
