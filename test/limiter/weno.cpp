@@ -46,13 +46,13 @@ TEST_F(TestWenoLimiters, Smoothness) {
   using Taylor = typename Projection::Taylor;
   using Value = typename Projection::Value;
   using Global = typename Projection::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
       Global{-1, -1, -1}, Global{+1, -1, -1},
       Global{+1, +1, -1}, Global{-1, +1, -1},
       Global{-1, -1, +1}, Global{+1, -1, +1},
       Global{+1, +1, +1}, Global{-1, +1, +1}
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   auto func = [](Coord const &point) {
     return Taylor::GetValue(point);
   };
@@ -130,9 +130,9 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
       p[i][2] = z[i_node];
     }
     auto coords = { p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7] };
-    auto lagrange_uptr = std::make_unique<Coordinate>(coords);
-    auto gauss_ptr = std::make_unique<Gauss>(*lagrange_uptr);
-    cells.emplace_back(std::move(lagrange_uptr), std::move(gauss_ptr), i_cell);
+    auto coordinate_uptr = std::make_unique<Coordinate>(coords);
+    auto gauss_ptr = std::make_unique<Gauss>(*coordinate_uptr);
+    cells.emplace_back(std::move(coordinate_uptr), std::move(gauss_ptr), i_cell);
     assert(&(cells[i_cell]) == &(cells.back()));
     cells[i_cell].Approximate(func);
   }

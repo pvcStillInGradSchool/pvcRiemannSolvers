@@ -46,7 +46,7 @@ class Pyramid : public Cell<Scalar> {
   static const std::array<Scalar, Qx * Qy * Qz> local_weights_;
   std::array<Global, Qx * Qy * Qz> global_coords_;
   std::array<Scalar, Qx * Qy * Qz> global_weights_;
-  Coordinate const *lagrange_;
+  Coordinate const *coordinate_;
   Scalar volume_;
 
  public:
@@ -115,7 +115,7 @@ class Pyramid : public Cell<Scalar> {
 
  public:
   explicit Pyramid(Coordinate const &lagrange)
-      : lagrange_(&lagrange) {
+      : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
   Pyramid(const Pyramid &) = default;
@@ -125,7 +125,7 @@ class Pyramid : public Cell<Scalar> {
   virtual ~Pyramid() noexcept = default;
 
   const Coordinate &coordinate() const final {
-    return *lagrange_;
+    return *coordinate_;
   }
 
   Scalar volume() const final {

@@ -18,15 +18,15 @@ class TestProjection : public ::testing::Test {
   using Gx = mini::gauss::Legendre<double, 5>;
   using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
   using Coord = typename Gauss::Global;
-  Coordinate lagrange_;
+  Coordinate coordinate_;
   Gauss gauss_;
 
-  TestProjection() : lagrange_{
+  TestProjection() : coordinate_{
       Coord{-1, -1, -1}, Coord{+1, -1, -1},
       Coord{+1, +1, -1}, Coord{-1, +1, -1},
       Coord{-1, -1, +1}, Coord{+1, -1, +1},
       Coord{+1, +1, +1}, Coord{-1, +1, +1}
-    }, gauss_(lagrange_) {
+    }, gauss_(coordinate_) {
   }
 };
 

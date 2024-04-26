@@ -116,16 +116,16 @@ struct Face {
   using Cell = part::Cell<Int, Riemann, P>;
   using Global = typename Cell::Global;
 
-  CoordinateUptr lagrange_ptr_;
+  CoordinateUptr coordinate_ptr_;
   GaussUptr gauss_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
   std::vector<Riemann> riemann_;
   Int id_{-1};
 
-  Face(CoordinateUptr &&lagrange_ptr, GaussUptr &&gauss_ptr,
+  Face(CoordinateUptr &&coordinate_ptr, GaussUptr &&gauss_ptr,
       Cell *holder, Cell *sharer, Int id = 0)
-      : lagrange_ptr_(std::move(lagrange_ptr)),
+      : coordinate_ptr_(std::move(coordinate_ptr)),
         gauss_ptr_(std::move(gauss_ptr)),
         holder_(holder), sharer_(sharer),
         holder_to_sharer_(-holder->center()),
@@ -147,8 +147,8 @@ struct Face {
     return *gauss_ptr_;
   }
   Coordinate const &coordinate() const {
-    assert(lagrange_ptr_);
-    return *lagrange_ptr_;
+    assert(coordinate_ptr_);
+    return *coordinate_ptr_;
   }
   Riemann const &riemann(int i) const {
     return riemann_[i];
@@ -210,14 +210,14 @@ struct Cell {
 
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
-  CoordinateUptr lagrange_ptr_;
+  CoordinateUptr coordinate_ptr_;
   GaussUptr gauss_ptr_;
   ProjectionUptr projection_ptr_;
   Int metis_id{-1}, id_{-1};
   bool inner_ = true;
 
-  Cell(CoordinateUptr &&lagrange_ptr, GaussUptr &&gauss_ptr, Int m_cell)
-      : lagrange_ptr_(std::move(lagrange_ptr)),
+  Cell(CoordinateUptr &&coordinate_ptr, GaussUptr &&gauss_ptr, Int m_cell)
+      : coordinate_ptr_(std::move(coordinate_ptr)),
         gauss_ptr_(std::move(gauss_ptr)),
         projection_ptr_(std::make_unique<Proj>(*gauss_ptr_)),
         metis_id(m_cell) {
@@ -249,8 +249,8 @@ struct Cell {
     return *gauss_ptr_;
   }
   Coordinate const &coordinate() const {
-    assert(lagrange_ptr_);
-    return *lagrange_ptr_;
+    assert(coordinate_ptr_);
+    return *coordinate_ptr_;
   }
   Projection const &projection() const {
     return *projection_ptr_;
@@ -811,9 +811,9 @@ class Part {
       local_cells_[i_zone][i_sect] = std::move(section);
       for (int i_cell = head; i_cell < tail; ++i_cell) {
         auto *i_node_list = &nodes[(i_cell - head) * npe];
-        auto [lagrange_uptr, gauss_uptr]
+        auto [coordinate_uptr, gauss_uptr]
             = BuildGaussForCell(npe, i_zone, i_node_list);
-        auto cell = Cell(std::move(lagrange_uptr),
+        auto cell = Cell(std::move(coordinate_uptr),
             std::move(gauss_uptr), metis_ids[i_cell]);
         local_cells_[i_zone][i_sect][i_cell] = std::move(cell);
       }
@@ -954,9 +954,9 @@ class Part {
             GhostCellIndex(i_source, index + 1, npe));
         int i_zone = recv_buf[index++];
         auto *i_node_list = &recv_buf[index];
-        auto [lagrange_uptr, gauss_uptr]
+        auto [coordinate_uptr, gauss_uptr]
             = BuildGaussForCell(npe, i_zone, i_node_list);
-        auto cell = Cell(std::move(lagrange_uptr),
+        auto cell = Cell(std::move(coordinate_uptr),
             std::move(gauss_uptr), m_cell);
         ghost_cells_[m_cell] = std::move(cell);
         index += npe;
@@ -1028,9 +1028,9 @@ class Part {
       auto *face_node_list = common_nodes.data();
       geometry::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
-      auto [lagrange_uptr, gauss_uptr]
+      auto [coordinate_uptr, gauss_uptr]
           = BuildGaussForFace(face_npe, i_zone, face_node_list);
-      auto face_uptr = std::make_unique<Face>(std::move(lagrange_uptr),
+      auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
           std::move(gauss_uptr), &holder, &sharer, local_faces_.size());
       holder.adj_faces_.emplace_back(face_uptr.get());
       sharer.adj_faces_.emplace_back(face_uptr.get());
@@ -1072,9 +1072,9 @@ class Part {
       auto *face_node_list = common_nodes.data();
       geometry::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
-      auto [lagrange_uptr, gauss_uptr]
+      auto [coordinate_uptr, gauss_uptr]
           = BuildGaussForFace(face_npe, i_zone, face_node_list);
-      auto face_uptr = std::make_unique<Face>(std::move(lagrange_uptr),
+      auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
           std::move(gauss_uptr), &holder, &sharer,
           local_faces_.size() + ghost_faces_.size());
       holder.adj_faces_.emplace_back(face_uptr.get());
@@ -1529,9 +1529,9 @@ class Part {
             break;
           }
         }
-        auto [lagrange_uptr, gauss_uptr]
+        auto [coordinate_uptr, gauss_uptr]
             = BuildGaussForFace(npe, i_zone, face_node_list);
-        auto face_uptr = std::make_unique<Face>(std::move(lagrange_uptr),
+        auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
             std::move(gauss_uptr), holder_ptr, nullptr, face_id++);
         // the face's normal vector always point from holder to the exterior
         assert((face_uptr->center() - holder_ptr->center()).dot(

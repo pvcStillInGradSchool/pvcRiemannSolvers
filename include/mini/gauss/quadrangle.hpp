@@ -50,7 +50,7 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   std::array<Global, Qx * Qy> global_coords_;
   std::array<Scalar, Qx * Qy> global_weights_;
   std::array<Frame, Qx * Qy> normal_frames_;
-  Coordinate const *lagrange_;
+  Coordinate const *coordinate_;
   Scalar area_;
 
  public:
@@ -124,13 +124,13 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
 
  public:
   explicit Quadrangle(Coordinate const &lagrange)
-      : lagrange_(&lagrange) {
+      : coordinate_(&lagrange) {
     area_ = this->BuildQuadraturePoints();
     Base::BuildNormalFrames(this);
   }
 
   const Coordinate &coordinate() const final {
-    return *lagrange_;
+    return *coordinate_;
   }
 
   Scalar area() const final {

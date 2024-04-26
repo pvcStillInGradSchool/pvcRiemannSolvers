@@ -46,7 +46,7 @@ class Wedge : public Cell<Scalar> {
   static const std::array<Scalar, Qt * Qz> local_weights_;
   std::array<Global, kPoints> global_coords_;
   std::array<Scalar, kPoints> global_weights_;
-  Coordinate const *lagrange_;
+  Coordinate const *coordinate_;
   Scalar volume_;
 
  public:
@@ -111,7 +111,7 @@ class Wedge : public Cell<Scalar> {
 
  public:
   explicit Wedge(Coordinate const &lagrange)
-      : lagrange_(&lagrange) {
+      : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
   Wedge(const Wedge &) = default;
@@ -121,7 +121,7 @@ class Wedge : public Cell<Scalar> {
   virtual ~Wedge() noexcept = default;
 
   const Coordinate &coordinate() const final {
-    return *lagrange_;
+    return *coordinate_;
   }
 
   Scalar volume() const final {

@@ -15,10 +15,10 @@ TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
   using Coordinate = mini::geometry::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 2);
   EXPECT_EQ(gauss.CountPoints(), 16);
@@ -43,10 +43,10 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
   using Coordinate = mini::geometry::Quadrangle4<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4)
   };
-  auto const gauss = Gauss(lagrange);
+  auto const gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);
@@ -78,11 +78,11 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
   using Coordinate = mini::geometry::Quadrangle8<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4),
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
   };
-  auto const gauss = Gauss(lagrange);
+  auto const gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);
@@ -114,12 +114,12 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle9) {
   using Coordinate = mini::geometry::Quadrangle9<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4),
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
     Global(2, 2, 2),
   };
-  auto const gauss = Gauss(lagrange);
+  auto const gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);

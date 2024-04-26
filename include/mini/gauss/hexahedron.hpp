@@ -53,7 +53,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   static const std::array<Scalar, Q> local_weights_;
   std::array<Global, Q> global_coords_;
   std::array<Scalar, Q> global_weights_;
-  Coordinate const *lagrange_;
+  Coordinate const *coordinate_;
   Scalar volume_;
 
 
@@ -122,7 +122,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
 
  public:
   explicit Hexahedron(Coordinate const &lagrange)
-      : lagrange_(&lagrange) {
+      : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
   Hexahedron(const Hexahedron &) = default;
@@ -132,7 +132,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   virtual ~Hexahedron() noexcept = default;
 
   const Coordinate &coordinate() const final {
-    return *lagrange_;
+    return *coordinate_;
   }
 
   Scalar volume() const final {

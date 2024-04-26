@@ -41,11 +41,11 @@ class TestPolynomialHexahedronProjection : public ::testing::Test {
 };
 TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   // build a hexa-gauss
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   // build an orthonormal basis on it
   auto basis = Basis(gauss);
   // check orthonormality
@@ -57,17 +57,17 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   EXPECT_NEAR(residual, 0.0, 1e-14);
   // build another hexa-gauss
   Coord shift = {-1, 2, 3};
-  lagrange = Coordinate {
-    lagrange.GetGlobalCoord(0) + shift,
-    lagrange.GetGlobalCoord(1) + shift,
-    lagrange.GetGlobalCoord(2) + shift,
-    lagrange.GetGlobalCoord(3) + shift,
-    lagrange.GetGlobalCoord(4) + shift,
-    lagrange.GetGlobalCoord(5) + shift,
-    lagrange.GetGlobalCoord(6) + shift,
-    lagrange.GetGlobalCoord(7) + shift,
+  coordinate = Coordinate {
+    coordinate.GetGlobalCoord(0) + shift,
+    coordinate.GetGlobalCoord(1) + shift,
+    coordinate.GetGlobalCoord(2) + shift,
+    coordinate.GetGlobalCoord(3) + shift,
+    coordinate.GetGlobalCoord(4) + shift,
+    coordinate.GetGlobalCoord(5) + shift,
+    coordinate.GetGlobalCoord(6) + shift,
+    coordinate.GetGlobalCoord(7) + shift,
   };
-  gauss = Gauss(lagrange);
+  gauss = Gauss(coordinate);
   // build another orthonormal basis on it
   basis = Basis(gauss);
   // check orthonormality
@@ -79,11 +79,11 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   EXPECT_NEAR(residual, 0.0, 1e-14);
 }
 TEST_F(TestPolynomialHexahedronProjection, Projection) {
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   auto scalar_pf = ScalarPF(gauss);
   scalar_pf.Approximate([](Coord const& xyz){
     return xyz[0] * xyz[1] + xyz[2];
@@ -161,13 +161,13 @@ TEST_F(TestPolynomialHexahedronInterpolation, StaticMethods) {
 TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
   // build a hexa-gauss and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
     Global(+a, +b, -c), Global(-a, +b, -c),
     Global(-a, -b, +c), Global(+a, -b, +c),
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   // build a vector function and its interpolation
   auto vector_func = [](Global const& xyz) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
@@ -215,7 +215,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
   for (int i_cell = 1; i_cell > 0; --i_cell) {
     // build a hexa-gauss and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
-    auto lagrange = Coordinate {
+    auto coordinate = Coordinate {
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() + b, rand_f() - c),
@@ -225,7 +225,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
       Global(rand_f() + a, rand_f() + b, rand_f() + c),
       Global(rand_f() - a, rand_f() + b, rand_f() + c),
     };
-    auto gauss = Gauss(lagrange);
+    auto gauss = Gauss(coordinate);
     // build a vector function and its interpolation
     Value coeff = Value::Random();
     auto get_value = [&coeff](Global const& xyz) {
@@ -311,23 +311,23 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
 TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
   // build a hexa-gauss and a Coordinate interpolation on it
   auto a = 2.0, b = 3.0, c = 4.0;
-  auto cell_lagrange = Coordinate {
+  auto cell_coordinate = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
     Global(+a, +b, -c), Global(-a, +b, -c),
     Global(-a, -b, +c), Global(+a, -b, +c),
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
-  auto cell_gauss = Gauss(cell_lagrange);
+  auto cell_gauss = Gauss(cell_coordinate);
   auto interp = Interpolation(cell_gauss);
   using CoordinateOnFace = mini::geometry::Quadrangle4<double, 3>;
   /* test on the x_local == +1 face */{
-    auto face_lagrange = CoordinateOnFace {
+    auto face_coordinate = CoordinateOnFace {
       Global(+a, -b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(+a, -b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussY, GaussZ>(face_lagrange);
+    auto face_gauss = mini::gauss::Quadrangle<3, GaussY, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
-    int i_face = interp.FindFaceId(face_lagrange.center());
+    int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 2);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
       Global global = face_gauss_ref.GetGlobalCoord(f);
@@ -341,13 +341,13 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the x_local == -1 face */{
-    auto face_lagrange = CoordinateOnFace {
+    auto face_coordinate = CoordinateOnFace {
       Global(-a, -b, -c), Global(-a, +b, -c),
       Global(-a, +b, +c), Global(-a, -b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussY, GaussZ>(face_lagrange);
+    auto face_gauss = mini::gauss::Quadrangle<3, GaussY, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
-    int i_face = interp.FindFaceId(face_lagrange.center());
+    int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 4);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
       Global global = face_gauss_ref.GetGlobalCoord(f);
@@ -361,13 +361,13 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the y_local == +1 face */{
-    auto face_lagrange = CoordinateOnFace {
+    auto face_coordinate = CoordinateOnFace {
       Global(-a, +b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussZ>(face_lagrange);
+    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
-    int i_face = interp.FindFaceId(face_lagrange.center());
+    int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 3);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
       Global global = face_gauss_ref.GetGlobalCoord(f);
@@ -381,13 +381,13 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the y_local == -1 face */{
-    auto face_lagrange = CoordinateOnFace {
+    auto face_coordinate = CoordinateOnFace {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, -b, +c), Global(-a, -b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussZ>(face_lagrange);
+    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
-    int i_face = interp.FindFaceId(face_lagrange.center());
+    int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 1);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
       Global global = face_gauss_ref.GetGlobalCoord(f);
@@ -401,13 +401,13 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the z_local == +1 face */{
-    auto face_lagrange = CoordinateOnFace {
+    auto face_coordinate = CoordinateOnFace {
       Global(-a, -b, +c), Global(+a, -b, +c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussY>(face_lagrange);
+    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussY>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
-    int i_face = interp.FindFaceId(face_lagrange.center());
+    int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 5);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
       Global global = face_gauss_ref.GetGlobalCoord(f);
@@ -421,13 +421,13 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the z_local == -1 face */{
-    auto face_lagrange = CoordinateOnFace {
+    auto face_coordinate = CoordinateOnFace {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, +b, -c), Global(-a, +b, -c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussY>(face_lagrange);
+    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussY>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
-    int i_face = interp.FindFaceId(face_lagrange.center());
+    int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 0);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
       Global global = face_gauss_ref.GetGlobalCoord(f);

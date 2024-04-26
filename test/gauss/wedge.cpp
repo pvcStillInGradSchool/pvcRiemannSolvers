@@ -14,11 +14,11 @@ TEST_F(TestGaussWedge, OnLinearElement) {
   using Gauss = mini::gauss::Wedge<double, 16, 4>;
   using Coordinate = mini::geometry::Wedge6<double>;
   using Coord = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1)
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);
@@ -42,14 +42,14 @@ TEST_F(TestGaussWedge, OnQuadraticElement) {
   using Gauss = mini::gauss::Wedge<double, 16, 4>;
   using Coordinate = mini::geometry::Wedge15<double>;
   using Coord = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1),
     Coord(0, -1, -1), Coord(0.5, 0, -1), Coord(-0.5, 0, -1),
     Coord(-1, -1, 0), Coord(+1, -1, 0), Coord(0, +1, 0),
     Coord(0, -1, +1), Coord(0.5, 0, +1), Coord(-0.5, 0, +1),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);
@@ -73,7 +73,7 @@ TEST_F(TestGaussWedge, On18NodeQuadraticElement) {
   using Gauss = mini::gauss::Wedge<double, 16, 4>;
   using Coordinate = mini::geometry::Wedge18<double>;
   using Coord = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1),
     Coord(0, -1, -1), Coord(0.5, 0, -1), Coord(-0.5, 0, -1),
@@ -81,7 +81,7 @@ TEST_F(TestGaussWedge, On18NodeQuadraticElement) {
     Coord(0, -1, +1), Coord(0.5, 0, +1), Coord(-0.5, 0, +1),
     Coord(0, -1, 0), Coord(0.5, 0, 0), Coord(-0.5, 0, 0),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);

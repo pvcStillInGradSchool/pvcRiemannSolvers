@@ -19,28 +19,28 @@ class TestCoordinatePyramid5 : public ::testing::Test {
 };
 TEST_F(TestCoordinatePyramid5, CoordinateMap) {
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0),
     Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h)
   };
-  static_assert(lagrange.CellDim() == 3);
-  static_assert(lagrange.PhysDim() == 3);
-  EXPECT_EQ(lagrange.CountCorners(), 5);
-  EXPECT_EQ(lagrange.CountNodes(), 5);
-  EXPECT_EQ(lagrange.center(), Coord(0, 0, h/4));
-  EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
-  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
+  static_assert(coordinate.CellDim() == 3);
+  static_assert(coordinate.PhysDim() == 3);
+  EXPECT_EQ(coordinate.CountCorners(), 5);
+  EXPECT_EQ(coordinate.CountNodes(), 5);
+  EXPECT_EQ(coordinate.center(), Coord(0, 0, h/4));
+  EXPECT_EQ(coordinate.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
+  for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
     if (i_node == 4) {
-      EXPECT_ANY_THROW(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node)));
+      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node)));
       continue;
     }
-    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
-        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
+        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -212,30 +212,30 @@ class TestCoordinatePyramid13 : public ::testing::Test {
 };
 TEST_F(TestCoordinatePyramid13, CoordinateMap) {
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
     Coord(-a/2, -b/2, h/2), Coord(+a/2, -b/2, h/2),
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
   };
-  static_assert(lagrange.CellDim() == 3);
-  static_assert(lagrange.PhysDim() == 3);
-  EXPECT_EQ(lagrange.CountCorners(), 5);
-  EXPECT_EQ(lagrange.CountNodes(), 13);
-  EXPECT_EQ(lagrange.center(), Coord(0, 0, h/4));
-  EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
-  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
+  static_assert(coordinate.CellDim() == 3);
+  static_assert(coordinate.PhysDim() == 3);
+  EXPECT_EQ(coordinate.CountCorners(), 5);
+  EXPECT_EQ(coordinate.CountNodes(), 13);
+  EXPECT_EQ(coordinate.center(), Coord(0, 0, h/4));
+  EXPECT_EQ(coordinate.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
+  for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
     if (i_node == 4) {
-      EXPECT_ANY_THROW(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node)));
+      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node)));
       continue;
     }
-    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
-        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
+        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -422,7 +422,7 @@ class TestCoordinatePyramid14 : public ::testing::Test {
 };
 TEST_F(TestCoordinatePyramid14, CoordinateMap) {
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
@@ -430,23 +430,23 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
     Coord(0, 0, 0),
   };
-  static_assert(lagrange.CellDim() == 3);
-  static_assert(lagrange.PhysDim() == 3);
-  EXPECT_EQ(lagrange.CountCorners(), 5);
-  EXPECT_EQ(lagrange.CountNodes(), 14);
-  EXPECT_EQ(lagrange.center(), Coord(0, 0, h/4));
-  EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
-  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
+  static_assert(coordinate.CellDim() == 3);
+  static_assert(coordinate.PhysDim() == 3);
+  EXPECT_EQ(coordinate.CountCorners(), 5);
+  EXPECT_EQ(coordinate.CountNodes(), 14);
+  EXPECT_EQ(coordinate.center(), Coord(0, 0, h/4));
+  EXPECT_EQ(coordinate.LocalToGlobal(1, 0, 0), Coord(a/2, 0, h/2));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 1, 0), Coord(0, b/2, h/2));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
+  for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
     if (i_node == 4) {
-      EXPECT_ANY_THROW(lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node)));
+      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node)));
       continue;
     }
-    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
-        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
+        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };

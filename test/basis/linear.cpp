@@ -84,8 +84,8 @@ TEST_F(TestBasisOrthoNormal, OnTriangle) {
   using Gauss = mini::gauss::Triangle<double, 2, 16>;
   using Coord = Gauss::Global;
   Coord p0{0, 0}, p1{3, 0}, p2{0, 3};
-  auto lagrange = Coordinate{ p0, p1, p2 };
-  auto gauss = Gauss(lagrange);
+  auto coordinate = Coordinate{ p0, p1, p2 };
+  auto gauss = Gauss(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.area(), basis.Measure());
@@ -106,8 +106,8 @@ TEST_F(TestBasisOrthoNormal, OnQuadrangle) {
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
   using Coord = Gauss::Global;
   Coord p0{-1, -1}, p1{+1, -1}, p2{+1, +1}, p3{-1, +1};
-  auto lagrange = Coordinate(p0, p1, p2, p3);
-  auto gauss = Gauss(lagrange);
+  auto coordinate = Coordinate(p0, p1, p2, p3);
+  auto gauss = Gauss(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.area(), basis.Measure());
@@ -127,8 +127,8 @@ TEST_F(TestBasisOrthoNormal, OnTetrahedron) {
   using Coordinate = mini::geometry::Tetrahedron4<double>;
   using Coord = Gauss::Global;
   Coord p0{0, 0, 0}, p1{3, 0, 0}, p2{0, 3, 0}, p3{0, 0, 3};
-  auto lagrange = Coordinate(p0, p1, p2, p3);
-  auto gauss = Gauss(lagrange);
+  auto coordinate = Coordinate(p0, p1, p2, p3);
+  auto gauss = Gauss(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.volume(), basis.Measure());
@@ -150,8 +150,8 @@ TEST_F(TestBasisOrthoNormal, OnHexahedron) {
   using Coord = Gauss::Global;
   Coord p0{-1, -1, -1}, p1{+1, -1, -1}, p2{+1, +1, -1}, p3{-1, +1, -1},
         p4{-1, -1, +1}, p5{+1, -1, +1}, p6{+1, +1, +1}, p7{-1, +1, +1};
-  auto lagrange = Coordinate{ p0, p1, p2, p3, p4, p5, p6, p7 };
-  auto gauss = Gauss(lagrange);
+  auto coordinate = Coordinate{ p0, p1, p2, p3, p4, p5, p6, p7 };
+  auto gauss = Gauss(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.volume(), basis.Measure());

@@ -19,23 +19,23 @@ class TestCoordinateWedge6 : public ::testing::Test {
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinateWedge6, CoordinateMap) {
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3)
   };
-  static_assert(lagrange.CellDim() == 3);
-  static_assert(lagrange.PhysDim() == 3);
-  EXPECT_EQ(lagrange.CountCorners(), 6);
-  EXPECT_EQ(lagrange.CountNodes(), 6);
-  EXPECT_NEAR((lagrange.center() - Coord(1, 1, 0)).norm(), 0, 1e-15);
-  EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
-  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
-    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
-        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+  static_assert(coordinate.CellDim() == 3);
+  static_assert(coordinate.PhysDim() == 3);
+  EXPECT_EQ(coordinate.CountCorners(), 6);
+  EXPECT_EQ(coordinate.CountNodes(), 6);
+  EXPECT_NEAR((coordinate.center() - Coord(1, 1, 0)).norm(), 0, 1e-15);
+  EXPECT_EQ(coordinate.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
+  for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
+        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -198,26 +198,26 @@ class TestCoordinateWedge15 : public ::testing::Test {
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinateWedge15, CoordinateMap) {
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3),
     Coord(1.5, 0, -3), Coord(1.5, 1.5, -3), Coord(0, 1.5, -3),
     Coord(0, 0, 0), Coord(3, 0, 0), Coord(0, 3, 0),
     Coord(1.5, 0, +3), Coord(1.5, 1.5, +3), Coord(0, 1.5, +3),
   };
-  static_assert(lagrange.CellDim() == 3);
-  static_assert(lagrange.PhysDim() == 3);
-  EXPECT_EQ(lagrange.CountCorners(), 6);
-  EXPECT_EQ(lagrange.CountNodes(), 15);
-  EXPECT_NEAR((lagrange.center() - Coord(1, 1, 0)).norm(), 0, 1e-15);
-  EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
-  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
-    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
-        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+  static_assert(coordinate.CellDim() == 3);
+  static_assert(coordinate.PhysDim() == 3);
+  EXPECT_EQ(coordinate.CountCorners(), 6);
+  EXPECT_EQ(coordinate.CountNodes(), 15);
+  EXPECT_NEAR((coordinate.center() - Coord(1, 1, 0)).norm(), 0, 1e-15);
+  EXPECT_EQ(coordinate.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
+  for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
+        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -391,7 +391,7 @@ class TestCoordinateWedge18 : public ::testing::Test {
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinateWedge18, CoordinateMap) {
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3),
     Coord(1.5, 0, -3), Coord(1.5, 1.5, -3), Coord(0, 1.5, -3),
@@ -399,19 +399,19 @@ TEST_F(TestCoordinateWedge18, CoordinateMap) {
     Coord(1.5, 0, +3), Coord(1.5, 1.5, +3), Coord(0, 1.5, +3),
     Coord(1.5, 0, 0), Coord(1.5, 1.5, 0), Coord(0, 1.5, 0),
   };
-  static_assert(lagrange.CellDim() == 3);
-  static_assert(lagrange.PhysDim() == 3);
-  EXPECT_EQ(lagrange.CountCorners(), 6);
-  EXPECT_EQ(lagrange.CountNodes(), 18);
-  EXPECT_NEAR((lagrange.center() - Coord(1, 1, 0)).norm(), 0, 1e-15);
-  EXPECT_EQ(lagrange.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
-  EXPECT_EQ(lagrange.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
-  for (int i_node = 0; i_node < lagrange.CountNodes(); ++i_node) {
-    EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
-        - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
+  static_assert(coordinate.CellDim() == 3);
+  static_assert(coordinate.PhysDim() == 3);
+  EXPECT_EQ(coordinate.CountCorners(), 6);
+  EXPECT_EQ(coordinate.CountNodes(), 18);
+  EXPECT_NEAR((coordinate.center() - Coord(1, 1, 0)).norm(), 0, 1e-15);
+  EXPECT_EQ(coordinate.LocalToGlobal(1, 0, 0), Coord(0, 0, 0));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 1, 0), Coord(3, 0, 0));
+  EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 0), Coord(0, 3, 0));
+  for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
+        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };

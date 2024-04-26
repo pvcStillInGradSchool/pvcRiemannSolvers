@@ -151,13 +151,13 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   using Global = typename Gauss::Global;
   // build a hexa-gauss and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
     Global(+a, +b, -c), Global(-a, +b, -c),
     Global(-a, -b, +c), Global(+a, -b, +c),
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   auto interp = Interpolation(gauss);
   // build a vector function and its interpolation
   Scalar rho = 1.29, p = 101325;

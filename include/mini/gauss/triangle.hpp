@@ -45,7 +45,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
   std::array<Global, kPoints> global_coords_;
   std::array<Scalar, kPoints> global_weights_;
   std::array<Frame, kPoints> normal_frames_;
-  Coordinate const *lagrange_;
+  Coordinate const *coordinate_;
   Scalar area_;
 
  public:
@@ -95,13 +95,13 @@ class Triangle : public Face<Scalar, kPhysDim> {
 
  public:
   explicit Triangle(Coordinate const &lagrange)
-      : lagrange_(&lagrange) {
+      : coordinate_(&lagrange) {
     area_ = this->BuildQuadraturePoints();
     Base::BuildNormalFrames(this);
   }
 
   const Coordinate &coordinate() const final {
-    return *lagrange_;
+    return *coordinate_;
   }
 
   Scalar area() const final {

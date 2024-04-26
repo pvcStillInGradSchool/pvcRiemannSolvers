@@ -15,12 +15,12 @@ TEST_F(TestGaussPyramid, OnLinearElement) {
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0),
     Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h)
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;
@@ -40,14 +40,14 @@ TEST_F(TestGaussPyramid, OnQuadraticElement) {
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
     Coord(-a/2, -b/2, h/2), Coord(+a/2, -b/2, h/2),
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;
@@ -67,7 +67,7 @@ TEST_F(TestGaussPyramid, On14NodeQuadraticElement) {
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Coordinate{
+  auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
@@ -75,7 +75,7 @@ TEST_F(TestGaussPyramid, On14NodeQuadraticElement) {
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
     Coord(0, 0, 0),
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;

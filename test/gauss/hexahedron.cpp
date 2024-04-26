@@ -19,13 +19,13 @@ class TestGaussHexahedron : public ::testing::Test {
 };
 TEST_F(TestGaussHexahedron, OnLinearElement) {
   using Coordinate = mini::geometry::Hexahedron8<double>;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1),
     Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1),
     Coord(+1, +1, +1), Coord(-1, +1, +1)
   };
-  auto hexa = Gauss(lagrange);
+  auto hexa = Gauss(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -36,13 +36,13 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Coordinate {
+  coordinate = Coordinate {
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
     Coord(-10, -10, +10), Coord(+10, -10, +10),
     Coord(+10, +10, +10), Coord(-10, +10, +10)
   };
-  hexa = Gauss(lagrange);
+  hexa = Gauss(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };
@@ -54,14 +54,14 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
 }
 TEST_F(TestGaussHexahedron, OnQuadraticElement) {
   using Coordinate = mini::geometry::Hexahedron20<double>;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
     Coord(0, -1, -1), Coord(+1, 0, -1), Coord(0, +1, -1), Coord(-1, 0, -1),
     Coord(-1, -1, 0), Coord(+1, -1, 0), Coord(+1, +1, 0), Coord(-1, +1, 0),
     Coord(0, -1, +1), Coord(+1, 0, +1), Coord(0, +1, +1), Coord(-1, 0, +1),
   };
-  auto hexa = Gauss(lagrange);
+  auto hexa = Gauss(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -72,7 +72,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Coordinate {
+  coordinate = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -89,7 +89,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
     Coord(0, -10, +10), Coord(+10, 0, +10),
     Coord(0, +10, +10), Coord(-10, 0, +10),
   };
-  hexa = Gauss(lagrange);
+  hexa = Gauss(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };
@@ -101,7 +101,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
 }
 TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
   using Coordinate = mini::geometry::Hexahedron27<double>;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
     Coord(0, -1, -1), Coord(+1, 0, -1), Coord(0, +1, -1), Coord(-1, 0, -1),
@@ -111,7 +111,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
     Coord(0, -1, 0), Coord(+1, 0, 0), Coord(0, +1, 0), Coord(-1, 0, 0),
     Coord(0, 0, +1), Coord(0, 0, 0),
   };
-  auto hexa = Gauss(lagrange);
+  auto hexa = Gauss(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -122,7 +122,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Coordinate {
+  coordinate = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -145,7 +145,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
     // center
     Coord(0, 0, 0),
   };
-  hexa = Gauss(lagrange);
+  hexa = Gauss(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };
@@ -157,7 +157,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
 }
 TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
   using Coordinate = mini::geometry::Hexahedron26<double>;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
     Coord(0, -1, -1), Coord(+1, 0, -1), Coord(0, +1, -1), Coord(-1, 0, -1),
@@ -167,7 +167,7 @@ TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
     Coord(0, -1, 0), Coord(+1, 0, 0), Coord(0, +1, 0), Coord(-1, 0, 0),
     Coord(0, 0, +1),
   };
-  auto hexa = Gauss(lagrange);
+  auto hexa = Gauss(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -178,7 +178,7 @@ TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Coordinate {
+  coordinate = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -199,7 +199,7 @@ TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
     Coord(0, -10, 0), Coord(+10, 0, 0), Coord(0, +10, 0), Coord(-10, 0, 0),
     Coord(0, 0, +10),
   };
-  hexa = Gauss(lagrange);
+  hexa = Gauss(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };

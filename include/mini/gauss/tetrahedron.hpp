@@ -41,7 +41,7 @@ class Tetrahedron : public Cell<Scalar> {
   static const std::array<Scalar, kPoints> local_weights_;
   std::array<Global, kPoints> global_coords_;
   std::array<Scalar, kPoints> global_weights_;
-  Coordinate const *lagrange_;
+  Coordinate const *coordinate_;
   Scalar volume_;
 
  public:
@@ -79,7 +79,7 @@ class Tetrahedron : public Cell<Scalar> {
 
  public:
   explicit Tetrahedron(Coordinate const &lagrange)
-      : lagrange_(&lagrange) {
+      : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
   Tetrahedron(const Tetrahedron &) = default;
@@ -89,7 +89,7 @@ class Tetrahedron : public Cell<Scalar> {
   virtual ~Tetrahedron() noexcept = default;
 
   const Coordinate &coordinate() const final {
-    return *lagrange_;
+    return *coordinate_;
   }
 
   Scalar volume() const final {

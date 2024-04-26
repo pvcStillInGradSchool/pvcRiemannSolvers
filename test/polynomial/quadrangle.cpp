@@ -21,10 +21,10 @@ TEST_F(TestQuadrangle4x4, OrthoNormal) {
   using Coordinate = mini::geometry::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   Coord origin = {0, 0}, left = {-1, 2}, right = {1, 3};
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   auto basis = Basis(gauss);
   using A = typename Basis::MatNxN;
   double residual = (Integrate([&basis](const Coord& xy) {
@@ -34,7 +34,7 @@ TEST_F(TestQuadrangle4x4, OrthoNormal) {
   }, gauss) - A::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-14);
   auto x = left[0], y = left[1];
-  lagrange = Coordinate {
+  coordinate = Coordinate {
     Coord(x-1, y-1), Coord(x+1, y-1), Coord(x+1, y+1), Coord(x-1, y+1)
   };
   basis = Basis(gauss);
@@ -51,10 +51,10 @@ TEST_F(TestQuadrangle4x4, Projection) {
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
   using Coordinate = mini::geometry::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
-  auto lagrange = Coordinate {
+  auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Gauss(lagrange);
+  auto gauss = Gauss(coordinate);
   auto scalar_f = [](Coord const& xy){
     return xy[0] * xy[1];
   };
