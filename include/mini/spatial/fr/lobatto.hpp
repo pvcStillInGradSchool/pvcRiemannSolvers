@@ -85,7 +85,7 @@ class Lobatto : public General<Part> {
       const auto &cell_gauss = cell.gauss();
       const auto &cell_basis = cell.basis();
       const auto &cell_projection = cell.projection();
-      int i_face = cell_projection.FindFaceId(face.lagrange().center());
+      int i_face = cell_projection.FindFaceId(face.coordinate().center());
       assert(kFaceQ == face.gauss().CountPoints());
       for (int f = 0; f < kFaceQ; ++f) {
         Global const &face_normal = face.riemann(f).normal();

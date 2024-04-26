@@ -88,7 +88,7 @@ class Tetrahedron : public Cell<Scalar> {
   Tetrahedron &operator=(Tetrahedron &&) noexcept = default;
   virtual ~Tetrahedron() noexcept = default;
 
-  const Lagrange &lagrange() const final {
+  const Lagrange &coordinate() const final {
     return *lagrange_;
   }
 

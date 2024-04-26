@@ -33,7 +33,7 @@ class Cell : public Element<Scalar, 3, 3> {
    * 
    * @return const Lagrange &  Reference to the geometry::Cell object it uses for coordinate mapping.
    */
-  virtual const Lagrange &lagrange() const = 0;
+  virtual const Lagrange &coordinate() const = 0;
 };
 
 }  // namespace gauss

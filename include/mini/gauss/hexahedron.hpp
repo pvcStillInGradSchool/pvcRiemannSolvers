@@ -131,7 +131,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   Hexahedron &operator=(Hexahedron &&) noexcept = default;
   virtual ~Hexahedron() noexcept = default;
 
-  const Lagrange &lagrange() const final {
+  const Lagrange &coordinate() const final {
     return *lagrange_;
   }
 

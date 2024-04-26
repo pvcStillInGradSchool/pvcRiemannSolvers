@@ -124,7 +124,7 @@ class Pyramid : public Cell<Scalar> {
   Pyramid &operator=(Pyramid &&) noexcept = default;
   virtual ~Pyramid() noexcept = default;
 
-  const Lagrange &lagrange() const final {
+  const Lagrange &coordinate() const final {
     return *lagrange_;
   }
 

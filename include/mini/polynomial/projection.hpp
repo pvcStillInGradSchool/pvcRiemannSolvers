@@ -120,7 +120,7 @@ class Projection {
   }
   void LocalToGlobalAndValue(Local const &local,
       Global *global, Value *value) const {
-    *global = gauss().lagrange().LocalToGlobal(local);
+    *global = gauss().coordinate().LocalToGlobal(local);
     *value = GlobalToValue(*global);
   }
   Coeff GetCoeffOnTaylorBasis() const {

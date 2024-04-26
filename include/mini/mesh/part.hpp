@@ -146,7 +146,7 @@ struct Face {
     assert(gauss_ptr_);
     return *gauss_ptr_;
   }
-  Lagrange const &lagrange() const {
+  Lagrange const &coordinate() const {
     assert(lagrange_ptr_);
     return *lagrange_ptr_;
   }
@@ -248,7 +248,7 @@ struct Cell {
     assert(gauss_ptr_);
     return *gauss_ptr_;
   }
-  Lagrange const &lagrange() const {
+  Lagrange const &coordinate() const {
     assert(lagrange_ptr_);
     return *lagrange_ptr_;
   }
@@ -259,7 +259,7 @@ struct Cell {
     return *projection_ptr_;
   }
   Global LocalToGlobal(const Local &local) const {
-    return lagrange().LocalToGlobal(local);
+    return coordinate().LocalToGlobal(local);
   }
   Value GlobalToValue(const Global &global) const {
     return projection().GlobalToValue(global);
@@ -268,7 +268,7 @@ struct Cell {
     return projection().basis();
   }
   int CountCorners() const {
-    return lagrange().CountCorners();
+    return coordinate().CountCorners();
   }
   int CountFields() const {
     return projection().coeff().cols() * projection().coeff().rows();
@@ -1026,7 +1026,7 @@ class Part {
       holder.adj_cells_.emplace_back(&sharer);
       sharer.adj_cells_.emplace_back(&holder);
       auto *face_node_list = common_nodes.data();
-      geometry::SortNodesOnFace(holder.lagrange(), &holder_nodes[holder_head],
+      geometry::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
       auto [lagrange_uptr, gauss_uptr]
           = BuildGaussForFace(face_npe, i_zone, face_node_list);
@@ -1070,7 +1070,7 @@ class Part {
       auto &sharer = ghost_cells_.at(m_sharer);
       holder.adj_cells_.emplace_back(&sharer);
       auto *face_node_list = common_nodes.data();
-      geometry::SortNodesOnFace(holder.lagrange(), &holder_nodes[holder_head],
+      geometry::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
       auto [lagrange_uptr, gauss_uptr]
           = BuildGaussForFace(face_npe, i_zone, face_node_list);
@@ -1520,11 +1520,11 @@ class Part {
           if (cnt == npe) {  // this cell holds this face
             auto [z, s, c, n] = m_to_cell_index_[m_cell];
             holder_ptr = &(local_cells_.at(z).at(s).at(c));
-            assert(n == holder_ptr->lagrange().CountNodes());
+            assert(n == holder_ptr->coordinate().CountNodes());
             auto &holder_conn = connectivities_.at(z).at(s);
             auto &holder_nodes = holder_conn.nodes;
             auto holder_head = holder_conn.index[c];
-            geometry::SortNodesOnFace(holder_ptr->lagrange(),
+            geometry::SortNodesOnFace(holder_ptr->coordinate(),
                 &holder_nodes[holder_head], face_node_list, npe);
             break;
           }

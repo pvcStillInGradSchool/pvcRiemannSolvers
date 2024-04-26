@@ -75,10 +75,10 @@ class Element {
    * 
    * @return const Lagrange &  Reference to the geometry::Element object it uses for coordinate mapping.
    */
-  virtual const Lagrange &lagrange() const = 0;
+  virtual const Lagrange &coordinate() const = 0;
 
   const Global &center() const {
-    return lagrange().center();
+    return coordinate().center();
   }
 
  protected:
@@ -88,8 +88,8 @@ class Element {
     Real sum = 0.0;
     for (int i = 0, n = CountPoints(); i < n; ++i) {
       auto &local_i = GetLocalCoord(i);
-      GetGlobalCoord(i) = lagrange().LocalToGlobal(local_i);
-      auto mat_j = lagrange().LocalToJacobian(local_i);
+      GetGlobalCoord(i) = coordinate().LocalToGlobal(local_i);
+      auto mat_j = coordinate().LocalToJacobian(local_i);
       auto det_j = CellDim() < PhysDim()
           ? std::sqrt((mat_j * mat_j.transpose()).determinant())
           : std::abs(mat_j.determinant());

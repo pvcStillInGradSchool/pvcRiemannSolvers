@@ -120,7 +120,7 @@ class Wedge : public Cell<Scalar> {
   Wedge &operator=(Wedge &&) noexcept = default;
   virtual ~Wedge() noexcept = default;
 
-  const Lagrange &lagrange() const final {
+  const Lagrange &coordinate() const final {
     return *lagrange_;
   }
 

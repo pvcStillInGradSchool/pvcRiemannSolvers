@@ -129,7 +129,7 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
     Base::BuildNormalFrames(this);
   }
 
-  const Lagrange &lagrange() const final {
+  const Lagrange &coordinate() const final {
     return *lagrange_;
   }
 

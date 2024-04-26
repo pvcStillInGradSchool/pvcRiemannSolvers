@@ -56,10 +56,10 @@ class Rotorcraft {
       }
       const auto &gauss = face->gauss();
       // Currently, only triangle is supported.
-      assert(gauss.lagrange().CountCorners() == 3);
-      Global pa = gauss.lagrange().GetGlobalCoord(0) - p;
-      Global pb = gauss.lagrange().GetGlobalCoord(1) - p;
-      Global pc = gauss.lagrange().GetGlobalCoord(2) - p;
+      assert(gauss.coordinate().CountCorners() == 3);
+      Global pa = gauss.coordinate().GetGlobalCoord(0) - p;
+      Global pb = gauss.coordinate().GetGlobalCoord(1) - p;
+      Global pc = gauss.coordinate().GetGlobalCoord(2) - p;
       Scalar ratio = -1.0;
       mini::geometry::Intersect(pa, pb, pc, pq, &ratio);
       if (Valid(ratio)) {

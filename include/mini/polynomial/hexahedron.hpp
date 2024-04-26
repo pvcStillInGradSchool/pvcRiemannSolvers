@@ -167,17 +167,17 @@ class Hexahedron {
       : gauss_ptr_(dynamic_cast<const Gauss *>(&gauss)) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = gauss_ptr_->GetLocalCoord(ijk);
-      Jacobian mat = lagrange().LocalToJacobian(local);
+      Jacobian mat = coordinate().LocalToJacobian(local);
       Jacobian inv = mat.inverse();
       Scalar det = mat.determinant();
       jacobian_det_[ijk] = det;
       jacobian_det_inv_[ijk] = det * inv;
       jacobian_det_grad_[ijk]
-          = lagrange().LocalToJacobianDeterminantGradient(local);
+          = coordinate().LocalToJacobianDeterminantGradient(local);
       // cache for evaluating Hessian
       Jacobian inv_T = inv.transpose();
       mat_after_hess_of_U_[ijk] = inv_T / det;
-      auto mat_grad = lagrange().LocalToJacobianGradient(local);
+      auto mat_grad = coordinate().LocalToJacobianGradient(local);
       Jacobian inv_T_grad[3];
       inv_T_grad[X] = -(inv * mat_grad[X] * inv).transpose();
       inv_T_grad[Y] = -(inv * mat_grad[Y] * inv).transpose();
@@ -191,7 +191,7 @@ class Hexahedron {
       mat_after_grad_of_U_[ijk][Z] = inv_T_grad[Z] / det
           + inv_T * (-det_grad[Z] / det2);
       mat_before_grad_of_U_[ijk] = det_grad.transpose() * inv_T / det2;
-      auto det_hess = lagrange().LocalToJacobianDeterminantHessian(local);
+      auto det_hess = coordinate().LocalToJacobianDeterminantHessian(local);
       auto &mat_before_U = mat_before_U_[ijk];
       mat_before_U(X, X) = det_hess[XX];
       mat_before_U(X, Y) = det_hess[XY];
@@ -216,7 +216,7 @@ class Hexahedron {
       : gauss_ptr_(dynamic_cast<const Gauss *>(&gauss)) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = gauss_ptr_->GetLocalCoord(ijk);
-      Jacobian jacobian = lagrange().LocalToJacobian(local);
+      Jacobian jacobian = coordinate().LocalToJacobian(local);
       basis_global_gradients_[ijk] = LocalGradientsToGlobalGradients(
           jacobian, basis_local_gradients_[ijk]);
     }
@@ -230,7 +230,7 @@ class Hexahedron {
 
   Value LocalToValue(Local const &local) const requires(kLocal) {
     Value value = coeff_ * basis_.GetValues(local).transpose();
-    value /= lagrange().LocalToJacobian(local).determinant();
+    value /= coordinate().LocalToJacobian(local).determinant();
     return value;
   }
   Value LocalToValue(Local const &local) const requires(!kLocal) {
@@ -238,12 +238,12 @@ class Hexahedron {
   }
   void LocalToGlobalAndValue(Local const &local,
       Global *global, Value *value) const {
-    *global = gauss().lagrange().LocalToGlobal(local);
+    *global = gauss().coordinate().LocalToGlobal(local);
     *value = LocalToValue(local);
   }
 
   Value GlobalToValue(Global const &global) const {
-    Local local = lagrange().GlobalToLocal(global);
+    Local local = coordinate().GlobalToLocal(global);
     return LocalToValue(local);
   }
   /**
@@ -276,16 +276,16 @@ class Hexahedron {
     coeff_.col(i) = value;
   }
   Mat1xN GlobalToBasisValues(Global const &global) const {
-    Local local = lagrange().GlobalToLocal(global);
+    Local local = coordinate().GlobalToLocal(global);
     return basis_.GetValues(local);
   }
   Mat3xN GlobalToBasisGradients(Global const &global) const {
-    Local local = lagrange().GlobalToLocal(global);
+    Local local = coordinate().GlobalToLocal(global);
     Mat3xN grad;
     grad.row(0) = basis_.GetDerivatives(1, 0, 0, local);
     grad.row(1) = basis_.GetDerivatives(0, 1, 0, local);
     grad.row(2) = basis_.GetDerivatives(0, 0, 1, local);
-    Jacobian jacobian = lagrange().LocalToJacobian(local);
+    Jacobian jacobian = coordinate().LocalToJacobian(local);
     return LocalGradientsToGlobalGradients(jacobian, grad);
   }
   /**
@@ -336,15 +336,15 @@ class Hexahedron {
   }
   Gradient LocalToGlobalGradient(Local const &local) const requires(kLocal) {
     Gradient grad = LocalToLocalGradient(local);
-    Jacobian mat = lagrange().LocalToJacobian(local);
+    Jacobian mat = coordinate().LocalToJacobian(local);
     Scalar det = mat.determinant();
-    Global det_grad = lagrange().LocalToJacobianDeterminantGradient(local);
+    Global det_grad = coordinate().LocalToJacobianDeterminantGradient(local);
     Value value = coeff_ * basis_.GetValues(local).transpose();
     grad -= (det_grad / det) * value.transpose();
     return mat.inverse() / det * grad;
   }
   Gradient GlobalToGlobalGradient(Global const &global) const requires(kLocal) {
-    auto local = lagrange().GlobalToLocal(global);
+    auto local = coordinate().GlobalToLocal(global);
     return LocalToGlobalGradient(local);
   }
   /**
@@ -500,8 +500,8 @@ class Hexahedron {
   Gauss const &gauss() const {
     return *gauss_ptr_;
   }
-  Lagrange const &lagrange() const {
-    return gauss().lagrange();
+  Lagrange const &coordinate() const {
+    return gauss().coordinate();
   }
   template <typename Callable>
   void Approximate(Callable &&global_to_value) {
@@ -582,12 +582,12 @@ class Hexahedron {
       point -= face_center;
       return point.norm() < 1e-10;
     };
-    if (almost_equal(lagrange().LocalToGlobal(0, 0, -1))) { i_face = 0; }
-    else if (almost_equal(lagrange().LocalToGlobal(0, -1, 0))) { i_face = 1; }
-    else if (almost_equal(lagrange().LocalToGlobal(+1, 0, 0))) { i_face = 2; }
-    else if (almost_equal(lagrange().LocalToGlobal(0, +1, 0))) { i_face = 3; }
-    else if (almost_equal(lagrange().LocalToGlobal(-1, 0, 0))) { i_face = 4; }
-    else if (almost_equal(lagrange().LocalToGlobal(0, 0, +1))) { i_face = 5; }
+    if (almost_equal(coordinate().LocalToGlobal(0, 0, -1))) { i_face = 0; }
+    else if (almost_equal(coordinate().LocalToGlobal(0, -1, 0))) { i_face = 1; }
+    else if (almost_equal(coordinate().LocalToGlobal(+1, 0, 0))) { i_face = 2; }
+    else if (almost_equal(coordinate().LocalToGlobal(0, +1, 0))) { i_face = 3; }
+    else if (almost_equal(coordinate().LocalToGlobal(-1, 0, 0))) { i_face = 4; }
+    else if (almost_equal(coordinate().LocalToGlobal(0, 0, +1))) { i_face = 5; }
     else { assert(false); }
     return i_face;
   }
@@ -596,7 +596,7 @@ class Hexahedron {
     using mini::geometry::X;
     using mini::geometry::Y;
     using mini::geometry::Z;
-    auto local = lagrange().GlobalToLocal(global);
+    auto local = coordinate().GlobalToLocal(global);
     int i, j, k;
     auto almost_equal = [](Scalar x, Scalar y) {
       return std::abs(x - y) < 1e-10;
@@ -716,7 +716,7 @@ class Hexahedron {
     case 0:
       for (i = 0; i < GaussX::Q; ++i) {
         for (j = 0; j < GaussY::Q; ++j) {
-          global_temp = lagrange().LocalToGlobal(
+          global_temp = coordinate().LocalToGlobal(
               GaussX::points[i], GaussY::points[j], -1);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
@@ -732,7 +732,7 @@ class Hexahedron {
     case 1:
       for (i = 0; i < GaussX::Q; ++i) {
         for (k = 0; k < GaussZ::Q; ++k) {
-          global_temp = lagrange().LocalToGlobal(
+          global_temp = coordinate().LocalToGlobal(
               GaussX::points[i], -1, GaussZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
@@ -748,7 +748,7 @@ class Hexahedron {
     case 2:
       for (j = 0; j < GaussY::Q; ++j) {
         for (k = 0; k < GaussZ::Q; ++k) {
-          global_temp = lagrange().LocalToGlobal(
+          global_temp = coordinate().LocalToGlobal(
               +1, GaussY::points[j], GaussZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
@@ -764,7 +764,7 @@ class Hexahedron {
     case 3:
       for (i = 0; i < GaussX::Q; ++i) {
         for (k = 0; k < GaussZ::Q; ++k) {
-          global_temp = lagrange().LocalToGlobal(
+          global_temp = coordinate().LocalToGlobal(
               GaussX::points[i], +1, GaussZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
@@ -780,7 +780,7 @@ class Hexahedron {
     case 4:
       for (j = 0; j < GaussY::Q; ++j) {
         for (k = 0; k < GaussZ::Q; ++k) {
-          global_temp = lagrange().LocalToGlobal(
+          global_temp = coordinate().LocalToGlobal(
               -1, GaussY::points[j], GaussZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
@@ -796,7 +796,7 @@ class Hexahedron {
     case 5:
       for (i = 0; i < GaussX::Q; ++i) {
         for (j = 0; j < GaussY::Q; ++j) {
-          global_temp = lagrange().LocalToGlobal(
+          global_temp = coordinate().LocalToGlobal(
               GaussX::points[i], GaussY::points[j], +1);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
@@ -828,7 +828,7 @@ class Hexahedron {
     case 5: local_hint[Z] = +1; break;
     default: assert(false);
     }
-    auto local = lagrange().GlobalToLocal(global, local_hint);
+    auto local = coordinate().GlobalToLocal(global, local_hint);
     auto almost_equal = [](Scalar x, Scalar y) {
       return std::abs(x - y) < 1e-10;
     };

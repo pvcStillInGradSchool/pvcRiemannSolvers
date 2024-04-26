@@ -39,7 +39,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
    * 
    * @return const Lagrange &  Reference to the geometry::Face object it uses for coordinate mapping.
    */
-  virtual const Lagrange &lagrange() const = 0;
+  virtual const Lagrange &coordinate() const = 0;
 
  protected:
   static void BuildNormalFrames(Face *face) requires(kPhysDim == 2) {
@@ -48,7 +48,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
     int n = face->CountPoints();
     for (int i = 0; i < n; ++i) {
       auto &local_i = face->GetLocalCoord(i);
-      face->GetNormalFrame(i) = face->lagrange().LocalToNormalFrame(local_i);
+      face->GetNormalFrame(i) = face->coordinate().LocalToNormalFrame(local_i);
     }
   }
   virtual Frame &GetNormalFrame(int i) = 0;
