@@ -12,9 +12,9 @@ class TestGaussWedge : public ::testing::Test {
 };
 TEST_F(TestGaussWedge, OnLinearElement) {
   using Gauss = mini::gauss::Wedge<double, 16, 4>;
-  using Lagrange = mini::geometry::Wedge6<double>;
-  using Coord = typename Lagrange::Global;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Wedge6<double>;
+  using Coord = typename Coordinate::Global;
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1)
   };
@@ -40,9 +40,9 @@ TEST_F(TestGaussWedge, OnLinearElement) {
 }
 TEST_F(TestGaussWedge, OnQuadraticElement) {
   using Gauss = mini::gauss::Wedge<double, 16, 4>;
-  using Lagrange = mini::geometry::Wedge15<double>;
-  using Coord = typename Lagrange::Global;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Wedge15<double>;
+  using Coord = typename Coordinate::Global;
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1),
     Coord(0, -1, -1), Coord(0.5, 0, -1), Coord(-0.5, 0, -1),
@@ -71,9 +71,9 @@ TEST_F(TestGaussWedge, OnQuadraticElement) {
 }
 TEST_F(TestGaussWedge, On18NodeQuadraticElement) {
   using Gauss = mini::gauss::Wedge<double, 16, 4>;
-  using Lagrange = mini::geometry::Wedge18<double>;
-  using Coord = typename Lagrange::Global;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Wedge18<double>;
+  using Coord = typename Coordinate::Global;
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1),
     Coord(0, -1, -1), Coord(0.5, 0, -1), Coord(-0.5, 0, -1),

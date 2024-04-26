@@ -12,14 +12,14 @@
 
 #include "gtest/gtest.h"
 
-class TestLagrangePyramid5 : public ::testing::Test {
+class TestCoordinatePyramid5 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Pyramid5<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Pyramid5<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangePyramid5, CoordinateMap) {
+TEST_F(TestCoordinatePyramid5, CoordinateMap) {
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Lagrange{
+  auto lagrange = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0),
     Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h)
@@ -40,7 +40,7 @@ TEST_F(TestLagrangePyramid5, CoordinateMap) {
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
         - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -143,9 +143,9 @@ TEST_F(TestLagrangePyramid5, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangePyramid5, SortNodesOnFace) {
+TEST_F(TestCoordinatePyramid5, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(-2, -2, 0), Coord(2, -2, 0), Coord(2, 2, 0), Coord(-2, 2, 0),
     Coord(0, 0, 4)
   };
@@ -205,14 +205,14 @@ TEST_F(TestLagrangePyramid5, SortNodesOnFace) {
   }
 }
 
-class TestLagrangePyramid13 : public ::testing::Test {
+class TestCoordinatePyramid13 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Pyramid13<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Pyramid13<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangePyramid13, CoordinateMap) {
+TEST_F(TestCoordinatePyramid13, CoordinateMap) {
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Lagrange{
+  auto lagrange = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
@@ -235,7 +235,7 @@ TEST_F(TestLagrangePyramid13, CoordinateMap) {
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
         - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -344,10 +344,10 @@ TEST_F(TestLagrangePyramid13, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangePyramid13, SortNodesOnFace) {
+TEST_F(TestCoordinatePyramid13, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
@@ -415,14 +415,14 @@ TEST_F(TestLagrangePyramid13, SortNodesOnFace) {
 }
 
 
-class TestLagrangePyramid14 : public ::testing::Test {
+class TestCoordinatePyramid14 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Pyramid14<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Pyramid14<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangePyramid14, CoordinateMap) {
+TEST_F(TestCoordinatePyramid14, CoordinateMap) {
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Lagrange{
+  auto lagrange = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
@@ -446,7 +446,7 @@ TEST_F(TestLagrangePyramid14, CoordinateMap) {
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
         - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -556,10 +556,10 @@ TEST_F(TestLagrangePyramid14, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangePyramid14, SortNodesOnFace) {
+TEST_F(TestCoordinatePyramid14, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),

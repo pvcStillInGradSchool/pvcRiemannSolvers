@@ -20,11 +20,11 @@ using namespace mini::constant::index;
 template <std::floating_point Scalar, int kPhysDim, int kCellDim>
 class Element {
  public:
-  using Lagrange = geometry::Element<Scalar, kPhysDim, kCellDim>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
+  using Coordinate = geometry::Element<Scalar, kPhysDim, kCellDim>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
 
   static constexpr int CellDim() { return kCellDim; }
   static constexpr int PhysDim() { return kPhysDim; }
@@ -73,9 +73,9 @@ class Element {
   /**
    * @brief Get a reference to the geometry::Element object it uses for coordinate mapping.
    * 
-   * @return const Lagrange &  Reference to the geometry::Element object it uses for coordinate mapping.
+   * @return const Coordinate &  Reference to the geometry::Element object it uses for coordinate mapping.
    */
-  virtual const Lagrange &coordinate() const = 0;
+  virtual const Coordinate &coordinate() const = 0;
 
   const Global &center() const {
     return coordinate().center();

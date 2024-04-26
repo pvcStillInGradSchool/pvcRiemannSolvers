@@ -33,12 +33,12 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   using GaussY = Gy;
   using Scalar = typename GaussX::Scalar;
   static_assert(std::is_same_v<Scalar, typename Gy::Scalar>);
-  using Lagrange = geometry::Quadrangle<Scalar, kPhysDim>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
-  using Frame = typename Lagrange::Frame;
+  using Coordinate = geometry::Quadrangle<Scalar, kPhysDim>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
+  using Frame = typename Coordinate::Frame;
 
  private:
   using Base = Face<Scalar, kPhysDim>;
@@ -50,7 +50,7 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   std::array<Global, Qx * Qy> global_coords_;
   std::array<Scalar, Qx * Qy> global_weights_;
   std::array<Frame, Qx * Qy> normal_frames_;
-  Lagrange const *lagrange_;
+  Coordinate const *lagrange_;
   Scalar area_;
 
  public:
@@ -123,13 +123,13 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   }
 
  public:
-  explicit Quadrangle(Lagrange const &lagrange)
+  explicit Quadrangle(Coordinate const &lagrange)
       : lagrange_(&lagrange) {
     area_ = this->BuildQuadraturePoints();
     Base::BuildNormalFrames(this);
   }
 
-  const Lagrange &coordinate() const final {
+  const Coordinate &coordinate() const final {
     return *lagrange_;
   }
 

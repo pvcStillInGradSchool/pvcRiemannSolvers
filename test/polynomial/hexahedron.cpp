@@ -28,7 +28,7 @@ class TestPolynomialHexahedronProjection : public ::testing::Test {
  protected:
   using GaussX = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Hexahedron<GaussX, GaussX, GaussX>;
-  using Lagrange = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::geometry::Hexahedron8<double>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coord = typename Basis::Coord;
   using Y = typename Basis::MatNx1;
@@ -41,7 +41,7 @@ class TestPolynomialHexahedronProjection : public ::testing::Test {
 };
 TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   // build a hexa-gauss
-  auto lagrange = Lagrange {
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
   };
@@ -57,7 +57,7 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   EXPECT_NEAR(residual, 0.0, 1e-14);
   // build another hexa-gauss
   Coord shift = {-1, 2, 3};
-  lagrange = Lagrange {
+  lagrange = Coordinate {
     lagrange.GetGlobalCoord(0) + shift,
     lagrange.GetGlobalCoord(1) + shift,
     lagrange.GetGlobalCoord(2) + shift,
@@ -79,7 +79,7 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   EXPECT_NEAR(residual, 0.0, 1e-14);
 }
 TEST_F(TestPolynomialHexahedronProjection, Projection) {
-  auto lagrange = Lagrange{
+  auto lagrange = Coordinate{
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
   };
@@ -121,7 +121,7 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
 class TestPolynomialHexahedronInterpolation : public ::testing::Test {
  protected:
   using Scalar = double;
-  using Lagrange = mini::geometry::Hexahedron8<Scalar>;
+  using Coordinate = mini::geometry::Hexahedron8<Scalar>;
   // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
   using GaussX = mini::gauss::Legendre<Scalar, 3>;
   using GaussY = mini::gauss::Lobatto<Scalar, 3>;
@@ -161,7 +161,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, StaticMethods) {
 TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
   // build a hexa-gauss and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
-  auto lagrange = Lagrange {
+  auto lagrange = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
     Global(+a, +b, -c), Global(-a, +b, -c),
     Global(-a, -b, +c), Global(+a, -b, +c),
@@ -215,7 +215,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
   for (int i_cell = 1; i_cell > 0; --i_cell) {
     // build a hexa-gauss and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
-    auto lagrange = Lagrange {
+    auto lagrange = Coordinate {
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() + b, rand_f() - c),
@@ -309,9 +309,9 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
   }
 }
 TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
-  // build a hexa-gauss and a Lagrange interpolation on it
+  // build a hexa-gauss and a Coordinate interpolation on it
   auto a = 2.0, b = 3.0, c = 4.0;
-  auto cell_lagrange = Lagrange {
+  auto cell_lagrange = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
     Global(+a, +b, -c), Global(-a, +b, -c),
     Global(-a, -b, +c), Global(+a, -b, +c),
@@ -319,9 +319,9 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
   };
   auto cell_gauss = Gauss(cell_lagrange);
   auto interp = Interpolation(cell_gauss);
-  using LagrangeOnFace = mini::geometry::Quadrangle4<double, 3>;
+  using CoordinateOnFace = mini::geometry::Quadrangle4<double, 3>;
   /* test on the x_local == +1 face */{
-    auto face_lagrange = LagrangeOnFace {
+    auto face_lagrange = CoordinateOnFace {
       Global(+a, -b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(+a, -b, +c),
     };
@@ -341,7 +341,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the x_local == -1 face */{
-    auto face_lagrange = LagrangeOnFace {
+    auto face_lagrange = CoordinateOnFace {
       Global(-a, -b, -c), Global(-a, +b, -c),
       Global(-a, +b, +c), Global(-a, -b, +c),
     };
@@ -361,7 +361,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the y_local == +1 face */{
-    auto face_lagrange = LagrangeOnFace {
+    auto face_lagrange = CoordinateOnFace {
       Global(-a, +b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
@@ -381,7 +381,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the y_local == -1 face */{
-    auto face_lagrange = LagrangeOnFace {
+    auto face_lagrange = CoordinateOnFace {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, -b, +c), Global(-a, -b, +c),
     };
@@ -401,7 +401,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the z_local == +1 face */{
-    auto face_lagrange = LagrangeOnFace {
+    auto face_lagrange = CoordinateOnFace {
       Global(-a, -b, +c), Global(+a, -b, +c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
@@ -421,7 +421,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     }
   }
   /* test on the z_local == -1 face */{
-    auto face_lagrange = LagrangeOnFace {
+    auto face_lagrange = CoordinateOnFace {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, +b, -c), Global(-a, +b, -c),
     };

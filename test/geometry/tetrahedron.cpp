@@ -11,13 +11,13 @@
 
 #include "gtest/gtest.h"
 
-class TestLagrangeTetrahedron4 : public ::testing::Test {
+class TestCoordinateTetrahedron4 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Tetrahedron4<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Tetrahedron4<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangeTetrahedron4, CoordinateMap) {
-  auto tetra = Lagrange{
+TEST_F(TestCoordinateTetrahedron4, CoordinateMap) {
+  auto tetra = Coordinate{
     Coord(0, 0, 0), Coord(3, 0, 0), Coord(0, 3, 0), Coord(0, 0, 3)
   };
   static_assert(tetra.CellDim() == 3);
@@ -33,7 +33,7 @@ TEST_F(TestLagrangeTetrahedron4, CoordinateMap) {
   EXPECT_EQ(tetra.GlobalToLocal(3, 0, 0), Coord(0, 1, 0));
   EXPECT_EQ(tetra.GlobalToLocal(0, 3, 0), Coord(0, 0, 1));
   EXPECT_EQ(tetra.GlobalToLocal(0, 0, 3), Coord(0, 0, 0));
-  mini::geometry::Cell<typename Lagrange::Real> &cell = tetra;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = tetra;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -76,9 +76,9 @@ TEST_F(TestLagrangeTetrahedron4, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeTetrahedron4, SortNodesOnFace) {
+TEST_F(TestCoordinateTetrahedron4, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(0, 0, 0), Coord(3, 0, 0), Coord(0, 3, 0), Coord(0, 0, 3)
   };
   int face_n_node = 3;
@@ -126,13 +126,13 @@ TEST_F(TestLagrangeTetrahedron4, SortNodesOnFace) {
   }
 }
 
-class TestLagrangeTetrahedron10 : public ::testing::Test {
+class TestCoordinateTetrahedron10 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Tetrahedron10<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Tetrahedron10<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangeTetrahedron10, CoordinateMap) {
-  auto tetra = Lagrange{
+TEST_F(TestCoordinateTetrahedron10, CoordinateMap) {
+  auto tetra = Coordinate{
     Coord(0, 0, 0), Coord(6, 0, 0), Coord(0, 6, 0), Coord(0, 0, 6),
     Coord(3, 0, 0), Coord(3, 3, 0), Coord(0, 3, 0),
     Coord(0, 0, 3), Coord(3, 0, 3), Coord(0, 3, 3),
@@ -150,7 +150,7 @@ TEST_F(TestLagrangeTetrahedron10, CoordinateMap) {
   EXPECT_EQ(tetra.GlobalToLocal(6, 0, 0), Coord(0, 1, 0));
   EXPECT_EQ(tetra.GlobalToLocal(0, 6, 0), Coord(0, 0, 1));
   EXPECT_EQ(tetra.GlobalToLocal(0, 0, 6), Coord(0, 0, 0));
-  mini::geometry::Cell<typename Lagrange::Real> &cell = tetra;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = tetra;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -193,9 +193,9 @@ TEST_F(TestLagrangeTetrahedron10, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeTetrahedron10, SortNodesOnFace) {
+TEST_F(TestCoordinateTetrahedron10, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(0, 0, 0), Coord(6, 0, 0), Coord(0, 6, 0), Coord(0, 0, 6),
     Coord(3, 0, 0), Coord(3, 3, 0), Coord(0, 3, 0),
     Coord(0, 0, 3), Coord(3, 0, 3), Coord(0, 3, 3),

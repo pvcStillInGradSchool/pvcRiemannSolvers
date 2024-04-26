@@ -31,7 +31,7 @@
 class TestWenoLimiters : public ::testing::Test {
  protected:
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
-  using Lagrange = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::geometry::Hexahedron8<double>;
   using Gx = mini::gauss::Legendre<double, 5>;
   using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
   using Coord = typename Gauss::Global;
@@ -39,14 +39,14 @@ class TestWenoLimiters : public ::testing::Test {
   std::string const input_dir_{INPUT_DIR};
 };
 TEST_F(TestWenoLimiters, Smoothness) {
-  using Lagrange = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::geometry::Hexahedron8<double>;
   using Gx = mini::gauss::Legendre<double, 5>;
   using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
   using Projection = mini::polynomial::Projection<double, 3, 2, 10>;
   using Taylor = typename Projection::Taylor;
   using Value = typename Projection::Value;
   using Global = typename Projection::Global;
-  auto lagrange = Lagrange {
+  auto lagrange = Coordinate {
       Global{-1, -1, -1}, Global{+1, -1, -1},
       Global{+1, +1, -1}, Global{-1, +1, -1},
       Global{-1, -1, +1}, Global{+1, -1, +1},
@@ -130,7 +130,7 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
       p[i][2] = z[i_node];
     }
     auto coords = { p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7] };
-    auto lagrange_uptr = std::make_unique<Lagrange>(coords);
+    auto lagrange_uptr = std::make_unique<Coordinate>(coords);
     auto gauss_ptr = std::make_unique<Gauss>(*lagrange_uptr);
     cells.emplace_back(std::move(lagrange_uptr), std::move(gauss_ptr), i_cell);
     assert(&(cells[i_cell]) == &(cells.back()));

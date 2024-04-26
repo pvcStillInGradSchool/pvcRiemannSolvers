@@ -31,12 +31,12 @@ class Triangle : public Face<Scalar, kPhysDim> {
   static constexpr int D = kPhysDim;
 
  public:
-  using Lagrange = geometry::Triangle<Scalar, kPhysDim>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
-  using Frame = typename Lagrange::Frame;
+  using Coordinate = geometry::Triangle<Scalar, kPhysDim>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
+  using Frame = typename Coordinate::Frame;
 
  private:
   using Base = Face<Scalar, kPhysDim>;
@@ -45,7 +45,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
   std::array<Global, kPoints> global_coords_;
   std::array<Scalar, kPoints> global_weights_;
   std::array<Frame, kPoints> normal_frames_;
-  Lagrange const *lagrange_;
+  Coordinate const *lagrange_;
   Scalar area_;
 
  public:
@@ -94,13 +94,13 @@ class Triangle : public Face<Scalar, kPhysDim> {
   }
 
  public:
-  explicit Triangle(Lagrange const &lagrange)
+  explicit Triangle(Coordinate const &lagrange)
       : lagrange_(&lagrange) {
     area_ = this->BuildQuadraturePoints();
     Base::BuildNormalFrames(this);
   }
 
-  const Lagrange &coordinate() const final {
+  const Coordinate &coordinate() const final {
     return *lagrange_;
   }
 

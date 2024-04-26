@@ -35,18 +35,18 @@ class Pyramid : public Cell<Scalar> {
   using GaussY = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qy>, Lobatto<Scalar, Qy> >;
   using GaussZ = Jacobi<Scalar, Qz, 2, 0>;
-  using Lagrange = geometry::Pyramid<Scalar>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
+  using Coordinate = geometry::Pyramid<Scalar>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
 
  private:
   static const std::array<Local, Qx * Qy * Qz> local_coords_;
   static const std::array<Scalar, Qx * Qy * Qz> local_weights_;
   std::array<Global, Qx * Qy * Qz> global_coords_;
   std::array<Scalar, Qx * Qy * Qz> global_weights_;
-  Lagrange const *lagrange_;
+  Coordinate const *lagrange_;
   Scalar volume_;
 
  public:
@@ -114,7 +114,7 @@ class Pyramid : public Cell<Scalar> {
   }
 
  public:
-  explicit Pyramid(Lagrange const &lagrange)
+  explicit Pyramid(Coordinate const &lagrange)
       : lagrange_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
@@ -124,7 +124,7 @@ class Pyramid : public Cell<Scalar> {
   Pyramid &operator=(Pyramid &&) noexcept = default;
   virtual ~Pyramid() noexcept = default;
 
-  const Lagrange &coordinate() const final {
+  const Coordinate &coordinate() const final {
     return *lagrange_;
   }
 

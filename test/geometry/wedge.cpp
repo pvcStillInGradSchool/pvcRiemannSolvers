@@ -13,13 +13,13 @@
 
 #include "gtest/gtest.h"
 
-class TestLagrangeWedge6 : public ::testing::Test {
+class TestCoordinateWedge6 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Wedge6<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Wedge6<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangeWedge6, CoordinateMap) {
-  auto lagrange = Lagrange{
+TEST_F(TestCoordinateWedge6, CoordinateMap) {
+  auto lagrange = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3)
   };
@@ -35,7 +35,7 @@ TEST_F(TestLagrangeWedge6, CoordinateMap) {
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
         - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -130,9 +130,9 @@ TEST_F(TestLagrangeWedge6, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeWedge6, SortNodesOnFace) {
+TEST_F(TestCoordinateWedge6, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3)
   };
@@ -192,13 +192,13 @@ TEST_F(TestLagrangeWedge6, SortNodesOnFace) {
   }
 }
 
-class TestLagrangeWedge15 : public ::testing::Test {
+class TestCoordinateWedge15 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Wedge15<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Wedge15<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangeWedge15, CoordinateMap) {
-  auto lagrange = Lagrange{
+TEST_F(TestCoordinateWedge15, CoordinateMap) {
+  auto lagrange = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3),
     Coord(1.5, 0, -3), Coord(1.5, 1.5, -3), Coord(0, 1.5, -3),
@@ -217,7 +217,7 @@ TEST_F(TestLagrangeWedge15, CoordinateMap) {
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
         - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -316,9 +316,9 @@ TEST_F(TestLagrangeWedge15, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeWedge15, SortNodesOnFace) {
+TEST_F(TestCoordinateWedge15, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3),
     Coord(1.5, 0, -3), Coord(1.5, 1.5, -3), Coord(0, 1.5, -3),
@@ -385,13 +385,13 @@ TEST_F(TestLagrangeWedge15, SortNodesOnFace) {
   }
 }
 
-class TestLagrangeWedge18 : public ::testing::Test {
+class TestCoordinateWedge18 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Wedge18<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Wedge18<double>;
+  using Coord = typename Coordinate::Global;
 };
-TEST_F(TestLagrangeWedge18, CoordinateMap) {
-  auto lagrange = Lagrange{
+TEST_F(TestCoordinateWedge18, CoordinateMap) {
+  auto lagrange = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3),
     Coord(1.5, 0, -3), Coord(1.5, 1.5, -3), Coord(0, 1.5, -3),
@@ -411,7 +411,7 @@ TEST_F(TestLagrangeWedge18, CoordinateMap) {
     EXPECT_NEAR(0.0, (lagrange.GlobalToLocal(lagrange.GetGlobalCoord(i_node))
         - lagrange.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Lagrange::Real> &cell = lagrange;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = lagrange;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -511,9 +511,9 @@ TEST_F(TestLagrangeWedge18, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeWedge18, SortNodesOnFace) {
+TEST_F(TestCoordinateWedge18, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(0, 0, -3), Coord(3, 0, -3), Coord(0, 3, -3),
     Coord(0, 0, +3), Coord(3, 0, +3), Coord(0, 3, +3),
     Coord(1.5, 0, -3), Coord(1.5, 1.5, -3), Coord(0, 1.5, -3),

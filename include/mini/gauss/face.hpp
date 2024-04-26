@@ -23,12 +23,12 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   static_assert(D == 2 || D == 3);
 
  public:
-  using Lagrange = geometry::Face<Scalar, kPhysDim>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
-  using Frame = typename Lagrange::Frame;
+  using Coordinate = geometry::Face<Scalar, kPhysDim>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
+  using Frame = typename Coordinate::Frame;
 
   virtual ~Face() noexcept = default;
   virtual const Frame &GetNormalFrame(int i) const = 0;
@@ -37,9 +37,9 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   /**
    * @brief Get a reference to the geometry::Face object it uses for coordinate mapping.
    * 
-   * @return const Lagrange &  Reference to the geometry::Face object it uses for coordinate mapping.
+   * @return const Coordinate &  Reference to the geometry::Face object it uses for coordinate mapping.
    */
-  virtual const Lagrange &coordinate() const = 0;
+  virtual const Coordinate &coordinate() const = 0;
 
  protected:
   static void BuildNormalFrames(Face *face) requires(kPhysDim == 2) {

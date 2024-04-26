@@ -15,14 +15,14 @@ using std::sqrt;
 class TestTetrahedron : public ::testing::Test {
  protected:
   using Gauss = mini::gauss::Tetrahedron<double, 14>;
-  using Lagrange = mini::geometry::Tetrahedron4<double>;
+  using Coordinate = mini::geometry::Tetrahedron4<double>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coord = typename Basis::Coord;
   using A = typename Basis::MatNxN;
 };
 TEST_F(TestTetrahedron, OrthoNormal) {
   // build a tetra-gauss
-  auto lagrange = Lagrange {
+  auto lagrange = Coordinate {
     Coord(10, 10, 0), Coord(0, 10, 10),
     Coord(10, 0, 10), Coord(10, 10, 10)
   };
@@ -38,7 +38,7 @@ TEST_F(TestTetrahedron, OrthoNormal) {
   EXPECT_NEAR(residual, 0.0, 1e-14);
   // build another tetra-gauss
   Coord shift = {10, 20, 30};
-  lagrange = Lagrange {
+  lagrange = Coordinate {
     lagrange.GetGlobalCoord(0) + shift,
     lagrange.GetGlobalCoord(1) + shift,
     lagrange.GetGlobalCoord(2) + shift,

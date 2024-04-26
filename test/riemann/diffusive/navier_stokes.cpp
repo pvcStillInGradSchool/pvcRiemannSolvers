@@ -139,7 +139,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
   }
 }
 TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
-  using Lagrange = mini::geometry::Hexahedron8<Scalar>;
+  using Coordinate = mini::geometry::Hexahedron8<Scalar>;
   // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
   using GaussX = mini::gauss::Lobatto<Scalar, 3>;
   using Interpolation = mini::polynomial::Hexahedron<GaussX, GaussX, GaussX,
@@ -151,7 +151,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   using Global = typename Gauss::Global;
   // build a hexa-gauss and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
-  auto lagrange = Lagrange {
+  auto lagrange = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
     Global(+a, +b, -c), Global(-a, +b, -c),
     Global(-a, -b, +c), Global(+a, -b, +c),

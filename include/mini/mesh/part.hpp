@@ -111,19 +111,19 @@ struct Face {
   constexpr static int kPhysDim = Riemann::kDimensions;
   using Gauss = gauss::Face<Scalar, kPhysDim>;
   using GaussUptr = std::unique_ptr<Gauss>;
-  using Lagrange = geometry::Face<Scalar, kPhysDim>;
-  using LagrangeUptr = std::unique_ptr<Lagrange>;
+  using Coordinate = geometry::Face<Scalar, kPhysDim>;
+  using CoordinateUptr = std::unique_ptr<Coordinate>;
   using Cell = part::Cell<Int, Riemann, P>;
   using Global = typename Cell::Global;
 
-  LagrangeUptr lagrange_ptr_;
+  CoordinateUptr lagrange_ptr_;
   GaussUptr gauss_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
   std::vector<Riemann> riemann_;
   Int id_{-1};
 
-  Face(LagrangeUptr &&lagrange_ptr, GaussUptr &&gauss_ptr,
+  Face(CoordinateUptr &&lagrange_ptr, GaussUptr &&gauss_ptr,
       Cell *holder, Cell *sharer, Int id = 0)
       : lagrange_ptr_(std::move(lagrange_ptr)),
         gauss_ptr_(std::move(gauss_ptr)),
@@ -146,7 +146,7 @@ struct Face {
     assert(gauss_ptr_);
     return *gauss_ptr_;
   }
-  Lagrange const &coordinate() const {
+  Coordinate const &coordinate() const {
     assert(lagrange_ptr_);
     return *lagrange_ptr_;
   }
@@ -192,8 +192,8 @@ struct Cell {
   using Scalar = typename Riemann::Scalar;
   using Gauss = gauss::Cell<Scalar>;
   using GaussUptr = std::unique_ptr<Gauss>;
-  using Lagrange = geometry::Cell<Scalar>;
-  using LagrangeUptr = std::unique_ptr<Lagrange>;
+  using Coordinate = geometry::Cell<Scalar>;
+  using CoordinateUptr = std::unique_ptr<Coordinate>;
   using Basis = typename Projection::Basis;
   using Local = typename Projection::Local;
   using Global = typename Projection::Global;
@@ -210,13 +210,13 @@ struct Cell {
 
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
-  LagrangeUptr lagrange_ptr_;
+  CoordinateUptr lagrange_ptr_;
   GaussUptr gauss_ptr_;
   ProjectionUptr projection_ptr_;
   Int metis_id{-1}, id_{-1};
   bool inner_ = true;
 
-  Cell(LagrangeUptr &&lagrange_ptr, GaussUptr &&gauss_ptr, Int m_cell)
+  Cell(CoordinateUptr &&lagrange_ptr, GaussUptr &&gauss_ptr, Int m_cell)
       : lagrange_ptr_(std::move(lagrange_ptr)),
         gauss_ptr_(std::move(gauss_ptr)),
         projection_ptr_(std::make_unique<Proj>(*gauss_ptr_)),
@@ -248,7 +248,7 @@ struct Cell {
     assert(gauss_ptr_);
     return *gauss_ptr_;
   }
-  Lagrange const &coordinate() const {
+  Coordinate const &coordinate() const {
     assert(lagrange_ptr_);
     return *lagrange_ptr_;
   }
@@ -439,31 +439,31 @@ class Part {
 
  private:
   using GaussOnLine = typename Projection::GaussOnLine;
-  using LagrangeOnTriangle = geometry::Triangle3<Scalar, kPhysDim>;
+  using CoordinateOnTriangle = geometry::Triangle3<Scalar, kPhysDim>;
   using GaussOnTriangle = type::select_t<kDegrees,
     gauss::Triangle<Scalar, kPhysDim, 1>,
     gauss::Triangle<Scalar, kPhysDim, 3>,
     gauss::Triangle<Scalar, kPhysDim, 6>,
     gauss::Triangle<Scalar, kPhysDim, 12>>;
-  using LagrangeOnQuadrangle = geometry::Quadrangle4<Scalar, kPhysDim>;
+  using CoordinateOnQuadrangle = geometry::Quadrangle4<Scalar, kPhysDim>;
   using GaussOnQuadrangle =
     gauss::Quadrangle<kPhysDim, GaussOnLine, GaussOnLine>;
-  using LagrangeOnTetrahedron = geometry::Tetrahedron4<Scalar>;
+  using CoordinateOnTetrahedron = geometry::Tetrahedron4<Scalar>;
   using GaussOnTetrahedron = type::select_t<kDegrees,
     gauss::Tetrahedron<Scalar, 1>,
     gauss::Tetrahedron<Scalar, 4>,
     gauss::Tetrahedron<Scalar, 14>,
     gauss::Tetrahedron<Scalar, 24>>;
-  using LagrangeOnHexahedron = geometry::Hexahedron8<Scalar>;
+  using CoordinateOnHexahedron = geometry::Hexahedron8<Scalar>;
   using GaussOnHexahedron =
       gauss::Hexahedron<GaussOnLine, GaussOnLine, GaussOnLine>;
-  using LagrangeOnPyramid = geometry::Pyramid5<Scalar>;
+  using CoordinateOnPyramid = geometry::Pyramid5<Scalar>;
   using GaussOnPyramid = type::select_t<kDegrees,
     gauss::Pyramid<Scalar, 1, 1, 1>,
     gauss::Pyramid<Scalar, 2, 2, 2>,
     gauss::Pyramid<Scalar, 3, 3, 3>,
     gauss::Pyramid<Scalar, 4, 4, 4>>;
-  using LagrangeOnWedge = geometry::Wedge6<Scalar>;
+  using CoordinateOnWedge = geometry::Wedge6<Scalar>;
   using GaussOnWedge = type::select_t<kDegrees,
     gauss::Wedge<Scalar, 1, 1>,
     gauss::Wedge<Scalar, 3, 2>,
@@ -664,16 +664,16 @@ class Part {
       }
     }
   }
-  std::pair< std::unique_ptr<LagrangeOnTetrahedron>,
+  std::pair< std::unique_ptr<CoordinateOnTetrahedron>,
              std::unique_ptr<GaussOnTetrahedron> >
   BuildTetrahedronUptr(int i_zone, Int const *i_node_list) const {
-    auto lagrange = std::make_unique<LagrangeOnTetrahedron>(
+    auto lagrange = std::make_unique<CoordinateOnTetrahedron>(
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]));
     auto gauss = std::make_unique<GaussOnTetrahedron>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< std::unique_ptr<LagrangeOnPyramid>,
+  std::pair< std::unique_ptr<CoordinateOnPyramid>,
              std::unique_ptr<GaussOnPyramid> >
   BuildPyramidUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
@@ -681,11 +681,11 @@ class Part {
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
         GetCoord(i_zone, i_node_list[4]),
     };
-    auto lagrange = std::make_unique<LagrangeOnPyramid>(coords);
+    auto lagrange = std::make_unique<CoordinateOnPyramid>(coords);
     auto gauss = std::make_unique<GaussOnPyramid>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< std::unique_ptr<LagrangeOnWedge>,
+  std::pair< std::unique_ptr<CoordinateOnWedge>,
              std::unique_ptr<GaussOnWedge> >
   BuildWedgeUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
@@ -693,11 +693,11 @@ class Part {
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
         GetCoord(i_zone, i_node_list[4]), GetCoord(i_zone, i_node_list[5]),
     };
-    auto lagrange = std::make_unique<LagrangeOnWedge>(coords);
+    auto lagrange = std::make_unique<CoordinateOnWedge>(coords);
     auto gauss = std::make_unique<GaussOnWedge>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< std::unique_ptr<LagrangeOnHexahedron>,
+  std::pair< std::unique_ptr<CoordinateOnHexahedron>,
              std::unique_ptr<GaussOnHexahedron> >
   BuildHexahedronUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
@@ -706,11 +706,11 @@ class Part {
         GetCoord(i_zone, i_node_list[4]), GetCoord(i_zone, i_node_list[5]),
         GetCoord(i_zone, i_node_list[6]), GetCoord(i_zone, i_node_list[7]),
     };
-    auto lagrange = std::make_unique<LagrangeOnHexahedron>(coords);
+    auto lagrange = std::make_unique<CoordinateOnHexahedron>(coords);
     auto gauss = std::make_unique<GaussOnHexahedron>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< typename Cell::LagrangeUptr, typename Cell::GaussUptr >
+  std::pair< typename Cell::CoordinateUptr, typename Cell::GaussUptr >
   BuildGaussForCell(int npe, int i_zone, Int const *i_node_list) const {
     switch (npe) {
       case 4:
@@ -727,29 +727,29 @@ class Part {
     }
     return {nullptr, nullptr};
   }
-  std::pair< std::unique_ptr<LagrangeOnTriangle>,
+  std::pair< std::unique_ptr<CoordinateOnTriangle>,
              std::unique_ptr<GaussOnTriangle> >
   BuildTriangleUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
         GetCoord(i_zone, i_node_list[2]),
     };
-    auto lagrange = std::make_unique<LagrangeOnTriangle>(coords);
+    auto lagrange = std::make_unique<CoordinateOnTriangle>(coords);
     auto gauss = std::make_unique<GaussOnTriangle>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< std::unique_ptr<LagrangeOnQuadrangle>,
+  std::pair< std::unique_ptr<CoordinateOnQuadrangle>,
              std::unique_ptr<GaussOnQuadrangle> >
   BuildQuadrangleUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
     };
-    auto lagrange = std::make_unique<LagrangeOnQuadrangle>(coords);
+    auto lagrange = std::make_unique<CoordinateOnQuadrangle>(coords);
     auto gauss = std::make_unique<GaussOnQuadrangle>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< typename Face::LagrangeUptr, typename Face::GaussUptr >
+  std::pair< typename Face::CoordinateUptr, typename Face::GaussUptr >
   BuildGaussForFace(int npe, int i_zone, Int const *i_node_list) const {
     switch (npe) {
       case 3:

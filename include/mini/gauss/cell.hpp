@@ -19,11 +19,11 @@ namespace gauss {
 template <std::floating_point Scalar>
 class Cell : public Element<Scalar, 3, 3> {
  public:
-  using Lagrange = geometry::Cell<Scalar>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
+  using Coordinate = geometry::Cell<Scalar>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
 
   virtual ~Cell() noexcept = default;
   virtual Real volume() const = 0;
@@ -31,9 +31,9 @@ class Cell : public Element<Scalar, 3, 3> {
   /**
    * @brief Get a reference to the geometry::Cell object it uses for coordinate mapping.
    * 
-   * @return const Lagrange &  Reference to the geometry::Cell object it uses for coordinate mapping.
+   * @return const Coordinate &  Reference to the geometry::Cell object it uses for coordinate mapping.
    */
-  virtual const Lagrange &coordinate() const = 0;
+  virtual const Coordinate &coordinate() const = 0;
 };
 
 }  // namespace gauss

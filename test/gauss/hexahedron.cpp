@@ -18,8 +18,8 @@ class TestGaussHexahedron : public ::testing::Test {
   using Coord = typename Gauss::Global;
 };
 TEST_F(TestGaussHexahedron, OnLinearElement) {
-  using Lagrange = mini::geometry::Hexahedron8<double>;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Hexahedron8<double>;
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1),
     Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1),
@@ -36,7 +36,7 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Lagrange {
+  lagrange = Coordinate {
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
     Coord(-10, -10, +10), Coord(+10, -10, +10),
@@ -53,8 +53,8 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(g, hexa), std::sqrt(Innerprod(g, g, hexa)));
 }
 TEST_F(TestGaussHexahedron, OnQuadraticElement) {
-  using Lagrange = mini::geometry::Hexahedron20<double>;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Hexahedron20<double>;
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
     Coord(0, -1, -1), Coord(+1, 0, -1), Coord(0, +1, -1), Coord(-1, 0, -1),
@@ -72,7 +72,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Lagrange {
+  lagrange = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -100,8 +100,8 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(g, hexa), std::sqrt(Innerprod(g, g, hexa)));
 }
 TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
-  using Lagrange = mini::geometry::Hexahedron27<double>;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Hexahedron27<double>;
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
     Coord(0, -1, -1), Coord(+1, 0, -1), Coord(0, +1, -1), Coord(-1, 0, -1),
@@ -122,7 +122,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Lagrange {
+  lagrange = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -156,8 +156,8 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(g, hexa), std::sqrt(Innerprod(g, g, hexa)));
 }
 TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
-  using Lagrange = mini::geometry::Hexahedron26<double>;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Hexahedron26<double>;
+  auto lagrange = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
     Coord(0, -1, -1), Coord(+1, 0, -1), Coord(0, +1, -1), Coord(-1, 0, -1),
@@ -178,7 +178,7 @@ TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;
   EXPECT_EQ(hexa.GetLocalWeight(0), w1d * w1d * w1d);
-  lagrange = Lagrange {
+  lagrange = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),

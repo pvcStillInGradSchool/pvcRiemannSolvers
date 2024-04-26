@@ -35,10 +35,10 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   using Scalar = typename GaussX::Scalar;
   static_assert(std::is_same_v<Scalar, typename Gy::Scalar>);
   static_assert(std::is_same_v<Scalar, typename Gz::Scalar>);
-  using Lagrange = geometry::Hexahedron<Scalar>;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
+  using Coordinate = geometry::Hexahedron<Scalar>;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
 
  private:
   static constexpr int Qx = GaussX::Q;
@@ -53,7 +53,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   static const std::array<Scalar, Q> local_weights_;
   std::array<Global, Q> global_coords_;
   std::array<Scalar, Q> global_weights_;
-  Lagrange const *lagrange_;
+  Coordinate const *lagrange_;
   Scalar volume_;
 
 
@@ -121,7 +121,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   }
 
  public:
-  explicit Hexahedron(Lagrange const &lagrange)
+  explicit Hexahedron(Coordinate const &lagrange)
       : lagrange_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
@@ -131,7 +131,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   Hexahedron &operator=(Hexahedron &&) noexcept = default;
   virtual ~Hexahedron() noexcept = default;
 
-  const Lagrange &coordinate() const final {
+  const Coordinate &coordinate() const final {
     return *lagrange_;
   }
 

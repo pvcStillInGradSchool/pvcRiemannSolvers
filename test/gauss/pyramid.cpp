@@ -11,11 +11,11 @@
 class TestGaussPyramid : public ::testing::Test {
 };
 TEST_F(TestGaussPyramid, OnLinearElement) {
-  using Lagrange = mini::geometry::Pyramid5<double>;
+  using Coordinate = mini::geometry::Pyramid5<double>;
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Lagrange{
+  auto lagrange = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0),
     Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h)
@@ -36,11 +36,11 @@ TEST_F(TestGaussPyramid, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
 TEST_F(TestGaussPyramid, OnQuadraticElement) {
-  using Lagrange = mini::geometry::Pyramid13<double>;
+  using Coordinate = mini::geometry::Pyramid13<double>;
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Lagrange{
+  auto lagrange = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),
@@ -63,11 +63,11 @@ TEST_F(TestGaussPyramid, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
 TEST_F(TestGaussPyramid, On14NodeQuadraticElement) {
-  using Lagrange = mini::geometry::Pyramid14<double>;
+  using Coordinate = mini::geometry::Pyramid14<double>;
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
-  auto lagrange = Lagrange{
+  auto lagrange = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h),
     Coord(0, -b, 0), Coord(+a, 0, 0), Coord(0, +b, 0), Coord(-a, 0, 0),

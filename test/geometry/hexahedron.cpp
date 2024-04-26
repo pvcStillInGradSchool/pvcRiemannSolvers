@@ -16,16 +16,16 @@ double rand_f() {
   return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX);
 }
 
-class TestLagrangeHexahedron8 : public ::testing::Test {
+class TestCoordinateHexahedron8 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Hexahedron8<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Hexahedron8<double>;
+  using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
   using Gradient = Coord;
 };
-TEST_F(TestLagrangeHexahedron8, CoordinateMap) {
-  auto hexa = Lagrange {
+TEST_F(TestCoordinateHexahedron8, CoordinateMap) {
+  auto hexa = Coordinate {
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
     Coord(-10, -10, +10), Coord(+10, -10, +10),
@@ -68,7 +68,7 @@ TEST_F(TestLagrangeHexahedron8, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(+10, +10, +20) - Coord(+1, +1, +2)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Lagrange::Real> &cell = hexa;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -108,7 +108,7 @@ TEST_F(TestLagrangeHexahedron8, CoordinateMap) {
       EXPECT_EQ(shapes[j], i == j);
     }
   }
-  hexa = Lagrange {
+  hexa = Coordinate {
     Coord(2.00000, 1.000000, 0.0), Coord(1.94313, 0.878607, 0.0),
     Coord(2.00493, 0.845382, 0.0), Coord(2.06283, 0.874438, 0.0),
     Coord(2.00000, 1.000000, 0.1), Coord(1.94313, 0.878607, 0.1),
@@ -116,12 +116,12 @@ TEST_F(TestLagrangeHexahedron8, CoordinateMap) {
   };
   EXPECT_ANY_THROW(hexa.GlobalToLocal(2.05723, 0.777978, 0));
 }
-TEST_F(TestLagrangeHexahedron8, GetJacobianGradient) {
+TEST_F(TestCoordinateHexahedron8, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
     // build a hexa-gauss and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
-    auto cell = Lagrange {
+    auto cell = Coordinate {
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() + b, rand_f() - c),
@@ -192,9 +192,9 @@ TEST_F(TestLagrangeHexahedron8, GetJacobianGradient) {
     }
   }
 }
-TEST_F(TestLagrangeHexahedron8, SortNodesOnFace) {
+TEST_F(TestCoordinateHexahedron8, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
     Coord(-10, -10, +10), Coord(+10, -10, +10),
@@ -269,16 +269,16 @@ TEST_F(TestLagrangeHexahedron8, SortNodesOnFace) {
   }
 }
 
-class TestLagrangeHexahedron20 : public ::testing::Test {
+class TestCoordinateHexahedron20 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Hexahedron20<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Hexahedron20<double>;
+  using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
   using Gradient = Coord;
 };
-TEST_F(TestLagrangeHexahedron20, CoordinateMap) {
-  auto hexa = Lagrange {
+TEST_F(TestCoordinateHexahedron20, CoordinateMap) {
+  auto hexa = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -308,7 +308,7 @@ TEST_F(TestLagrangeHexahedron20, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(70, 130, 60) - Coord(7, 13, 6)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Lagrange::Real> &cell = hexa;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -349,12 +349,12 @@ TEST_F(TestLagrangeHexahedron20, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeHexahedron20, GetJacobianGradient) {
+TEST_F(TestCoordinateHexahedron20, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
     // build a hexa-gauss and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
-    auto cell = Lagrange {
+    auto cell = Coordinate {
       // corner nodes on the bottom face
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() - b, rand_f() - c),
@@ -442,9 +442,9 @@ TEST_F(TestLagrangeHexahedron20, GetJacobianGradient) {
     }
   }
 }
-TEST_F(TestLagrangeHexahedron20, SortNodesOnFace) {
+TEST_F(TestCoordinateHexahedron20, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -532,16 +532,16 @@ TEST_F(TestLagrangeHexahedron20, SortNodesOnFace) {
   }
 }
 
-class TestLagrangeHexahedron27 : public ::testing::Test {
+class TestCoordinateHexahedron27 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Hexahedron27<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Hexahedron27<double>;
+  using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
   using Gradient = Coord;
 };
-TEST_F(TestLagrangeHexahedron27, CoordinateMap) {
-  auto hexa = Lagrange {
+TEST_F(TestCoordinateHexahedron27, CoordinateMap) {
+  auto hexa = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -578,7 +578,7 @@ TEST_F(TestLagrangeHexahedron27, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(70, 130, 60) - Coord(7, 13, 6)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Lagrange::Real> &cell = hexa;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -619,12 +619,12 @@ TEST_F(TestLagrangeHexahedron27, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeHexahedron27, GetJacobianGradient) {
+TEST_F(TestCoordinateHexahedron27, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
     // build a hexa-gauss and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
-    auto cell = Lagrange {
+    auto cell = Coordinate {
       // corner nodes on the bottom face
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() - b, rand_f() - c),
@@ -721,9 +721,9 @@ TEST_F(TestLagrangeHexahedron27, GetJacobianGradient) {
     }
   }
 }
-TEST_F(TestLagrangeHexahedron27, SortNodesOnFace) {
+TEST_F(TestCoordinateHexahedron27, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -821,16 +821,16 @@ TEST_F(TestLagrangeHexahedron27, SortNodesOnFace) {
 }
 
 
-class TestLagrangeHexahedron26 : public ::testing::Test {
+class TestCoordinateHexahedron26 : public ::testing::Test {
  protected:
-  using Lagrange = mini::geometry::Hexahedron26<double>;
-  using Coord = typename Lagrange::Global;
+  using Coordinate = mini::geometry::Hexahedron26<double>;
+  using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
   using Gradient = Coord;
 };
-TEST_F(TestLagrangeHexahedron26, CoordinateMap) {
-  auto hexa = Lagrange {
+TEST_F(TestCoordinateHexahedron26, CoordinateMap) {
+  auto hexa = Coordinate {
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -865,7 +865,7 @@ TEST_F(TestLagrangeHexahedron26, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(70, 130, 60) - Coord(7, 13, 6)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Lagrange::Real> &cell = hexa;
+  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -906,12 +906,12 @@ TEST_F(TestLagrangeHexahedron26, CoordinateMap) {
     }
   }
 }
-TEST_F(TestLagrangeHexahedron26, GetJacobianGradient) {
+TEST_F(TestCoordinateHexahedron26, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
     // build a hexa-gauss and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
-    auto cell = Lagrange {
+    auto cell = Coordinate {
       // corner nodes on the bottom face
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
       Global(rand_f() + a, rand_f() - b, rand_f() - c),
@@ -1006,9 +1006,9 @@ TEST_F(TestLagrangeHexahedron26, GetJacobianGradient) {
     }
   }
 }
-TEST_F(TestLagrangeHexahedron26, SortNodesOnFace) {
+TEST_F(TestCoordinateHexahedron26, SortNodesOnFace) {
   using mini::geometry::SortNodesOnFace;
-  auto cell = Lagrange{
+  auto cell = Coordinate{
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),

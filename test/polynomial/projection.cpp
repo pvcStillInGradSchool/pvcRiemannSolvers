@@ -14,11 +14,11 @@ class TestProjection : public ::testing::Test {
  protected:
   using Taylor = mini::basis::Taylor<double, 3, 2>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
-  using Lagrange = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::geometry::Hexahedron8<double>;
   using Gx = mini::gauss::Legendre<double, 5>;
   using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
   using Coord = typename Gauss::Global;
-  Lagrange lagrange_;
+  Coordinate lagrange_;
   Gauss gauss_;
 
   TestProjection() : lagrange_{

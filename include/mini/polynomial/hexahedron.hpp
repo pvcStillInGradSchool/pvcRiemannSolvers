@@ -50,8 +50,8 @@ class Hexahedron {
   using Local = typename Gauss::Local;
   using Global = typename Gauss::Global;
   using GaussBase = gauss::Cell<Scalar>;
-  using Lagrange = typename Gauss::Lagrange;
-  using Jacobian = typename Lagrange::Jacobian;
+  using Coordinate = typename Gauss::Coordinate;
+  using Jacobian = typename Coordinate::Jacobian;
   static constexpr int Px = Gx::Q - 1;
   static constexpr int Py = Gy::Q - 1;
   static constexpr int Pz = Gz::Q - 1;
@@ -500,7 +500,7 @@ class Hexahedron {
   Gauss const &gauss() const {
     return *gauss_ptr_;
   }
-  Lagrange const &coordinate() const {
+  Coordinate const &coordinate() const {
     return gauss().coordinate();
   }
   template <typename Callable>

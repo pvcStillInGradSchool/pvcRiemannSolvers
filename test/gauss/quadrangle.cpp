@@ -13,9 +13,9 @@ class TestGaussQuadrangle : public ::testing::Test {
 TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
-  using Lagrange = mini::geometry::Quadrangle4<double, 2>;
-  using Coord = typename Lagrange::Global;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Quadrangle4<double, 2>;
+  using Coord = typename Coordinate::Global;
+  auto lagrange = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
   auto gauss = Gauss(lagrange);
@@ -40,10 +40,10 @@ TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
 TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<3, Gx, Gx>;
-  using Lagrange = mini::geometry::Quadrangle4<double, 3>;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Quadrangle4<double, 3>;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  auto lagrange = Coordinate {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4)
   };
   auto const gauss = Gauss(lagrange);
@@ -75,10 +75,10 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
 TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<3, Gx, Gx>;
-  using Lagrange = mini::geometry::Quadrangle8<double, 3>;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Quadrangle8<double, 3>;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  auto lagrange = Coordinate {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4),
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
   };
@@ -111,10 +111,10 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
 TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle9) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<3, Gx, Gx>;
-  using Lagrange = mini::geometry::Quadrangle9<double, 3>;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  auto lagrange = Lagrange {
+  using Coordinate = mini::geometry::Quadrangle9<double, 3>;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  auto lagrange = Coordinate {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4),
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
     Global(2, 2, 2),

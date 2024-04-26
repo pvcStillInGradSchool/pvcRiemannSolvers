@@ -35,18 +35,18 @@ class Wedge : public Cell<Scalar> {
   using GaussT = Triangle<Scalar, 2, Qt>;
   using GaussZ = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qz>, Lobatto<Scalar, Qz> >;
-  using Lagrange = geometry::Wedge<Scalar>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
+  using Coordinate = geometry::Wedge<Scalar>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
 
  private:
   static const std::array<Local, Qt * Qz> local_coords_;
   static const std::array<Scalar, Qt * Qz> local_weights_;
   std::array<Global, kPoints> global_coords_;
   std::array<Scalar, kPoints> global_weights_;
-  Lagrange const *lagrange_;
+  Coordinate const *lagrange_;
   Scalar volume_;
 
  public:
@@ -110,7 +110,7 @@ class Wedge : public Cell<Scalar> {
   }
 
  public:
-  explicit Wedge(Lagrange const &lagrange)
+  explicit Wedge(Coordinate const &lagrange)
       : lagrange_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
@@ -120,7 +120,7 @@ class Wedge : public Cell<Scalar> {
   Wedge &operator=(Wedge &&) noexcept = default;
   virtual ~Wedge() noexcept = default;
 
-  const Lagrange &coordinate() const final {
+  const Coordinate &coordinate() const final {
     return *lagrange_;
   }
 

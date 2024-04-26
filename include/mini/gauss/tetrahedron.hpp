@@ -30,18 +30,18 @@ class Tetrahedron : public Cell<Scalar> {
       || kPoints == 24 || kPoints == 46);
 
  public:
-  using Lagrange = geometry::Tetrahedron<Scalar>;
-  using Real = typename Lagrange::Real;
-  using Local = typename Lagrange::Local;
-  using Global = typename Lagrange::Global;
-  using Jacobian = typename Lagrange::Jacobian;
+  using Coordinate = geometry::Tetrahedron<Scalar>;
+  using Real = typename Coordinate::Real;
+  using Local = typename Coordinate::Local;
+  using Global = typename Coordinate::Global;
+  using Jacobian = typename Coordinate::Jacobian;
 
  private:
   static const std::array<Local, kPoints> local_coords_;
   static const std::array<Scalar, kPoints> local_weights_;
   std::array<Global, kPoints> global_coords_;
   std::array<Scalar, kPoints> global_weights_;
-  Lagrange const *lagrange_;
+  Coordinate const *lagrange_;
   Scalar volume_;
 
  public:
@@ -78,7 +78,7 @@ class Tetrahedron : public Cell<Scalar> {
   }
 
  public:
-  explicit Tetrahedron(Lagrange const &lagrange)
+  explicit Tetrahedron(Coordinate const &lagrange)
       : lagrange_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
   }
@@ -88,7 +88,7 @@ class Tetrahedron : public Cell<Scalar> {
   Tetrahedron &operator=(Tetrahedron &&) noexcept = default;
   virtual ~Tetrahedron() noexcept = default;
 
-  const Lagrange &coordinate() const final {
+  const Coordinate &coordinate() const final {
     return *lagrange_;
   }
 
