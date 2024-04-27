@@ -5,13 +5,13 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/tetrahedron.hpp"
-#include "mini/geometry/tetrahedron.hpp"
+#include "mini/coordinate/tetrahedron.hpp"
 #include "mini/gauss/hexahedron.hpp"
-#include "mini/geometry/hexahedron.hpp"
+#include "mini/coordinate/hexahedron.hpp"
 #include "mini/gauss/triangle.hpp"
-#include "mini/geometry/triangle.hpp"
+#include "mini/coordinate/triangle.hpp"
 #include "mini/gauss/quadrangle.hpp"
-#include "mini/geometry/quadrangle.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 #include "mini/basis/linear.hpp"
 
 #include "gtest/gtest.h"
@@ -80,7 +80,7 @@ TEST_F(TestBasisLinear, In3dSpace) {
 class TestBasisOrthoNormal : public ::testing::Test {
 };
 TEST_F(TestBasisOrthoNormal, OnTriangle) {
-  using Coordinate = mini::geometry::Triangle3<double, 2>;
+  using Coordinate = mini::coordinate::Triangle3<double, 2>;
   using Gauss = mini::gauss::Triangle<double, 2, 16>;
   using Coord = Gauss::Global;
   Coord p0{0, 0}, p1{3, 0}, p2{0, 3};
@@ -101,7 +101,7 @@ TEST_F(TestBasisOrthoNormal, OnTriangle) {
   EXPECT_NEAR(diff.norm(), 0.0, 1e-13);
 }
 TEST_F(TestBasisOrthoNormal, OnQuadrangle) {
-  using Coordinate = mini::geometry::Quadrangle4<double, 2>;
+  using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
   using Coord = Gauss::Global;
@@ -124,7 +124,7 @@ TEST_F(TestBasisOrthoNormal, OnQuadrangle) {
 }
 TEST_F(TestBasisOrthoNormal, OnTetrahedron) {
   using Gauss = mini::gauss::Tetrahedron<double, 24>;
-  using Coordinate = mini::geometry::Tetrahedron4<double>;
+  using Coordinate = mini::coordinate::Tetrahedron4<double>;
   using Coord = Gauss::Global;
   Coord p0{0, 0, 0}, p1{3, 0, 0}, p2{0, 3, 0}, p3{0, 0, 3};
   auto coordinate = Coordinate(p0, p1, p2, p3);
@@ -144,7 +144,7 @@ TEST_F(TestBasisOrthoNormal, OnTetrahedron) {
   EXPECT_NEAR(diff.norm(), 0.0, 1e-14);
 }
 TEST_F(TestBasisOrthoNormal, OnHexahedron) {
-  using Coordinate = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::gauss::Legendre<double, 5>;
   using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
   using Coord = Gauss::Global;

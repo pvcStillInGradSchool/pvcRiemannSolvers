@@ -4,7 +4,7 @@
 
 #include <concepts>
 
-#include "mini/geometry/face.hpp"
+#include "mini/coordinate/face.hpp"
 #include "mini/gauss/element.hpp"
 #include "mini/gauss/function.hpp"
 
@@ -23,7 +23,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   static_assert(D == 2 || D == 3);
 
  public:
-  using Coordinate = geometry::Face<Scalar, kPhysDim>;
+  using Coordinate = coordinate::Face<Scalar, kPhysDim>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
@@ -35,9 +35,9 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   virtual Scalar area() const = 0;
 
   /**
-   * @brief Get a reference to the geometry::Face object it uses for coordinate mapping.
+   * @brief Get a reference to the coordinate::Face object it uses for coordinate mapping.
    * 
-   * @return const Coordinate &  Reference to the geometry::Face object it uses for coordinate mapping.
+   * @return const Coordinate &  Reference to the coordinate::Face object it uses for coordinate mapping.
    */
   virtual const Coordinate &coordinate() const = 0;
 

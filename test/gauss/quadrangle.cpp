@@ -4,7 +4,7 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/quadrangle.hpp"
-#include "mini/geometry/quadrangle.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 
 #include "gtest/gtest.h"
 
@@ -13,7 +13,7 @@ class TestGaussQuadrangle : public ::testing::Test {
 TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
-  using Coordinate = mini::geometry::Quadrangle4<double, 2>;
+  using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
@@ -40,7 +40,7 @@ TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
 TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<3, Gx, Gx>;
-  using Coordinate = mini::geometry::Quadrangle4<double, 3>;
+  using Coordinate = mini::coordinate::Quadrangle4<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -75,7 +75,7 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
 TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<3, Gx, Gx>;
-  using Coordinate = mini::geometry::Quadrangle8<double, 3>;
+  using Coordinate = mini::coordinate::Quadrangle8<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -111,7 +111,7 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
 TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle9) {
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<3, Gx, Gx>;
-  using Coordinate = mini::geometry::Quadrangle9<double, 3>;
+  using Coordinate = mini::coordinate::Quadrangle9<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {

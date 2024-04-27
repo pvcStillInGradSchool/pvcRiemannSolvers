@@ -18,7 +18,7 @@
 #include "mini/gauss/cell.hpp"
 #include "mini/gauss/lobatto.hpp"
 #include "mini/gauss/hexahedron.hpp"
-#include "mini/geometry/element.hpp"
+#include "mini/coordinate/element.hpp"
 #include "mini/basis/lagrange.hpp"
 #include "mini/constant/index.hpp"
 
@@ -444,9 +444,9 @@ class Hexahedron {
   /**
    * @brief Convert the gradients in local coordinates to the gradients in global coordinates.
    * 
-   * \f$ \begin{bmatrix}\partial_{\xi}\,\phi\\\partial_{\eta}\,\phi\\\partial_{\zeta}\,\phi\end{bmatrix}=\mathbf{J}\begin{bmatrix}\partial_{x}\,\phi\\\partial_{y}\,\phi\\\partial_{z}\,\phi\end{bmatrix} \f$, in which \f$ \mathbf{J}=\begin{bmatrix}\partial_{\xi}\\\partial_{\eta}\\\partial_{\zeta}\end{bmatrix}\begin{bmatrix}x & y & z\end{bmatrix} \f$ is `geometry::Element::Jacobian`.
+   * \f$ \begin{bmatrix}\partial_{\xi}\,\phi\\\partial_{\eta}\,\phi\\\partial_{\zeta}\,\phi\end{bmatrix}=\mathbf{J}\begin{bmatrix}\partial_{x}\,\phi\\\partial_{y}\,\phi\\\partial_{z}\,\phi\end{bmatrix} \f$, in which \f$ \mathbf{J}=\begin{bmatrix}\partial_{\xi}\\\partial_{\eta}\\\partial_{\zeta}\end{bmatrix}\begin{bmatrix}x & y & z\end{bmatrix} \f$ is `coordinate::Element::Jacobian`.
    * 
-   * @param jacobian the Jacobian matrix of the type `geometry::Element::Jacobian`.
+   * @param jacobian the Jacobian matrix of the type `coordinate::Element::Jacobian`.
    * @param local_grad the gradients in local coordinates
    * @return Mat3xN the gradients in global coordinates
    */
@@ -475,7 +475,7 @@ class Hexahedron {
   /**
    * @brief Get the associated matrix of the Jacobian at a given Gaussian point.
    * 
-   * \f$ \mathbf{J}^{*}=\det(\mathbf{J})\,\mathbf{J}^{-1} \f$, in which \f$ \mathbf{J}^{-1}=\begin{bmatrix}\partial_{x}\\\partial_{y}\\\partial_{z}\end{bmatrix}\begin{bmatrix}\xi & \eta & \zeta\end{bmatrix} \f$ is the inverse of `geometry::Element::Jacobian`.
+   * \f$ \mathbf{J}^{*}=\det(\mathbf{J})\,\mathbf{J}^{-1} \f$, in which \f$ \mathbf{J}^{-1}=\begin{bmatrix}\partial_{x}\\\partial_{y}\\\partial_{z}\end{bmatrix}\begin{bmatrix}\xi & \eta & \zeta\end{bmatrix} \f$ is the inverse of `coordinate::Element::Jacobian`.
    * 
    * @param ijk the index of the Gaussian point
    * @return Jacobian const& the associated matrix of \f$ \mathbf{J} \f$.
@@ -593,9 +593,9 @@ class Hexahedron {
   }
   std::vector<int> FindCollinearPoints(Global const &global, int i_face) const {
     std::vector<int> indices;
-    using mini::geometry::X;
-    using mini::geometry::Y;
-    using mini::geometry::Z;
+    using mini::coordinate::X;
+    using mini::coordinate::Y;
+    using mini::coordinate::Z;
     auto local = coordinate().GlobalToLocal(global);
     int i, j, k;
     auto almost_equal = [](Scalar x, Scalar y) {
@@ -707,9 +707,9 @@ class Hexahedron {
   }
   std::tuple<int, int, int> FindCollinearIndexByGlobal(Global const &global, int i_face) const {
     int i{-1}, j{-1}, k{-1};
-    using mini::geometry::X;
-    using mini::geometry::Y;
-    using mini::geometry::Z;
+    using mini::coordinate::X;
+    using mini::coordinate::Y;
+    using mini::coordinate::Z;
     Global global_temp;
     bool done = false;
     switch (i_face) {
@@ -815,9 +815,9 @@ class Hexahedron {
   }
   std::tuple<int, int, int> FindCollinearIndexByLocal(Global const &global, int i_face) const {
     int i{-1}, j{-1}, k{-1};
-    using mini::geometry::X;
-    using mini::geometry::Y;
-    using mini::geometry::Z;
+    using mini::coordinate::X;
+    using mini::coordinate::Y;
+    using mini::coordinate::Z;
     Local local_hint(0, 0, 0);
     switch (i_face) {
     case 0: local_hint[Z] = -1; break;

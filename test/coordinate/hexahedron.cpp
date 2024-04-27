@@ -4,8 +4,8 @@
 
 #include <cmath>
 
-#include "mini/geometry/cell.hpp"
-#include "mini/geometry/hexahedron.hpp"
+#include "mini/coordinate/cell.hpp"
+#include "mini/coordinate/hexahedron.hpp"
 #include "mini/constant/index.hpp"
 
 #include "gtest/gtest.h"
@@ -18,7 +18,7 @@ double rand_f() {
 
 class TestCoordinateHexahedron8 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
@@ -68,7 +68,7 @@ TEST_F(TestCoordinateHexahedron8, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(+10, +10, +20) - Coord(+1, +1, +2)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -193,7 +193,7 @@ TEST_F(TestCoordinateHexahedron8, GetJacobianGradient) {
   }
 }
 TEST_F(TestCoordinateHexahedron8, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto cell = Coordinate{
     Coord(-10, -10, -10), Coord(+10, -10, -10),
     Coord(+10, +10, -10), Coord(-10, +10, -10),
@@ -271,7 +271,7 @@ TEST_F(TestCoordinateHexahedron8, SortNodesOnFace) {
 
 class TestCoordinateHexahedron20 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Hexahedron20<double>;
+  using Coordinate = mini::coordinate::Hexahedron20<double>;
   using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
@@ -308,7 +308,7 @@ TEST_F(TestCoordinateHexahedron20, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(70, 130, 60) - Coord(7, 13, 6)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -443,7 +443,7 @@ TEST_F(TestCoordinateHexahedron20, GetJacobianGradient) {
   }
 }
 TEST_F(TestCoordinateHexahedron20, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto cell = Coordinate{
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
@@ -534,7 +534,7 @@ TEST_F(TestCoordinateHexahedron20, SortNodesOnFace) {
 
 class TestCoordinateHexahedron27 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Hexahedron27<double>;
+  using Coordinate = mini::coordinate::Hexahedron27<double>;
   using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
@@ -578,7 +578,7 @@ TEST_F(TestCoordinateHexahedron27, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(70, 130, 60) - Coord(7, 13, 6)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -722,7 +722,7 @@ TEST_F(TestCoordinateHexahedron27, GetJacobianGradient) {
   }
 }
 TEST_F(TestCoordinateHexahedron27, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto cell = Coordinate{
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),
@@ -823,7 +823,7 @@ TEST_F(TestCoordinateHexahedron27, SortNodesOnFace) {
 
 class TestCoordinateHexahedron26 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Hexahedron26<double>;
+  using Coordinate = mini::coordinate::Hexahedron26<double>;
   using Coord = typename Coordinate::Global;
   using Global = Coord;
   using Local = Coord;
@@ -865,7 +865,7 @@ TEST_F(TestCoordinateHexahedron26, CoordinateMap) {
       1e-10);
   EXPECT_NEAR(0, (hexa.GlobalToLocal(70, 130, 60) - Coord(7, 13, 6)).norm(),
       1e-10);
-  mini::geometry::Cell<typename Coordinate::Real> &cell = hexa;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = hexa;
   // test the partition-of-unity property:
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -1007,7 +1007,7 @@ TEST_F(TestCoordinateHexahedron26, GetJacobianGradient) {
   }
 }
 TEST_F(TestCoordinateHexahedron26, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto cell = Coordinate{
     // corner nodes on the bottom face
     Coord(-10, -10, -10), Coord(+10, -10, -10),

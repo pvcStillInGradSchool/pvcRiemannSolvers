@@ -8,8 +8,8 @@
 #include "mini/gauss/lobatto.hpp"
 #include "mini/gauss/quadrangle.hpp"
 #include "mini/gauss/hexahedron.hpp"
-#include "mini/geometry/quadrangle.hpp"
-#include "mini/geometry/hexahedron.hpp"
+#include "mini/coordinate/quadrangle.hpp"
+#include "mini/coordinate/hexahedron.hpp"
 #include "mini/basis/linear.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"
@@ -28,7 +28,7 @@ class TestPolynomialHexahedronProjection : public ::testing::Test {
  protected:
   using GaussX = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Hexahedron<GaussX, GaussX, GaussX>;
-  using Coordinate = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coord = typename Basis::Coord;
   using Y = typename Basis::MatNx1;
@@ -121,7 +121,7 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
 class TestPolynomialHexahedronInterpolation : public ::testing::Test {
  protected:
   using Scalar = double;
-  using Coordinate = mini::geometry::Hexahedron8<Scalar>;
+  using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
   // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
   using GaussX = mini::gauss::Legendre<Scalar, 3>;
   using GaussY = mini::gauss::Lobatto<Scalar, 3>;
@@ -319,7 +319,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
   };
   auto cell_gauss = Gauss(cell_coordinate);
   auto interp = Interpolation(cell_gauss);
-  using CoordinateOnFace = mini::geometry::Quadrangle4<double, 3>;
+  using CoordinateOnFace = mini::coordinate::Quadrangle4<double, 3>;
   /* test on the x_local == +1 face */{
     auto face_coordinate = CoordinateOnFace {
       Global(+a, -b, -c), Global(+a, +b, -c),

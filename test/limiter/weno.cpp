@@ -19,7 +19,7 @@
 #include "mini/mesh/shuffler.hpp"
 #include "mini/mesh/part.hpp"
 #include "mini/gauss/hexahedron.hpp"
-#include "mini/geometry/hexahedron.hpp"
+#include "mini/coordinate/hexahedron.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/limiter/weno.hpp"
 #include "mini/riemann/rotated/single.hpp"
@@ -31,7 +31,7 @@
 class TestWenoLimiters : public ::testing::Test {
  protected:
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
-  using Coordinate = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::gauss::Legendre<double, 5>;
   using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
   using Coord = typename Gauss::Global;
@@ -39,7 +39,7 @@ class TestWenoLimiters : public ::testing::Test {
   std::string const input_dir_{INPUT_DIR};
 };
 TEST_F(TestWenoLimiters, Smoothness) {
-  using Coordinate = mini::geometry::Hexahedron8<double>;
+  using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::gauss::Legendre<double, 5>;
   using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
   using Projection = mini::polynomial::Projection<double, 3, 2, 10>;

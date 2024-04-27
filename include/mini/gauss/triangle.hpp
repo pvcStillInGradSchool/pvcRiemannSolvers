@@ -12,7 +12,7 @@
 #include <type_traits>
 
 #include "mini/gauss/face.hpp"
-#include "mini/geometry/triangle.hpp"
+#include "mini/coordinate/triangle.hpp"
 
 namespace mini {
 namespace gauss {
@@ -31,7 +31,7 @@ class Triangle : public Face<Scalar, kPhysDim> {
   static constexpr int D = kPhysDim;
 
  public:
-  using Coordinate = geometry::Triangle<Scalar, kPhysDim>;
+  using Coordinate = coordinate::Triangle<Scalar, kPhysDim>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;

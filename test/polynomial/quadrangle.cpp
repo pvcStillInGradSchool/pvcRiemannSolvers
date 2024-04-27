@@ -4,7 +4,7 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/quadrangle.hpp"
-#include "mini/geometry/quadrangle.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 #include "mini/basis/linear.hpp"
 #include "mini/polynomial/projection.hpp"
 
@@ -18,7 +18,7 @@ TEST_F(TestQuadrangle4x4, OrthoNormal) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
-  using Coordinate = mini::geometry::Quadrangle4<double, 2>;
+  using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   Coord origin = {0, 0}, left = {-1, 2}, right = {1, 3};
   auto coordinate = Coordinate {
@@ -49,7 +49,7 @@ TEST_F(TestQuadrangle4x4, Projection) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   using Gx = mini::gauss::Legendre<double, 4>;
   using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
-  using Coordinate = mini::geometry::Quadrangle4<double, 2>;
+  using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)

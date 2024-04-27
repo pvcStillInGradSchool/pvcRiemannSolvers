@@ -6,14 +6,14 @@
 #include <numeric>
 #include <vector>
 
-#include "mini/geometry/cell.hpp"
-#include "mini/geometry/tetrahedron.hpp"
+#include "mini/coordinate/cell.hpp"
+#include "mini/coordinate/tetrahedron.hpp"
 
 #include "gtest/gtest.h"
 
 class TestCoordinateTetrahedron4 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Tetrahedron4<double>;
+  using Coordinate = mini::coordinate::Tetrahedron4<double>;
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinateTetrahedron4, CoordinateMap) {
@@ -33,7 +33,7 @@ TEST_F(TestCoordinateTetrahedron4, CoordinateMap) {
   EXPECT_EQ(tetra.GlobalToLocal(3, 0, 0), Coord(0, 1, 0));
   EXPECT_EQ(tetra.GlobalToLocal(0, 3, 0), Coord(0, 0, 1));
   EXPECT_EQ(tetra.GlobalToLocal(0, 0, 3), Coord(0, 0, 0));
-  mini::geometry::Cell<typename Coordinate::Real> &cell = tetra;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = tetra;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -77,7 +77,7 @@ TEST_F(TestCoordinateTetrahedron4, CoordinateMap) {
   }
 }
 TEST_F(TestCoordinateTetrahedron4, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto cell = Coordinate{
     Coord(0, 0, 0), Coord(3, 0, 0), Coord(0, 3, 0), Coord(0, 0, 3)
   };
@@ -128,7 +128,7 @@ TEST_F(TestCoordinateTetrahedron4, SortNodesOnFace) {
 
 class TestCoordinateTetrahedron10 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Tetrahedron10<double>;
+  using Coordinate = mini::coordinate::Tetrahedron10<double>;
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinateTetrahedron10, CoordinateMap) {
@@ -150,7 +150,7 @@ TEST_F(TestCoordinateTetrahedron10, CoordinateMap) {
   EXPECT_EQ(tetra.GlobalToLocal(6, 0, 0), Coord(0, 1, 0));
   EXPECT_EQ(tetra.GlobalToLocal(0, 6, 0), Coord(0, 0, 1));
   EXPECT_EQ(tetra.GlobalToLocal(0, 0, 6), Coord(0, 0, 0));
-  mini::geometry::Cell<typename Coordinate::Real> &cell = tetra;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = tetra;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return std::rand() / (1.0 + RAND_MAX); };
@@ -194,7 +194,7 @@ TEST_F(TestCoordinateTetrahedron10, CoordinateMap) {
   }
 }
 TEST_F(TestCoordinateTetrahedron10, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto cell = Coordinate{
     Coord(0, 0, 0), Coord(6, 0, 0), Coord(0, 6, 0), Coord(0, 0, 6),
     Coord(3, 0, 0), Coord(3, 3, 0), Coord(0, 3, 0),

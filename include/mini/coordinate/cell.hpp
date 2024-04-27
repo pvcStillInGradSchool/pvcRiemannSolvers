@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GEOMETRY_CELL_HPP_
-#define MINI_GEOMETRY_CELL_HPP_
+#ifndef MINI_COORDINATE_CELL_HPP_
+#define MINI_COORDINATE_CELL_HPP_
 
 #include <concepts>
 
@@ -8,10 +8,10 @@
 #include <type_traits>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
+#include "mini/coordinate/element.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on volume elements.
@@ -256,7 +256,7 @@ void SortNodesOnFace(const Cell<Scalar> &cell, const T *cell_nodes,
 }
 
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_CELL_HPP_
+#endif  // MINI_COORDINATE_CELL_HPP_

@@ -12,7 +12,7 @@
 
 #include "mini/gauss/line.hpp"
 #include "mini/gauss/face.hpp"
-#include "mini/geometry/quadrangle.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 
 namespace mini {
 namespace gauss {
@@ -33,7 +33,7 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   using GaussY = Gy;
   using Scalar = typename GaussX::Scalar;
   static_assert(std::is_same_v<Scalar, typename Gy::Scalar>);
-  using Coordinate = geometry::Quadrangle<Scalar, kPhysDim>;
+  using Coordinate = coordinate::Quadrangle<Scalar, kPhysDim>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;

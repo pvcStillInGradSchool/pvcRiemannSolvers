@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GEOMETRY_TRIANGLE_HPP_
-#define MINI_GEOMETRY_TRIANGLE_HPP_
+#ifndef MINI_COORDINATE_TRIANGLE_HPP_
+#define MINI_COORDINATE_TRIANGLE_HPP_
 
 #include <concepts>
 
@@ -10,11 +10,11 @@
 #include <initializer_list>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
-#include "mini/geometry/face.hpp"
+#include "mini/coordinate/element.hpp"
+#include "mini/coordinate/face.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on triangular elements.
@@ -201,7 +201,7 @@ Triangle6<Scalar, kPhysDim>::local_coords_{
   Triangle6::Local(0, 0.5), Triangle6::Local(0.5, 0)
 };
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_TRIANGLE_HPP_
+#endif  // MINI_COORDINATE_TRIANGLE_HPP_

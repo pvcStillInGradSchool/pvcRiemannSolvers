@@ -25,13 +25,13 @@
 #include "pcgnslib.h"
 #include "mini/algebra/eigen.hpp"
 #include "mini/mesh/cgns.hpp"
-#include "mini/geometry/cell.hpp"
-#include "mini/geometry/triangle.hpp"
-#include "mini/geometry/quadrangle.hpp"
-#include "mini/geometry/tetrahedron.hpp"
-#include "mini/geometry/hexahedron.hpp"
-#include "mini/geometry/pyramid.hpp"
-#include "mini/geometry/wedge.hpp"
+#include "mini/coordinate/cell.hpp"
+#include "mini/coordinate/triangle.hpp"
+#include "mini/coordinate/quadrangle.hpp"
+#include "mini/coordinate/tetrahedron.hpp"
+#include "mini/coordinate/hexahedron.hpp"
+#include "mini/coordinate/pyramid.hpp"
+#include "mini/coordinate/wedge.hpp"
 #include "mini/gauss/cell.hpp"
 #include "mini/gauss/triangle.hpp"
 #include "mini/gauss/quadrangle.hpp"
@@ -111,7 +111,7 @@ struct Face {
   constexpr static int kPhysDim = Riemann::kDimensions;
   using Gauss = gauss::Face<Scalar, kPhysDim>;
   using GaussUptr = std::unique_ptr<Gauss>;
-  using Coordinate = geometry::Face<Scalar, kPhysDim>;
+  using Coordinate = coordinate::Face<Scalar, kPhysDim>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
   using Cell = part::Cell<Int, Riemann, P>;
   using Global = typename Cell::Global;
@@ -192,7 +192,7 @@ struct Cell {
   using Scalar = typename Riemann::Scalar;
   using Gauss = gauss::Cell<Scalar>;
   using GaussUptr = std::unique_ptr<Gauss>;
-  using Coordinate = geometry::Cell<Scalar>;
+  using Coordinate = coordinate::Cell<Scalar>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
   using Basis = typename Projection::Basis;
   using Local = typename Projection::Local;
@@ -439,31 +439,31 @@ class Part {
 
  private:
   using GaussOnLine = typename Projection::GaussOnLine;
-  using CoordinateOnTriangle = geometry::Triangle3<Scalar, kPhysDim>;
+  using CoordinateOnTriangle = coordinate::Triangle3<Scalar, kPhysDim>;
   using GaussOnTriangle = type::select_t<kDegrees,
     gauss::Triangle<Scalar, kPhysDim, 1>,
     gauss::Triangle<Scalar, kPhysDim, 3>,
     gauss::Triangle<Scalar, kPhysDim, 6>,
     gauss::Triangle<Scalar, kPhysDim, 12>>;
-  using CoordinateOnQuadrangle = geometry::Quadrangle4<Scalar, kPhysDim>;
+  using CoordinateOnQuadrangle = coordinate::Quadrangle4<Scalar, kPhysDim>;
   using GaussOnQuadrangle =
     gauss::Quadrangle<kPhysDim, GaussOnLine, GaussOnLine>;
-  using CoordinateOnTetrahedron = geometry::Tetrahedron4<Scalar>;
+  using CoordinateOnTetrahedron = coordinate::Tetrahedron4<Scalar>;
   using GaussOnTetrahedron = type::select_t<kDegrees,
     gauss::Tetrahedron<Scalar, 1>,
     gauss::Tetrahedron<Scalar, 4>,
     gauss::Tetrahedron<Scalar, 14>,
     gauss::Tetrahedron<Scalar, 24>>;
-  using CoordinateOnHexahedron = geometry::Hexahedron8<Scalar>;
+  using CoordinateOnHexahedron = coordinate::Hexahedron8<Scalar>;
   using GaussOnHexahedron =
       gauss::Hexahedron<GaussOnLine, GaussOnLine, GaussOnLine>;
-  using CoordinateOnPyramid = geometry::Pyramid5<Scalar>;
+  using CoordinateOnPyramid = coordinate::Pyramid5<Scalar>;
   using GaussOnPyramid = type::select_t<kDegrees,
     gauss::Pyramid<Scalar, 1, 1, 1>,
     gauss::Pyramid<Scalar, 2, 2, 2>,
     gauss::Pyramid<Scalar, 3, 3, 3>,
     gauss::Pyramid<Scalar, 4, 4, 4>>;
-  using CoordinateOnWedge = geometry::Wedge6<Scalar>;
+  using CoordinateOnWedge = coordinate::Wedge6<Scalar>;
   using GaussOnWedge = type::select_t<kDegrees,
     gauss::Wedge<Scalar, 1, 1>,
     gauss::Wedge<Scalar, 3, 2>,
@@ -1026,7 +1026,7 @@ class Part {
       holder.adj_cells_.emplace_back(&sharer);
       sharer.adj_cells_.emplace_back(&holder);
       auto *face_node_list = common_nodes.data();
-      geometry::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
+      coordinate::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
       auto [coordinate_uptr, gauss_uptr]
           = BuildGaussForFace(face_npe, i_zone, face_node_list);
@@ -1070,7 +1070,7 @@ class Part {
       auto &sharer = ghost_cells_.at(m_sharer);
       holder.adj_cells_.emplace_back(&sharer);
       auto *face_node_list = common_nodes.data();
-      geometry::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
+      coordinate::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
       auto [coordinate_uptr, gauss_uptr]
           = BuildGaussForFace(face_npe, i_zone, face_node_list);
@@ -1524,7 +1524,7 @@ class Part {
             auto &holder_conn = connectivities_.at(z).at(s);
             auto &holder_nodes = holder_conn.nodes;
             auto holder_head = holder_conn.index[c];
-            geometry::SortNodesOnFace(holder_ptr->coordinate(),
+            coordinate::SortNodesOnFace(holder_ptr->coordinate(),
                 &holder_nodes[holder_head], face_node_list, npe);
             break;
           }

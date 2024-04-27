@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GEOMETRY_TETRAHEDRON_HPP_
-#define MINI_GEOMETRY_TETRAHEDRON_HPP_
+#ifndef MINI_COORDINATE_TETRAHEDRON_HPP_
+#define MINI_COORDINATE_TETRAHEDRON_HPP_
 
 #include <concepts>
 
@@ -10,11 +10,11 @@
 #include <initializer_list>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
-#include "mini/geometry/cell.hpp"
+#include "mini/coordinate/element.hpp"
+#include "mini/coordinate/cell.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on tetrahedral elements.
@@ -315,7 +315,7 @@ Tetrahedron10<Scalar>::faces_{
   /* A D C */0, 3, 2, 7, 9, 6, /* B C D */1, 2, 3, 5, 9, 8
 };
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_TETRAHEDRON_HPP_
+#endif  // MINI_COORDINATE_TETRAHEDRON_HPP_

@@ -4,7 +4,7 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/triangle.hpp"
-#include "mini/geometry/triangle.hpp"
+#include "mini/coordinate/triangle.hpp"
 
 #include "gtest/gtest.h"
 
@@ -12,7 +12,7 @@ class TestGaussTriangle : public ::testing::Test {
 };
 TEST_F(TestGaussTriangle, OnScaledElementInTwoDimensionalSpace) {
   using Gauss = mini::gauss::Triangle<double, 2, 16>;
-  using Coordinate = mini::geometry::Triangle3<double, 2>;
+  using Coordinate = mini::coordinate::Triangle3<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate { Coord(0, 0), Coord(2, 0), Coord(2, 2) };
   auto gauss = Gauss(coordinate);
@@ -32,7 +32,7 @@ TEST_F(TestGaussTriangle, OnScaledElementInTwoDimensionalSpace) {
 }
 TEST_F(TestGaussTriangle, OnMappedElementInThreeDimensionalSpace) {
   using Gauss = mini::gauss::Triangle<double, 3, 16>;
-  using Coordinate = mini::geometry::Triangle3<double, 3>;
+  using Coordinate = mini::coordinate::Triangle3<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -66,7 +66,7 @@ TEST_F(TestGaussTriangle, OnMappedElementInThreeDimensionalSpace) {
 }
 TEST_F(TestGaussTriangle, OnQuadraticElementInThreeDimensionalSpace) {
   using Gauss = mini::gauss::Triangle<double, 3, 16>;
-  using Coordinate = mini::geometry::Triangle6<double, 3>;
+  using Coordinate = mini::coordinate::Triangle6<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {

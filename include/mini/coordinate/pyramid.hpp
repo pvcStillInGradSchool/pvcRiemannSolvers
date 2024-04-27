@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GEOMETRY_PYRAMID_HPP_
-#define MINI_GEOMETRY_PYRAMID_HPP_
+#ifndef MINI_COORDINATE_PYRAMID_HPP_
+#define MINI_COORDINATE_PYRAMID_HPP_
 
 #include <concepts>
 
@@ -11,11 +11,11 @@
 #include <numeric>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
-#include "mini/geometry/cell.hpp"
+#include "mini/coordinate/element.hpp"
+#include "mini/coordinate/cell.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on pyramidal elements.
@@ -537,7 +537,7 @@ Pyramid14<Scalar>::local_coords_{
   Pyramid14::Local(0, 0, -1),
 };
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_PYRAMID_HPP_
+#endif  // MINI_COORDINATE_PYRAMID_HPP_

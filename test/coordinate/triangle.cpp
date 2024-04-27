@@ -4,8 +4,8 @@
 
 #include <cmath>
 
-#include "mini/geometry/face.hpp"
-#include "mini/geometry/triangle.hpp"
+#include "mini/coordinate/face.hpp"
+#include "mini/coordinate/triangle.hpp"
 
 #include "gtest/gtest.h"
 
@@ -14,7 +14,7 @@ class TestCoordinateTriangle3 : public ::testing::Test {
 };
 TEST_F(TestCoordinateTriangle3, ThreeDimensional) {
   constexpr int D = 3;
-  using Coordinate = mini::geometry::Triangle3<double, D>;
+  using Coordinate = mini::coordinate::Triangle3<double, D>;
   using Coord = typename Coordinate::Global;
   using Local = typename Coordinate::Local;
   auto quadrangle = Coordinate {
@@ -31,7 +31,7 @@ TEST_F(TestCoordinateTriangle3, ThreeDimensional) {
                                     quadrangle.GetGlobalCoord(1));
   EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(2)),
                                     quadrangle.GetGlobalCoord(2));
-  mini::geometry::Face<typename Coordinate::Real, D> &face = quadrangle;
+  mini::coordinate::Face<typename Coordinate::Real, D> &face = quadrangle;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -85,7 +85,7 @@ class TestCoordinateTriangle6 : public ::testing::Test {
 };
 TEST_F(TestCoordinateTriangle6, ThreeDimensional) {
   constexpr int D = 3;
-  using Coordinate = mini::geometry::Triangle6<double, D>;
+  using Coordinate = mini::coordinate::Triangle6<double, D>;
   using Coord = typename Coordinate::Global;
   using Local = typename Coordinate::Local;
   auto quadrangle = Coordinate {
@@ -109,7 +109,7 @@ TEST_F(TestCoordinateTriangle6, ThreeDimensional) {
                                     quadrangle.GetGlobalCoord(4));
   EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(5)),
                                     quadrangle.GetGlobalCoord(5));
-  mini::geometry::Face<typename Coordinate::Real, D> &face = quadrangle;
+  mini::coordinate::Face<typename Coordinate::Real, D> &face = quadrangle;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };

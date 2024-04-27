@@ -13,7 +13,7 @@
 
 #include "mini/gauss/line.hpp"
 #include "mini/gauss/cell.hpp"
-#include "mini/geometry/hexahedron.hpp"
+#include "mini/coordinate/hexahedron.hpp"
 
 namespace mini {
 namespace gauss {
@@ -35,7 +35,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   using Scalar = typename GaussX::Scalar;
   static_assert(std::is_same_v<Scalar, typename Gy::Scalar>);
   static_assert(std::is_same_v<Scalar, typename Gz::Scalar>);
-  using Coordinate = geometry::Hexahedron<Scalar>;
+  using Coordinate = coordinate::Hexahedron<Scalar>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   using Jacobian = typename Coordinate::Jacobian;

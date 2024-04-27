@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GEOMETRY_FACE_HPP_
-#define MINI_GEOMETRY_FACE_HPP_
+#ifndef MINI_COORDINATE_FACE_HPP_
+#define MINI_COORDINATE_FACE_HPP_
 
 #include <concepts>
 
@@ -9,10 +9,10 @@
 #include <type_traits>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
+#include "mini/coordinate/element.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on surface elements.
@@ -98,7 +98,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   }
 };
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_FACE_HPP_
+#endif  // MINI_COORDINATE_FACE_HPP_

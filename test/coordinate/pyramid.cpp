@@ -5,16 +5,16 @@
 #include <numeric>
 #include <cstdlib>
 
-#include "mini/geometry/cell.hpp"
-#include "mini/geometry/pyramid.hpp"
-#include "mini/geometry/triangle.hpp"
-#include "mini/geometry/quadrangle.hpp"
+#include "mini/coordinate/cell.hpp"
+#include "mini/coordinate/pyramid.hpp"
+#include "mini/coordinate/triangle.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 
 #include "gtest/gtest.h"
 
 class TestCoordinatePyramid5 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Pyramid5<double>;
+  using Coordinate = mini::coordinate::Pyramid5<double>;
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinatePyramid5, CoordinateMap) {
@@ -40,7 +40,7 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
     EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
         - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -101,7 +101,7 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
       auto c2f = std::vector<int>(cell.CountNodes(), -1);
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
-      auto face = mini::geometry::Triangle3<double, 3>{
+      auto face = mini::coordinate::Triangle3<double, 3>{
         cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
         cell.GetGlobalCoord(c_list[2]),
       };
@@ -125,7 +125,7 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
       auto c2f = std::vector<int>(cell.CountNodes(), -1);
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
-      auto face = mini::geometry::Quadrangle4<double, 3>{
+      auto face = mini::coordinate::Quadrangle4<double, 3>{
         cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
         cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
       };
@@ -144,7 +144,7 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
   }
 }
 TEST_F(TestCoordinatePyramid5, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto cell = Coordinate{
     Coord(-2, -2, 0), Coord(2, -2, 0), Coord(2, 2, 0), Coord(-2, 2, 0),
     Coord(0, 0, 4)
@@ -207,7 +207,7 @@ TEST_F(TestCoordinatePyramid5, SortNodesOnFace) {
 
 class TestCoordinatePyramid13 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Pyramid13<double>;
+  using Coordinate = mini::coordinate::Pyramid13<double>;
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinatePyramid13, CoordinateMap) {
@@ -235,7 +235,7 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
     EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
         - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -297,7 +297,7 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
       auto c2f = std::vector<int>(cell.CountNodes(), -1);
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
-      auto face = mini::geometry::Triangle6<double, 3>{
+      auto face = mini::coordinate::Triangle6<double, 3>{
         cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
         cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
         cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
@@ -324,7 +324,7 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
       auto c2f = std::vector<int>(cell.CountNodes(), -1);
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
-      auto face = mini::geometry::Quadrangle8<double, 3>{
+      auto face = mini::coordinate::Quadrangle8<double, 3>{
         cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
         cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
         cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
@@ -345,7 +345,7 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
   }
 }
 TEST_F(TestCoordinatePyramid13, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto cell = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
@@ -417,7 +417,7 @@ TEST_F(TestCoordinatePyramid13, SortNodesOnFace) {
 
 class TestCoordinatePyramid14 : public ::testing::Test {
  protected:
-  using Coordinate = mini::geometry::Pyramid14<double>;
+  using Coordinate = mini::coordinate::Pyramid14<double>;
   using Coord = typename Coordinate::Global;
 };
 TEST_F(TestCoordinatePyramid14, CoordinateMap) {
@@ -446,7 +446,7 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
     EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
         - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
   }
-  mini::geometry::Cell<typename Coordinate::Real> &cell = coordinate;
+  mini::coordinate::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -508,7 +508,7 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
       auto c2f = std::vector<int>(cell.CountNodes(), -1);
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
-      auto face = mini::geometry::Triangle6<double, 3>{
+      auto face = mini::coordinate::Triangle6<double, 3>{
         cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
         cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
         cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
@@ -535,7 +535,7 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
       auto c2f = std::vector<int>(cell.CountNodes(), -1);
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
-      auto face = mini::geometry::Quadrangle9<double, 3>{
+      auto face = mini::coordinate::Quadrangle9<double, 3>{
         cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
         cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
         cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
@@ -557,7 +557,7 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
   }
 }
 TEST_F(TestCoordinatePyramid14, SortNodesOnFace) {
-  using mini::geometry::SortNodesOnFace;
+  using mini::coordinate::SortNodesOnFace;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto cell = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),

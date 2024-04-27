@@ -4,7 +4,7 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/tetrahedron.hpp"
-#include "mini/geometry/tetrahedron.hpp"
+#include "mini/coordinate/tetrahedron.hpp"
 #include "mini/basis/linear.hpp"
 #include "mini/polynomial/projection.hpp"
 
@@ -15,7 +15,7 @@ using std::sqrt;
 class TestTetrahedron : public ::testing::Test {
  protected:
   using Gauss = mini::gauss::Tetrahedron<double, 14>;
-  using Coordinate = mini::geometry::Tetrahedron4<double>;
+  using Coordinate = mini::coordinate::Tetrahedron4<double>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coord = typename Basis::Coord;
   using A = typename Basis::MatNxN;

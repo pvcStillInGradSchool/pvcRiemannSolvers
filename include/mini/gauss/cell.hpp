@@ -4,7 +4,7 @@
 
 #include <concepts>
 
-#include "mini/geometry/cell.hpp"
+#include "mini/coordinate/cell.hpp"
 #include "mini/gauss/element.hpp"
 #include "mini/gauss/function.hpp"
 
@@ -19,7 +19,7 @@ namespace gauss {
 template <std::floating_point Scalar>
 class Cell : public Element<Scalar, 3, 3> {
  public:
-  using Coordinate = geometry::Cell<Scalar>;
+  using Coordinate = coordinate::Cell<Scalar>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
@@ -29,9 +29,9 @@ class Cell : public Element<Scalar, 3, 3> {
   virtual Real volume() const = 0;
 
   /**
-   * @brief Get a reference to the geometry::Cell object it uses for coordinate mapping.
+   * @brief Get a reference to the coordinate::Cell object it uses for coordinate mapping.
    * 
-   * @return const Coordinate &  Reference to the geometry::Cell object it uses for coordinate mapping.
+   * @return const Coordinate &  Reference to the coordinate::Cell object it uses for coordinate mapping.
    */
   virtual const Coordinate &coordinate() const = 0;
 };

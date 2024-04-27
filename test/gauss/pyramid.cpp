@@ -4,14 +4,14 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/pyramid.hpp"
-#include "mini/geometry/pyramid.hpp"
+#include "mini/coordinate/pyramid.hpp"
 
 #include "gtest/gtest.h"
 
 class TestGaussPyramid : public ::testing::Test {
 };
 TEST_F(TestGaussPyramid, OnLinearElement) {
-  using Coordinate = mini::geometry::Pyramid5<double>;
+  using Coordinate = mini::coordinate::Pyramid5<double>;
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
@@ -36,7 +36,7 @@ TEST_F(TestGaussPyramid, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
 TEST_F(TestGaussPyramid, OnQuadraticElement) {
-  using Coordinate = mini::geometry::Pyramid13<double>;
+  using Coordinate = mini::coordinate::Pyramid13<double>;
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
@@ -63,7 +63,7 @@ TEST_F(TestGaussPyramid, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
 TEST_F(TestGaussPyramid, On14NodeQuadraticElement) {
-  using Coordinate = mini::geometry::Pyramid14<double>;
+  using Coordinate = mini::coordinate::Pyramid14<double>;
   using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;

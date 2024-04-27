@@ -5,13 +5,13 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/tetrahedron.hpp"
-#include "mini/geometry/tetrahedron.hpp"
+#include "mini/coordinate/tetrahedron.hpp"
 #include "mini/gauss/hexahedron.hpp"
-#include "mini/geometry/hexahedron.hpp"
+#include "mini/coordinate/hexahedron.hpp"
 #include "mini/gauss/triangle.hpp"
-#include "mini/geometry/triangle.hpp"
+#include "mini/coordinate/triangle.hpp"
 #include "mini/gauss/quadrangle.hpp"
-#include "mini/geometry/quadrangle.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 #include "mini/basis/taylor.hpp"
 
 #include "gtest/gtest.h"

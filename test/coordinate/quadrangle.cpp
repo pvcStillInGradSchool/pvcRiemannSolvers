@@ -3,8 +3,8 @@
 #include <numeric>
 #include <cmath>
 
-#include "mini/geometry/face.hpp"
-#include "mini/geometry/quadrangle.hpp"
+#include "mini/coordinate/face.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 
 #include "gtest/gtest.h"
 
@@ -12,7 +12,7 @@ class TestCoordinateQuadrangle : public ::testing::Test {
  protected:
 };
 TEST_F(TestCoordinateQuadrangle, TwoDimensionalQuadrangle4) {
-  using Coordinate = mini::geometry::Quadrangle4<double, 2>;
+  using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   using Local = typename Coordinate::Local;
   auto face = Coordinate {
@@ -44,7 +44,7 @@ TEST_F(TestCoordinateQuadrangle, TwoDimensionalQuadrangle4) {
 }
 TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangle4) {
   constexpr int D = 3;
-  using Coordinate = mini::geometry::Quadrangle4<double, D>;
+  using Coordinate = mini::coordinate::Quadrangle4<double, D>;
   using Coord = typename Coordinate::Global;
   using Local = typename Coordinate::Local;
   auto quadrangle = Coordinate {
@@ -63,7 +63,7 @@ TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangle4) {
                                     quadrangle.GetGlobalCoord(2));
   EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(3)),
                                     quadrangle.GetGlobalCoord(3));
-  mini::geometry::Face<typename Coordinate::Real, D> &face = quadrangle;
+  mini::coordinate::Face<typename Coordinate::Real, D> &face = quadrangle;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -113,7 +113,7 @@ TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangle4) {
 }
 TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangl8) {
   constexpr int D = 3;
-  using Coordinate = mini::geometry::Quadrangle8<double, D>;
+  using Coordinate = mini::coordinate::Quadrangle8<double, D>;
   using Coord = typename Coordinate::Global;
   using Local = typename Coordinate::Local;
   auto quadrangle = Coordinate {
@@ -141,7 +141,7 @@ TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangl8) {
                                     quadrangle.GetGlobalCoord(6));
   EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(7)),
                                     quadrangle.GetGlobalCoord(7));
-  mini::geometry::Face<typename Coordinate::Real, D> &face = quadrangle;
+  mini::coordinate::Face<typename Coordinate::Real, D> &face = quadrangle;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };
@@ -191,7 +191,7 @@ TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangl8) {
 }
 TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangle9) {
   constexpr int D = 3;
-  using Coordinate = mini::geometry::Quadrangle9<double, D>;
+  using Coordinate = mini::coordinate::Quadrangle9<double, D>;
   using Coord = typename Coordinate::Global;
   using Local = typename Coordinate::Local;
   auto quadrangle = Coordinate {
@@ -220,7 +220,7 @@ TEST_F(TestCoordinateQuadrangle, ThreeDimensionalQuadrangle9) {
                                     quadrangle.GetGlobalCoord(6));
   EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(7)),
                                     quadrangle.GetGlobalCoord(7));
-  mini::geometry::Face<typename Coordinate::Real, D> &face = quadrangle;
+  mini::coordinate::Face<typename Coordinate::Real, D> &face = quadrangle;
   // test the partition-of-unity property:
   std::srand(31415926);
   auto rand = [](){ return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX); };

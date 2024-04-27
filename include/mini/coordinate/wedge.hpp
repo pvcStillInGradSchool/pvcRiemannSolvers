@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GEOMETRY_WEDGE_HPP_
-#define MINI_GEOMETRY_WEDGE_HPP_
+#ifndef MINI_COORDINATE_WEDGE_HPP_
+#define MINI_COORDINATE_WEDGE_HPP_
 
 #include <concepts>
 
@@ -10,11 +10,11 @@
 #include <initializer_list>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
-#include "mini/geometry/cell.hpp"
+#include "mini/coordinate/element.hpp"
+#include "mini/coordinate/cell.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on wedge elements.
@@ -666,7 +666,7 @@ Wedge18<Scalar>::quadrangles_{
   0, 3, 5, 2, 9, 14, 11, 8, 17,
 };
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_WEDGE_HPP_
+#endif  // MINI_COORDINATE_WEDGE_HPP_

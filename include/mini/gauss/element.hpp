@@ -2,7 +2,7 @@
 #ifndef MINI_GAUSS_ELEMENT_HPP_
 #define MINI_GAUSS_ELEMENT_HPP_
 
-#include "mini/geometry/element.hpp"
+#include "mini/coordinate/element.hpp"
 #include "mini/constant/index.hpp"
 
 namespace mini {
@@ -20,7 +20,7 @@ using namespace mini::constant::index;
 template <std::floating_point Scalar, int kPhysDim, int kCellDim>
 class Element {
  public:
-  using Coordinate = geometry::Element<Scalar, kPhysDim, kCellDim>;
+  using Coordinate = coordinate::Element<Scalar, kPhysDim, kCellDim>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
@@ -71,9 +71,9 @@ class Element {
   virtual const Real &GetGlobalWeight(int i) const = 0;
 
   /**
-   * @brief Get a reference to the geometry::Element object it uses for coordinate mapping.
+   * @brief Get a reference to the coordinate::Element object it uses for coordinate mapping.
    * 
-   * @return const Coordinate &  Reference to the geometry::Element object it uses for coordinate mapping.
+   * @return const Coordinate &  Reference to the coordinate::Element object it uses for coordinate mapping.
    */
   virtual const Coordinate &coordinate() const = 0;
 

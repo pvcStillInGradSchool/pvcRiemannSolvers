@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GEOMETRY_HEXAHEDRON_HPP_
-#define MINI_GEOMETRY_HEXAHEDRON_HPP_
+#ifndef MINI_COORDINATE_HEXAHEDRON_HPP_
+#define MINI_COORDINATE_HEXAHEDRON_HPP_
 
 #include <concepts>
 
@@ -10,11 +10,11 @@
 #include <initializer_list>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
-#include "mini/geometry/cell.hpp"
+#include "mini/coordinate/element.hpp"
+#include "mini/coordinate/cell.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on hexahedral elements.
@@ -1088,7 +1088,7 @@ typename Hexahedron26<Scalar>::OldShapesOnNewNodes
 Hexahedron26<Scalar>::old_shapes_on_new_nodes_ =
     Hexahedron26<Scalar>::BuildOldShapesOnNewNodes();
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_HEXAHEDRON_HPP_
+#endif  // MINI_COORDINATE_HEXAHEDRON_HPP_

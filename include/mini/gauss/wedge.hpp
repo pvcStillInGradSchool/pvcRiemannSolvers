@@ -14,7 +14,7 @@
 #include "mini/gauss/line.hpp"
 #include "mini/gauss/cell.hpp"
 #include "mini/gauss/triangle.hpp"
-#include "mini/geometry/wedge.hpp"
+#include "mini/coordinate/wedge.hpp"
 
 namespace mini {
 namespace gauss {
@@ -35,7 +35,7 @@ class Wedge : public Cell<Scalar> {
   using GaussT = Triangle<Scalar, 2, Qt>;
   using GaussZ = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qz>, Lobatto<Scalar, Qz> >;
-  using Coordinate = geometry::Wedge<Scalar>;
+  using Coordinate = coordinate::Wedge<Scalar>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;

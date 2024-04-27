@@ -4,7 +4,7 @@
 
 #include "mini/gauss/function.hpp"
 #include "mini/gauss/triangle.hpp"
-#include "mini/geometry/triangle.hpp"
+#include "mini/coordinate/triangle.hpp"
 #include "mini/basis/linear.hpp"
 #include "mini/polynomial/projection.hpp"
 
@@ -17,7 +17,7 @@ class TestTriangle : public ::testing::Test {
 TEST_F(TestTriangle, OrthoNormal) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   using Gauss = mini::gauss::Triangle<double, 2, 12>;
-  using Coordinate = mini::geometry::Triangle3<double, 2>;
+  using Coordinate = mini::coordinate::Triangle3<double, 2>;
   using Coord = typename Coordinate::Global;
   // build a triangle-gauss
   auto coordinate = Coordinate { Coord(10, 0), Coord(0, 10), Coord(0, 0) };

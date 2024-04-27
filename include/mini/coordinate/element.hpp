@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GEOMETRY_ELEMENT_HPP_
-#define MINI_GEOMETRY_ELEMENT_HPP_
+#ifndef MINI_COORDINATE_ELEMENT_HPP_
+#define MINI_COORDINATE_ELEMENT_HPP_
 
 #include <concepts>
 
@@ -16,7 +16,7 @@
 #include "mini/constant/index.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 using namespace mini::constant::index;
 
@@ -156,7 +156,7 @@ class Element {
   }
 };
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_ELEMENT_HPP_
+#endif  // MINI_COORDINATE_ELEMENT_HPP_

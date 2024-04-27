@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "mini/gauss/cell.hpp"
-#include "mini/geometry/tetrahedron.hpp"
+#include "mini/coordinate/tetrahedron.hpp"
 
 namespace mini {
 namespace gauss {
@@ -30,7 +30,7 @@ class Tetrahedron : public Cell<Scalar> {
       || kPoints == 24 || kPoints == 46);
 
  public:
-  using Coordinate = geometry::Tetrahedron<Scalar>;
+  using Coordinate = coordinate::Tetrahedron<Scalar>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;

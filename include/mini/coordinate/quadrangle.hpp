@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GEOMETRY_QUADRANGLE_HPP_
-#define MINI_GEOMETRY_QUADRANGLE_HPP_
+#ifndef MINI_COORDINATE_QUADRANGLE_HPP_
+#define MINI_COORDINATE_QUADRANGLE_HPP_
 
 #include <concepts>
 
@@ -10,11 +10,11 @@
 #include <initializer_list>
 #include <vector>
 
-#include "mini/geometry/element.hpp"
-#include "mini/geometry/face.hpp"
+#include "mini/coordinate/element.hpp"
+#include "mini/coordinate/face.hpp"
 
 namespace mini {
-namespace geometry {
+namespace coordinate {
 
 /**
  * @brief Abstract coordinate map on quadrilateral elements.
@@ -384,7 +384,7 @@ Quadrangle9<Scalar, kPhysDim>::local_coords_{
   Quadrangle9::Local(0, +1), Quadrangle9::Local(-1, 0), Quadrangle9::Local(0, 0)
 };
 
-}  // namespace geometry
+}  // namespace coordinate
 }  // namespace mini
 
-#endif  // MINI_GEOMETRY_QUADRANGLE_HPP_
+#endif  // MINI_COORDINATE_QUADRANGLE_HPP_
