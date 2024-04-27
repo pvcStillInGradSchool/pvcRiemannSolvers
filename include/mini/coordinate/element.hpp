@@ -61,15 +61,15 @@ class Element {
   virtual Jacobian LocalToJacobian(const Local &) const = 0;
   virtual int CountCorners() const = 0;
   virtual int CountNodes() const = 0;
-  virtual const Local &GetLocalCoord(int i) const = 0;
-  virtual const Global &GetGlobalCoord(int i) const = 0;
+  virtual const Local &GetLocal(int i) const = 0;
+  virtual const Global &GetGlobal(int i) const = 0;
   virtual const Global &center() const = 0;
 
  protected:
   virtual void _BuildCenter() = 0;
-  Global &_GetGlobalCoord(int i) {
+  Global &_GetGlobal(int i) {
     const Global &global
-        = const_cast<const Element *>(this)->GetGlobalCoord(i);
+        = const_cast<const Element *>(this)->GetGlobal(i);
     return const_cast<Global &>(global);
   }
 
@@ -78,7 +78,7 @@ class Element {
     assert(il.size() == element->CountNodes());
     auto p = il.begin();
     for (int i = 0, n = element->CountNodes(); i < n; ++i) {
-      element->_GetGlobalCoord(i) = p[i];
+      element->_GetGlobal(i) = p[i];
     }
     element->_BuildCenter();
   }
@@ -152,7 +152,7 @@ class Element {
       std::cerr << "global = " << global.transpose() << "\n";
       std::cerr << "global_coords =" << "\n";
       for (int i = 0; i < this->CountNodes(); ++i) {
-        std::cerr << this->GetGlobalCoord(i).transpose() << "\n";
+        std::cerr << this->GetGlobal(i).transpose() << "\n";
       }
       std::cerr << std::endl;
       throw e;

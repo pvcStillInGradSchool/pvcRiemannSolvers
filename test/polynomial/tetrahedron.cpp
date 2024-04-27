@@ -39,10 +39,10 @@ TEST_F(TestTetrahedron, OrthoNormal) {
   // build another tetra-gauss
   Coord shift = {10, 20, 30};
   coordinate = Coordinate {
-    coordinate.GetGlobalCoord(0) + shift,
-    coordinate.GetGlobalCoord(1) + shift,
-    coordinate.GetGlobalCoord(2) + shift,
-    coordinate.GetGlobalCoord(3) + shift
+    coordinate.GetGlobal(0) + shift,
+    coordinate.GetGlobal(1) + shift,
+    coordinate.GetGlobal(2) + shift,
+    coordinate.GetGlobal(3) + shift
   };
   tetra = Gauss(coordinate);
   // build another orthonormal basis on it

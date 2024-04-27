@@ -25,12 +25,12 @@ TEST_F(TestCoordinateTriangle3, ThreeDimensional) {
   EXPECT_EQ(quadrangle.CountCorners(), 3);
   EXPECT_EQ(quadrangle.CountNodes(), 3);
   EXPECT_NEAR((quadrangle.center() - Coord(3, 3, 3)).norm(), 0.0, 1e-15);
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(0)),
-                                    quadrangle.GetGlobalCoord(0));
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(1)),
-                                    quadrangle.GetGlobalCoord(1));
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(2)),
-                                    quadrangle.GetGlobalCoord(2));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(0)),
+                                    quadrangle.GetGlobal(0));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(1)),
+                                    quadrangle.GetGlobal(1));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(2)),
+                                    quadrangle.GetGlobal(2));
   mini::coordinate::Face<typename Coordinate::Real, D> &face = quadrangle;
   // test the partition-of-unity property:
   std::srand(31415926);
@@ -62,7 +62,7 @@ TEST_F(TestCoordinateTriangle3, ThreeDimensional) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = face.CountNodes(); i < n; ++i) {
-    auto local_i = face.GetLocalCoord(i);
+    auto local_i = face.GetLocal(i);
     auto shapes = face.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);
@@ -97,18 +97,18 @@ TEST_F(TestCoordinateTriangle6, ThreeDimensional) {
   EXPECT_EQ(quadrangle.CountCorners(), 3);
   EXPECT_EQ(quadrangle.CountNodes(), 6);
   EXPECT_NEAR((quadrangle.center() - Coord(3, 3, 3)).norm(), 0.0, 1e-14);
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(0)),
-                                    quadrangle.GetGlobalCoord(0));
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(1)),
-                                    quadrangle.GetGlobalCoord(1));
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(2)),
-                                    quadrangle.GetGlobalCoord(2));
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(3)),
-                                    quadrangle.GetGlobalCoord(3));
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(4)),
-                                    quadrangle.GetGlobalCoord(4));
-  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocalCoord(5)),
-                                    quadrangle.GetGlobalCoord(5));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(0)),
+                                    quadrangle.GetGlobal(0));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(1)),
+                                    quadrangle.GetGlobal(1));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(2)),
+                                    quadrangle.GetGlobal(2));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(3)),
+                                    quadrangle.GetGlobal(3));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(4)),
+                                    quadrangle.GetGlobal(4));
+  EXPECT_EQ(quadrangle.LocalToGlobal(quadrangle.GetLocal(5)),
+                                    quadrangle.GetGlobal(5));
   mini::coordinate::Face<typename Coordinate::Real, D> &face = quadrangle;
   // test the partition-of-unity property:
   std::srand(31415926);
@@ -140,7 +140,7 @@ TEST_F(TestCoordinateTriangle6, ThreeDimensional) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = face.CountNodes(); i < n; ++i) {
-    auto local_i = face.GetLocalCoord(i);
+    auto local_i = face.GetLocal(i);
     auto shapes = face.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);

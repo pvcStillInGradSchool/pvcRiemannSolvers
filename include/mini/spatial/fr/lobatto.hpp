@@ -91,13 +91,13 @@ class Lobatto : public General<Part> {
         Global const &face_normal = face.riemann(f).normal();
         assert(face_normal == face_gauss.GetNormalFrame(f)[0]);
         auto &flux_point = curr_face.at(f);
-        auto &flux_point_coord = face_gauss.GetGlobalCoord(f);
+        auto &flux_point_coord = face_gauss.GetGlobal(f);
         auto [i, j, k] = cell_projection.FindCollinearIndex(flux_point_coord, i_face);
         switch (i_face) {
         case 0:
           assert(k == -1);
           flux_point.ijk = cell_basis.index(i, j, 0);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
           assert(Collinear(face_normal, flux_point.normal));
@@ -107,7 +107,7 @@ class Lobatto : public General<Part> {
         case 1:
           assert(j == -1);
           flux_point.ijk = cell_basis.index(i, 0, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
           assert(Collinear(face_normal, flux_point.normal));
@@ -117,7 +117,7 @@ class Lobatto : public General<Part> {
         case 2:
           assert(i == -1);
           flux_point.ijk = cell_basis.index(GaussOnLine::Q - 1, j, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
           assert(Collinear(face_normal, flux_point.normal));
@@ -127,7 +127,7 @@ class Lobatto : public General<Part> {
         case 3:
           assert(j == -1);
           flux_point.ijk = cell_basis.index(i, GaussOnLine::Q - 1, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
           assert(Collinear(face_normal, flux_point.normal));
@@ -137,7 +137,7 @@ class Lobatto : public General<Part> {
         case 4:
           assert(i == -1);
           flux_point.ijk = cell_basis.index(0, j, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
           assert(Collinear(face_normal, flux_point.normal));
@@ -147,7 +147,7 @@ class Lobatto : public General<Part> {
         case 5:
           assert(k == -1);
           flux_point.ijk = cell_basis.index(i, j, GaussOnLine::Q - 1);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
           assert(Collinear(face_normal, flux_point.normal));
@@ -294,7 +294,7 @@ class Lobatto : public General<Part> {
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
           Value u_holder = holder_projection.GetValue(holder_flux_point.ijk);
-          Value wall_value = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value wall_value = func(gauss.GetGlobal(f), this->t_curr_);
           Riemann::SetValueOnNoSlipWall(wall_value, &u_holder);
           holder_projection.SetValue(holder_flux_point.ijk, u_holder);
         }
@@ -314,7 +314,7 @@ class Lobatto : public General<Part> {
         assert(kFaceQ == gauss.CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value wall_value = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value wall_value = func(gauss.GetGlobal(f), this->t_curr_);
           Scalar distance = direction.dot(face.riemann(f).normal());        assert(distance > 0);
           Value f_holder = Base::GetFluxOnNoSlipWall(face.riemann(f),
               distance,
@@ -356,7 +356,7 @@ class Lobatto : public General<Part> {
           auto &holder_flux_point = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
@@ -379,7 +379,7 @@ class Lobatto : public General<Part> {
           auto &holder_flux_point = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicInlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
@@ -402,7 +402,7 @@ class Lobatto : public General<Part> {
           auto &holder_flux_point = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicOutlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
@@ -425,7 +425,7 @@ class Lobatto : public General<Part> {
           auto &holder_flux_point = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSmartBoundary(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=

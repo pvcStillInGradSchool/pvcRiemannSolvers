@@ -115,7 +115,7 @@ class Projection {
    * @return Value the value
    */
   Value GetValue(int i) const {
-    auto &global = gauss().GetGlobalCoord(i);
+    auto &global = gauss().GetGlobal(i);
     return GlobalToValue(global);
   }
   void LocalToGlobalAndValue(Local const &local,
@@ -152,7 +152,7 @@ class Projection {
    * 
    */
   Gradient GetGlobalGradient(int i) const {
-    auto &global = gauss().GetGlobalCoord(i);
+    auto &global = gauss().GetGlobal(i);
     Mat3xN basis_grad = GlobalToBasisGradients(global);
     return basis_grad * coeff().transpose();
   }

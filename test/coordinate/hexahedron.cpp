@@ -102,7 +102,7 @@ TEST_F(TestCoordinateHexahedron8, CoordinateMap) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = cell.CountNodes(); i < n; ++i) {
-    auto local_i = cell.GetLocalCoord(i);
+    auto local_i = cell.GetLocal(i);
     auto shapes = cell.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);
@@ -342,7 +342,7 @@ TEST_F(TestCoordinateHexahedron20, CoordinateMap) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = cell.CountNodes(); i < n; ++i) {
-    auto local_i = cell.GetLocalCoord(i);
+    auto local_i = cell.GetLocal(i);
     auto shapes = cell.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);
@@ -612,7 +612,7 @@ TEST_F(TestCoordinateHexahedron27, CoordinateMap) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = cell.CountNodes(); i < n; ++i) {
-    auto local_i = cell.GetLocalCoord(i);
+    auto local_i = cell.GetLocal(i);
     auto shapes = cell.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);
@@ -899,7 +899,7 @@ TEST_F(TestCoordinateHexahedron26, CoordinateMap) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = cell.CountNodes(); i < n; ++i) {
-    auto local_i = cell.GetLocalCoord(i);
+    auto local_i = cell.GetLocal(i);
     auto shapes = cell.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);

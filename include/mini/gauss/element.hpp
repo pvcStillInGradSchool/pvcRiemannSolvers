@@ -49,7 +49,7 @@ class Element {
    * @param i  0-based index of the i-th quadrature point.
    * @return const Local &  Local of the i-th quadrature point.
    */
-  virtual const Local &GetLocalCoord(int i) const = 0;
+  virtual const Local &GetLocal(int i) const = 0;
 
   /**
    * @brief Get the Global of the i-th quadrature point.
@@ -57,7 +57,7 @@ class Element {
    * @param i  0-based index of the i-th quadrature point.
    * @return const Global &  Global of the i-th quadrature point.
    */
-  virtual const Global &GetGlobalCoord(int i) const = 0;
+  virtual const Global &GetGlobal(int i) const = 0;
 
   /**
    * @brief Get the local (without Jacobian) weight of the i-th quadrature point.
@@ -87,13 +87,13 @@ class Element {
   }
 
  protected:
-  virtual Global &GetGlobalCoord(int i) = 0;
+  virtual Global &GetGlobal(int i) = 0;
   virtual Real &GetGlobalWeight(int i) = 0;
   Real BuildQuadraturePoints() {
     Real sum = 0.0;
     for (int i = 0, n = CountPoints(); i < n; ++i) {
-      auto &local_i = GetLocalCoord(i);
-      GetGlobalCoord(i) = coordinate().LocalToGlobal(local_i);
+      auto &local_i = GetLocal(i);
+      GetGlobal(i) = coordinate().LocalToGlobal(local_i);
       auto mat_j = coordinate().LocalToJacobian(local_i);
       auto det_j = CellDim() < PhysDim()
           ? std::sqrt((mat_j * mat_j.transpose()).determinant())

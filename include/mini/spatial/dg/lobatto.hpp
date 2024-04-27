@@ -61,10 +61,10 @@ class Lobatto : public General<Part> {
       const auto &face_gauss = face.gauss();
       const auto &cell_gauss = face_to_cell(face).gauss();
       for (int f = 0, F = face_gauss.CountPoints(); f < F; ++f) {
-        auto &flux_point = face_gauss.GetGlobalCoord(f);
+        auto &flux_point = face_gauss.GetGlobal(f);
         curr_face.at(f) = -1;
         for (int h = 0, H = cell_gauss.CountPoints(); h < H; ++h) {
-          if (Near(flux_point, cell_gauss.GetGlobalCoord(h))) {
+          if (Near(flux_point, cell_gauss.GetGlobal(h))) {
             curr_face[f] = h;
             break;
           }
@@ -236,7 +236,7 @@ class Lobatto : public General<Part> {
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
         for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
           flux *= gauss.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
@@ -254,7 +254,7 @@ class Lobatto : public General<Part> {
         for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.projection().GetValue(c_holder);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSubsonicInlet(u_inner, u_given);
           flux *= gauss.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
@@ -272,7 +272,7 @@ class Lobatto : public General<Part> {
         for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.projection().GetValue(c_holder);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSubsonicOutlet(u_inner, u_given);
           flux *= gauss.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
@@ -290,7 +290,7 @@ class Lobatto : public General<Part> {
         for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.projection().GetValue(c_holder);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSmartBoundary(u_inner, u_given);
           flux *= gauss.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);

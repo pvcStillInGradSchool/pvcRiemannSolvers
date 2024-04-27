@@ -64,9 +64,9 @@ class Face : public Element<Scalar, kPhysDim, 2> {
 
   Global LocalToGlobal(Scalar x_local, Scalar y_local) const {
     auto shapes = LocalToShapeFunctions(x_local, y_local);
-    Global sum = this->GetGlobalCoord(0) * shapes[0];
+    Global sum = this->GetGlobal(0) * shapes[0];
     for (int i = 1, n = this->CountNodes(); i < n; ++i) {
-      sum += this->GetGlobalCoord(i) * shapes[i];
+      sum += this->GetGlobal(i) * shapes[i];
     }
     return sum;
   }
@@ -76,9 +76,9 @@ class Face : public Element<Scalar, kPhysDim, 2> {
 
   Jacobian LocalToJacobian(Scalar x_local, Scalar y_local) const {
     auto shapes = LocalToShapeGradients(x_local, y_local);
-    Jacobian sum = shapes[0] * this->GetGlobalCoord(0).transpose();
+    Jacobian sum = shapes[0] * this->GetGlobal(0).transpose();
     for (int i = 1, n = this->CountNodes(); i < n; ++i) {
-      sum += shapes[i] * this->GetGlobalCoord(i).transpose();
+      sum += shapes[i] * this->GetGlobal(i).transpose();
     }
     return sum;
   }

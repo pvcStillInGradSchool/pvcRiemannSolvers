@@ -166,7 +166,7 @@ class Hexahedron {
   explicit Hexahedron(const GaussBase &gauss) requires(kLocal)
       : gauss_ptr_(dynamic_cast<const Gauss *>(&gauss)) {
     for (int ijk = 0; ijk < N; ++ijk) {
-      auto &local = gauss_ptr_->GetLocalCoord(ijk);
+      auto &local = gauss_ptr_->GetLocal(ijk);
       Jacobian mat = coordinate().LocalToJacobian(local);
       Jacobian inv = mat.inverse();
       Scalar det = mat.determinant();
@@ -215,7 +215,7 @@ class Hexahedron {
   explicit Hexahedron(const GaussBase &gauss) requires(!kLocal)
       : gauss_ptr_(dynamic_cast<const Gauss *>(&gauss)) {
     for (int ijk = 0; ijk < N; ++ijk) {
-      auto &local = gauss_ptr_->GetLocalCoord(ijk);
+      auto &local = gauss_ptr_->GetLocal(ijk);
       Jacobian jacobian = coordinate().LocalToJacobian(local);
       basis_global_gradients_[ijk] = LocalGradientsToGlobalGradients(
           jacobian, basis_local_gradients_[ijk]);
@@ -506,7 +506,7 @@ class Hexahedron {
   template <typename Callable>
   void Approximate(Callable &&global_to_value) {
     for (int ijk = 0; ijk < N; ++ijk) {
-      const auto &global = gauss_ptr_->GetGlobalCoord(ijk);
+      const auto &global = gauss_ptr_->GetGlobal(ijk);
       SetValue(ijk, global_to_value(global));
     }
   }

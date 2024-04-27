@@ -1091,7 +1091,7 @@ class Part {
       auto &projection = cell.projection();
       for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
         Value value = projection.GetValue(q);
-        value -= exact_solution(gauss.GetGlobalCoord(q), t_curr);
+        value -= exact_solution(gauss.GetGlobal(q), t_curr);
         value = value.cwiseAbs() * gauss.GetGlobalWeight(q);
         l1_error += value;
       }

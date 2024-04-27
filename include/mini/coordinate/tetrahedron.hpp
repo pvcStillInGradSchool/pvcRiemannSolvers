@@ -110,11 +110,11 @@ class Tetrahedron4 : public Tetrahedron<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }
@@ -276,11 +276,11 @@ class Tetrahedron10 : public Tetrahedron<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }

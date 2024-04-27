@@ -97,20 +97,20 @@ class General : public spatial::FiniteElement<Part> {
         Global const &face_normal = face.riemann(f).normal();
         assert(face_normal == face_gauss.GetNormalFrame(f)[0]);
         auto &[curr_line, flux_point] = curr_face.at(f);
-        auto &flux_point_coord = face_gauss.GetGlobalCoord(f);
+        auto &flux_point_coord = face_gauss.GetGlobal(f);
         auto [i, j, k] = cell_projection.FindCollinearIndex(flux_point_coord, i_face);
         switch (i_face) {
         case 0:
           assert(k == -1);
           flux_point.ijk = cell_basis.index(i, j, 0);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (k = 0; k < GaussOnLine::Q; ++k) {
             auto ijk = cell_basis.index(i, j, k);
-            auto &local = cell_gauss.GetLocalCoord(ijk);
+            auto &local = cell_gauss.GetLocal(ijk);
             auto g_prime = vincent_.LocalToLeftDerivative(local[Z]);
             curr_line[k].g_prime = g_prime;
             curr_line[k].ijk = ijk;
@@ -119,14 +119,14 @@ class General : public spatial::FiniteElement<Part> {
         case 1:
           assert(j == -1);
           flux_point.ijk = cell_basis.index(i, 0, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (j = 0; j < GaussOnLine::Q; ++j) {
             auto ijk = cell_basis.index(i, j, k);
-            auto &local = cell_gauss.GetLocalCoord(ijk);
+            auto &local = cell_gauss.GetLocal(ijk);
             auto g_prime = vincent_.LocalToLeftDerivative(local[Y]);
             curr_line[j].g_prime = g_prime;
             curr_line[j].ijk = ijk;
@@ -135,14 +135,14 @@ class General : public spatial::FiniteElement<Part> {
         case 2:
           assert(i == -1);
           flux_point.ijk = cell_basis.index(GaussOnLine::Q - 1, j, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (i = 0; i < GaussOnLine::Q; ++i) {
             auto ijk = cell_basis.index(i, j, k);
-            auto &local = cell_gauss.GetLocalCoord(ijk);
+            auto &local = cell_gauss.GetLocal(ijk);
             auto g_prime = vincent_.LocalToRightDerivative(local[X]);
             curr_line[i].g_prime = g_prime;
             curr_line[i].ijk = ijk;
@@ -151,14 +151,14 @@ class General : public spatial::FiniteElement<Part> {
         case 3:
           assert(j == -1);
           flux_point.ijk = cell_basis.index(i, GaussOnLine::Q - 1, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (j = 0; j < GaussOnLine::Q; ++j) {
             auto ijk = cell_basis.index(i, j, k);
-            auto &local = cell_gauss.GetLocalCoord(ijk);
+            auto &local = cell_gauss.GetLocal(ijk);
             auto g_prime = vincent_.LocalToRightDerivative(local[Y]);
             curr_line[j].g_prime = g_prime;
             curr_line[j].ijk = ijk;
@@ -167,14 +167,14 @@ class General : public spatial::FiniteElement<Part> {
         case 4:
           assert(i == -1);
           flux_point.ijk = cell_basis.index(0, j, k);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (i = 0; i < GaussOnLine::Q; ++i) {
             auto ijk = cell_basis.index(i, j, k);
-            auto &local = cell_gauss.GetLocalCoord(ijk);
+            auto &local = cell_gauss.GetLocal(ijk);
             auto g_prime = vincent_.LocalToLeftDerivative(local[X]);
             curr_line[i].g_prime = g_prime;
             curr_line[i].ijk = ijk;
@@ -183,14 +183,14 @@ class General : public spatial::FiniteElement<Part> {
         case 5:
           assert(k == -1);
           flux_point.ijk = cell_basis.index(i, j, GaussOnLine::Q - 1);
-          assert(Near(flux_point_coord, cell_gauss.GetGlobalCoord(flux_point.ijk)));
+          assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (k = 0; k < GaussOnLine::Q; ++k) {
             auto ijk = cell_basis.index(i, j, k);
-            auto &local = cell_gauss.GetLocalCoord(ijk);
+            auto &local = cell_gauss.GetLocal(ijk);
             auto g_prime = vincent_.LocalToRightDerivative(local[Z]);
             curr_line[k].g_prime = g_prime;
             curr_line[k].ijk = ijk;
@@ -461,7 +461,7 @@ class General : public spatial::FiniteElement<Part> {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
@@ -486,7 +486,7 @@ class General : public spatial::FiniteElement<Part> {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicInlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
@@ -511,7 +511,7 @@ class General : public spatial::FiniteElement<Part> {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicOutlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
@@ -536,7 +536,7 @@ class General : public spatial::FiniteElement<Part> {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
           Value u_holder = holder.projection().GetValue(
               holder_flux_point.ijk);
-          Value u_given = func(gauss.GetGlobalCoord(f), this->t_curr_);
+          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSmartBoundary(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=

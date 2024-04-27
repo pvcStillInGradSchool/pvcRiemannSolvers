@@ -50,7 +50,7 @@ class Tetrahedron : public Cell<Scalar> {
   }
 
  public:
-  const Global &GetGlobalCoord(int i) const final {
+  const Global &GetGlobal(int i) const final {
     assert(0 <= i && i < CountPoints());
     return global_coords_[i];
   }
@@ -58,7 +58,7 @@ class Tetrahedron : public Cell<Scalar> {
     assert(0 <= i && i < CountPoints());
     return global_weights_[i];
   }
-  const Local &GetLocalCoord(int i) const final {
+  const Local &GetLocal(int i) const final {
     assert(0 <= i && i < CountPoints());
     return local_coords_[i];
   }
@@ -68,7 +68,7 @@ class Tetrahedron : public Cell<Scalar> {
   }
 
  protected:
-  Global &GetGlobalCoord(int i) final {
+  Global &GetGlobal(int i) final {
     assert(0 <= i && i < CountPoints());
     return global_coords_[i];
   }

@@ -58,14 +58,14 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   // build another hexa-gauss
   Coord shift = {-1, 2, 3};
   coordinate = Coordinate {
-    coordinate.GetGlobalCoord(0) + shift,
-    coordinate.GetGlobalCoord(1) + shift,
-    coordinate.GetGlobalCoord(2) + shift,
-    coordinate.GetGlobalCoord(3) + shift,
-    coordinate.GetGlobalCoord(4) + shift,
-    coordinate.GetGlobalCoord(5) + shift,
-    coordinate.GetGlobalCoord(6) + shift,
-    coordinate.GetGlobalCoord(7) + shift,
+    coordinate.GetGlobal(0) + shift,
+    coordinate.GetGlobal(1) + shift,
+    coordinate.GetGlobal(2) + shift,
+    coordinate.GetGlobal(3) + shift,
+    coordinate.GetGlobal(4) + shift,
+    coordinate.GetGlobal(5) + shift,
+    coordinate.GetGlobal(6) + shift,
+    coordinate.GetGlobal(7) + shift,
   };
   gauss = Gauss(coordinate);
   // build another orthonormal basis on it
@@ -178,7 +178,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
   vector_interp.Approximate(vector_func);
   // test values on nodes
   for (int ijk = 0; ijk < Basis::N; ++ijk) {
-    auto &global = vector_interp.gauss().GetGlobalCoord(ijk);
+    auto &global = vector_interp.gauss().GetGlobal(ijk);
     auto value = vector_func(global);
     value -= vector_interp.GlobalToValue(global);
     EXPECT_NEAR(value.norm(), 0, 1e-13);
@@ -193,7 +193,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
   }
   // test value query methods
   for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
-    Global global = vector_interp.gauss().GetGlobalCoord(q);
+    Global global = vector_interp.gauss().GetGlobal(q);
     Value value = vector_interp.GlobalToValue(global);
     EXPECT_NEAR((value - vector_interp.GetValue(q)).norm(), 0, 1e-13);
     vector_interp.SetValue(q, value);
@@ -253,8 +253,8 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
     interp.Approximate(get_value);
     // test values and gradients on nodes
     for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
-      Local const &local = interp.gauss().GetLocalCoord(ijk);
-      Global const &global = interp.gauss().GetGlobalCoord(ijk);
+      Local const &local = interp.gauss().GetLocal(ijk);
+      Global const &global = interp.gauss().GetGlobal(ijk);
       Value value = interp.GetValue(ijk);
       EXPECT_NEAR((value - get_value(global)).norm(), 0, 1e-13);
       EXPECT_NEAR((value - interp.GlobalToValue(global)).norm(), 0, 1e-10);
@@ -282,7 +282,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
     for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
       Hessian hess = interp.GetGlobalHessian(ijk);
       // compare with O(h^2) finite difference derivatives
-      auto const &global = interp.gauss().GetGlobalCoord(ijk);
+      auto const &global = interp.gauss().GetGlobal(ijk);
       auto x = global[X], y = global[Y], z = global[Z], h = 1e-5;
       Gradient grad_diff = (
           interp.GlobalToGlobalGradient(Global(x + h, y, z)) -
@@ -330,12 +330,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 2);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobalCoord(f);
+      Global global = face_gauss_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), GaussX::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocalCoord(ijk);
+        auto local = cell_gauss.GetLocal(ijk);
         EXPECT_EQ(local[0], GaussX::points[i]);
       }
     }
@@ -350,12 +350,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 4);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobalCoord(f);
+      Global global = face_gauss_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), GaussX::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocalCoord(ijk);
+        auto local = cell_gauss.GetLocal(ijk);
         EXPECT_EQ(local[0], GaussX::points[i]);
       }
     }
@@ -370,12 +370,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 3);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobalCoord(f);
+      Global global = face_gauss_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), GaussY::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocalCoord(ijk);
+        auto local = cell_gauss.GetLocal(ijk);
         EXPECT_EQ(local[1], GaussY::points[j]);
       }
     }
@@ -390,12 +390,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 1);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobalCoord(f);
+      Global global = face_gauss_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), GaussY::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocalCoord(ijk);
+        auto local = cell_gauss.GetLocal(ijk);
         EXPECT_EQ(local[1], GaussY::points[j]);
       }
     }
@@ -410,12 +410,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 5);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobalCoord(f);
+      Global global = face_gauss_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), GaussZ::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocalCoord(ijk);
+        auto local = cell_gauss.GetLocal(ijk);
         EXPECT_EQ(local[2], GaussZ::points[k]);
       }
     }
@@ -430,12 +430,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 0);
     for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobalCoord(f);
+      Global global = face_gauss_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), GaussZ::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocalCoord(ijk);
+        auto local = cell_gauss.GetLocal(ijk);
         EXPECT_EQ(local[2], GaussZ::points[k]);
       }
     }

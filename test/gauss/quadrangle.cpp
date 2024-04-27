@@ -22,7 +22,7 @@ TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 2);
   EXPECT_EQ(gauss.CountPoints(), 16);
-  auto p0 = gauss.GetLocalCoord(0);
+  auto p0 = gauss.GetLocal(0);
   EXPECT_EQ(p0[0], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[1], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   auto w1d = (18 - std::sqrt(30)) / 36.0;

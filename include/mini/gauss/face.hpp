@@ -47,7 +47,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   static void BuildNormalFrames(Face *face) requires(kPhysDim == 3) {
     int n = face->CountPoints();
     for (int i = 0; i < n; ++i) {
-      auto &local_i = face->GetLocalCoord(i);
+      auto &local_i = face->GetLocal(i);
       face->GetNormalFrame(i) = face->coordinate().LocalToNormalFrame(local_i);
     }
   }

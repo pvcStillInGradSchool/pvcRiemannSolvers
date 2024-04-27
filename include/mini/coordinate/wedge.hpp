@@ -179,11 +179,11 @@ class Wedge6 : public Wedge<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }
@@ -389,11 +389,11 @@ class Wedge15 : public Wedge<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }
@@ -621,11 +621,11 @@ class Wedge18 : public Wedge<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }

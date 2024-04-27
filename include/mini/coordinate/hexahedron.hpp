@@ -320,11 +320,11 @@ class Hexahedron27 : public Hexahedron<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }
@@ -498,11 +498,11 @@ class Hexahedron8 : public Hexahedron<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return Hexahedron27<Scalar>::local_coords_[i];
   }
@@ -773,11 +773,11 @@ class Hexahedron20 : public Hexahedron<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return Hexahedron27<Scalar>::local_coords_[i];
   }
@@ -1069,11 +1069,11 @@ class Hexahedron26 : public Hexahedron<Scalar> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return Hexahedron27<Scalar>::local_coords_[i];
   }

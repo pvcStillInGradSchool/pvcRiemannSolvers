@@ -30,7 +30,7 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
   EXPECT_EQ(hexa.CountPoints(), 64);
-  auto p0 = hexa.GetLocalCoord(0);
+  auto p0 = hexa.GetLocal(0);
   EXPECT_EQ(p0[0], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[1], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
@@ -66,7 +66,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
   EXPECT_EQ(hexa.CountPoints(), 64);
-  auto p0 = hexa.GetLocalCoord(0);
+  auto p0 = hexa.GetLocal(0);
   EXPECT_EQ(p0[0], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[1], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
@@ -116,7 +116,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
   EXPECT_EQ(hexa.CountPoints(), 64);
-  auto p0 = hexa.GetLocalCoord(0);
+  auto p0 = hexa.GetLocal(0);
   EXPECT_EQ(p0[0], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[1], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
@@ -172,7 +172,7 @@ TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
   EXPECT_EQ(hexa.CountPoints(), 64);
-  auto p0 = hexa.GetLocalCoord(0);
+  auto p0 = hexa.GetLocal(0);
   EXPECT_EQ(p0[0], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[1], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));
   EXPECT_EQ(p0[2], -std::sqrt((3 + 2 * std::sqrt(1.2)) / 7));

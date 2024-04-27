@@ -34,11 +34,11 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
   EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
   for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
     if (i_node == 4) {
-      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node)));
+      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobal(i_node)));
       continue;
     }
-    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
-        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobal(i_node))
+        - coordinate.GetLocal(i_node)).norm(), 1e-15);
   }
   mini::coordinate::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
@@ -76,7 +76,7 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = cell.CountNodes(); i < n; ++i) {
-    auto local_i = cell.GetLocalCoord(i);
+    auto local_i = cell.GetLocal(i);
     auto shapes = cell.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);
@@ -102,8 +102,8 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
       auto face = mini::coordinate::Triangle3<double, 3>{
-        cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
-        cell.GetGlobalCoord(c_list[2]),
+        cell.GetGlobal(c_list[0]), cell.GetGlobal(c_list[1]),
+        cell.GetGlobal(c_list[2]),
       };
       for (int i = 0; i < 1000; ++i) {
         auto x = (rand() + 1) / 2, y = (rand() + 1) / 2;
@@ -126,8 +126,8 @@ TEST_F(TestCoordinatePyramid5, CoordinateMap) {
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
       auto face = mini::coordinate::Quadrangle4<double, 3>{
-        cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
-        cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
+        cell.GetGlobal(c_list[0]), cell.GetGlobal(c_list[1]),
+        cell.GetGlobal(c_list[2]), cell.GetGlobal(c_list[3]),
       };
       for (int i = 0; i < 1000; ++i) {
         auto x = rand(), y = rand();
@@ -229,11 +229,11 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
   EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
   for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
     if (i_node == 4) {
-      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node)));
+      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobal(i_node)));
       continue;
     }
-    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
-        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobal(i_node))
+        - coordinate.GetLocal(i_node)).norm(), 1e-15);
   }
   mini::coordinate::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
@@ -271,7 +271,7 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = cell.CountNodes(); i < n; ++i) {
-    auto local_i = cell.GetLocalCoord(i);
+    auto local_i = cell.GetLocal(i);
     auto shapes = cell.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);
@@ -298,9 +298,9 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
       auto face = mini::coordinate::Triangle6<double, 3>{
-        cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
-        cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
-        cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
+        cell.GetGlobal(c_list[0]), cell.GetGlobal(c_list[1]),
+        cell.GetGlobal(c_list[2]), cell.GetGlobal(c_list[3]),
+        cell.GetGlobal(c_list[4]), cell.GetGlobal(c_list[5]),
       };
       for (int i = 0; i < 1000; ++i) {
         auto x = (rand() + 1) / 2, y = (rand() + 1) / 2;
@@ -325,10 +325,10 @@ TEST_F(TestCoordinatePyramid13, CoordinateMap) {
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
       auto face = mini::coordinate::Quadrangle8<double, 3>{
-        cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
-        cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
-        cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
-        cell.GetGlobalCoord(c_list[6]), cell.GetGlobalCoord(c_list[7]),
+        cell.GetGlobal(c_list[0]), cell.GetGlobal(c_list[1]),
+        cell.GetGlobal(c_list[2]), cell.GetGlobal(c_list[3]),
+        cell.GetGlobal(c_list[4]), cell.GetGlobal(c_list[5]),
+        cell.GetGlobal(c_list[6]), cell.GetGlobal(c_list[7]),
       };
       for (int i = 0; i < 1000; ++i) {
         auto x = rand(), y = rand();
@@ -440,11 +440,11 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
   EXPECT_EQ(coordinate.LocalToGlobal(0, 0, 1), Coord(0, 0, h));
   for (int i_node = 0; i_node < coordinate.CountNodes(); ++i_node) {
     if (i_node == 4) {
-      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node)));
+      EXPECT_ANY_THROW(coordinate.GlobalToLocal(coordinate.GetGlobal(i_node)));
       continue;
     }
-    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobalCoord(i_node))
-        - coordinate.GetLocalCoord(i_node)).norm(), 1e-15);
+    EXPECT_NEAR(0.0, (coordinate.GlobalToLocal(coordinate.GetGlobal(i_node))
+        - coordinate.GetLocal(i_node)).norm(), 1e-15);
   }
   mini::coordinate::Cell<typename Coordinate::Real> &cell = coordinate;
   // test the partition-of-unity property:
@@ -482,7 +482,7 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
   }
   // test the Kronecker-delta and property:
   for (int i = 0, n = cell.CountNodes(); i < n; ++i) {
-    auto local_i = cell.GetLocalCoord(i);
+    auto local_i = cell.GetLocal(i);
     auto shapes = cell.LocalToShapeFunctions(local_i);
     for (int j = 0; j < n; ++j) {
       EXPECT_EQ(shapes[j], i == j);
@@ -509,9 +509,9 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
       auto face = mini::coordinate::Triangle6<double, 3>{
-        cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
-        cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
-        cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
+        cell.GetGlobal(c_list[0]), cell.GetGlobal(c_list[1]),
+        cell.GetGlobal(c_list[2]), cell.GetGlobal(c_list[3]),
+        cell.GetGlobal(c_list[4]), cell.GetGlobal(c_list[5]),
       };
       for (int i = 0; i < 1000; ++i) {
         auto x = (rand() + 1) / 2, y = (rand() + 1) / 2;
@@ -536,11 +536,11 @@ TEST_F(TestCoordinatePyramid14, CoordinateMap) {
       int f = 0;
       for (int c : c_list) { c2f[c] = f++; }
       auto face = mini::coordinate::Quadrangle9<double, 3>{
-        cell.GetGlobalCoord(c_list[0]), cell.GetGlobalCoord(c_list[1]),
-        cell.GetGlobalCoord(c_list[2]), cell.GetGlobalCoord(c_list[3]),
-        cell.GetGlobalCoord(c_list[4]), cell.GetGlobalCoord(c_list[5]),
-        cell.GetGlobalCoord(c_list[6]), cell.GetGlobalCoord(c_list[7]),
-        cell.GetGlobalCoord(c_list[8]),
+        cell.GetGlobal(c_list[0]), cell.GetGlobal(c_list[1]),
+        cell.GetGlobal(c_list[2]), cell.GetGlobal(c_list[3]),
+        cell.GetGlobal(c_list[4]), cell.GetGlobal(c_list[5]),
+        cell.GetGlobal(c_list[6]), cell.GetGlobal(c_list[7]),
+        cell.GetGlobal(c_list[8]),
       };
       for (int i = 0; i < 1000; ++i) {
         auto x = rand(), y = rand();

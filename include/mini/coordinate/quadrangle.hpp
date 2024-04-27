@@ -110,11 +110,11 @@ class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }
@@ -237,11 +237,11 @@ class Quadrangle8 : public Quadrangle<Scalar, kPhysDim> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }
@@ -347,11 +347,11 @@ class Quadrangle9 : public Quadrangle<Scalar, kPhysDim> {
   }
 
  public:
-  Global const &GetGlobalCoord(int i) const final {
+  Global const &GetGlobal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return global_coords_[i];
   }
-  Local const &GetLocalCoord(int i) const final {
+  Local const &GetLocal(int i) const final {
     assert(0 <= i && i < CountNodes());
     return local_coords_[i];
   }

@@ -60,7 +60,7 @@ class Line {
     int n = CountPoints();
     for (int i = 0; i < n; ++i) {
       global_weights_[i] = local_weights_[i] * det_j;
-      global_coords_[i] = LocalToGlobal(GetLocalCoord(i));
+      global_coords_[i] = LocalToGlobal(GetLocal(i));
     }
   }
   static constexpr auto BuildLocalCoords() {
@@ -79,7 +79,7 @@ class Line {
     pq_[0] = p0; pq_[1] = p1;
     BuildQuadraturePoints();
   }
-  Global const &GetGlobalCoord(int i) const {
+  Global const &GetGlobal(int i) const {
     assert(0 <= i && i < CountPoints());
     return global_coords_[i];
   }
@@ -87,7 +87,7 @@ class Line {
     assert(0 <= i && i < CountPoints());
     return global_weights_[i];
   }
-  Local const &GetLocalCoord(int i) const {
+  Local const &GetLocal(int i) const {
     assert(0 <= i && i < CountPoints());
     return local_coords_[i];
   }

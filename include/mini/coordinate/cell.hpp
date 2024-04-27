@@ -67,9 +67,9 @@ class Cell : public Element<Scalar, 3, 3> {
   Global LocalToGlobal(Scalar x_local, Scalar y_local, Scalar z_local)
       const {
     auto shapes = LocalToShapeFunctions(x_local, y_local, z_local);
-    Global sum = this->GetGlobalCoord(0) * shapes[0];
+    Global sum = this->GetGlobal(0) * shapes[0];
     for (int i = 1, n = this->CountNodes(); i < n; ++i) {
-      sum += this->GetGlobalCoord(i) * shapes[i];
+      sum += this->GetGlobal(i) * shapes[i];
     }
     return sum;
   }
@@ -80,9 +80,9 @@ class Cell : public Element<Scalar, 3, 3> {
   Jacobian LocalToJacobian(Scalar x_local, Scalar y_local, Scalar z_local)
       const {
     auto shapes = LocalToShapeGradients(x_local, y_local, z_local);
-    Jacobian sum = shapes[0] * this->GetGlobalCoord(0).transpose();
+    Jacobian sum = shapes[0] * this->GetGlobal(0).transpose();
     for (int i = 1, n = this->CountNodes(); i < n; ++i) {
-      sum += shapes[i] * this->GetGlobalCoord(i).transpose();
+      sum += shapes[i] * this->GetGlobal(i).transpose();
     }
     return sum;
   }
@@ -101,7 +101,7 @@ class Cell : public Element<Scalar, 3, 3> {
     algebra::Vector<Jacobian, 3> grad;
     grad[X].setZero(); grad[Y].setZero(); grad[Z].setZero();
     for (int i = 0, n = this->CountNodes(); i < n; ++i) {
-      auto &xyz = this->GetGlobalCoord(i);
+      auto &xyz = this->GetGlobal(i);
       auto &hessian = hessians[i];
       grad[X].row(X) += xyz * hessian[XX];
       grad[X].row(Y) += xyz * hessian[XY];
@@ -122,7 +122,7 @@ class Cell : public Element<Scalar, 3, 3> {
     hessian[XX].setZero(); hessian[XY].setZero(); hessian[XZ].setZero();
     hessian[YY].setZero(); hessian[YZ].setZero(); hessian[ZZ].setZero();
     for (int i = 0, n = this->CountNodes(); i < n; ++i) {
-      auto &xyz = this->GetGlobalCoord(i);
+      auto &xyz = this->GetGlobal(i);
       auto &tensor = tensors[i];
       hessian[XX].row(X) += xyz * tensor[XXX];
       hessian[XX].row(Y) += xyz * tensor[XXY];

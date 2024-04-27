@@ -31,7 +31,7 @@ auto Quadrature(Callable &&local_to_value, const Gauss &gauss) {
   Value sum; algebra::SetZero(&sum);
   auto n = gauss.CountPoints();
   for (int i = 0; i < n; ++i) {
-    auto f_val = local_to_value(gauss.GetLocalCoord(i));
+    auto f_val = local_to_value(gauss.GetLocal(i));
     f_val *= gauss.GetLocalWeight(i);
     sum += f_val;
   }
@@ -55,7 +55,7 @@ auto Integrate(Callable &&global_to_value, const Gauss &gauss) {
   Value sum; algebra::SetZero(&sum);
   auto n = gauss.CountPoints();
   for (int i = 0; i < n; ++i) {
-    auto f_val = global_to_value(gauss.GetGlobalCoord(i));
+    auto f_val = global_to_value(gauss.GetGlobal(i));
     f_val *= gauss.GetGlobalWeight(i);
     sum += f_val;
   }
