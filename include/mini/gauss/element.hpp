@@ -6,6 +6,11 @@
 #include "mini/constant/index.hpp"
 
 namespace mini {
+
+/**
+ * @brief Numerical integrators on regular elements.
+ * 
+ */
 namespace gauss {
 
 using namespace mini::constant::index;

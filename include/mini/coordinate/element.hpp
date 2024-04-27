@@ -16,6 +16,11 @@
 #include "mini/constant/index.hpp"
 
 namespace mini {
+
+/**
+ * @brief Maps between physical (global) coordinates and parametric (local) coordinates on regular elements.
+ * 
+ */
 namespace coordinate {
 
 using namespace mini::constant::index;
