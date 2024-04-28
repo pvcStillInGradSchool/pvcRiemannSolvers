@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GAUSS_LINE_HPP_
-#define MINI_GAUSS_LINE_HPP_
+#ifndef MINI_INTEGRATOR_LINE_HPP_
+#define MINI_INTEGRATOR_LINE_HPP_
 
 #include <cmath>
 #include <type_traits>
@@ -111,4 +111,4 @@ Line<S, D, Q>::local_weights_ = Line<S, D, Q>::BuildLocalWeights();
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_LINE_HPP_
+#endif  // MINI_INTEGRATOR_LINE_HPP_

@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GAUSS_TETRAHEDRON_HPP_
-#define MINI_GAUSS_TETRAHEDRON_HPP_
+#ifndef MINI_INTEGRATOR_TETRAHEDRON_HPP_
+#define MINI_INTEGRATOR_TETRAHEDRON_HPP_
 
 #include <concepts>
 
@@ -359,4 +359,4 @@ Tetrahedron<Scalar, kPoints>::local_weights_
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_TETRAHEDRON_HPP_
+#endif  // MINI_INTEGRATOR_TETRAHEDRON_HPP_

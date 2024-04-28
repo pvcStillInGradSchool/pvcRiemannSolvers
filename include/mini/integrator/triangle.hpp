@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GAUSS_TRIANGLE_HPP_
-#define MINI_GAUSS_TRIANGLE_HPP_
+#ifndef MINI_INTEGRATOR_TRIANGLE_HPP_
+#define MINI_INTEGRATOR_TRIANGLE_HPP_
 
 #include <concepts>
 
@@ -284,4 +284,4 @@ Triangle<Scalar, kPhysDim, kPoints>::local_weights_
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_TRIANGLE_HPP_
+#endif  // MINI_INTEGRATOR_TRIANGLE_HPP_

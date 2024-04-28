@@ -1,6 +1,6 @@
 //  Copyright 2019 PEI Weicheng and YANG Minghao
-#ifndef MINI_GAUSS_LEGENDRE_HPP_
-#define MINI_GAUSS_LEGENDRE_HPP_
+#ifndef MINI_INTEGRATOR_LEGENDRE_HPP_
+#define MINI_INTEGRATOR_LEGENDRE_HPP_
 
 #include <concepts>
 
@@ -124,4 +124,4 @@ Legendre<S, Q>::weights = Legendre<S, Q>::BuildWeights();
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_LEGENDRE_HPP_
+#endif  // MINI_INTEGRATOR_LEGENDRE_HPP_

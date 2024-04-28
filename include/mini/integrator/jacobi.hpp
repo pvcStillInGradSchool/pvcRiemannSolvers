@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GAUSS_JACOBI_HPP_
-#define MINI_GAUSS_JACOBI_HPP_
+#ifndef MINI_INTEGRATOR_JACOBI_HPP_
+#define MINI_INTEGRATOR_JACOBI_HPP_
 
 #include <concepts>
 
@@ -115,4 +115,4 @@ Jacobi<Scalar, Q, A, B>::weights = Jacobi<Scalar, Q, A, B>::BuildWeights();
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_JACOBI_HPP_
+#endif  // MINI_INTEGRATOR_JACOBI_HPP_

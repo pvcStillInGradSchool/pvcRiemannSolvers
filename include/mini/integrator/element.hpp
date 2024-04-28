@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GAUSS_ELEMENT_HPP_
-#define MINI_GAUSS_ELEMENT_HPP_
+#ifndef MINI_INTEGRATOR_ELEMENT_HPP_
+#define MINI_INTEGRATOR_ELEMENT_HPP_
 
 #include "mini/coordinate/element.hpp"
 #include "mini/constant/index.hpp"
@@ -108,4 +108,4 @@ class Element {
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_ELEMENT_HPP_
+#endif  // MINI_INTEGRATOR_ELEMENT_HPP_

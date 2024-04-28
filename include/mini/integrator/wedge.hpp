@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GAUSS_WEDGE_HPP_
-#define MINI_GAUSS_WEDGE_HPP_
+#ifndef MINI_INTEGRATOR_WEDGE_HPP_
+#define MINI_INTEGRATOR_WEDGE_HPP_
 
 #include <concepts>
 
@@ -142,4 +142,4 @@ Wedge<Scalar, Qt, Qz, R>::local_weights_
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_WEDGE_HPP_
+#endif  // MINI_INTEGRATOR_WEDGE_HPP_

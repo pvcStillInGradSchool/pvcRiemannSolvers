@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GAUSS_LOBATTO_HPP_
-#define MINI_GAUSS_LOBATTO_HPP_
+#ifndef MINI_INTEGRATOR_LOBATTO_HPP_
+#define MINI_INTEGRATOR_LOBATTO_HPP_
 
 #include <concepts>
 
@@ -95,4 +95,4 @@ Lobatto<S, Q>::weights = Lobatto<S, Q>::BuildWeights();
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_LOBATTO_HPP_
+#endif  // MINI_INTEGRATOR_LOBATTO_HPP_

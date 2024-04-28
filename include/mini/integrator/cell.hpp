@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GAUSS_CELL_HPP_
-#define MINI_GAUSS_CELL_HPP_
+#ifndef MINI_INTEGRATOR_CELL_HPP_
+#define MINI_INTEGRATOR_CELL_HPP_
 
 #include <concepts>
 
@@ -39,4 +39,4 @@ class Cell : public Element<Scalar, 3, 3> {
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_CELL_HPP_
+#endif  // MINI_INTEGRATOR_CELL_HPP_

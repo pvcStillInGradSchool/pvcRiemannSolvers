@@ -1,6 +1,6 @@
 //  Copyright 2023 PEI Weicheng
-#ifndef MINI_GAUSS_PYRAMID_HPP_
-#define MINI_GAUSS_PYRAMID_HPP_
+#ifndef MINI_INTEGRATOR_PYRAMID_HPP_
+#define MINI_INTEGRATOR_PYRAMID_HPP_
 
 #include <concepts>
 
@@ -146,4 +146,4 @@ Pyramid<Scalar, Qx, Qy, Qz, R>::local_weights_
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_PYRAMID_HPP_
+#endif  // MINI_INTEGRATOR_PYRAMID_HPP_

@@ -1,6 +1,6 @@
 //  Copyright 2021 PEI Weicheng and JIANG Yuyan
-#ifndef MINI_GAUSS_FACE_HPP_
-#define MINI_GAUSS_FACE_HPP_
+#ifndef MINI_INTEGRATOR_FACE_HPP_
+#define MINI_INTEGRATOR_FACE_HPP_
 
 #include <concepts>
 
@@ -57,4 +57,4 @@ class Face : public Element<Scalar, kPhysDim, 2> {
 }  // namespace integrator
 }  // namespace mini
 
-#endif  // MINI_GAUSS_FACE_HPP_
+#endif  // MINI_INTEGRATOR_FACE_HPP_
