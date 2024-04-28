@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/triangle.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/triangle.hpp"
 #include "mini/coordinate/triangle.hpp"
 
 #include "gtest/gtest.h"
@@ -11,7 +11,7 @@
 class TestGaussTriangle : public ::testing::Test {
 };
 TEST_F(TestGaussTriangle, OnScaledElementInTwoDimensionalSpace) {
-  using Gauss = mini::gauss::Triangle<double, 2, 16>;
+  using Gauss = mini::integrator::Triangle<double, 2, 16>;
   using Coordinate = mini::coordinate::Triangle3<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate { Coord(0, 0), Coord(2, 0), Coord(2, 2) };
@@ -31,7 +31,7 @@ TEST_F(TestGaussTriangle, OnScaledElementInTwoDimensionalSpace) {
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
 TEST_F(TestGaussTriangle, OnMappedElementInThreeDimensionalSpace) {
-  using Gauss = mini::gauss::Triangle<double, 3, 16>;
+  using Gauss = mini::integrator::Triangle<double, 3, 16>;
   using Coordinate = mini::coordinate::Triangle3<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
@@ -65,7 +65,7 @@ TEST_F(TestGaussTriangle, OnMappedElementInThreeDimensionalSpace) {
   }
 }
 TEST_F(TestGaussTriangle, OnQuadraticElementInThreeDimensionalSpace) {
-  using Gauss = mini::gauss::Triangle<double, 3, 16>;
+  using Gauss = mini::integrator::Triangle<double, 3, 16>;
   using Coordinate = mini::coordinate::Triangle6<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;

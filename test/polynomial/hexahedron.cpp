@@ -3,11 +3,11 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/legendre.hpp"
-#include "mini/gauss/lobatto.hpp"
-#include "mini/gauss/quadrangle.hpp"
-#include "mini/gauss/hexahedron.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/legendre.hpp"
+#include "mini/integrator/lobatto.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/basis/linear.hpp"
@@ -26,8 +26,8 @@ double rand_f() {
 
 class TestPolynomialHexahedronProjection : public ::testing::Test {
  protected:
-  using GaussX = mini::gauss::Legendre<double, 4>;
-  using Gauss = mini::gauss::Hexahedron<GaussX, GaussX, GaussX>;
+  using GaussX = mini::integrator::Legendre<double, 4>;
+  using Gauss = mini::integrator::Hexahedron<GaussX, GaussX, GaussX>;
   using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coord = typename Basis::Coord;
@@ -123,9 +123,9 @@ class TestPolynomialHexahedronInterpolation : public ::testing::Test {
   using Scalar = double;
   using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
   // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
-  using GaussX = mini::gauss::Legendre<Scalar, 3>;
-  using GaussY = mini::gauss::Lobatto<Scalar, 3>;
-  using GaussZ = mini::gauss::Lobatto<Scalar, 4>;
+  using GaussX = mini::integrator::Legendre<Scalar, 3>;
+  using GaussY = mini::integrator::Lobatto<Scalar, 3>;
+  using GaussZ = mini::integrator::Lobatto<Scalar, 4>;
   using Interpolation = mini::polynomial::Hexahedron<GaussX, GaussY, GaussZ, 11>;
   using Basis = typename Interpolation::Basis;
   using Gauss = typename Interpolation::Gauss;
@@ -325,7 +325,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(+a, -b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(+a, -b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussY, GaussZ>(face_coordinate);
+    auto face_gauss = mini::integrator::Quadrangle<3, GaussY, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 2);
@@ -345,7 +345,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, -c), Global(-a, +b, -c),
       Global(-a, +b, +c), Global(-a, -b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussY, GaussZ>(face_coordinate);
+    auto face_gauss = mini::integrator::Quadrangle<3, GaussY, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 4);
@@ -365,7 +365,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, +b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussZ>(face_coordinate);
+    auto face_gauss = mini::integrator::Quadrangle<3, GaussX, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 3);
@@ -385,7 +385,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, -b, +c), Global(-a, -b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussZ>(face_coordinate);
+    auto face_gauss = mini::integrator::Quadrangle<3, GaussX, GaussZ>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 1);
@@ -405,7 +405,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, +c), Global(+a, -b, +c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussY>(face_coordinate);
+    auto face_gauss = mini::integrator::Quadrangle<3, GaussX, GaussY>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 5);
@@ -425,7 +425,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, +b, -c), Global(-a, +b, -c),
     };
-    auto face_gauss = mini::gauss::Quadrangle<3, GaussX, GaussY>(face_coordinate);
+    auto face_gauss = mini::integrator::Quadrangle<3, GaussX, GaussY>(face_coordinate);
     auto const &face_gauss_ref = face_gauss;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 0);

@@ -5,11 +5,11 @@
 #include <concepts>
 
 #include "mini/coordinate/face.hpp"
-#include "mini/gauss/element.hpp"
-#include "mini/gauss/function.hpp"
+#include "mini/integrator/element.hpp"
+#include "mini/integrator/function.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Abstract numerical integrators on surface elements.
@@ -54,7 +54,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   virtual Frame &GetNormalFrame(int i) = 0;
 };
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_FACE_HPP_

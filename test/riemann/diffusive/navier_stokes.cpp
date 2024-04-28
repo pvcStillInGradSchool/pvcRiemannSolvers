@@ -9,7 +9,7 @@
 #include "mini/riemann/euler/types.hpp"
 #include "mini/riemann/diffusive/navier_stokes.hpp"
 #include "mini/coordinate/hexahedron.hpp"
-#include "mini/gauss/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 
 class TestRiemannDiffusiveNavierStokes : public ::testing::Test {
@@ -141,7 +141,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
 TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
   // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
-  using GaussX = mini::gauss::Lobatto<Scalar, 3>;
+  using GaussX = mini::integrator::Lobatto<Scalar, 3>;
   using Interpolation = mini::polynomial::Hexahedron<GaussX, GaussX, GaussX,
       NS::kComponents, true>;
   using Basis = typename Interpolation::Basis;

@@ -15,7 +15,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include "mini/gauss/lobatto.hpp"
+#include "mini/integrator/lobatto.hpp"
 #include "mini/spatial/fr/general.hpp"
 #include "mini/basis/vincent.hpp"
 
@@ -55,7 +55,7 @@ class Lobatto : public General<Part> {
   static_assert(std::is_same_v<GaussOnLine, typename GaussOnCell::GaussZ>);
   static constexpr int kLineQ = GaussOnLine::Q;
   static_assert(std::is_same_v<GaussOnLine,
-      mini::gauss::Lobatto<Scalar, kLineQ>>);
+      mini::integrator::Lobatto<Scalar, kLineQ>>);
   static constexpr int kFaceQ = kLineQ * kLineQ;
   static constexpr int kCellQ = kLineQ * kFaceQ;
 

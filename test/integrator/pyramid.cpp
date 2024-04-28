@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/pyramid.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/pyramid.hpp"
 #include "mini/coordinate/pyramid.hpp"
 
 #include "gtest/gtest.h"
@@ -12,7 +12,7 @@ class TestGaussPyramid : public ::testing::Test {
 };
 TEST_F(TestGaussPyramid, OnLinearElement) {
   using Coordinate = mini::coordinate::Pyramid5<double>;
-  using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
+  using Gauss = mini::integrator::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
@@ -37,7 +37,7 @@ TEST_F(TestGaussPyramid, OnLinearElement) {
 }
 TEST_F(TestGaussPyramid, OnQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid13<double>;
-  using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
+  using Gauss = mini::integrator::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
@@ -64,7 +64,7 @@ TEST_F(TestGaussPyramid, OnQuadraticElement) {
 }
 TEST_F(TestGaussPyramid, On14NodeQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid14<double>;
-  using Gauss = mini::gauss::Pyramid<double, 4, 4, 3>;
+  using Gauss = mini::integrator::Pyramid<double, 4, 4, 3>;
   using Coord = typename Gauss::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{

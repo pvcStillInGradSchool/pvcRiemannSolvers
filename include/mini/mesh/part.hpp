@@ -32,13 +32,13 @@
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/coordinate/pyramid.hpp"
 #include "mini/coordinate/wedge.hpp"
-#include "mini/gauss/cell.hpp"
-#include "mini/gauss/triangle.hpp"
-#include "mini/gauss/quadrangle.hpp"
-#include "mini/gauss/tetrahedron.hpp"
-#include "mini/gauss/hexahedron.hpp"
-#include "mini/gauss/pyramid.hpp"
-#include "mini/gauss/wedge.hpp"
+#include "mini/integrator/cell.hpp"
+#include "mini/integrator/triangle.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/integrator/tetrahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
+#include "mini/integrator/pyramid.hpp"
+#include "mini/integrator/wedge.hpp"
 #include "mini/riemann/concept.hpp"
 #include "mini/type/select.hpp"
 
@@ -109,7 +109,7 @@ struct Face {
   using Scalar = typename Riemann::Scalar;
   constexpr static int kComponents = Riemann::kComponents;
   constexpr static int kPhysDim = Riemann::kDimensions;
-  using Gauss = gauss::Face<Scalar, kPhysDim>;
+  using Gauss = integrator::Face<Scalar, kPhysDim>;
   using GaussUptr = std::unique_ptr<Gauss>;
   using Coordinate = coordinate::Face<Scalar, kPhysDim>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
@@ -190,7 +190,7 @@ struct Cell {
   using ProjectionUptr = std::unique_ptr<Proj>;
   using FluxMatrix = typename Riemann::FluxMatrix;
   using Scalar = typename Riemann::Scalar;
-  using Gauss = gauss::Cell<Scalar>;
+  using Gauss = integrator::Cell<Scalar>;
   using GaussUptr = std::unique_ptr<Gauss>;
   using Coordinate = coordinate::Cell<Scalar>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
@@ -441,34 +441,34 @@ class Part {
   using GaussOnLine = typename Projection::GaussOnLine;
   using CoordinateOnTriangle = coordinate::Triangle3<Scalar, kPhysDim>;
   using GaussOnTriangle = type::select_t<kDegrees,
-    gauss::Triangle<Scalar, kPhysDim, 1>,
-    gauss::Triangle<Scalar, kPhysDim, 3>,
-    gauss::Triangle<Scalar, kPhysDim, 6>,
-    gauss::Triangle<Scalar, kPhysDim, 12>>;
+    integrator::Triangle<Scalar, kPhysDim, 1>,
+    integrator::Triangle<Scalar, kPhysDim, 3>,
+    integrator::Triangle<Scalar, kPhysDim, 6>,
+    integrator::Triangle<Scalar, kPhysDim, 12>>;
   using CoordinateOnQuadrangle = coordinate::Quadrangle4<Scalar, kPhysDim>;
   using GaussOnQuadrangle =
-    gauss::Quadrangle<kPhysDim, GaussOnLine, GaussOnLine>;
+    integrator::Quadrangle<kPhysDim, GaussOnLine, GaussOnLine>;
   using CoordinateOnTetrahedron = coordinate::Tetrahedron4<Scalar>;
   using GaussOnTetrahedron = type::select_t<kDegrees,
-    gauss::Tetrahedron<Scalar, 1>,
-    gauss::Tetrahedron<Scalar, 4>,
-    gauss::Tetrahedron<Scalar, 14>,
-    gauss::Tetrahedron<Scalar, 24>>;
+    integrator::Tetrahedron<Scalar, 1>,
+    integrator::Tetrahedron<Scalar, 4>,
+    integrator::Tetrahedron<Scalar, 14>,
+    integrator::Tetrahedron<Scalar, 24>>;
   using CoordinateOnHexahedron = coordinate::Hexahedron8<Scalar>;
   using GaussOnHexahedron =
-      gauss::Hexahedron<GaussOnLine, GaussOnLine, GaussOnLine>;
+      integrator::Hexahedron<GaussOnLine, GaussOnLine, GaussOnLine>;
   using CoordinateOnPyramid = coordinate::Pyramid5<Scalar>;
   using GaussOnPyramid = type::select_t<kDegrees,
-    gauss::Pyramid<Scalar, 1, 1, 1>,
-    gauss::Pyramid<Scalar, 2, 2, 2>,
-    gauss::Pyramid<Scalar, 3, 3, 3>,
-    gauss::Pyramid<Scalar, 4, 4, 4>>;
+    integrator::Pyramid<Scalar, 1, 1, 1>,
+    integrator::Pyramid<Scalar, 2, 2, 2>,
+    integrator::Pyramid<Scalar, 3, 3, 3>,
+    integrator::Pyramid<Scalar, 4, 4, 4>>;
   using CoordinateOnWedge = coordinate::Wedge6<Scalar>;
   using GaussOnWedge = type::select_t<kDegrees,
-    gauss::Wedge<Scalar, 1, 1>,
-    gauss::Wedge<Scalar, 3, 2>,
-    gauss::Wedge<Scalar, 6, 3>,
-    gauss::Wedge<Scalar, 12, 4>>;
+    integrator::Wedge<Scalar, 1, 1>,
+    integrator::Wedge<Scalar, 3, 2>,
+    integrator::Wedge<Scalar, 6, 3>,
+    integrator::Wedge<Scalar, 12, 4>>;
 
  public:
   Part(std::string const &directory, int rank, int size)

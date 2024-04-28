@@ -3,8 +3,8 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "mini/gauss/legendre.hpp"
-#include "mini/gauss/function.hpp"
+#include "mini/integrator/legendre.hpp"
+#include "mini/integrator/function.hpp"
 
 #include "gtest/gtest.h"
 
@@ -31,7 +31,7 @@ class TestGaussLegendre : public ::testing::Test {
 TEST_F(TestGaussLegendre, OnePoint) {
   constexpr int kQuad = 1;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Legendre<double, kQuad>;
+  using Gauss = mini::integrator::Legendre<double, kQuad>;
   static_assert(Gauss::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -48,7 +48,7 @@ TEST_F(TestGaussLegendre, OnePoint) {
 TEST_F(TestGaussLegendre, TwoPoint) {
   constexpr int kQuad = 2;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Legendre<double, kQuad>;
+  using Gauss = mini::integrator::Legendre<double, kQuad>;
   static_assert(Gauss::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -65,7 +65,7 @@ TEST_F(TestGaussLegendre, TwoPoint) {
 TEST_F(TestGaussLegendre, ThreePoint) {
   constexpr int kQuad = 3;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Legendre<double, kQuad>;
+  using Gauss = mini::integrator::Legendre<double, kQuad>;
   static_assert(Gauss::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -82,7 +82,7 @@ TEST_F(TestGaussLegendre, ThreePoint) {
 TEST_F(TestGaussLegendre, FourPoint) {
   constexpr int kQuad = 4;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Legendre<double, kQuad>;
+  using Gauss = mini::integrator::Legendre<double, kQuad>;
   static_assert(Gauss::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
@@ -99,7 +99,7 @@ TEST_F(TestGaussLegendre, FourPoint) {
 TEST_F(TestGaussLegendre, FivePoint) {
   constexpr int kQuad = 5;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Legendre<double, kQuad>;
+  using Gauss = mini::integrator::Legendre<double, kQuad>;
   static_assert(Gauss::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {

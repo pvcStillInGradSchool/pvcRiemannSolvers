@@ -11,7 +11,7 @@ namespace mini {
  * @brief Numerical integrators on regular elements.
  * 
  */
-namespace gauss {
+namespace integrator {
 
 using namespace mini::constant::index;
 
@@ -105,7 +105,7 @@ class Element {
   }
 };
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_ELEMENT_HPP_

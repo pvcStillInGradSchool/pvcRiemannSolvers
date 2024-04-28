@@ -6,11 +6,11 @@
 #include <type_traits>
 
 #include "mini/algebra/eigen.hpp"
-#include "mini/gauss/legendre.hpp"
-#include "mini/gauss/lobatto.hpp"
+#include "mini/integrator/legendre.hpp"
+#include "mini/integrator/lobatto.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 enum class Rule { kLegendre, kLobatto };
 
@@ -108,7 +108,7 @@ template <typename S, int D, int Q>
 std::array<S, Q> const
 Line<S, D, Q>::local_weights_ = Line<S, D, Q>::BuildLocalWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_LINE_HPP_

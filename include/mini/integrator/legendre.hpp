@@ -9,7 +9,7 @@
 #include <array>
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Gauss--Legendre quadrature rules, i.e. \f$ \int_{-1}^{1} f(\xi) \,\mathrm{d}\xi \approx \sum_{q=1}^{Q} w_q f(\xi_q) \f$
@@ -121,7 +121,7 @@ template <std::floating_point S, int Q>
 typename Legendre<S, Q>::Array const
 Legendre<S, Q>::weights = Legendre<S, Q>::BuildWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_LEGENDRE_HPP_

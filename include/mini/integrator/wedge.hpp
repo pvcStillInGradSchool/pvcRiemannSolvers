@@ -11,13 +11,13 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "mini/gauss/line.hpp"
-#include "mini/gauss/cell.hpp"
-#include "mini/gauss/triangle.hpp"
+#include "mini/integrator/line.hpp"
+#include "mini/integrator/cell.hpp"
+#include "mini/integrator/triangle.hpp"
 #include "mini/coordinate/wedge.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 /**
  * @brief Numerical integrators on hexahedral elements.
  * 
@@ -139,7 +139,7 @@ std::array<Scalar, Qt * Qz> const
 Wedge<Scalar, Qt, Qz, R>::local_weights_
     = Wedge<Scalar, Qt, Qz, R>::BuildLocalWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_WEDGE_HPP_

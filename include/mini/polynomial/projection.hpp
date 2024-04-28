@@ -12,9 +12,9 @@
 #include <utility>
 
 #include "mini/algebra/eigen.hpp"
-#include "mini/gauss/legendre.hpp"
-#include "mini/gauss/hexahedron.hpp"
-#include "mini/gauss/function.hpp"
+#include "mini/integrator/legendre.hpp"
+#include "mini/integrator/hexahedron.hpp"
+#include "mini/integrator/function.hpp"
 #include "mini/basis/linear.hpp"
 
 namespace mini {
@@ -30,7 +30,7 @@ void Project(Projection *proj, Callable &&func) {
   using Coeff = typename Projection::Coeff;
   using Return = std::invoke_result_t<Callable, Global>;
   static_assert(std::is_same_v<Return, Value> || std::is_scalar_v<Return>);
-  proj->coeff() = gauss::Integrate([&](Global const &xyz) {
+  proj->coeff() = integrator::Integrate([&](Global const &xyz) {
     auto f_col = std::forward<Callable>(func)(xyz);
     Mat1xN b_row = proj->GlobalToBasisValues(xyz);
     Coeff prod = f_col * b_row;
@@ -82,7 +82,7 @@ class Projection {
   using Value = algebra::Matrix<Scalar, K, 1>;
   using Gradient = algebra::Matrix<Scalar, 3, K>;
 
-  using GaussOnLine = gauss::Legendre<Scalar, kDegrees + 1>;
+  using GaussOnLine = integrator::Legendre<Scalar, kDegrees + 1>;
 
  public:
   Coeff coeff_;

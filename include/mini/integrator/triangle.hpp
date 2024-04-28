@@ -11,11 +11,11 @@
 #include <cstring>
 #include <type_traits>
 
-#include "mini/gauss/face.hpp"
+#include "mini/integrator/face.hpp"
 #include "mini/coordinate/triangle.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Numerical integrators on triangular elements.
@@ -281,7 +281,7 @@ typename Triangle<Scalar, kPhysDim, kPoints>::Weights const
 Triangle<Scalar, kPhysDim, kPoints>::local_weights_
     = Triangle<Scalar, kPhysDim, kPoints>::BuildLocalWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_TRIANGLE_HPP_

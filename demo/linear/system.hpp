@@ -49,7 +49,7 @@ using Jacobian = typename Convection::Jacobian;
 
 /* Define spatial discretization. */
 constexpr int kDegrees = 2;
-using Gx = mini::gauss::Lobatto<Scalar, kDegrees + 1>;
+using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 #ifdef DG
 using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents,
     false>;

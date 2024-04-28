@@ -12,9 +12,9 @@
 
 #include "mini/algebra/eigen.hpp"
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/face.hpp"
-#include "mini/gauss/cell.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/face.hpp"
+#include "mini/integrator/cell.hpp"
 
 #include "mini/basis/taylor.hpp"
 
@@ -37,7 +37,7 @@ class Linear {
   using MatNx1 = typename Taylor::MatNx1;
   using MatNxN = algebra::Matrix<Scalar, N, N>;
   using Gauss = std::conditional_t<kDimensions == 2,
-      gauss::Face<Scalar, 2>, gauss::Cell<Scalar>>;
+      integrator::Face<Scalar, 2>, integrator::Cell<Scalar>>;
 
  public:
   explicit Linear(Coord const &center)

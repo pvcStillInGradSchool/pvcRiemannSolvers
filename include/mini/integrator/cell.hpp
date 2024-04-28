@@ -5,11 +5,11 @@
 #include <concepts>
 
 #include "mini/coordinate/cell.hpp"
-#include "mini/gauss/element.hpp"
-#include "mini/gauss/function.hpp"
+#include "mini/integrator/element.hpp"
+#include "mini/integrator/function.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Abstract numerical integrators on volume elements.
@@ -36,7 +36,7 @@ class Cell : public Element<Scalar, 3, 3> {
   virtual const Coordinate &coordinate() const = 0;
 };
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_CELL_HPP_

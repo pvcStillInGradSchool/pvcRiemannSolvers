@@ -3,14 +3,14 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/tetrahedron.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/tetrahedron.hpp"
 #include "mini/coordinate/tetrahedron.hpp"
-#include "mini/gauss/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/hexahedron.hpp"
-#include "mini/gauss/triangle.hpp"
+#include "mini/integrator/triangle.hpp"
 #include "mini/coordinate/triangle.hpp"
-#include "mini/gauss/quadrangle.hpp"
+#include "mini/integrator/quadrangle.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 #include "mini/basis/taylor.hpp"
 

@@ -10,12 +10,12 @@
 
 #include "mini/algebra/eigen.hpp"
 
-#include "mini/gauss/line.hpp"
-#include "mini/gauss/face.hpp"
+#include "mini/integrator/line.hpp"
+#include "mini/integrator/face.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Numerical integrators on quadrilateral elements.
@@ -150,7 +150,7 @@ std::array<typename Quadrangle<D, Gx, Gy>::Scalar,
 Quadrangle<D, Gx, Gy>::local_weights_
     = Quadrangle<D, Gx, Gy>::BuildLocalWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_QUADRANGLE_HPP_

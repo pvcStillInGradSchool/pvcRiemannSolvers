@@ -2,19 +2,19 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/legendre.hpp"
-#include "mini/gauss/hexahedron.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/legendre.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 
 #include "gtest/gtest.h"
 
 class TestGaussHexahedron : public ::testing::Test {
  protected:
-  using Gx = mini::gauss::Legendre<double, 4>;
-  using Gy = mini::gauss::Legendre<double, 4>;
-  using Gz = mini::gauss::Legendre<double, 4>;
-  using Gauss = mini::gauss::Hexahedron<Gx, Gy, Gz>;
+  using Gx = mini::integrator::Legendre<double, 4>;
+  using Gy = mini::integrator::Legendre<double, 4>;
+  using Gz = mini::integrator::Legendre<double, 4>;
+  using Gauss = mini::integrator::Hexahedron<Gx, Gy, Gz>;
   using Coord = typename Gauss::Global;
 };
 TEST_F(TestGaussHexahedron, OnLinearElement) {

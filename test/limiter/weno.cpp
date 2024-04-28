@@ -18,7 +18,7 @@
 #include "mini/mesh/mapper.hpp"
 #include "mini/mesh/shuffler.hpp"
 #include "mini/mesh/part.hpp"
-#include "mini/gauss/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/limiter/weno.hpp"
@@ -32,16 +32,16 @@ class TestWenoLimiters : public ::testing::Test {
  protected:
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coordinate = mini::coordinate::Hexahedron8<double>;
-  using Gx = mini::gauss::Legendre<double, 5>;
-  using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
+  using Gx = mini::integrator::Legendre<double, 5>;
+  using Gauss = mini::integrator::Hexahedron<Gx, Gx, Gx>;
   using Coord = typename Gauss::Global;
 
   std::string const input_dir_{INPUT_DIR};
 };
 TEST_F(TestWenoLimiters, Smoothness) {
   using Coordinate = mini::coordinate::Hexahedron8<double>;
-  using Gx = mini::gauss::Legendre<double, 5>;
-  using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
+  using Gx = mini::integrator::Legendre<double, 5>;
+  using Gauss = mini::integrator::Hexahedron<Gx, Gx, Gx>;
   using Projection = mini::polynomial::Projection<double, 3, 2, 10>;
   using Taylor = typename Projection::Taylor;
   using Value = typename Projection::Value;

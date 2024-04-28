@@ -10,13 +10,13 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "mini/gauss/line.hpp"
-#include "mini/gauss/jacobi.hpp"
-#include "mini/gauss/cell.hpp"
+#include "mini/integrator/line.hpp"
+#include "mini/integrator/jacobi.hpp"
+#include "mini/integrator/cell.hpp"
 #include "mini/coordinate/pyramid.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 /**
  * @brief Numerical integrators on pyramidal elements.
  * 
@@ -143,7 +143,7 @@ std::array<Scalar, Qx * Qy * Qz> const
 Pyramid<Scalar, Qx, Qy, Qz, R>::local_weights_
     = Pyramid<Scalar, Qx, Qy, Qz, R>::BuildLocalWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_PYRAMID_HPP_

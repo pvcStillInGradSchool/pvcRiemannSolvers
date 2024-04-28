@@ -12,11 +12,11 @@
 #include <type_traits>
 #include <utility>
 
-#include "mini/gauss/cell.hpp"
+#include "mini/integrator/cell.hpp"
 #include "mini/coordinate/tetrahedron.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Numerical integrators on tetrahedral elements.
@@ -356,7 +356,7 @@ typename Tetrahedron<Scalar, kPoints>::Weights const
 Tetrahedron<Scalar, kPoints>::local_weights_
     = Tetrahedron<Scalar, kPoints>::BuildLocalWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_TETRAHEDRON_HPP_

@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/hexahedron.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/basis/linear.hpp"
 #include "mini/polynomial/projection.hpp"
@@ -15,8 +15,8 @@ class TestProjection : public ::testing::Test {
   using Taylor = mini::basis::Taylor<double, 3, 2>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coordinate = mini::coordinate::Hexahedron8<double>;
-  using Gx = mini::gauss::Legendre<double, 5>;
-  using Gauss = mini::gauss::Hexahedron<Gx, Gx, Gx>;
+  using Gx = mini::integrator::Legendre<double, 5>;
+  using Gauss = mini::integrator::Hexahedron<Gx, Gx, Gx>;
   using Coord = typename Gauss::Global;
   Coordinate coordinate_;
   Gauss gauss_;
@@ -42,8 +42,8 @@ TEST_F(TestProjection, ScalarFunction) {
   static_assert(ProjFunc::N == 10);
   EXPECT_NEAR(projection({0, 0, 0})[0], 0.0, 1e-14);
   EXPECT_NEAR(projection({0.3, 0.4, 0.5})[0], 0.5, 1e-14);
-  auto integral_f = mini::gauss::Integrate(func, gauss_);
-  auto integral_1 = mini::gauss::Integrate([](auto const &){
+  auto integral_f = mini::integrator::Integrate(func, gauss_);
+  auto integral_1 = mini::integrator::Integrate([](auto const &){
     return 1.0;
   }, gauss_);
   EXPECT_NEAR(projection.average()[0], integral_f / integral_1, 1e-14);
@@ -64,8 +64,8 @@ TEST_F(TestProjection, VectorFunction) {
   auto v_expect = Taylor::GetValue({0.3, 0.4, 0.5});
   Value res = v_actual - v_expect;
   EXPECT_NEAR(res.norm(), 0.0, 1e-14);
-  auto integral_f = mini::gauss::Integrate(func, gauss_);
-  auto integral_1 = mini::gauss::Integrate([](auto const &){
+  auto integral_f = mini::integrator::Integrate(func, gauss_);
+  auto integral_1 = mini::integrator::Integrate([](auto const &){
     return 1.0;
   }, gauss_);
   res = projection.average() - integral_f / integral_1;

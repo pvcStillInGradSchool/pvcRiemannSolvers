@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/quadrangle.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/quadrangle.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 #include "mini/basis/linear.hpp"
 #include "mini/polynomial/projection.hpp"
@@ -16,8 +16,8 @@ class TestQuadrangle4x4 : public ::testing::Test {
 };
 TEST_F(TestQuadrangle4x4, OrthoNormal) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
-  using Gx = mini::gauss::Legendre<double, 4>;
-  using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
+  using Gx = mini::integrator::Legendre<double, 4>;
+  using Gauss = mini::integrator::Quadrangle<2, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   Coord origin = {0, 0}, left = {-1, 2}, right = {1, 3};
@@ -47,8 +47,8 @@ TEST_F(TestQuadrangle4x4, OrthoNormal) {
 }
 TEST_F(TestQuadrangle4x4, Projection) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
-  using Gx = mini::gauss::Legendre<double, 4>;
-  using Gauss = mini::gauss::Quadrangle<2, Gx, Gx>;
+  using Gx = mini::integrator::Legendre<double, 4>;
+  using Gauss = mini::integrator::Quadrangle<2, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {

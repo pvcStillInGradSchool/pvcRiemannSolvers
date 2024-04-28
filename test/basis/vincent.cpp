@@ -4,8 +4,8 @@
 #include <cstdlib>
 
 #include "mini/basis/vincent.hpp"
-#include "mini/gauss/line.hpp"
-#include "mini/gauss/function.hpp"
+#include "mini/integrator/line.hpp"
+#include "mini/integrator/function.hpp"
 
 #include "gtest/gtest.h"
 
@@ -19,7 +19,7 @@ class TestBasisVincent : public ::testing::Test {
   using Vincent = mini::basis::Vincent<Scalar>;
 };
 TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
-  auto line_gauss = mini::gauss::Line<Scalar, 1, 6>(-1, 1);
+  auto line_gauss = mini::integrator::Line<Scalar, 1, 6>(-1, 1);
   for (int degree = 1; degree < 6; ++degree) {
     auto vincent = Vincent(degree, Vincent::DiscontinuousGalerkin(degree));
     // check values at ends
@@ -29,7 +29,7 @@ TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
     EXPECT_EQ(vincent.LocalToLeftValue(-1.0), 1.0);
     // check orthogonality with P_{N - 2 == degree - 1}
     for (int l = 0; l < degree - 0; ++l) {
-      auto ip = mini::gauss::Innerprod(
+      auto ip = mini::integrator::Innerprod(
           [&vincent](Scalar x){ return vincent.LocalToRightValue(x); },
           [l](Scalar x){ return std::legendre(l, x); },
           line_gauss);
@@ -48,7 +48,7 @@ TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
   }
 }
 TEST_F(TestBasisVincent, HuynhLumpingLobatto) {
-  auto line_gauss = mini::gauss::Line<Scalar, 1, 5>(-1, 1);
+  auto line_gauss = mini::integrator::Line<Scalar, 1, 5>(-1, 1);
   for (int degree = 1; degree < 6; ++degree) {
     auto vincent = Vincent(degree, Vincent::HuynhLumpingLobatto(degree));
     // check values at ends
@@ -58,7 +58,7 @@ TEST_F(TestBasisVincent, HuynhLumpingLobatto) {
     EXPECT_EQ(vincent.LocalToLeftValue(-1.0), 1.0);
     // check orthogonality with P_{N - 3 == degree - 2}
     for (int l = 0; l < degree - 1; ++l) {
-      auto ip = mini::gauss::Innerprod(
+      auto ip = mini::integrator::Innerprod(
           [&vincent](Scalar x){ return vincent.LocalToRightValue(x); },
           [l](Scalar x){ return std::legendre(l, x); },
           line_gauss);

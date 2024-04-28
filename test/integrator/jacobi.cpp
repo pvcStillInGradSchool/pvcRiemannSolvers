@@ -3,8 +3,8 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "mini/gauss/jacobi.hpp"
-#include "mini/gauss/function.hpp"
+#include "mini/integrator/jacobi.hpp"
+#include "mini/integrator/function.hpp"
 
 #include "gtest/gtest.h"
 
@@ -32,7 +32,7 @@ class TestGaussJacobi : public ::testing::Test {
 TEST_F(TestGaussJacobi, OnePoint) {
   constexpr int kQuad = 1;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -48,7 +48,7 @@ TEST_F(TestGaussJacobi, OnePoint) {
 TEST_F(TestGaussJacobi, TwoPoint) {
   constexpr int kQuad = 2;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -64,7 +64,7 @@ TEST_F(TestGaussJacobi, TwoPoint) {
 TEST_F(TestGaussJacobi, ThreePoint) {
   constexpr int kQuad = 3;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -80,7 +80,7 @@ TEST_F(TestGaussJacobi, ThreePoint) {
 TEST_F(TestGaussJacobi, FourPoint) {
   constexpr int kQuad = 4;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -96,7 +96,7 @@ TEST_F(TestGaussJacobi, FourPoint) {
 TEST_F(TestGaussJacobi, FivePoint) {
   constexpr int kQuad = 5;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::gauss::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);

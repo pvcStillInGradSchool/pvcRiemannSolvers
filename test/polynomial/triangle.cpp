@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/triangle.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/triangle.hpp"
 #include "mini/coordinate/triangle.hpp"
 #include "mini/basis/linear.hpp"
 #include "mini/polynomial/projection.hpp"
@@ -16,7 +16,7 @@ class TestTriangle : public ::testing::Test {
 };
 TEST_F(TestTriangle, OrthoNormal) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
-  using Gauss = mini::gauss::Triangle<double, 2, 12>;
+  using Gauss = mini::integrator::Triangle<double, 2, 12>;
   using Coordinate = mini::coordinate::Triangle3<double, 2>;
   using Coord = typename Coordinate::Global;
   // build a triangle-gauss

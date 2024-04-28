@@ -15,9 +15,9 @@
 #include <vector>
 
 #include "mini/algebra/eigen.hpp"
-#include "mini/gauss/cell.hpp"
-#include "mini/gauss/lobatto.hpp"
-#include "mini/gauss/hexahedron.hpp"
+#include "mini/integrator/cell.hpp"
+#include "mini/integrator/lobatto.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/element.hpp"
 #include "mini/basis/lagrange.hpp"
 #include "mini/constant/index.hpp"
@@ -45,11 +45,11 @@ class Hexahedron {
   using GaussX = Gx;
   using GaussY = Gy;
   using GaussZ = Gz;
-  using Gauss = gauss::Hexahedron<Gx, Gy, Gz>;
+  using Gauss = integrator::Hexahedron<Gx, Gy, Gz>;
   using Scalar = typename Gauss::Scalar;
   using Local = typename Gauss::Local;
   using Global = typename Gauss::Global;
-  using GaussBase = gauss::Cell<Scalar>;
+  using GaussBase = integrator::Cell<Scalar>;
   using Coordinate = typename Gauss::Coordinate;
   using Jacobian = typename Coordinate::Jacobian;
   static constexpr int Px = Gx::Q - 1;

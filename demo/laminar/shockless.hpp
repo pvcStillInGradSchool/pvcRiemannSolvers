@@ -59,7 +59,7 @@ using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 /* Define spatial discretization. */
 constexpr int kDegrees = 2;
 constexpr int kComponents = Riemann::kComponents;
-using Gx = mini::gauss::Lobatto<Scalar, kDegrees + 1>;
+using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 #ifdef DG
 using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents,
     false>;

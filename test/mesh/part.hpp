@@ -6,7 +6,7 @@
 #include "mini/riemann/rotated/multiple.hpp"
 #include "mini/riemann/diffusive/linear.hpp"
 #include "mini/riemann/diffusive/direct_dg.hpp"
-#include "mini/gauss/lobatto.hpp"
+#include "mini/integrator/lobatto.hpp"
 
 #include "mpi.h"
 #include "gtest/gtest.h"
@@ -49,7 +49,7 @@ Value moving(const Coord& xyz, double t) {
 int n_core, i_core;
 double time_begin;
 
-using Gx = mini::gauss::Lobatto<Scalar, kDegrees + 1>;
+using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 
 int Main(int argc, char* argv[]) {
   // Initialize MPI before any call to gtest_mpi

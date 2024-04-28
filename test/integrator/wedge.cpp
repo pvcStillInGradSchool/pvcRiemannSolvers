@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/wedge.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/wedge.hpp"
 #include "mini/coordinate/wedge.hpp"
 
 #include "gtest/gtest.h"
@@ -11,7 +11,7 @@
 class TestGaussWedge : public ::testing::Test {
 };
 TEST_F(TestGaussWedge, OnLinearElement) {
-  using Gauss = mini::gauss::Wedge<double, 16, 4>;
+  using Gauss = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge6<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -39,7 +39,7 @@ TEST_F(TestGaussWedge, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
 TEST_F(TestGaussWedge, OnQuadraticElement) {
-  using Gauss = mini::gauss::Wedge<double, 16, 4>;
+  using Gauss = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge15<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -70,7 +70,7 @@ TEST_F(TestGaussWedge, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
 TEST_F(TestGaussWedge, On18NodeQuadraticElement) {
-  using Gauss = mini::gauss::Wedge<double, 16, 4>;
+  using Gauss = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge18<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {

@@ -12,7 +12,7 @@
 #include "mini/algebra/eigen.hpp"
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Perform Gaussian quadrature of a callable object on a Gauss object in the parametric space.
@@ -143,7 +143,7 @@ void OrthoNormalize(Basis *basis, const Gauss &gauss) {
   basis->Transform(algebra::GetLowerTriangularView(S));
 }
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_FUNCTION_HPP_

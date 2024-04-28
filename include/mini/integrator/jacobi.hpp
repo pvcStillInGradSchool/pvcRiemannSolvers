@@ -7,7 +7,7 @@
 #include <array>
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Gauss--Jacobi quadrature rules, i.e. \f$ \int_{-1}^{1} f(\xi) (1-\xi)^\alpha (1+\xi)^\beta \,\mathrm{d}\xi \approx \sum_{q=1}^{Q} w_q f(\xi_q) \f$
@@ -112,7 +112,7 @@ template <std::floating_point Scalar, int Q, int A, int B>
 typename Jacobi<Scalar, Q, A, B>::Array const
 Jacobi<Scalar, Q, A, B>::weights = Jacobi<Scalar, Q, A, B>::BuildWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_JACOBI_HPP_

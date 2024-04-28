@@ -2,8 +2,8 @@
 
 #include <cmath>
 
-#include "mini/gauss/function.hpp"
-#include "mini/gauss/tetrahedron.hpp"
+#include "mini/integrator/function.hpp"
+#include "mini/integrator/tetrahedron.hpp"
 #include "mini/coordinate/tetrahedron.hpp"
 
 #include "gtest/gtest.h"
@@ -11,7 +11,7 @@
 class TestGaussTetrahedron : public ::testing::Test {
  protected:
   static constexpr int kPoints = 24;
-  using Gauss = mini::gauss::Tetrahedron<double, kPoints>;
+  using Gauss = mini::integrator::Tetrahedron<double, kPoints>;
   using Coord = typename Gauss::Global;
 };
 TEST_F(TestGaussTetrahedron, OnLinearElement) {

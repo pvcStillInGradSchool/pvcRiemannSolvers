@@ -9,7 +9,7 @@
 #include <array>
 
 namespace mini {
-namespace gauss {
+namespace integrator {
 
 /**
  * @brief Gauss--Lobatto quadrature rules, i.e. \f$ \int_{-1}^{1} f(\xi) \,\mathrm{d}\xi \approx \sum_{q=1}^{Q} w_q f(\xi_q) \f$, in which \f$ \xi_1 = -1 \f$ and \f$ \xi_Q = +1 \f$.
@@ -92,7 +92,7 @@ template <std::floating_point S, int Q>
 typename Lobatto<S, Q>::Array const
 Lobatto<S, Q>::weights = Lobatto<S, Q>::BuildWeights();
 
-}  // namespace gauss
+}  // namespace integrator
 }  // namespace mini
 
 #endif  // MINI_GAUSS_LOBATTO_HPP_

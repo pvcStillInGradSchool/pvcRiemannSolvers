@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
 #ifdef DGFEM
   using Projection = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, 1>;
 #else
-  using Gx = mini::gauss::Lobatto<Scalar, kDegrees + 1>;
+  using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 #endif
 #ifdef DGSEM
   using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, 1, false>;
