@@ -35,8 +35,8 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
   using Projection = typename Base::Projection;
-  using Gauss = typename Projection::Gauss;
-  using Local = typename Gauss::Local;
+  using Integrator = typename Projection::Integrator;
+  using Local = typename Integrator::Local;
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;

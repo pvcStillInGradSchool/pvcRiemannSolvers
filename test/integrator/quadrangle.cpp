@@ -8,17 +8,17 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussQuadrangle : public ::testing::Test {
+class TestIntegratorQuadrangle : public ::testing::Test {
 };
-TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
+TEST_F(TestIntegratorQuadrangle, TwoDimensionalQuadrangle4) {
   using Gx = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Quadrangle<2, Gx, Gx>;
+  using Integrator = mini::integrator::Quadrangle<2, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 2);
   EXPECT_EQ(gauss.CountPoints(), 16);
@@ -37,16 +37,16 @@ TEST_F(TestGaussQuadrangle, TwoDimensionalQuadrangle4) {
   EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
-TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
+TEST_F(TestIntegratorQuadrangle, ThreeDimensionalQuadrangle4) {
   using Gx = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Quadrangle<3, Gx, Gx>;
+  using Integrator = mini::integrator::Quadrangle<3, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle4<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4)
   };
-  auto const gauss = Gauss(coordinate);
+  auto const gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);
@@ -72,9 +72,9 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle4) {
     EXPECT_NEAR((sigma - Global(1, 0, 0)).norm(), 0.0, 1e-15);
   }
 }
-TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
+TEST_F(TestIntegratorQuadrangle, ThreeDimensionalQuadrangle8) {
   using Gx = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Quadrangle<3, Gx, Gx>;
+  using Integrator = mini::integrator::Quadrangle<3, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle8<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
@@ -82,7 +82,7 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
     Global(0, 0, 0), Global(4, 0, 0), Global(4, 4, 4), Global(0, 4, 4),
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
   };
-  auto const gauss = Gauss(coordinate);
+  auto const gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);
@@ -108,9 +108,9 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle8) {
     EXPECT_NEAR((sigma - Global(1, 0, 0)).norm(), 0.0, 1e-15);
   }
 }
-TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle9) {
+TEST_F(TestIntegratorQuadrangle, ThreeDimensionalQuadrangle9) {
   using Gx = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Quadrangle<3, Gx, Gx>;
+  using Integrator = mini::integrator::Quadrangle<3, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle9<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
@@ -119,7 +119,7 @@ TEST_F(TestGaussQuadrangle, ThreeDimensionalQuadrangle9) {
     Global(2, 0, 0), Global(4, 2, 2), Global(2, 4, 4), Global(0, 2, 2),
     Global(2, 2, 2),
   };
-  auto const gauss = Gauss(coordinate);
+  auto const gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.area(), sqrt(2) * 16.0, 1e-14);

@@ -81,11 +81,11 @@ class TestBasisOrthoNormal : public ::testing::Test {
 };
 TEST_F(TestBasisOrthoNormal, OnTriangle) {
   using Coordinate = mini::coordinate::Triangle3<double, 2>;
-  using Gauss = mini::integrator::Triangle<double, 2, 16>;
-  using Coord = Gauss::Global;
+  using Integrator = mini::integrator::Triangle<double, 2, 16>;
+  using Coord = Integrator::Global;
   Coord p0{0, 0}, p1{3, 0}, p2{0, 3};
   auto coordinate = Coordinate{ p0, p1, p2 };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.area(), basis.Measure());
@@ -103,11 +103,11 @@ TEST_F(TestBasisOrthoNormal, OnTriangle) {
 TEST_F(TestBasisOrthoNormal, OnQuadrangle) {
   using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Gx = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Quadrangle<2, Gx, Gx>;
-  using Coord = Gauss::Global;
+  using Integrator = mini::integrator::Quadrangle<2, Gx, Gx>;
+  using Coord = Integrator::Global;
   Coord p0{-1, -1}, p1{+1, -1}, p2{+1, +1}, p3{-1, +1};
   auto coordinate = Coordinate(p0, p1, p2, p3);
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.area(), basis.Measure());
@@ -123,12 +123,12 @@ TEST_F(TestBasisOrthoNormal, OnQuadrangle) {
   EXPECT_NEAR(diff.norm(), 0.0, 1e-14);
 }
 TEST_F(TestBasisOrthoNormal, OnTetrahedron) {
-  using Gauss = mini::integrator::Tetrahedron<double, 24>;
+  using Integrator = mini::integrator::Tetrahedron<double, 24>;
   using Coordinate = mini::coordinate::Tetrahedron4<double>;
-  using Coord = Gauss::Global;
+  using Coord = Integrator::Global;
   Coord p0{0, 0, 0}, p1{3, 0, 0}, p2{0, 3, 0}, p3{0, 0, 3};
   auto coordinate = Coordinate(p0, p1, p2, p3);
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.volume(), basis.Measure());
@@ -146,12 +146,12 @@ TEST_F(TestBasisOrthoNormal, OnTetrahedron) {
 TEST_F(TestBasisOrthoNormal, OnHexahedron) {
   using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::integrator::Legendre<double, 5>;
-  using Gauss = mini::integrator::Hexahedron<Gx, Gx, Gx>;
-  using Coord = Gauss::Global;
+  using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  using Coord = Integrator::Global;
   Coord p0{-1, -1, -1}, p1{+1, -1, -1}, p2{+1, +1, -1}, p3{-1, +1, -1},
         p4{-1, -1, +1}, p5{+1, -1, +1}, p6{+1, +1, +1}, p7{-1, +1, +1};
   auto coordinate = Coordinate{ p0, p1, p2, p3, p4, p5, p6, p7 };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   auto basis = Basis(gauss);
   EXPECT_DOUBLE_EQ(gauss.volume(), basis.Measure());

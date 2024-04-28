@@ -49,12 +49,12 @@ class Lobatto : public General<Part> {
 
  protected:
   using FluxMatrix = typename Riemann::FluxMatrix;
-  using GaussOnCell = typename Projection::Gauss;
-  using GaussOnLine = typename GaussOnCell::GaussX;
-  static_assert(std::is_same_v<GaussOnLine, typename GaussOnCell::GaussY>);
-  static_assert(std::is_same_v<GaussOnLine, typename GaussOnCell::GaussZ>);
-  static constexpr int kLineQ = GaussOnLine::Q;
-  static_assert(std::is_same_v<GaussOnLine,
+  using IntegratorOnCell = typename Projection::Integrator;
+  using IntegratorOnLine = typename IntegratorOnCell::IntegratorX;
+  static_assert(std::is_same_v<IntegratorOnLine, typename IntegratorOnCell::IntegratorY>);
+  static_assert(std::is_same_v<IntegratorOnLine, typename IntegratorOnCell::IntegratorZ>);
+  static constexpr int kLineQ = IntegratorOnLine::Q;
+  static_assert(std::is_same_v<IntegratorOnLine,
       mini::integrator::Lobatto<Scalar, kLineQ>>);
   static constexpr int kFaceQ = kLineQ * kLineQ;
   static constexpr int kCellQ = kLineQ * kFaceQ;
@@ -116,7 +116,7 @@ class Lobatto : public General<Part> {
           break;
         case 2:
           assert(i == -1);
-          flux_point.ijk = cell_basis.index(GaussOnLine::Q - 1, j, k);
+          flux_point.ijk = cell_basis.index(IntegratorOnLine::Q - 1, j, k);
           assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
@@ -126,7 +126,7 @@ class Lobatto : public General<Part> {
           break;
         case 3:
           assert(j == -1);
-          flux_point.ijk = cell_basis.index(i, GaussOnLine::Q - 1, k);
+          flux_point.ijk = cell_basis.index(i, IntegratorOnLine::Q - 1, k);
           assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
@@ -146,7 +146,7 @@ class Lobatto : public General<Part> {
           break;
         case 5:
           assert(k == -1);
-          flux_point.ijk = cell_basis.index(i, j, GaussOnLine::Q - 1);
+          flux_point.ijk = cell_basis.index(i, j, IntegratorOnLine::Q - 1);
           assert(Near(flux_point_coord, cell_gauss.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);

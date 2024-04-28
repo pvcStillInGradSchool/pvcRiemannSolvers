@@ -15,17 +15,17 @@ namespace mini {
 namespace integrator {
 
 /**
- * @brief Perform Gaussian quadrature of a callable object on a Gauss object in the parametric space.
+ * @brief Perform Integratorian quadrature of a callable object on a Integrator object in the parametric space.
  * 
  * @tparam Callable the type of the integrand
- * @tparam Gauss the type of the gauss
+ * @tparam Integrator the type of the gauss
  * @param local_to_value the integrand using local coordinates as arguments
- * @param gauss the Gauss object
+ * @param gauss the Integrator object
  * @return auto the value of the integral
  */
-template <typename Callable, typename Gauss>
-auto Quadrature(Callable &&local_to_value, const Gauss &gauss) {
-  using Local = typename Gauss::Local;
+template <typename Callable, typename Integrator>
+auto Quadrature(Callable &&local_to_value, const Integrator &gauss) {
+  using Local = typename Integrator::Local;
   static_assert(std::regular_invocable<Callable, Local>);
   using Value = std::invoke_result_t<Callable, Local>;
   Value sum; algebra::SetZero(&sum);
@@ -39,17 +39,17 @@ auto Quadrature(Callable &&local_to_value, const Gauss &gauss) {
 }
 
 /**
- * @brief Perform Gaussian quadrature of a callable object on a Gauss object in the physical space.
+ * @brief Perform Integratorian quadrature of a callable object on a Integrator object in the physical space.
  * 
  * @tparam Callable the type of the integrand
- * @tparam Gauss the type of the gauss
+ * @tparam Integrator the type of the gauss
  * @param global_to_value the integrand using global coordinates as arguments
- * @param gauss the Gauss object
+ * @param gauss the Integrator object
  * @return auto the value of the integral
  */
-template <typename Callable, typename Gauss>
-auto Integrate(Callable &&global_to_value, const Gauss &gauss) {
-  using Global = typename Gauss::Global;
+template <typename Callable, typename Integrator>
+auto Integrate(Callable &&global_to_value, const Integrator &gauss) {
+  using Global = typename Integrator::Global;
   static_assert(std::regular_invocable<Callable, Global>);
   using Value = std::invoke_result_t<Callable, Global>;
   Value sum; algebra::SetZero(&sum);
@@ -63,19 +63,19 @@ auto Integrate(Callable &&global_to_value, const Gauss &gauss) {
 }
 
 /**
- * @brief Calculate the inner-product of two functions on a Gauss object.
+ * @brief Calculate the inner-product of two functions on a Integrator object.
  * 
  * @tparam Func1 the type of the first function
  * @tparam Func2 the type of the second function
- * @tparam Gauss the type of the gauss
+ * @tparam Integrator the type of the gauss
  * @param f1 the first function
  * @param f2 the second function
- * @param gauss the Gauss object
+ * @param gauss the Integrator object
  * @return auto the value of the innerproduct
  */
-template <typename Func1, typename Func2, typename Gauss>
-auto Innerprod(Func1 &&f1, Func2 &&f2, const Gauss &gauss) {
-  using Global = typename Gauss::Global;
+template <typename Func1, typename Func2, typename Integrator>
+auto Innerprod(Func1 &&f1, Func2 &&f2, const Integrator &gauss) {
+  using Global = typename Integrator::Global;
   static_assert(std::regular_invocable<Func1, Global>);
   static_assert(std::regular_invocable<Func2, Global>);
   return Integrate([&f1, &f2](const Global &xyz_global){
@@ -84,16 +84,16 @@ auto Innerprod(Func1 &&f1, Func2 &&f2, const Gauss &gauss) {
 }
 
 /**
- * @brief Calculate the 2-norm of a function on a Gauss object.
+ * @brief Calculate the 2-norm of a function on a Integrator object.
  * 
  * @tparam Callable type of the function
- * @tparam Gauss the type of the gauss
+ * @tparam Integrator the type of the gauss
  * @param f the function
- * @param gauss the Gauss object
+ * @param gauss the Integrator object
  * @return auto the value of the norm
  */
-template <typename Callable, typename Gauss>
-auto Norm(Callable &&f, const Gauss &gauss) {
+template <typename Callable, typename Integrator>
+auto Norm(Callable &&f, const Integrator &gauss) {
   auto ip = Innerprod(std::forward<Callable>(f), std::forward<Callable>(f),
       gauss);
   return std::sqrt(ip);
@@ -103,16 +103,16 @@ auto Norm(Callable &&f, const Gauss &gauss) {
  * @brief Change a group of linearly independent functions into an orthonormal basis.
  * 
  * @tparam Basis the type of the basis
- * @tparam Gauss the type of the gauss
+ * @tparam Integrator the type of the gauss
  * @param basis the basis to be orthonormalized, whose components are linearly independent from each other
- * @param gauss the Gauss object
+ * @param gauss the Integrator object
  */
-template <class Basis, class Gauss>
-void OrthoNormalize(Basis *basis, const Gauss &gauss) {
+template <class Basis, class Integrator>
+void OrthoNormalize(Basis *basis, const Integrator &gauss) {
   constexpr int N = Basis::N;
   using MatNxN = typename Basis::MatNxN;
-  using Global = typename Gauss::Global;
-  using Scalar = typename Gauss::Real;
+  using Global = typename Integrator::Global;
+  using Scalar = typename Integrator::Real;
   MatNxN S; S.setIdentity();
   auto A = Integrate([basis](const Global &xyz){
     auto col = (*basis)(xyz);

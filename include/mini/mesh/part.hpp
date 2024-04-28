@@ -109,21 +109,21 @@ struct Face {
   using Scalar = typename Riemann::Scalar;
   constexpr static int kComponents = Riemann::kComponents;
   constexpr static int kPhysDim = Riemann::kDimensions;
-  using Gauss = integrator::Face<Scalar, kPhysDim>;
-  using GaussUptr = std::unique_ptr<Gauss>;
+  using Integrator = integrator::Face<Scalar, kPhysDim>;
+  using IntegratorUptr = std::unique_ptr<Integrator>;
   using Coordinate = coordinate::Face<Scalar, kPhysDim>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
   using Cell = part::Cell<Int, Riemann, P>;
   using Global = typename Cell::Global;
 
   CoordinateUptr coordinate_ptr_;
-  GaussUptr gauss_ptr_;
+  IntegratorUptr gauss_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
   std::vector<Riemann> riemann_;
   Int id_{-1};
 
-  Face(CoordinateUptr &&coordinate_ptr, GaussUptr &&gauss_ptr,
+  Face(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&gauss_ptr,
       Cell *holder, Cell *sharer, Int id = 0)
       : coordinate_ptr_(std::move(coordinate_ptr)),
         gauss_ptr_(std::move(gauss_ptr)),
@@ -142,7 +142,7 @@ struct Face {
   Face &operator=(Face &&) noexcept = default;
   ~Face() noexcept = default;
 
-  Gauss const &gauss() const {
+  Integrator const &gauss() const {
     assert(gauss_ptr_);
     return *gauss_ptr_;
   }
@@ -190,8 +190,8 @@ struct Cell {
   using ProjectionUptr = std::unique_ptr<Proj>;
   using FluxMatrix = typename Riemann::FluxMatrix;
   using Scalar = typename Riemann::Scalar;
-  using Gauss = integrator::Cell<Scalar>;
-  using GaussUptr = std::unique_ptr<Gauss>;
+  using Integrator = integrator::Cell<Scalar>;
+  using IntegratorUptr = std::unique_ptr<Integrator>;
   using Coordinate = coordinate::Cell<Scalar>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
   using Basis = typename Projection::Basis;
@@ -211,12 +211,12 @@ struct Cell {
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
   CoordinateUptr coordinate_ptr_;
-  GaussUptr gauss_ptr_;
+  IntegratorUptr gauss_ptr_;
   ProjectionUptr projection_ptr_;
   Int metis_id{-1}, id_{-1};
   bool inner_ = true;
 
-  Cell(CoordinateUptr &&coordinate_ptr, GaussUptr &&gauss_ptr, Int m_cell)
+  Cell(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&gauss_ptr, Int m_cell)
       : coordinate_ptr_(std::move(coordinate_ptr)),
         gauss_ptr_(std::move(gauss_ptr)),
         projection_ptr_(std::make_unique<Proj>(*gauss_ptr_)),
@@ -244,7 +244,7 @@ struct Cell {
   Global const &center() const {
     return gauss().center();
   }
-  Gauss const &gauss() const {
+  Integrator const &gauss() const {
     assert(gauss_ptr_);
     return *gauss_ptr_;
   }
@@ -438,33 +438,33 @@ class Part {
   static const MPI_Datatype kMpiRealType;
 
  private:
-  using GaussOnLine = typename Projection::GaussOnLine;
+  using IntegratorOnLine = typename Projection::IntegratorOnLine;
   using CoordinateOnTriangle = coordinate::Triangle3<Scalar, kPhysDim>;
-  using GaussOnTriangle = type::select_t<kDegrees,
+  using IntegratorOnTriangle = type::select_t<kDegrees,
     integrator::Triangle<Scalar, kPhysDim, 1>,
     integrator::Triangle<Scalar, kPhysDim, 3>,
     integrator::Triangle<Scalar, kPhysDim, 6>,
     integrator::Triangle<Scalar, kPhysDim, 12>>;
   using CoordinateOnQuadrangle = coordinate::Quadrangle4<Scalar, kPhysDim>;
-  using GaussOnQuadrangle =
-    integrator::Quadrangle<kPhysDim, GaussOnLine, GaussOnLine>;
+  using IntegratorOnQuadrangle =
+    integrator::Quadrangle<kPhysDim, IntegratorOnLine, IntegratorOnLine>;
   using CoordinateOnTetrahedron = coordinate::Tetrahedron4<Scalar>;
-  using GaussOnTetrahedron = type::select_t<kDegrees,
+  using IntegratorOnTetrahedron = type::select_t<kDegrees,
     integrator::Tetrahedron<Scalar, 1>,
     integrator::Tetrahedron<Scalar, 4>,
     integrator::Tetrahedron<Scalar, 14>,
     integrator::Tetrahedron<Scalar, 24>>;
   using CoordinateOnHexahedron = coordinate::Hexahedron8<Scalar>;
-  using GaussOnHexahedron =
-      integrator::Hexahedron<GaussOnLine, GaussOnLine, GaussOnLine>;
+  using IntegratorOnHexahedron =
+      integrator::Hexahedron<IntegratorOnLine, IntegratorOnLine, IntegratorOnLine>;
   using CoordinateOnPyramid = coordinate::Pyramid5<Scalar>;
-  using GaussOnPyramid = type::select_t<kDegrees,
+  using IntegratorOnPyramid = type::select_t<kDegrees,
     integrator::Pyramid<Scalar, 1, 1, 1>,
     integrator::Pyramid<Scalar, 2, 2, 2>,
     integrator::Pyramid<Scalar, 3, 3, 3>,
     integrator::Pyramid<Scalar, 4, 4, 4>>;
   using CoordinateOnWedge = coordinate::Wedge6<Scalar>;
-  using GaussOnWedge = type::select_t<kDegrees,
+  using IntegratorOnWedge = type::select_t<kDegrees,
     integrator::Wedge<Scalar, 1, 1>,
     integrator::Wedge<Scalar, 3, 2>,
     integrator::Wedge<Scalar, 6, 3>,
@@ -665,16 +665,16 @@ class Part {
     }
   }
   std::pair< std::unique_ptr<CoordinateOnTetrahedron>,
-             std::unique_ptr<GaussOnTetrahedron> >
+             std::unique_ptr<IntegratorOnTetrahedron> >
   BuildTetrahedronUptr(int i_zone, Int const *i_node_list) const {
     auto lagrange = std::make_unique<CoordinateOnTetrahedron>(
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]));
-    auto gauss = std::make_unique<GaussOnTetrahedron>(*lagrange);
+    auto gauss = std::make_unique<IntegratorOnTetrahedron>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
   std::pair< std::unique_ptr<CoordinateOnPyramid>,
-             std::unique_ptr<GaussOnPyramid> >
+             std::unique_ptr<IntegratorOnPyramid> >
   BuildPyramidUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
@@ -682,11 +682,11 @@ class Part {
         GetCoord(i_zone, i_node_list[4]),
     };
     auto lagrange = std::make_unique<CoordinateOnPyramid>(coords);
-    auto gauss = std::make_unique<GaussOnPyramid>(*lagrange);
+    auto gauss = std::make_unique<IntegratorOnPyramid>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
   std::pair< std::unique_ptr<CoordinateOnWedge>,
-             std::unique_ptr<GaussOnWedge> >
+             std::unique_ptr<IntegratorOnWedge> >
   BuildWedgeUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
@@ -694,11 +694,11 @@ class Part {
         GetCoord(i_zone, i_node_list[4]), GetCoord(i_zone, i_node_list[5]),
     };
     auto lagrange = std::make_unique<CoordinateOnWedge>(coords);
-    auto gauss = std::make_unique<GaussOnWedge>(*lagrange);
+    auto gauss = std::make_unique<IntegratorOnWedge>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
   std::pair< std::unique_ptr<CoordinateOnHexahedron>,
-             std::unique_ptr<GaussOnHexahedron> >
+             std::unique_ptr<IntegratorOnHexahedron> >
   BuildHexahedronUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
@@ -707,11 +707,11 @@ class Part {
         GetCoord(i_zone, i_node_list[6]), GetCoord(i_zone, i_node_list[7]),
     };
     auto lagrange = std::make_unique<CoordinateOnHexahedron>(coords);
-    auto gauss = std::make_unique<GaussOnHexahedron>(*lagrange);
+    auto gauss = std::make_unique<IntegratorOnHexahedron>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< typename Cell::CoordinateUptr, typename Cell::GaussUptr >
-  BuildGaussForCell(int npe, int i_zone, Int const *i_node_list) const {
+  std::pair< typename Cell::CoordinateUptr, typename Cell::IntegratorUptr >
+  BuildIntegratorForCell(int npe, int i_zone, Int const *i_node_list) const {
     switch (npe) {
       case 4:
         return BuildTetrahedronUptr(i_zone, i_node_list); break;
@@ -728,29 +728,29 @@ class Part {
     return {nullptr, nullptr};
   }
   std::pair< std::unique_ptr<CoordinateOnTriangle>,
-             std::unique_ptr<GaussOnTriangle> >
+             std::unique_ptr<IntegratorOnTriangle> >
   BuildTriangleUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
         GetCoord(i_zone, i_node_list[2]),
     };
     auto lagrange = std::make_unique<CoordinateOnTriangle>(coords);
-    auto gauss = std::make_unique<GaussOnTriangle>(*lagrange);
+    auto gauss = std::make_unique<IntegratorOnTriangle>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
   std::pair< std::unique_ptr<CoordinateOnQuadrangle>,
-             std::unique_ptr<GaussOnQuadrangle> >
+             std::unique_ptr<IntegratorOnQuadrangle> >
   BuildQuadrangleUptr(int i_zone, Int const *i_node_list) const {
     auto coords = {
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
     };
     auto lagrange = std::make_unique<CoordinateOnQuadrangle>(coords);
-    auto gauss = std::make_unique<GaussOnQuadrangle>(*lagrange);
+    auto gauss = std::make_unique<IntegratorOnQuadrangle>(*lagrange);
     return { std::move(lagrange), std::move(gauss) };
   }
-  std::pair< typename Face::CoordinateUptr, typename Face::GaussUptr >
-  BuildGaussForFace(int npe, int i_zone, Int const *i_node_list) const {
+  std::pair< typename Face::CoordinateUptr, typename Face::IntegratorUptr >
+  BuildIntegratorForFace(int npe, int i_zone, Int const *i_node_list) const {
     switch (npe) {
       case 3:
         return BuildTriangleUptr(i_zone, i_node_list); break;
@@ -812,7 +812,7 @@ class Part {
       for (int i_cell = head; i_cell < tail; ++i_cell) {
         auto *i_node_list = &nodes[(i_cell - head) * npe];
         auto [coordinate_uptr, gauss_uptr]
-            = BuildGaussForCell(npe, i_zone, i_node_list);
+            = BuildIntegratorForCell(npe, i_zone, i_node_list);
         auto cell = Cell(std::move(coordinate_uptr),
             std::move(gauss_uptr), metis_ids[i_cell]);
         local_cells_[i_zone][i_sect][i_cell] = std::move(cell);
@@ -955,7 +955,7 @@ class Part {
         int i_zone = recv_buf[index++];
         auto *i_node_list = &recv_buf[index];
         auto [coordinate_uptr, gauss_uptr]
-            = BuildGaussForCell(npe, i_zone, i_node_list);
+            = BuildIntegratorForCell(npe, i_zone, i_node_list);
         auto cell = Cell(std::move(coordinate_uptr),
             std::move(gauss_uptr), m_cell);
         ghost_cells_[m_cell] = std::move(cell);
@@ -1029,7 +1029,7 @@ class Part {
       coordinate::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
       auto [coordinate_uptr, gauss_uptr]
-          = BuildGaussForFace(face_npe, i_zone, face_node_list);
+          = BuildIntegratorForFace(face_npe, i_zone, face_node_list);
       auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
           std::move(gauss_uptr), &holder, &sharer, local_faces_.size());
       holder.adj_faces_.emplace_back(face_uptr.get());
@@ -1073,7 +1073,7 @@ class Part {
       coordinate::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
       auto [coordinate_uptr, gauss_uptr]
-          = BuildGaussForFace(face_npe, i_zone, face_node_list);
+          = BuildIntegratorForFace(face_npe, i_zone, face_node_list);
       auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
           std::move(gauss_uptr), &holder, &sharer,
           local_faces_.size() + ghost_faces_.size());
@@ -1530,7 +1530,7 @@ class Part {
           }
         }
         auto [coordinate_uptr, gauss_uptr]
-            = BuildGaussForFace(npe, i_zone, face_node_list);
+            = BuildIntegratorForFace(npe, i_zone, face_node_list);
         auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
             std::move(gauss_uptr), holder_ptr, nullptr, face_id++);
         // the face's normal vector always point from holder to the exterior

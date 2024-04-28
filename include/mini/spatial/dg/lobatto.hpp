@@ -35,7 +35,7 @@ class Lobatto : public General<Part> {
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
-  using Gauss = typename Base::Gauss;
+  using Integrator = typename Base::Integrator;
   using Projection = typename Base::Projection;
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
@@ -43,9 +43,9 @@ class Lobatto : public General<Part> {
   using Column = typename Base::Column;
 
  protected:
-  using GaussOnCell = typename Projection::Gauss;
-  using GaussOnLine = typename GaussOnCell::GaussX;
-  static constexpr int kLineQ = GaussOnLine::Q;
+  using IntegratorOnCell = typename Projection::Integrator;
+  using IntegratorOnLine = typename IntegratorOnCell::IntegratorX;
+  static constexpr int kLineQ = IntegratorOnLine::Q;
   static constexpr int kFaceQ = kLineQ * kLineQ;
 
   using FaceCache = std::array<int16_t, kFaceQ>;
@@ -53,7 +53,7 @@ class Lobatto : public General<Part> {
   std::vector<FaceCache> i_node_on_sharer_;
 
   template <std::ranges::input_range R, class FaceToCell>
-  void MatchGaussianPoints(R &&faces, FaceToCell &&face_to_cell,
+  void MatchIntegratorianPoints(R &&faces, FaceToCell &&face_to_cell,
       std::vector<FaceCache> *cache) {
     for (const Face &face : faces) {
       assert(cache->size() == face.id());
@@ -75,10 +75,10 @@ class Lobatto : public General<Part> {
   }
 
   static constexpr bool kLocal = Projection::kLocal;
-  static Scalar GetWeight(const Gauss &gauss, int q) requires(kLocal) {
+  static Scalar GetWeight(const Integrator &gauss, int q) requires(kLocal) {
     return gauss.GetLocalWeight(q);
   }
-  static Scalar GetWeight(const Gauss &gauss, int q) requires(!kLocal) {
+  static Scalar GetWeight(const Integrator &gauss, int q) requires(!kLocal) {
     return gauss.GetGlobalWeight(q);
   }
   using FluxMatrix = typename Riemann::FluxMatrix;
@@ -103,13 +103,13 @@ class Lobatto : public General<Part> {
     auto face_to_holder = [](auto &face) -> auto & { return face.holder(); };
     auto face_to_sharer = [](auto &face) -> auto & { return face.sharer(); };
     auto local_cells = this->part().GetLocalFaces();
-    MatchGaussianPoints(local_cells, face_to_holder, &i_node_on_holder_);
-    MatchGaussianPoints(local_cells, face_to_sharer, &i_node_on_sharer_);
+    MatchIntegratorianPoints(local_cells, face_to_holder, &i_node_on_holder_);
+    MatchIntegratorianPoints(local_cells, face_to_sharer, &i_node_on_sharer_);
     auto ghost_cells = this->part().GetGhostFaces();
-    MatchGaussianPoints(ghost_cells, face_to_holder, &i_node_on_holder_);
-    MatchGaussianPoints(ghost_cells, face_to_sharer, &i_node_on_sharer_);
+    MatchIntegratorianPoints(ghost_cells, face_to_holder, &i_node_on_holder_);
+    MatchIntegratorianPoints(ghost_cells, face_to_sharer, &i_node_on_sharer_);
     auto boundary_cells = this->part().GetBoundaryFaces();
-    MatchGaussianPoints(boundary_cells, face_to_holder, &i_node_on_holder_);
+    MatchIntegratorianPoints(boundary_cells, face_to_holder, &i_node_on_holder_);
   }
   Lobatto(const Lobatto &) = default;
   Lobatto &operator=(const Lobatto &) = default;

@@ -8,14 +8,14 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussTriangle : public ::testing::Test {
+class TestIntegratorTriangle : public ::testing::Test {
 };
-TEST_F(TestGaussTriangle, OnScaledElementInTwoDimensionalSpace) {
-  using Gauss = mini::integrator::Triangle<double, 2, 16>;
+TEST_F(TestIntegratorTriangle, OnScaledElementInTwoDimensionalSpace) {
+  using Integrator = mini::integrator::Triangle<double, 2, 16>;
   using Coordinate = mini::coordinate::Triangle3<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate { Coord(0, 0), Coord(2, 0), Coord(2, 2) };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   EXPECT_EQ(gauss.CountPoints(), 16);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 2);
@@ -30,15 +30,15 @@ TEST_F(TestGaussTriangle, OnScaledElementInTwoDimensionalSpace) {
   EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
-TEST_F(TestGaussTriangle, OnMappedElementInThreeDimensionalSpace) {
-  using Gauss = mini::integrator::Triangle<double, 3, 16>;
+TEST_F(TestIntegratorTriangle, OnMappedElementInThreeDimensionalSpace) {
+  using Integrator = mini::integrator::Triangle<double, 3, 16>;
   using Coordinate = mini::coordinate::Triangle3<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {
     Global(0, 0, 2), Global(2, 0, 2), Global(2, 2, 2),
   };
-  auto const gauss = Gauss(coordinate);
+  auto const gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_DOUBLE_EQ(gauss.area(), 2.0);
@@ -64,8 +64,8 @@ TEST_F(TestGaussTriangle, OnMappedElementInThreeDimensionalSpace) {
     EXPECT_NEAR((pi - nu.cross(sigma)).norm(), 0.0, 1e-15);
   }
 }
-TEST_F(TestGaussTriangle, OnQuadraticElementInThreeDimensionalSpace) {
-  using Gauss = mini::integrator::Triangle<double, 3, 16>;
+TEST_F(TestIntegratorTriangle, OnQuadraticElementInThreeDimensionalSpace) {
+  using Integrator = mini::integrator::Triangle<double, 3, 16>;
   using Coordinate = mini::coordinate::Triangle6<double, 3>;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
@@ -73,7 +73,7 @@ TEST_F(TestGaussTriangle, OnQuadraticElementInThreeDimensionalSpace) {
     Global(0, 0, 2), Global(2, 0, 2), Global(2, 2, 2),
     Global(1, 0, 2), Global(2, 1, 2), Global(1, 1, 2),
   };
-  auto const gauss = Gauss(coordinate);
+  auto const gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 2);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_DOUBLE_EQ(gauss.area(), 2.0);

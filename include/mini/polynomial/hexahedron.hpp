@@ -42,15 +42,15 @@ template <class Gx, class Gy, class Gz, int kC, bool kL = false>
 class Hexahedron {
  public:
   static constexpr bool kLocal = kL;
-  using GaussX = Gx;
-  using GaussY = Gy;
-  using GaussZ = Gz;
-  using Gauss = integrator::Hexahedron<Gx, Gy, Gz>;
-  using Scalar = typename Gauss::Scalar;
-  using Local = typename Gauss::Local;
-  using Global = typename Gauss::Global;
-  using GaussBase = integrator::Cell<Scalar>;
-  using Coordinate = typename Gauss::Coordinate;
+  using IntegratorX = Gx;
+  using IntegratorY = Gy;
+  using IntegratorZ = Gz;
+  using Integrator = integrator::Hexahedron<Gx, Gy, Gz>;
+  using Scalar = typename Integrator::Scalar;
+  using Local = typename Integrator::Local;
+  using Global = typename Integrator::Global;
+  using IntegratorBase = integrator::Cell<Scalar>;
+  using Coordinate = typename Integrator::Coordinate;
   using Jacobian = typename Coordinate::Jacobian;
   static constexpr int Px = Gx::Q - 1;
   static constexpr int Py = Gy::Q - 1;
@@ -76,10 +76,10 @@ class Hexahedron {
   using Gradient = Mat3xK;
   using Hessian = Mat6xK;
 
-  using GaussOnLine = GaussX;
+  using IntegratorOnLine = IntegratorX;
 
  private:
-  const Gauss *gauss_ptr_ = nullptr;
+  const Integrator *gauss_ptr_ = nullptr;
   Coeff coeff_;  // u^h(local) = coeff_ @ basis.GetValues(local)
 
   struct E { };
@@ -126,9 +126,9 @@ class Hexahedron {
   static const Basis basis_;
   static Basis BuildInterpolationBasis() {
     CheckSize();
-    auto line_x = typename Basis::LineX{ Gauss::GaussX::BuildPoints() };
-    auto line_y = typename Basis::LineY{ Gauss::GaussY::BuildPoints() };
-    auto line_z = typename Basis::LineZ{ Gauss::GaussZ::BuildPoints() };
+    auto line_x = typename Basis::LineX{ Integrator::IntegratorX::BuildPoints() };
+    auto line_y = typename Basis::LineY{ Integrator::IntegratorY::BuildPoints() };
+    auto line_z = typename Basis::LineZ{ Integrator::IntegratorZ::BuildPoints() };
     return Basis(line_x, line_y, line_z);
   }
 
@@ -163,8 +163,8 @@ class Hexahedron {
   }
 
  public:
-  explicit Hexahedron(const GaussBase &gauss) requires(kLocal)
-      : gauss_ptr_(dynamic_cast<const Gauss *>(&gauss)) {
+  explicit Hexahedron(const IntegratorBase &gauss) requires(kLocal)
+      : gauss_ptr_(dynamic_cast<const Integrator *>(&gauss)) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = gauss_ptr_->GetLocal(ijk);
       Jacobian mat = coordinate().LocalToJacobian(local);
@@ -212,8 +212,8 @@ class Hexahedron {
           (inv_T_grad[Z] / det2 + inv_T * (-2 * det_grad[Z] / det3));
     }
   }
-  explicit Hexahedron(const GaussBase &gauss) requires(!kLocal)
-      : gauss_ptr_(dynamic_cast<const Gauss *>(&gauss)) {
+  explicit Hexahedron(const IntegratorBase &gauss) requires(!kLocal)
+      : gauss_ptr_(dynamic_cast<const Integrator *>(&gauss)) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = gauss_ptr_->GetLocal(ijk);
       Jacobian jacobian = coordinate().LocalToJacobian(local);
@@ -247,11 +247,11 @@ class Hexahedron {
     return LocalToValue(local);
   }
   /**
-   * @brief Get the value of \f$ u(x,y,z) \equiv \det(\mathbf{J})^{-1}\,U(\xi,\eta,\zeta) \f$ at a Gaussian point.
+   * @brief Get the value of \f$ u(x,y,z) \equiv \det(\mathbf{J})^{-1}\,U(\xi,\eta,\zeta) \f$ at a Integratorian point.
    * 
    * This version is compiled only if `kLocal` is `true`.
    * 
-   * @param ijk the index of the Gaussian point
+   * @param ijk the index of the Integratorian point
    * @return Value the value \f$ u(x_i,y_i,z_i) \f$
    */
   Value GetValue(int i) const requires(kLocal) {
@@ -262,11 +262,11 @@ class Hexahedron {
     coeff_.col(i) *= jacobian_det_[i];  // value in parametric space
   }
   /**
-   * @brief Get the value of \f$ u(x,y,z) \f$ at a Gaussian point.
+   * @brief Get the value of \f$ u(x,y,z) \f$ at a Integratorian point.
    * 
    * This version is compiled only if `kLocal` is `false`.
    * 
-   * @param ijk the index of the Gaussian point
+   * @param ijk the index of the Integratorian point
    * @return Value the value \f$ u(x_i,y_i,z_i) \f$
    */
   Value GetValue(int i) const requires(!kLocal) {
@@ -289,29 +289,29 @@ class Hexahedron {
     return LocalGradientsToGlobalGradients(jacobian, grad);
   }
   /**
-   * @brief Get the local gradients of basis at a Gaussian point.
+   * @brief Get the local gradients of basis at a Integratorian point.
    * 
    * This version is compiled only if `kLocal` is `true`.
    * 
-   * @param ijk the index of the Gaussian point
+   * @param ijk the index of the Integratorian point
    * @return const Mat3xN& the local gradients of basis
    */
   const Mat3xN &GetBasisGradients(int ijk) const requires(kLocal) {
     return basis_local_gradients_[ijk];
   }
   /**
-   * @brief Get the global gradients of basis at a Gaussian point.
+   * @brief Get the global gradients of basis at a Integratorian point.
    * 
    * This version is compiled only if `kLocal` is `false`.
    * 
-   * @param ijk the index of the Gaussian point
+   * @param ijk the index of the Integratorian point
    * @return const Mat3xN& the global gradients of basis
    */
   const Mat3xN &GetBasisGradients(int ijk) const requires(!kLocal) {
     return basis_global_gradients_[ijk];
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a Gaussian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a Integratorian point.
    * 
    */
   Gradient GetLocalGradient(int ijk) const requires(kLocal) {
@@ -348,7 +348,7 @@ class Hexahedron {
     return LocalToGlobalGradient(local);
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Gaussian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Integratorian point.
    * 
    * This version is compiled only if `kLocal` is `false`.
    * 
@@ -358,7 +358,7 @@ class Hexahedron {
     return basis_grad * coeff().transpose();
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Gaussian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Integratorian point.
    * 
    * This version is compiled only if `kLocal` is `true`.
    * 
@@ -375,18 +375,18 @@ class Hexahedron {
     return GetJacobianAssociated(ijk) * value_grad;
   }
   /**
-   * @brief Get the local Hessians of basis at a Gaussian point.
+   * @brief Get the local Hessians of basis at a Integratorian point.
    * 
    * This version is compiled only if `kLocal` is `true`.
    * 
-   * @param ijk the index of the Gaussian point
+   * @param ijk the index of the Integratorian point
    * @return const Mat6xN& the local Hessians of basis
    */
   const Mat6xN &GetBasisHessians(int ijk) const requires(kLocal) {
     return basis_local_hessians_[ijk];
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\partial_{\xi}\\ \partial_{\xi}\partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a Gaussian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\partial_{\xi}\\ \partial_{\xi}\partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a Integratorian point.
    * 
    */
   Hessian GetLocalHessian(int ijk) const requires(kLocal) {
@@ -398,7 +398,7 @@ class Hexahedron {
     return value_hess;
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{x}\partial_{x}\\ \partial_{x}\partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Gaussian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{x}\partial_{x}\\ \partial_{x}\partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Integratorian point.
    * 
    */
   Hessian GetGlobalHessian(int ijk) const requires(kLocal) {
@@ -456,13 +456,13 @@ class Hexahedron {
   }
 
   /**
-   * @brief Convert a flux matrix from global to local at a given Gaussian point.
+   * @brief Convert a flux matrix from global to local at a given Integratorian point.
    * 
    * \f$ \begin{bmatrix}F^{\xi} & F^{\eta} & F^{\zeta}\end{bmatrix}=\begin{bmatrix}f^{x} & f^{y} & f^{z}\end{bmatrix}\mathbf{J}^{*} \f$, in which \f$ \mathbf{J}^{*} = \det(\mathbf{J}) \begin{bmatrix}\partial_{x}\\\partial_{y}\\\partial_{z}\end{bmatrix}\begin{bmatrix}\xi & \eta & \zeta\end{bmatrix} \f$ is returned by `Hexahedron::GetJacobianAssociated`.
    * 
    * @tparam FluxMatrix a matrix type which has 3 columns
    * @param global_flux the global flux
-   * @param ijk the index of the Gaussian point
+   * @param ijk the index of the Integratorian point
    * @return FluxMatrix the local flux
    */
   template <class FluxMatrix>
@@ -473,11 +473,11 @@ class Hexahedron {
   }
 
   /**
-   * @brief Get the associated matrix of the Jacobian at a given Gaussian point.
+   * @brief Get the associated matrix of the Jacobian at a given Integratorian point.
    * 
    * \f$ \mathbf{J}^{*}=\det(\mathbf{J})\,\mathbf{J}^{-1} \f$, in which \f$ \mathbf{J}^{-1}=\begin{bmatrix}\partial_{x}\\\partial_{y}\\\partial_{z}\end{bmatrix}\begin{bmatrix}\xi & \eta & \zeta\end{bmatrix} \f$ is the inverse of `coordinate::Element::Jacobian`.
    * 
-   * @param ijk the index of the Gaussian point
+   * @param ijk the index of the Integratorian point
    * @return Jacobian const& the associated matrix of \f$ \mathbf{J} \f$.
    */
   Jacobian const &GetJacobianAssociated(int ijk) const
@@ -497,7 +497,7 @@ class Hexahedron {
   Basis const &basis() const {
     return basis_;
   }
-  Gauss const &gauss() const {
+  Integrator const &gauss() const {
     return *gauss_ptr_;
   }
   Coordinate const &coordinate() const {
@@ -604,97 +604,97 @@ class Hexahedron {
     switch (i_face) {
     case 0:
       assert(almost_equal(local[Z], -1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
         indices.push_back(basis().index(i, j, k));
       }
       break;
     case 1:
       assert(almost_equal(local[Y], -1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
-      for (j = 0; j < GaussY::Q; ++j) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
         indices.push_back(basis().index(i, j, k));
       }
       break;
     case 2:
       assert(almost_equal(local[X], +1));
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
-      for (i = 0; i < GaussX::Q; ++i) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
         indices.push_back(basis().index(i, j, k));
       }
       break;
     case 3:
       assert(almost_equal(local[Y], +1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
-      for (j = 0; j < GaussY::Q; ++j) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
         indices.push_back(basis().index(i, j, k));
       }
       break;
     case 4:
       assert(almost_equal(local[X], -1));
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
-      for (i = 0; i < GaussX::Q; ++i) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
         indices.push_back(basis().index(i, j, k));
       }
       break;
     case 5:
       assert(almost_equal(local[Z], +1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
         indices.push_back(basis().index(i, j, k));
       }
       break;
@@ -714,10 +714,10 @@ class Hexahedron {
     bool done = false;
     switch (i_face) {
     case 0:
-      for (i = 0; i < GaussX::Q; ++i) {
-        for (j = 0; j < GaussY::Q; ++j) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        for (j = 0; j < IntegratorY::Q; ++j) {
           global_temp = coordinate().LocalToGlobal(
-              GaussX::points[i], GaussY::points[j], -1);
+              IntegratorX::points[i], IntegratorY::points[j], -1);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
             done = true;
@@ -730,10 +730,10 @@ class Hexahedron {
       }
       break;
     case 1:
-      for (i = 0; i < GaussX::Q; ++i) {
-        for (k = 0; k < GaussZ::Q; ++k) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        for (k = 0; k < IntegratorZ::Q; ++k) {
           global_temp = coordinate().LocalToGlobal(
-              GaussX::points[i], -1, GaussZ::points[k]);
+              IntegratorX::points[i], -1, IntegratorZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
             done = true;
@@ -746,10 +746,10 @@ class Hexahedron {
       }
       break;
     case 2:
-      for (j = 0; j < GaussY::Q; ++j) {
-        for (k = 0; k < GaussZ::Q; ++k) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        for (k = 0; k < IntegratorZ::Q; ++k) {
           global_temp = coordinate().LocalToGlobal(
-              +1, GaussY::points[j], GaussZ::points[k]);
+              +1, IntegratorY::points[j], IntegratorZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
             done = true;
@@ -762,10 +762,10 @@ class Hexahedron {
       }
       break;
     case 3:
-      for (i = 0; i < GaussX::Q; ++i) {
-        for (k = 0; k < GaussZ::Q; ++k) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        for (k = 0; k < IntegratorZ::Q; ++k) {
           global_temp = coordinate().LocalToGlobal(
-              GaussX::points[i], +1, GaussZ::points[k]);
+              IntegratorX::points[i], +1, IntegratorZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
             done = true;
@@ -778,10 +778,10 @@ class Hexahedron {
       }
       break;
     case 4:
-      for (j = 0; j < GaussY::Q; ++j) {
-        for (k = 0; k < GaussZ::Q; ++k) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        for (k = 0; k < IntegratorZ::Q; ++k) {
           global_temp = coordinate().LocalToGlobal(
-              -1, GaussY::points[j], GaussZ::points[k]);
+              -1, IntegratorY::points[j], IntegratorZ::points[k]);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
             done = true;
@@ -794,10 +794,10 @@ class Hexahedron {
       }
       break;
     case 5:
-      for (i = 0; i < GaussX::Q; ++i) {
-        for (j = 0; j < GaussY::Q; ++j) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        for (j = 0; j < IntegratorY::Q; ++j) {
           global_temp = coordinate().LocalToGlobal(
-              GaussX::points[i], GaussY::points[j], +1);
+              IntegratorX::points[i], IntegratorY::points[j], +1);
           global_temp -= global;
           if (global_temp.norm() < 1e-8) {
             done = true;
@@ -835,78 +835,78 @@ class Hexahedron {
     switch (i_face) {
     case 0:
       assert(almost_equal(local[Z], -1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }
       break;
     case 1:
       assert(almost_equal(local[Y], -1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
       break;
     case 2:
       assert(almost_equal(local[X], +1));
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
       break;
     case 3:
       assert(almost_equal(local[Y], +1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
       break;
     case 4:
       assert(almost_equal(local[X], -1));
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }
-      for (k = 0; k < GaussZ::Q; ++k) {
-        if (almost_equal(local[Z], GaussZ::points[k])) {
+      for (k = 0; k < IntegratorZ::Q; ++k) {
+        if (almost_equal(local[Z], IntegratorZ::points[k])) {
           break;
         }
       }
       break;
     case 5:
       assert(almost_equal(local[Z], +1));
-      for (i = 0; i < GaussX::Q; ++i) {
-        if (almost_equal(local[X], GaussX::points[i])) {
+      for (i = 0; i < IntegratorX::Q; ++i) {
+        if (almost_equal(local[X], IntegratorX::points[i])) {
           break;
         }
       }
-      for (j = 0; j < GaussY::Q; ++j) {
-        if (almost_equal(local[Y], GaussY::points[j])) {
+      for (j = 0; j < IntegratorY::Q; ++j) {
+        if (almost_equal(local[Y], IntegratorY::points[j])) {
           break;
         }
       }

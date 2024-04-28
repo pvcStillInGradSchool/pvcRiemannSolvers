@@ -27,7 +27,7 @@ class Line {
  private:
   using MatDx2 = algebra::Vector<Global, 2>;
   using Mat2x1 = algebra::Vector<Scalar, 2>;
-  using Gauss = Legendre<Scalar, Q>;
+  using Integrator = Legendre<Scalar, Q>;
 
  private:
   static const std::array<Scalar, Q> local_weights_;
@@ -64,10 +64,10 @@ class Line {
     }
   }
   static constexpr auto BuildLocalCoords() {
-    return Gauss::points;
+    return Integrator::points;
   }
   static constexpr auto BuildLocalWeights() {
-    return Gauss::weights;
+    return Integrator::weights;
   }
   static Mat2x1 shape_2x1(Scalar x) {
     x *= 0.5;

@@ -8,19 +8,19 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussPyramid : public ::testing::Test {
+class TestIntegratorPyramid : public ::testing::Test {
 };
-TEST_F(TestGaussPyramid, OnLinearElement) {
+TEST_F(TestIntegratorPyramid, OnLinearElement) {
   using Coordinate = mini::coordinate::Pyramid5<double>;
-  using Gauss = mini::integrator::Pyramid<double, 4, 4, 3>;
-  using Coord = typename Gauss::Global;
+  using Integrator = mini::integrator::Pyramid<double, 4, 4, 3>;
+  using Coord = typename Integrator::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0),
     Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h)
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;
@@ -35,10 +35,10 @@ TEST_F(TestGaussPyramid, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
-TEST_F(TestGaussPyramid, OnQuadraticElement) {
+TEST_F(TestIntegratorPyramid, OnQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid13<double>;
-  using Gauss = mini::integrator::Pyramid<double, 4, 4, 3>;
-  using Coord = typename Gauss::Global;
+  using Integrator = mini::integrator::Pyramid<double, 4, 4, 3>;
+  using Coord = typename Integrator::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
@@ -47,7 +47,7 @@ TEST_F(TestGaussPyramid, OnQuadraticElement) {
     Coord(-a/2, -b/2, h/2), Coord(+a/2, -b/2, h/2),
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;
@@ -62,10 +62,10 @@ TEST_F(TestGaussPyramid, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
-TEST_F(TestGaussPyramid, On14NodeQuadraticElement) {
+TEST_F(TestIntegratorPyramid, On14NodeQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid14<double>;
-  using Gauss = mini::integrator::Pyramid<double, 4, 4, 3>;
-  using Coord = typename Gauss::Global;
+  using Integrator = mini::integrator::Pyramid<double, 4, 4, 3>;
+  using Coord = typename Integrator::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
     Coord(-a, -b, 0), Coord(+a, -b, 0), Coord(+a, +b, 0), Coord(-a, +b, 0),
@@ -75,7 +75,7 @@ TEST_F(TestGaussPyramid, On14NodeQuadraticElement) {
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
     Coord(0, 0, 0),
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;

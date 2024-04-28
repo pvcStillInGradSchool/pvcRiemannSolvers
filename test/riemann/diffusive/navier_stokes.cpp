@@ -141,14 +141,14 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
 TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
   // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
-  using GaussX = mini::integrator::Lobatto<Scalar, 3>;
-  using Interpolation = mini::polynomial::Hexahedron<GaussX, GaussX, GaussX,
+  using IntegratorX = mini::integrator::Lobatto<Scalar, 3>;
+  using Interpolation = mini::polynomial::Hexahedron<IntegratorX, IntegratorX, IntegratorX,
       NS::kComponents, true>;
   using Basis = typename Interpolation::Basis;
-  using Gauss = typename Interpolation::Gauss;
+  using Integrator = typename Interpolation::Integrator;
   using Coeff = typename Interpolation::Coeff;
   using Value = typename Interpolation::Value;
-  using Global = typename Gauss::Global;
+  using Global = typename Integrator::Global;
   // build a hexa-gauss and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
   auto coordinate = Coordinate {
@@ -157,7 +157,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
     Global(-a, -b, +c), Global(+a, -b, +c),
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   auto interp = Interpolation(gauss);
   // build a vector function and its interpolation
   Scalar rho = 1.29, p = 101325;

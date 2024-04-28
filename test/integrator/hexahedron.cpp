@@ -9,15 +9,15 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussHexahedron : public ::testing::Test {
+class TestIntegratorHexahedron : public ::testing::Test {
  protected:
   using Gx = mini::integrator::Legendre<double, 4>;
   using Gy = mini::integrator::Legendre<double, 4>;
   using Gz = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Hexahedron<Gx, Gy, Gz>;
-  using Coord = typename Gauss::Global;
+  using Integrator = mini::integrator::Hexahedron<Gx, Gy, Gz>;
+  using Coord = typename Integrator::Global;
 };
-TEST_F(TestGaussHexahedron, OnLinearElement) {
+TEST_F(TestIntegratorHexahedron, OnLinearElement) {
   using Coordinate = mini::coordinate::Hexahedron8<double>;
   auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1),
@@ -25,7 +25,7 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
     Coord(-1, -1, +1), Coord(+1, -1, +1),
     Coord(+1, +1, +1), Coord(-1, +1, +1)
   };
-  auto hexa = Gauss(coordinate);
+  auto hexa = Integrator(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -42,7 +42,7 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
     Coord(-10, -10, +10), Coord(+10, -10, +10),
     Coord(+10, +10, +10), Coord(-10, +10, +10)
   };
-  hexa = Gauss(coordinate);
+  hexa = Integrator(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };
@@ -52,7 +52,7 @@ TEST_F(TestGaussHexahedron, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(f, hexa), std::sqrt(Innerprod(f, f, hexa)));
   EXPECT_DOUBLE_EQ(Norm(g, hexa), std::sqrt(Innerprod(g, g, hexa)));
 }
-TEST_F(TestGaussHexahedron, OnQuadraticElement) {
+TEST_F(TestIntegratorHexahedron, OnQuadraticElement) {
   using Coordinate = mini::coordinate::Hexahedron20<double>;
   auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
@@ -61,7 +61,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
     Coord(-1, -1, 0), Coord(+1, -1, 0), Coord(+1, +1, 0), Coord(-1, +1, 0),
     Coord(0, -1, +1), Coord(+1, 0, +1), Coord(0, +1, +1), Coord(-1, 0, +1),
   };
-  auto hexa = Gauss(coordinate);
+  auto hexa = Integrator(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -89,7 +89,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
     Coord(0, -10, +10), Coord(+10, 0, +10),
     Coord(0, +10, +10), Coord(-10, 0, +10),
   };
-  hexa = Gauss(coordinate);
+  hexa = Integrator(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };
@@ -99,7 +99,7 @@ TEST_F(TestGaussHexahedron, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(f, hexa), std::sqrt(Innerprod(f, f, hexa)));
   EXPECT_DOUBLE_EQ(Norm(g, hexa), std::sqrt(Innerprod(g, g, hexa)));
 }
-TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
+TEST_F(TestIntegratorHexahedron, On27NodeQuadraticElement) {
   using Coordinate = mini::coordinate::Hexahedron27<double>;
   auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
@@ -111,7 +111,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
     Coord(0, -1, 0), Coord(+1, 0, 0), Coord(0, +1, 0), Coord(-1, 0, 0),
     Coord(0, 0, +1), Coord(0, 0, 0),
   };
-  auto hexa = Gauss(coordinate);
+  auto hexa = Integrator(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -145,7 +145,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
     // center
     Coord(0, 0, 0),
   };
-  hexa = Gauss(coordinate);
+  hexa = Integrator(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };
@@ -155,7 +155,7 @@ TEST_F(TestGaussHexahedron, On27NodeQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(f, hexa), std::sqrt(Innerprod(f, f, hexa)));
   EXPECT_DOUBLE_EQ(Norm(g, hexa), std::sqrt(Innerprod(g, g, hexa)));
 }
-TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
+TEST_F(TestIntegratorHexahedron, On26NodeQuadraticElement) {
   using Coordinate = mini::coordinate::Hexahedron26<double>;
   auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
@@ -167,7 +167,7 @@ TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
     Coord(0, -1, 0), Coord(+1, 0, 0), Coord(0, +1, 0), Coord(-1, 0, 0),
     Coord(0, 0, +1),
   };
-  auto hexa = Gauss(coordinate);
+  auto hexa = Integrator(coordinate);
   static_assert(hexa.CellDim() == 3);
   static_assert(hexa.PhysDim() == 3);
   EXPECT_NEAR(hexa.volume(), 8.0, 1e-14);
@@ -199,7 +199,7 @@ TEST_F(TestGaussHexahedron, On26NodeQuadraticElement) {
     Coord(0, -10, 0), Coord(+10, 0, 0), Coord(0, +10, 0), Coord(-10, 0, 0),
     Coord(0, 0, +10),
   };
-  hexa = Gauss(coordinate);
+  hexa = Integrator(coordinate);
   EXPECT_DOUBLE_EQ(Quadrature([](Coord const&){ return 2.0; }, hexa), 16.0);
   EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, hexa), 16000, 1e-10);
   auto f = [](Coord const& xyz){ return xyz[0]; };

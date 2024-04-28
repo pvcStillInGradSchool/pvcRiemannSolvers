@@ -29,10 +29,10 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
  public:
   static_assert(std::is_same_v<typename Gx::Scalar, typename Gy::Scalar>);
   static_assert(std::is_same_v<typename Gx::Scalar, typename Gz::Scalar>);
-  using GaussX = Gx;
-  using GaussY = Gy;
-  using GaussZ = Gz;
-  using Scalar = typename GaussX::Scalar;
+  using IntegratorX = Gx;
+  using IntegratorY = Gy;
+  using IntegratorZ = Gz;
+  using Scalar = typename IntegratorX::Scalar;
   static_assert(std::is_same_v<Scalar, typename Gy::Scalar>);
   static_assert(std::is_same_v<Scalar, typename Gz::Scalar>);
   using Coordinate = coordinate::Hexahedron<Scalar>;
@@ -41,9 +41,9 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   using Jacobian = typename Coordinate::Jacobian;
 
  private:
-  static constexpr int Qx = GaussX::Q;
-  static constexpr int Qy = GaussY::Q;
-  static constexpr int Qz = GaussZ::Q;
+  static constexpr int Qx = IntegratorX::Q;
+  static constexpr int Qy = IntegratorY::Q;
+  static constexpr int Qz = IntegratorZ::Q;
 
  public:
   static constexpr int Q = Qx * Qy * Qz;
@@ -69,9 +69,9 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
     for (int i = 0; i < Qx; ++i) {
       for (int j = 0; j < Qy; ++j) {
         for (int k = 0; k < Qz; ++k) {
-          points[n][X] = GaussX::points[i];
-          points[n][Y] = GaussY::points[j];
-          points[n][Z] = GaussZ::points[k];
+          points[n][X] = IntegratorX::points[i];
+          points[n][Y] = IntegratorY::points[j];
+          points[n][Z] = IntegratorZ::points[k];
           n++;
         }
       }
@@ -84,8 +84,8 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
     for (int i = 0; i < Qx; ++i) {
       for (int j = 0; j < Qy; ++j) {
         for (int k = 0; k < Qz; ++k) {
-          weights[n++] = GaussX::weights[i] * GaussY::weights[j]
-              * GaussZ::weights[k];
+          weights[n++] = IntegratorX::weights[i] * IntegratorY::weights[j]
+              * IntegratorZ::weights[k];
         }
       }
     }

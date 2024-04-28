@@ -8,7 +8,7 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussJacobi : public ::testing::Test {
+class TestIntegratorJacobi : public ::testing::Test {
  protected:
   static constexpr int kAlpha{2}, kBeta{0};
   static double rand() {
@@ -29,10 +29,10 @@ class TestGaussJacobi : public ::testing::Test {
     return val;
   }
 };
-TEST_F(TestGaussJacobi, OnePoint) {
+TEST_F(TestIntegratorJacobi, OnePoint) {
   constexpr int kQuad = 1;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Integrator = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -40,15 +40,15 @@ TEST_F(TestGaussJacobi, OnePoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-15);
   }
 }
-TEST_F(TestGaussJacobi, TwoPoint) {
+TEST_F(TestIntegratorJacobi, TwoPoint) {
   constexpr int kQuad = 2;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Integrator = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -56,15 +56,15 @@ TEST_F(TestGaussJacobi, TwoPoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-14);
   }
 }
-TEST_F(TestGaussJacobi, ThreePoint) {
+TEST_F(TestIntegratorJacobi, ThreePoint) {
   constexpr int kQuad = 3;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Integrator = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -72,15 +72,15 @@ TEST_F(TestGaussJacobi, ThreePoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-13);
   }
 }
-TEST_F(TestGaussJacobi, FourPoint) {
+TEST_F(TestIntegratorJacobi, FourPoint) {
   constexpr int kQuad = 4;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Integrator = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -88,15 +88,15 @@ TEST_F(TestGaussJacobi, FourPoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-12);
   }
 }
-TEST_F(TestGaussJacobi, FivePoint) {
+TEST_F(TestIntegratorJacobi, FivePoint) {
   constexpr int kQuad = 5;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
+  using Integrator = mini::integrator::Jacobi<double, kQuad, kAlpha, kBeta>;
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -104,7 +104,7 @@ TEST_F(TestGaussJacobi, FivePoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-12);
   }

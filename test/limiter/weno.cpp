@@ -33,15 +33,15 @@ class TestWenoLimiters : public ::testing::Test {
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::integrator::Legendre<double, 5>;
-  using Gauss = mini::integrator::Hexahedron<Gx, Gx, Gx>;
-  using Coord = typename Gauss::Global;
+  using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  using Coord = typename Integrator::Global;
 
   std::string const input_dir_{INPUT_DIR};
 };
 TEST_F(TestWenoLimiters, Smoothness) {
   using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::integrator::Legendre<double, 5>;
-  using Gauss = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
   using Projection = mini::polynomial::Projection<double, 3, 2, 10>;
   using Taylor = typename Projection::Taylor;
   using Value = typename Projection::Value;
@@ -52,7 +52,7 @@ TEST_F(TestWenoLimiters, Smoothness) {
       Global{-1, -1, +1}, Global{+1, -1, +1},
       Global{+1, +1, +1}, Global{-1, +1, +1}
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   auto func = [](Coord const &point) {
     return Taylor::GetValue(point);
   };
@@ -131,7 +131,7 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
     }
     auto coords = { p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7] };
     auto coordinate_uptr = std::make_unique<Coordinate>(coords);
-    auto gauss_ptr = std::make_unique<Gauss>(*coordinate_uptr);
+    auto gauss_ptr = std::make_unique<Integrator>(*coordinate_uptr);
     cells.emplace_back(std::move(coordinate_uptr), std::move(gauss_ptr), i_cell);
     assert(&(cells[i_cell]) == &(cells.back()));
     cells[i_cell].Approximate(func);

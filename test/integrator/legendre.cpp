@@ -8,7 +8,7 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussLegendre : public ::testing::Test {
+class TestIntegratorLegendre : public ::testing::Test {
  protected:
   static double rand() {
     return std::rand() / (1.0 + RAND_MAX);
@@ -28,11 +28,11 @@ class TestGaussLegendre : public ::testing::Test {
     return val;
   }
 };
-TEST_F(TestGaussLegendre, OnePoint) {
+TEST_F(TestIntegratorLegendre, OnePoint) {
   constexpr int kQuad = 1;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Legendre<double, kQuad>;
-  static_assert(Gauss::Q == kQuad);
+  using Integrator = mini::integrator::Legendre<double, kQuad>;
+  static_assert(Integrator::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -40,16 +40,16 @@ TEST_F(TestGaussLegendre, OnePoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-15);
   }
 }
-TEST_F(TestGaussLegendre, TwoPoint) {
+TEST_F(TestIntegratorLegendre, TwoPoint) {
   constexpr int kQuad = 2;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Legendre<double, kQuad>;
-  static_assert(Gauss::Q == kQuad);
+  using Integrator = mini::integrator::Legendre<double, kQuad>;
+  static_assert(Integrator::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -57,16 +57,16 @@ TEST_F(TestGaussLegendre, TwoPoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-15);
   }
 }
-TEST_F(TestGaussLegendre, ThreePoint) {
+TEST_F(TestIntegratorLegendre, ThreePoint) {
   constexpr int kQuad = 3;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Legendre<double, kQuad>;
-  static_assert(Gauss::Q == kQuad);
+  using Integrator = mini::integrator::Legendre<double, kQuad>;
+  static_assert(Integrator::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -74,16 +74,16 @@ TEST_F(TestGaussLegendre, ThreePoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-15);
   }
 }
-TEST_F(TestGaussLegendre, FourPoint) {
+TEST_F(TestIntegratorLegendre, FourPoint) {
   constexpr int kQuad = 4;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Legendre<double, kQuad>;
-  static_assert(Gauss::Q == kQuad);
+  using Integrator = mini::integrator::Legendre<double, kQuad>;
+  static_assert(Integrator::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -91,16 +91,16 @@ TEST_F(TestGaussLegendre, FourPoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-15);
   }
 }
-TEST_F(TestGaussLegendre, FivePoint) {
+TEST_F(TestIntegratorLegendre, FivePoint) {
   constexpr int kQuad = 5;
   constexpr int kTerm = 2 * kQuad - 1;
-  using Gauss = mini::integrator::Legendre<double, kQuad>;
-  static_assert(Gauss::Q == kQuad);
+  using Integrator = mini::integrator::Legendre<double, kQuad>;
+  static_assert(Integrator::Q == kQuad);
   std::srand(31415926);
   for (int i = 0; i < 1000; ++i) {
     auto v = std::vector<double>(kTerm);
@@ -108,7 +108,7 @@ TEST_F(TestGaussLegendre, FivePoint) {
     auto *a = v.data();
     double sum = 0.0;
     for (int i = 0; i < kQuad; ++i) {
-      sum += f(a, kTerm, Gauss::points[i]) * Gauss::weights[i];
+      sum += f(a, kTerm, Integrator::points[i]) * Integrator::weights[i];
     }
     EXPECT_NEAR(sum, exact(a, kTerm), 1e-14);
   }

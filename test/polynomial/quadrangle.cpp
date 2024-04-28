@@ -17,14 +17,14 @@ class TestQuadrangle4x4 : public ::testing::Test {
 TEST_F(TestQuadrangle4x4, OrthoNormal) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   using Gx = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Quadrangle<2, Gx, Gx>;
+  using Integrator = mini::integrator::Quadrangle<2, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   Coord origin = {0, 0}, left = {-1, 2}, right = {1, 3};
   auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   auto basis = Basis(gauss);
   using A = typename Basis::MatNxN;
   double residual = (Integrate([&basis](const Coord& xy) {
@@ -48,13 +48,13 @@ TEST_F(TestQuadrangle4x4, OrthoNormal) {
 TEST_F(TestQuadrangle4x4, Projection) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   using Gx = mini::integrator::Legendre<double, 4>;
-  using Gauss = mini::integrator::Quadrangle<2, Gx, Gx>;
+  using Integrator = mini::integrator::Quadrangle<2, Gx, Gx>;
   using Coordinate = mini::coordinate::Quadrangle4<double, 2>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   auto scalar_f = [](Coord const& xy){
     return xy[0] * xy[1];
   };

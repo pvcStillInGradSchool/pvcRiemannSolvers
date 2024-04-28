@@ -8,18 +8,18 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussTetrahedron : public ::testing::Test {
+class TestIntegratorTetrahedron : public ::testing::Test {
  protected:
   static constexpr int kPoints = 24;
-  using Gauss = mini::integrator::Tetrahedron<double, kPoints>;
-  using Coord = typename Gauss::Global;
+  using Integrator = mini::integrator::Tetrahedron<double, kPoints>;
+  using Coord = typename Integrator::Global;
 };
-TEST_F(TestGaussTetrahedron, OnLinearElement) {
+TEST_F(TestIntegratorTetrahedron, OnLinearElement) {
   using Coordinate = mini::coordinate::Tetrahedron4<double>;
   auto coordinate = Coordinate{
     Coord(0, 0, 0), Coord(3, 0, 0), Coord(0, 3, 0), Coord(0, 0, 3)
   };
-  auto tetra = Gauss(coordinate);
+  auto tetra = Integrator(coordinate);
   static_assert(tetra.CellDim() == 3);
   static_assert(tetra.PhysDim() == 3);
   EXPECT_NEAR(tetra.volume(), 4.5, 1e-14);
@@ -34,7 +34,7 @@ TEST_F(TestGaussTetrahedron, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(f, tetra), std::sqrt(Innerprod(f, f, tetra)));
   EXPECT_DOUBLE_EQ(Norm(g, tetra), std::sqrt(Innerprod(g, g, tetra)));
 }
-TEST_F(TestGaussTetrahedron, OnQuadraticElement) {
+TEST_F(TestIntegratorTetrahedron, OnQuadraticElement) {
   using Coordinate = mini::coordinate::Tetrahedron10<double>;
   double a = 1.5;
   auto coordinate = Coordinate{
@@ -42,7 +42,7 @@ TEST_F(TestGaussTetrahedron, OnQuadraticElement) {
     Coord(a, 0, 0), Coord(a, a, 0), Coord(0, a, 0),
     Coord(0, 0, a), Coord(a, 0, a), Coord(0, a, a),
   };
-  auto tetra = Gauss(coordinate);
+  auto tetra = Integrator(coordinate);
   static_assert(tetra.CellDim() == 3);
   static_assert(tetra.PhysDim() == 3);
   EXPECT_NEAR(tetra.volume(), 4.5, 1e-14);

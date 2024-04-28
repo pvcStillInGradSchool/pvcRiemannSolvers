@@ -16,12 +16,12 @@ class TestTriangle : public ::testing::Test {
 };
 TEST_F(TestTriangle, OrthoNormal) {
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
-  using Gauss = mini::integrator::Triangle<double, 2, 12>;
+  using Integrator = mini::integrator::Triangle<double, 2, 12>;
   using Coordinate = mini::coordinate::Triangle3<double, 2>;
   using Coord = typename Coordinate::Global;
   // build a triangle-gauss
   auto coordinate = Coordinate { Coord(10, 0), Coord(0, 10), Coord(0, 0) };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   // build an orthonormal basis on it
   auto basis = Basis(gauss);
   // check orthonormality
@@ -37,7 +37,7 @@ TEST_F(TestTriangle, OrthoNormal) {
   coordinate = Coordinate {
     Coord(10, 0) + shift, Coord(0, 10) + shift, Coord(0, 0) + shift
   };
-  gauss = Gauss(coordinate);
+  gauss = Integrator(coordinate);
   // build another orthonormal basis on it
   basis = Basis(gauss);
   // check orthonormality

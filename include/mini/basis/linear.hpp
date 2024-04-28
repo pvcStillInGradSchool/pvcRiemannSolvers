@@ -36,7 +36,7 @@ class Linear {
   using Coord = typename Taylor::Coord;
   using MatNx1 = typename Taylor::MatNx1;
   using MatNxN = algebra::Matrix<Scalar, N, N>;
-  using Gauss = std::conditional_t<kDimensions == 2,
+  using Integrator = std::conditional_t<kDimensions == 2,
       integrator::Face<Scalar, 2>, integrator::Cell<Scalar>>;
 
  public:
@@ -90,13 +90,13 @@ class OrthoNormal {
   using Linear = basis::Linear<Scalar, kDimensions, kDegrees>;
   static constexpr int N = Linear::N;
   using Coord = typename Linear::Coord;
-  using Gauss = typename Linear::Gauss;
+  using Integrator = typename Linear::Integrator;
   using MatNx1 = typename Linear::MatNx1;
   using MatNxN = typename Linear::MatNxN;
   using MatNxD = algebra::Matrix<Scalar, N, kDimensions>;
 
  public:
-  explicit OrthoNormal(const Gauss &gauss)
+  explicit OrthoNormal(const Integrator &gauss)
       : gauss_ptr_(&gauss), basis_(gauss.center()) {
     assert(gauss.PhysDim() == kDimensions);
     OrthoNormalize(&basis_, gauss);
@@ -114,7 +114,7 @@ class OrthoNormal {
   MatNxN const &coeff() const {
     return basis_.coeff();
   }
-  Gauss const &gauss() const {
+  Integrator const &gauss() const {
     return *gauss_ptr_;
   }
   MatNx1 operator()(const Coord &global) const {
@@ -134,7 +134,7 @@ class OrthoNormal {
   }
 
  private:
-  Gauss const *gauss_ptr_;
+  Integrator const *gauss_ptr_;
   Linear basis_;
 };
 

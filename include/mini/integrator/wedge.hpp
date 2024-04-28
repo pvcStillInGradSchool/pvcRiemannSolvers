@@ -24,7 +24,7 @@ namespace integrator {
  * @tparam Scalar  Type of scalar variables.
  * @tparam Qt  Number of qudrature points in each layer of triangle.
  * @tparam Qz  Number of qudrature points in the \f$\zeta\f$ direction.
- * @tparam kRule  The type of Gaussian quadrature rule.
+ * @tparam kRule  The type of Integratorian quadrature rule.
  */
 template <std::floating_point Scalar, int Qt, int Qz,
     Rule kRule = Rule::kLegendre>
@@ -32,8 +32,8 @@ class Wedge : public Cell<Scalar> {
   static constexpr int kPoints = Qt * Qz;
 
  public:
-  using GaussT = Triangle<Scalar, 2, Qt>;
-  using GaussZ = std::conditional_t< kRule == Rule::kLegendre,
+  using IntegratorT = Triangle<Scalar, 2, Qt>;
+  using IntegratorZ = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qz>, Lobatto<Scalar, Qz> >;
   using Coordinate = coordinate::Wedge<Scalar>;
   using Real = typename Coordinate::Real;
@@ -57,13 +57,13 @@ class Wedge : public Cell<Scalar> {
  private:
   static constexpr auto BuildLocalCoords() {
     std::array<Local, kPoints> points;
-    auto triangle_points = GaussT::BuildLocalCoords();
+    auto triangle_points = IntegratorT::BuildLocalCoords();
     int n = 0;
     for (int i = 0; i < Qt; ++i) {
       for (int k = 0; k < Qz; ++k) {
         points[n][X] = triangle_points[i][X];
         points[n][Y] = triangle_points[i][Y];
-        points[n][Z] = GaussZ::points[k];
+        points[n][Z] = IntegratorZ::points[k];
         n++;
       }
     }
@@ -71,11 +71,11 @@ class Wedge : public Cell<Scalar> {
   }
   static constexpr auto BuildLocalWeights() {
     std::array<Scalar, Qt * Qz> weights;
-    auto triangle_weights = GaussT::BuildLocalWeights();
+    auto triangle_weights = IntegratorT::BuildLocalWeights();
     int n = 0;
     for (int i = 0; i < Qt; ++i) {
       for (int k = 0; k < Qz; ++k) {
-        weights[n++] = triangle_weights[i] * GaussZ::weights[k];
+        weights[n++] = triangle_weights[i] * IntegratorZ::weights[k];
       }
     }
     return weights;

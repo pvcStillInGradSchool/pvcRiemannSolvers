@@ -24,17 +24,17 @@ namespace integrator {
  * @tparam Qx  Number of qudrature points in the \f$\xi\f$ direction.
  * @tparam Qy  Number of qudrature points in the \f$\eta\f$ direction.
  * @tparam Qz  Number of qudrature points in the \f$\zeta\f$ direction.
- * @tparam kRule  The type of Gaussian quadrature rule.
+ * @tparam kRule  The type of Integratorian quadrature rule.
  */
 template <std::floating_point Scalar, int Qx, int Qy, int Qz,
     Rule kRule = Rule::kLegendre>
 class Pyramid : public Cell<Scalar> {
  public:
-  using GaussX = std::conditional_t< kRule == Rule::kLegendre,
+  using IntegratorX = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qx>, Lobatto<Scalar, Qx> >;
-  using GaussY = std::conditional_t< kRule == Rule::kLegendre,
+  using IntegratorY = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qy>, Lobatto<Scalar, Qy> >;
-  using GaussZ = Jacobi<Scalar, Qz, 2, 0>;
+  using IntegratorZ = Jacobi<Scalar, Qz, 2, 0>;
   using Coordinate = coordinate::Pyramid<Scalar>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
@@ -61,9 +61,9 @@ class Pyramid : public Cell<Scalar> {
     for (int i = 0; i < Qx; ++i) {
       for (int j = 0; j < Qy; ++j) {
         for (int k = 0; k < Qz; ++k) {
-          points[n][X] = GaussX::points[i];
-          points[n][Y] = GaussY::points[j];
-          points[n][Z] = GaussZ::points[k];
+          points[n][X] = IntegratorX::points[i];
+          points[n][Y] = IntegratorY::points[j];
+          points[n][Z] = IntegratorZ::points[k];
           n++;
         }
       }
@@ -76,9 +76,9 @@ class Pyramid : public Cell<Scalar> {
     for (int i = 0; i < Qx; ++i) {
       for (int j = 0; j < Qy; ++j) {
         for (int k = 0; k < Qz; ++k) {
-          weights[n++] = GaussX::weights[i] * GaussY::weights[j]
+          weights[n++] = IntegratorX::weights[i] * IntegratorY::weights[j]
               // Jacobi::weights have taken account of \f$ (1 - \xi)^2 \f$.
-              * GaussZ::weights[k] * std::pow(1 - GaussZ::points[k], -2);
+              * IntegratorZ::weights[k] * std::pow(1 - IntegratorZ::points[k], -2);
         }
       }
     }

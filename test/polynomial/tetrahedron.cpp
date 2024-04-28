@@ -14,7 +14,7 @@ using std::sqrt;
 
 class TestTetrahedron : public ::testing::Test {
  protected:
-  using Gauss = mini::integrator::Tetrahedron<double, 14>;
+  using Integrator = mini::integrator::Tetrahedron<double, 14>;
   using Coordinate = mini::coordinate::Tetrahedron4<double>;
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coord = typename Basis::Coord;
@@ -26,7 +26,7 @@ TEST_F(TestTetrahedron, OrthoNormal) {
     Coord(10, 10, 0), Coord(0, 10, 10),
     Coord(10, 0, 10), Coord(10, 10, 10)
   };
-  auto tetra = Gauss(coordinate);
+  auto tetra = Integrator(coordinate);
   // build an orthonormal basis on it
   auto basis = Basis(tetra);
   // check orthonormality
@@ -44,7 +44,7 @@ TEST_F(TestTetrahedron, OrthoNormal) {
     coordinate.GetGlobal(2) + shift,
     coordinate.GetGlobal(3) + shift
   };
-  tetra = Gauss(coordinate);
+  tetra = Integrator(coordinate);
   // build another orthonormal basis on it
   basis = Basis(tetra);
   // check orthonormality

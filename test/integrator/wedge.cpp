@@ -8,17 +8,17 @@
 
 #include "gtest/gtest.h"
 
-class TestGaussWedge : public ::testing::Test {
+class TestIntegratorWedge : public ::testing::Test {
 };
-TEST_F(TestGaussWedge, OnLinearElement) {
-  using Gauss = mini::integrator::Wedge<double, 16, 4>;
+TEST_F(TestIntegratorWedge, OnLinearElement) {
+  using Integrator = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge6<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1)
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);
@@ -38,8 +38,8 @@ TEST_F(TestGaussWedge, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
-TEST_F(TestGaussWedge, OnQuadraticElement) {
-  using Gauss = mini::integrator::Wedge<double, 16, 4>;
+TEST_F(TestIntegratorWedge, OnQuadraticElement) {
+  using Integrator = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge15<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -49,7 +49,7 @@ TEST_F(TestGaussWedge, OnQuadraticElement) {
     Coord(-1, -1, 0), Coord(+1, -1, 0), Coord(0, +1, 0),
     Coord(0, -1, +1), Coord(0.5, 0, +1), Coord(-0.5, 0, +1),
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);
@@ -69,8 +69,8 @@ TEST_F(TestGaussWedge, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
   EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
 }
-TEST_F(TestGaussWedge, On18NodeQuadraticElement) {
-  using Gauss = mini::integrator::Wedge<double, 16, 4>;
+TEST_F(TestIntegratorWedge, On18NodeQuadraticElement) {
+  using Integrator = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge18<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -81,7 +81,7 @@ TEST_F(TestGaussWedge, On18NodeQuadraticElement) {
     Coord(0, -1, +1), Coord(0.5, 0, +1), Coord(-0.5, 0, +1),
     Coord(0, -1, 0), Coord(0.5, 0, 0), Coord(-0.5, 0, 0),
   };
-  auto gauss = Gauss(coordinate);
+  auto gauss = Integrator(coordinate);
   static_assert(gauss.CellDim() == 3);
   static_assert(gauss.PhysDim() == 3);
   EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);

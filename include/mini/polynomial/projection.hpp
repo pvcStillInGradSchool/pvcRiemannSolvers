@@ -72,9 +72,9 @@ class Projection {
   static constexpr int N = Basis::N;
   static constexpr int K = kComponents;
   static constexpr int P = kDegrees;
-  using Gauss = typename Basis::Gauss;
-  using Local = typename Gauss::Local;
-  using Global = typename Gauss::Global;
+  using Integrator = typename Basis::Integrator;
+  using Local = typename Integrator::Local;
+  using Global = typename Integrator::Global;
   using MatNx1 = typename Basis::MatNx1;
   using Mat3xN = algebra::Matrix<Scalar, 3, N>;
   using Mat1xN = algebra::Matrix<Scalar, 1, N>;
@@ -82,14 +82,14 @@ class Projection {
   using Value = algebra::Matrix<Scalar, K, 1>;
   using Gradient = algebra::Matrix<Scalar, 3, K>;
 
-  using GaussOnLine = integrator::Legendre<Scalar, kDegrees + 1>;
+  using IntegratorOnLine = integrator::Legendre<Scalar, kDegrees + 1>;
 
  public:
   Coeff coeff_;
   Basis basis_;
 
  public:
-  explicit Projection(const Gauss &gauss)
+  explicit Projection(const Integrator &gauss)
       : basis_(gauss) {
   }
   Projection() = default;
@@ -109,9 +109,9 @@ class Projection {
     return GlobalToValue(global);
   }
   /**
-   * @brief Get the value of \f$ u(x,y,z) \f$ at a Gaussian point.
+   * @brief Get the value of \f$ u(x,y,z) \f$ at a Integratorian point.
    * 
-   * @param i the index of the Gaussian point
+   * @param i the index of the Integratorian point
    * @return Value the value
    */
   Value GetValue(int i) const {
@@ -129,7 +129,7 @@ class Projection {
   Basis const &basis() const {
     return basis_;
   }
-  Gauss const &gauss() const {
+  Integrator const &gauss() const {
     return basis().gauss();
   }
   Global const &center() const {
@@ -148,7 +148,7 @@ class Projection {
     return basis_.GetGradValue(global).transpose();
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Gaussian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Integratorian point.
    * 
    */
   Gradient GetGlobalGradient(int i) const {
@@ -206,7 +206,7 @@ class ProjectionWrapper {
   static constexpr int N = Base::N;
   static constexpr int K = Base::K;
   static constexpr int P = Base::P;
-  using Gauss = typename Base::Gauss;
+  using Integrator = typename Base::Integrator;
   using Local = typename Base::Local;
   using Global = typename Base::Global;
   using MatNx1 = typename Base::MatNx1;
@@ -237,7 +237,7 @@ class ProjectionWrapper {
   Basis const &basis() const {
     return *basis_ptr_;
   }
-  Gauss const &gauss() const {
+  Integrator const &gauss() const {
     return basis().gauss();
   }
   Coeff GetCoeffOnTaylorBasis() const {

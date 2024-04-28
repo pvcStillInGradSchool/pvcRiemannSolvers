@@ -29,9 +29,9 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   static constexpr int D = kPhysDim;
 
  public:
-  using GaussX = Gx;
-  using GaussY = Gy;
-  using Scalar = typename GaussX::Scalar;
+  using IntegratorX = Gx;
+  using IntegratorY = Gy;
+  using Scalar = typename IntegratorX::Scalar;
   static_assert(std::is_same_v<Scalar, typename Gy::Scalar>);
   using Coordinate = coordinate::Quadrangle<Scalar, kPhysDim>;
   using Real = typename Coordinate::Real;
@@ -42,8 +42,8 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
 
  private:
   using Base = Face<Scalar, kPhysDim>;
-  static constexpr int Qx = GaussX::Q;
-  static constexpr int Qy = GaussY::Q;
+  static constexpr int Qx = IntegratorX::Q;
+  static constexpr int Qy = IntegratorY::Q;
   static constexpr int Q = Qx * Qy;
   static const std::array<Local, Q> local_coords_;
   static const std::array<Scalar, Q> local_weights_;
@@ -64,8 +64,8 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
     int k = 0;
     for (int i = 0; i < Qx; ++i) {
       for (int j = 0; j < Qy; ++j) {
-        points[k][0] = GaussX::points[i];
-        points[k][1] = GaussY::points[j];
+        points[k][0] = IntegratorX::points[i];
+        points[k][1] = IntegratorY::points[j];
         k++;
       }
     }
@@ -76,7 +76,7 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
     int k = 0;
     for (int i = 0; i < Qx; ++i) {
       for (int j = 0; j < Qy; ++j) {
-        weights[k++] = GaussX::weights[i] * GaussY::weights[j];
+        weights[k++] = IntegratorX::weights[i] * IntegratorY::weights[j];
       }
     }
     return weights;

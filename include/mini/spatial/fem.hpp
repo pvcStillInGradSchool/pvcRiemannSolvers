@@ -44,7 +44,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   using Cell = typename Part::Cell;
   using Index = typename Part::Index;
   using Global = typename Cell::Global;
-  using Gauss = typename Cell::Gauss;
+  using Integrator = typename Cell::Integrator;
   using Projection = typename Cell::Projection;
   using Coeff = typename Projection::Coeff;
   using Value = typename Projection::Value;
@@ -242,7 +242,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   /**
    * @brief Add the flux divergence to the residual column of the given Cell.
    * 
-   * @param cell_to_flux the pointer of a function that gets the FluxMatrix on a given Gaussian point of a Cell
+   * @param cell_to_flux the pointer of a function that gets the FluxMatrix on a given Integratorian point of a Cell
    * @param cell the Cell to be processed
    * @param data the residual column of the given Cell
    */
@@ -251,7 +251,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   /**
    * @brief Add the flux divergence to the residual column of the given Part.
    * 
-   * @param cell_to_flux the pointer of a function that gets the FluxMatrix on a given Gaussian point of a Cell
+   * @param cell_to_flux the pointer of a function that gets the FluxMatrix on a given Integratorian point of a Cell
    * @param data the residual column of the given Part
    */
   virtual void AddFluxDivergence(CellToFlux cell_to_flux,

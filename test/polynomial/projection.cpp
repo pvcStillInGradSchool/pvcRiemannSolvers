@@ -16,10 +16,10 @@ class TestProjection : public ::testing::Test {
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::integrator::Legendre<double, 5>;
-  using Gauss = mini::integrator::Hexahedron<Gx, Gx, Gx>;
-  using Coord = typename Gauss::Global;
+  using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  using Coord = typename Integrator::Global;
   Coordinate coordinate_;
-  Gauss gauss_;
+  Integrator gauss_;
 
   TestProjection() : coordinate_{
       Coord{-1, -1, -1}, Coord{+1, -1, -1},
