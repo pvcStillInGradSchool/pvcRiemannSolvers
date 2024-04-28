@@ -79,7 +79,7 @@ class Hexahedron {
   using IntegratorOnLine = IntegratorX;
 
  private:
-  const Integrator *gauss_ptr_ = nullptr;
+  const Integrator *integrator_ptr_ = nullptr;
   Coeff coeff_;  // u^h(local) = coeff_ @ basis.GetValues(local)
 
   struct E { };
@@ -118,7 +118,7 @@ class Hexahedron {
             + sizeof(Jacobian[N]) + sizeof(Local[N])
         : sizeof(std::array<Mat3xN, N>);
     constexpr size_t all_member_size = large_member_size
-        + sizeof(gauss_ptr_) + sizeof(coeff_);
+        + sizeof(integrator_ptr_) + sizeof(coeff_);
     static_assert(sizeof(Hexahedron) >= all_member_size);
     static_assert(sizeof(Hexahedron) <= all_member_size + 16);
   }
@@ -163,10 +163,10 @@ class Hexahedron {
   }
 
  public:
-  explicit Hexahedron(const IntegratorBase &gauss) requires(kLocal)
-      : gauss_ptr_(dynamic_cast<const Integrator *>(&gauss)) {
+  explicit Hexahedron(const IntegratorBase &integrator) requires(kLocal)
+      : integrator_ptr_(dynamic_cast<const Integrator *>(&integrator)) {
     for (int ijk = 0; ijk < N; ++ijk) {
-      auto &local = gauss_ptr_->GetLocal(ijk);
+      auto &local = integrator_ptr_->GetLocal(ijk);
       Jacobian mat = coordinate().LocalToJacobian(local);
       Jacobian inv = mat.inverse();
       Scalar det = mat.determinant();
@@ -212,10 +212,10 @@ class Hexahedron {
           (inv_T_grad[Z] / det2 + inv_T * (-2 * det_grad[Z] / det3));
     }
   }
-  explicit Hexahedron(const IntegratorBase &gauss) requires(!kLocal)
-      : gauss_ptr_(dynamic_cast<const Integrator *>(&gauss)) {
+  explicit Hexahedron(const IntegratorBase &integrator) requires(!kLocal)
+      : integrator_ptr_(dynamic_cast<const Integrator *>(&integrator)) {
     for (int ijk = 0; ijk < N; ++ijk) {
-      auto &local = gauss_ptr_->GetLocal(ijk);
+      auto &local = integrator_ptr_->GetLocal(ijk);
       Jacobian jacobian = coordinate().LocalToJacobian(local);
       basis_global_gradients_[ijk] = LocalGradientsToGlobalGradients(
           jacobian, basis_local_gradients_[ijk]);
@@ -238,7 +238,7 @@ class Hexahedron {
   }
   void LocalToGlobalAndValue(Local const &local,
       Global *global, Value *value) const {
-    *global = gauss().coordinate().LocalToGlobal(local);
+    *global = integrator().coordinate().LocalToGlobal(local);
     *value = LocalToValue(local);
   }
 
@@ -486,7 +486,7 @@ class Hexahedron {
   }
 
   Global const &center() const {
-    return gauss_ptr_->center();
+    return integrator_ptr_->center();
   }
   Coeff const &coeff() const {
     return coeff_;
@@ -497,16 +497,16 @@ class Hexahedron {
   Basis const &basis() const {
     return basis_;
   }
-  Integrator const &gauss() const {
-    return *gauss_ptr_;
+  Integrator const &integrator() const {
+    return *integrator_ptr_;
   }
   Coordinate const &coordinate() const {
-    return gauss().coordinate();
+    return integrator().coordinate();
   }
   template <typename Callable>
   void Approximate(Callable &&global_to_value) {
     for (int ijk = 0; ijk < N; ++ijk) {
-      const auto &global = gauss_ptr_->GetGlobal(ijk);
+      const auto &global = integrator_ptr_->GetGlobal(ijk);
       SetValue(ijk, global_to_value(global));
     }
   }

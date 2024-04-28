@@ -48,7 +48,7 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
       auto &local_on_neighbor_i = local_on_neighbors_of_cell_i.at(i_neighbor);
       auto *neighbor_i = cell_i.adj_cells_.at(i_neighbor);
       for (int i_node = 0; i_node < cell_i.N; ++i_node) {
-        auto &global = cell_i.gauss().GetGlobal(i_node);
+        auto &global = cell_i.integrator().GetGlobal(i_node);
         auto global_from_neighbor
             = neighbor_i->coordinate().LocalToGlobal(local_on_neighbor_i.at(i_node));
         EXPECT_NEAR((global - global_from_neighbor).norm(), 0, 1e-10);

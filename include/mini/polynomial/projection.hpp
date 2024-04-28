@@ -35,7 +35,7 @@ void Project(Projection *proj, Callable &&func) {
     Mat1xN b_row = proj->GlobalToBasisValues(xyz);
     Coeff prod = f_col * b_row;
     return prod;
-  }, proj->gauss());
+  }, proj->integrator());
 }
 
 template <typename Projection>
@@ -89,8 +89,8 @@ class Projection {
   Basis basis_;
 
  public:
-  explicit Projection(const Integrator &gauss)
-      : basis_(gauss) {
+  explicit Projection(const Integrator &integrator)
+      : basis_(integrator) {
   }
   Projection() = default;
   Projection(const Projection &) = default;
@@ -115,12 +115,12 @@ class Projection {
    * @return Value the value
    */
   Value GetValue(int i) const {
-    auto &global = gauss().GetGlobal(i);
+    auto &global = integrator().GetGlobal(i);
     return GlobalToValue(global);
   }
   void LocalToGlobalAndValue(Local const &local,
       Global *global, Value *value) const {
-    *global = gauss().coordinate().LocalToGlobal(local);
+    *global = integrator().coordinate().LocalToGlobal(local);
     *value = GlobalToValue(*global);
   }
   Coeff GetCoeffOnTaylorBasis() const {
@@ -129,8 +129,8 @@ class Projection {
   Basis const &basis() const {
     return basis_;
   }
-  Integrator const &gauss() const {
-    return basis().gauss();
+  Integrator const &integrator() const {
+    return basis().integrator();
   }
   Global const &center() const {
     return basis().center();
@@ -152,7 +152,7 @@ class Projection {
    * 
    */
   Gradient GetGlobalGradient(int i) const {
-    auto &global = gauss().GetGlobal(i);
+    auto &global = integrator().GetGlobal(i);
     Mat3xN basis_grad = GlobalToBasisGradients(global);
     return basis_grad * coeff().transpose();
   }
@@ -237,8 +237,8 @@ class ProjectionWrapper {
   Basis const &basis() const {
     return *basis_ptr_;
   }
-  Integrator const &gauss() const {
-    return basis().gauss();
+  Integrator const &integrator() const {
+    return basis().integrator();
   }
   Coeff GetCoeffOnTaylorBasis() const {
     return coeff_ * basis().coeff();

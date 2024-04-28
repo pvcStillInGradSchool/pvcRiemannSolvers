@@ -58,13 +58,13 @@ class Lobatto : public General<Part> {
     for (const Face &face : faces) {
       assert(cache->size() == face.id());
       auto &curr_face = cache->emplace_back();
-      const auto &face_gauss = face.gauss();
-      const auto &cell_gauss = face_to_cell(face).gauss();
-      for (int f = 0, F = face_gauss.CountPoints(); f < F; ++f) {
-        auto &flux_point = face_gauss.GetGlobal(f);
+      const auto &face_integrator = face.integrator();
+      const auto &cell_integrator = face_to_cell(face).integrator();
+      for (int f = 0, F = face_integrator.CountPoints(); f < F; ++f) {
+        auto &flux_point = face_integrator.GetGlobal(f);
         curr_face.at(f) = -1;
-        for (int h = 0, H = cell_gauss.CountPoints(); h < H; ++h) {
-          if (Near(flux_point, cell_gauss.GetGlobal(h))) {
+        for (int h = 0, H = cell_integrator.CountPoints(); h < H; ++h) {
+          if (Near(flux_point, cell_integrator.GetGlobal(h))) {
             curr_face[f] = h;
             break;
           }
@@ -75,11 +75,11 @@ class Lobatto : public General<Part> {
   }
 
   static constexpr bool kLocal = Projection::kLocal;
-  static Scalar GetWeight(const Integrator &gauss, int q) requires(kLocal) {
-    return gauss.GetLocalWeight(q);
+  static Scalar GetWeight(const Integrator &integrator, int q) requires(kLocal) {
+    return integrator.GetLocalWeight(q);
   }
-  static Scalar GetWeight(const Integrator &gauss, int q) requires(!kLocal) {
-    return gauss.GetGlobalWeight(q);
+  static Scalar GetWeight(const Integrator &integrator, int q) requires(!kLocal) {
+    return integrator.GetGlobalWeight(q);
   }
   using FluxMatrix = typename Riemann::FluxMatrix;
   using CellToFlux = typename Base::CellToFlux;
@@ -87,13 +87,13 @@ class Lobatto : public General<Part> {
       const Cell &cell, int q) requires(kLocal) {
     auto flux = cell_to_flux(cell, q);
     flux = cell.projection().GlobalFluxToLocalFlux(flux, q);
-    flux *= GetWeight(cell.gauss(), q);
+    flux *= GetWeight(cell.integrator(), q);
     return flux;
   }
   static FluxMatrix GetWeightedFluxMatrix(CellToFlux cell_to_flux,
       const Cell &cell, int q) requires(!kLocal) {
     auto flux = cell_to_flux(cell, q);
-    flux *= GetWeight(cell.gauss(), q);
+    flux *= GetWeight(cell.integrator(), q);
     return flux;
   }
 
@@ -127,9 +127,9 @@ class Lobatto : public General<Part> {
     for (const Cell &cell : this->part().GetLocalCells()) {
       auto i_cell = cell.id();
       Scalar *data = this->AddCellDataOffset(&residual, i_cell);
-      const auto &gauss = cell.gauss();
-      for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
-        auto scale = 1.0 / GetWeight(gauss, q);
+      const auto &integrator = cell.integrator();
+      for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
+        auto scale = 1.0 / GetWeight(integrator, q);
         data = cell.projection().ScaleValueAt(scale, data);
       }
       assert(data == residual.data() + residual.size()
@@ -141,8 +141,8 @@ class Lobatto : public General<Part> {
  protected:  // override virtual methods defined in Base
   void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
       Scalar *data) const override {
-    const auto &gauss = cell.gauss();
-    for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
+    const auto &integrator = cell.integrator();
+    for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
       auto flux = GetWeightedFluxMatrix(cell_to_flux, cell, q);
       auto const &grad = cell.projection().GetBasisGradients(q);
       Coeff prod = flux * grad;
@@ -155,20 +155,20 @@ class Lobatto : public General<Part> {
   }
   void AddFluxOnLocalFaces(Column *residual) const override {
     for (const Face &face : this->part().GetLocalFaces()) {
-      const auto &gauss = face.gauss();
+      const auto &integrator = face.integrator();
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
       Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
       Scalar *sharer_data = this->AddCellDataOffset(residual, sharer.id());
       auto &i_node_on_holder = i_node_on_holder_[face.id()];
       auto &i_node_on_sharer = i_node_on_sharer_[face.id()];
-      for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+      for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
         auto c_holder = i_node_on_holder[f];
         auto c_sharer = i_node_on_sharer[f];
         Value u_holder = holder.projection().GetValue(c_holder);
         Value u_sharer = sharer.projection().GetValue(c_sharer);
         Value flux = face.riemann(f).GetFluxUpwind(u_holder, u_sharer);
-        flux *= gauss.GetGlobalWeight(f);
+        flux *= integrator.GetGlobalWeight(f);
         holder.projection().MinusValue(flux, holder_data, c_holder);
         sharer.projection().AddValueTo(flux, sharer_data, c_sharer);
       }
@@ -176,19 +176,19 @@ class Lobatto : public General<Part> {
   }
   void AddFluxOnGhostFaces(Column *residual) const override {
     for (const Face &face : this->part().GetGhostFaces()) {
-      const auto &gauss = face.gauss();
+      const auto &integrator = face.integrator();
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
       Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
       auto &i_node_on_holder = i_node_on_holder_[face.id()];
       auto &i_node_on_sharer = i_node_on_sharer_[face.id()];
-      for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+      for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
         auto c_holder = i_node_on_holder[f];
         auto c_sharer = i_node_on_sharer[f];
         Value u_holder = holder.projection().GetValue(c_holder);
         Value u_sharer = sharer.projection().GetValue(c_sharer);
         Value flux = face.riemann(f).GetFluxUpwind(u_holder, u_sharer);
-        flux *= gauss.GetGlobalWeight(f);
+        flux *= integrator.GetGlobalWeight(f);
         holder.projection().MinusValue(flux, holder_data, c_holder);
       }
     }
@@ -196,15 +196,15 @@ class Lobatto : public General<Part> {
   void AddFluxOnInviscidWalls(Column *residual) const override {
     for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
-        const auto &gauss = face.gauss();
+        const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
-        for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+        for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_holder = holder.projection().GetValue(c_holder);
           Value flux = face.riemann(f).GetFluxOnInviscidWall(u_holder);
-          flux *= gauss.GetGlobalWeight(f);
+          flux *= integrator.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
         }
       }
@@ -213,15 +213,15 @@ class Lobatto : public General<Part> {
   void AddFluxOnSupersonicOutlets(Column *residual) const override {
     for (const auto &name : this->supersonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
-        const auto &gauss = face.gauss();
+        const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
-        for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+        for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_holder = holder.projection().GetValue(c_holder);
           Value flux = face.riemann(f).GetFluxOnSupersonicOutlet(u_holder);
-          flux *= gauss.GetGlobalWeight(f);
+          flux *= integrator.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
         }
       }
@@ -230,15 +230,15 @@ class Lobatto : public General<Part> {
   void AddFluxOnSupersonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->supersonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
-        const auto &gauss = face.gauss();
+        const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
-        for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+        for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
-          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
+          Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
-          flux *= gauss.GetGlobalWeight(f);
+          flux *= integrator.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
         }
       }
@@ -247,16 +247,16 @@ class Lobatto : public General<Part> {
   void AddFluxOnSubsonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
-        const auto &gauss = face.gauss();
+        const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
-        for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+        for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.projection().GetValue(c_holder);
-          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
+          Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSubsonicInlet(u_inner, u_given);
-          flux *= gauss.GetGlobalWeight(f);
+          flux *= integrator.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
         }
       }
@@ -265,16 +265,16 @@ class Lobatto : public General<Part> {
   void AddFluxOnSubsonicOutlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
-        const auto &gauss = face.gauss();
+        const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
-        for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+        for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.projection().GetValue(c_holder);
-          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
+          Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSubsonicOutlet(u_inner, u_given);
-          flux *= gauss.GetGlobalWeight(f);
+          flux *= integrator.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
         }
       }
@@ -283,16 +283,16 @@ class Lobatto : public General<Part> {
   void AddFluxOnSmartBoundaries(Column *residual) const override {
     for (auto &[name, func] : this->smart_boundary_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
-        const auto &gauss = face.gauss();
+        const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
-        for (int f = 0, n = gauss.CountPoints(); f < n; ++f) {
+        for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.projection().GetValue(c_holder);
-          Value u_given = func(gauss.GetGlobal(f), this->t_curr_);
+          Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSmartBoundary(u_inner, u_given);
-          flux *= gauss.GetGlobalWeight(f);
+          flux *= integrator.GetGlobalWeight(f);
           holder.projection().MinusValue(flux, holder_data, c_holder);
         }
       }

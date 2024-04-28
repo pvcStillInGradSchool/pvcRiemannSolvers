@@ -85,18 +85,18 @@ TEST_F(TestBasisOrthoNormal, OnTriangle) {
   using Coord = Integrator::Global;
   Coord p0{0, 0}, p1{3, 0}, p2{0, 3};
   auto coordinate = Coordinate{ p0, p1, p2 };
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
-  auto basis = Basis(gauss);
-  EXPECT_DOUBLE_EQ(gauss.area(), basis.Measure());
+  auto basis = Basis(integrator);
+  EXPECT_DOUBLE_EQ(integrator.area(), basis.Measure());
   std::cout << basis.coeff() << std::endl;
   auto area = mini::integrator::Integrate(
-        [](const Coord &){ return 1.0; }, basis.gauss());
+        [](const Coord &){ return 1.0; }, basis.integrator());
   EXPECT_DOUBLE_EQ(basis.Measure(), area);
   auto f = [&basis](const Coord &coord){
       return Basis::MatNxN(basis(coord) * basis(coord).transpose());
   };
-  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.gauss())
+  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.integrator())
       - Basis::MatNxN::Identity();
   EXPECT_NEAR(diff.norm(), 0.0, 1e-13);
 }
@@ -107,18 +107,18 @@ TEST_F(TestBasisOrthoNormal, OnQuadrangle) {
   using Coord = Integrator::Global;
   Coord p0{-1, -1}, p1{+1, -1}, p2{+1, +1}, p3{-1, +1};
   auto coordinate = Coordinate(p0, p1, p2, p3);
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
-  auto basis = Basis(gauss);
-  EXPECT_DOUBLE_EQ(gauss.area(), basis.Measure());
+  auto basis = Basis(integrator);
+  EXPECT_DOUBLE_EQ(integrator.area(), basis.Measure());
   std::cout << basis.coeff() << std::endl;
   auto area = mini::integrator::Integrate(
-        [](const Coord &){ return 1.0; }, basis.gauss());
+        [](const Coord &){ return 1.0; }, basis.integrator());
   EXPECT_DOUBLE_EQ(basis.Measure(), area);
   auto f = [&basis](const Coord &coord){
       return Basis::MatNxN(basis(coord) * basis(coord).transpose());
   };
-  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.gauss())
+  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.integrator())
       - Basis::MatNxN::Identity();
   EXPECT_NEAR(diff.norm(), 0.0, 1e-14);
 }
@@ -128,18 +128,18 @@ TEST_F(TestBasisOrthoNormal, OnTetrahedron) {
   using Coord = Integrator::Global;
   Coord p0{0, 0, 0}, p1{3, 0, 0}, p2{0, 3, 0}, p3{0, 0, 3};
   auto coordinate = Coordinate(p0, p1, p2, p3);
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
-  auto basis = Basis(gauss);
-  EXPECT_DOUBLE_EQ(gauss.volume(), basis.Measure());
+  auto basis = Basis(integrator);
+  EXPECT_DOUBLE_EQ(integrator.volume(), basis.Measure());
   std::cout << basis.coeff() << std::endl;
   auto volume = mini::integrator::Integrate(
-        [](const Coord &){ return 1.0; }, basis.gauss());
+        [](const Coord &){ return 1.0; }, basis.integrator());
   EXPECT_DOUBLE_EQ(basis.Measure(), volume);
   auto f = [&basis](const Coord &coord){
       return Basis::MatNxN(basis(coord) * basis(coord).transpose());
   };
-  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.gauss())
+  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.integrator())
       - Basis::MatNxN::Identity();
   EXPECT_NEAR(diff.norm(), 0.0, 1e-14);
 }
@@ -151,18 +151,18 @@ TEST_F(TestBasisOrthoNormal, OnHexahedron) {
   Coord p0{-1, -1, -1}, p1{+1, -1, -1}, p2{+1, +1, -1}, p3{-1, +1, -1},
         p4{-1, -1, +1}, p5{+1, -1, +1}, p6{+1, +1, +1}, p7{-1, +1, +1};
   auto coordinate = Coordinate{ p0, p1, p2, p3, p4, p5, p6, p7 };
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
-  auto basis = Basis(gauss);
-  EXPECT_DOUBLE_EQ(gauss.volume(), basis.Measure());
+  auto basis = Basis(integrator);
+  EXPECT_DOUBLE_EQ(integrator.volume(), basis.Measure());
   std::cout << basis.coeff() << std::endl;
   auto volume = mini::integrator::Integrate(
-        [](const Coord &){ return 1.0; }, basis.gauss());
+        [](const Coord &){ return 1.0; }, basis.integrator());
   EXPECT_DOUBLE_EQ(basis.Measure(), volume);
   auto f = [&basis](const Coord &coord){
       return Basis::MatNxN(basis(coord) * basis(coord).transpose());
   };
-  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.gauss())
+  Basis::MatNxN diff = mini::integrator::Integrate(f, basis.integrator())
       - Basis::MatNxN::Identity();
   EXPECT_NEAR(diff.norm(), 0.0, 1e-14);
 }

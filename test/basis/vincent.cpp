@@ -19,7 +19,7 @@ class TestBasisVincent : public ::testing::Test {
   using Vincent = mini::basis::Vincent<Scalar>;
 };
 TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
-  auto line_gauss = mini::integrator::Line<Scalar, 1, 6>(-1, 1);
+  auto line_integrator = mini::integrator::Line<Scalar, 1, 6>(-1, 1);
   for (int degree = 1; degree < 6; ++degree) {
     auto vincent = Vincent(degree, Vincent::DiscontinuousGalerkin(degree));
     // check values at ends
@@ -32,7 +32,7 @@ TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
       auto ip = mini::integrator::Innerprod(
           [&vincent](Scalar x){ return vincent.LocalToRightValue(x); },
           [l](Scalar x){ return std::legendre(l, x); },
-          line_gauss);
+          line_integrator);
       EXPECT_NEAR(ip, 0, 1e-15);
     }
     // check derivatives
@@ -48,7 +48,7 @@ TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
   }
 }
 TEST_F(TestBasisVincent, HuynhLumpingLobatto) {
-  auto line_gauss = mini::integrator::Line<Scalar, 1, 5>(-1, 1);
+  auto line_integrator = mini::integrator::Line<Scalar, 1, 5>(-1, 1);
   for (int degree = 1; degree < 6; ++degree) {
     auto vincent = Vincent(degree, Vincent::HuynhLumpingLobatto(degree));
     // check values at ends
@@ -61,7 +61,7 @@ TEST_F(TestBasisVincent, HuynhLumpingLobatto) {
       auto ip = mini::integrator::Innerprod(
           [&vincent](Scalar x){ return vincent.LocalToRightValue(x); },
           [l](Scalar x){ return std::legendre(l, x); },
-          line_gauss);
+          line_integrator);
       EXPECT_NEAR(ip, 0, 1e-15);
     }
     // check derivatives

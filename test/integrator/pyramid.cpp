@@ -20,20 +20,20 @@ TEST_F(TestIntegratorPyramid, OnLinearElement) {
     Coord(+a, +b, 0), Coord(-a, +b, 0),
     Coord(0, 0, h)
   };
-  auto gauss = Integrator(coordinate);
-  static_assert(gauss.CellDim() == 3);
-  static_assert(gauss.PhysDim() == 3);
+  auto integrator = Integrator(coordinate);
+  static_assert(integrator.CellDim() == 3);
+  static_assert(integrator.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;
-  EXPECT_NEAR(gauss.volume(), volume, 1e-13);
-  EXPECT_EQ(gauss.CountPoints(), 48);
-  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, gauss),
+  EXPECT_NEAR(integrator.volume(), volume, 1e-13);
+  EXPECT_EQ(integrator.CountPoints(), 48);
+  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, integrator),
       volume * 2, 1e-13);
   auto f = [](Coord const& xyz){ return xyz[0]; };
   auto g = [](Coord const& xyz){ return xyz[1]; };
   auto fg = [](Coord const& xyz){ return xyz[0] * xyz[1]; };
-  EXPECT_DOUBLE_EQ(Innerprod(f, g, gauss), Integrate(fg, gauss));
-  EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
-  EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
+  EXPECT_DOUBLE_EQ(Innerprod(f, g, integrator), Integrate(fg, integrator));
+  EXPECT_DOUBLE_EQ(Norm(f, integrator), std::sqrt(Innerprod(f, f, integrator)));
+  EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 TEST_F(TestIntegratorPyramid, OnQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid13<double>;
@@ -47,20 +47,20 @@ TEST_F(TestIntegratorPyramid, OnQuadraticElement) {
     Coord(-a/2, -b/2, h/2), Coord(+a/2, -b/2, h/2),
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
   };
-  auto gauss = Integrator(coordinate);
-  static_assert(gauss.CellDim() == 3);
-  static_assert(gauss.PhysDim() == 3);
+  auto integrator = Integrator(coordinate);
+  static_assert(integrator.CellDim() == 3);
+  static_assert(integrator.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;
-  EXPECT_NEAR(gauss.volume(), volume, 1e-13);
-  EXPECT_EQ(gauss.CountPoints(), 48);
-  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, gauss),
+  EXPECT_NEAR(integrator.volume(), volume, 1e-13);
+  EXPECT_EQ(integrator.CountPoints(), 48);
+  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, integrator),
       volume * 2, 1e-13);
   auto f = [](Coord const& xyz){ return xyz[0]; };
   auto g = [](Coord const& xyz){ return xyz[1]; };
   auto fg = [](Coord const& xyz){ return xyz[0] * xyz[1]; };
-  EXPECT_DOUBLE_EQ(Innerprod(f, g, gauss), Integrate(fg, gauss));
-  EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
-  EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
+  EXPECT_DOUBLE_EQ(Innerprod(f, g, integrator), Integrate(fg, integrator));
+  EXPECT_DOUBLE_EQ(Norm(f, integrator), std::sqrt(Innerprod(f, f, integrator)));
+  EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 TEST_F(TestIntegratorPyramid, On14NodeQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid14<double>;
@@ -75,20 +75,20 @@ TEST_F(TestIntegratorPyramid, On14NodeQuadraticElement) {
     Coord(+a/2, +b/2, h/2), Coord(-a/2, +b/2, h/2),
     Coord(0, 0, 0),
   };
-  auto gauss = Integrator(coordinate);
-  static_assert(gauss.CellDim() == 3);
-  static_assert(gauss.PhysDim() == 3);
+  auto integrator = Integrator(coordinate);
+  static_assert(integrator.CellDim() == 3);
+  static_assert(integrator.PhysDim() == 3);
   auto volume = (a + a) * (b + b) * h / 3;
-  EXPECT_NEAR(gauss.volume(), volume, 1e-13);
-  EXPECT_EQ(gauss.CountPoints(), 48);
-  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, gauss),
+  EXPECT_NEAR(integrator.volume(), volume, 1e-13);
+  EXPECT_EQ(integrator.CountPoints(), 48);
+  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, integrator),
       volume * 2, 1e-13);
   auto f = [](Coord const& xyz){ return xyz[0]; };
   auto g = [](Coord const& xyz){ return xyz[1]; };
   auto fg = [](Coord const& xyz){ return xyz[0] * xyz[1]; };
-  EXPECT_DOUBLE_EQ(Innerprod(f, g, gauss), Integrate(fg, gauss));
-  EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
-  EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
+  EXPECT_DOUBLE_EQ(Innerprod(f, g, integrator), Integrate(fg, integrator));
+  EXPECT_DOUBLE_EQ(Norm(f, integrator), std::sqrt(Innerprod(f, f, integrator)));
+  EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 
 int main(int argc, char* argv[]) {

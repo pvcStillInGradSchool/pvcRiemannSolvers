@@ -40,22 +40,22 @@ class TestPolynomialHexahedronProjection : public ::testing::Test {
   using Mat11x10 = mini::algebra::Matrix<double, 11, 10>;
 };
 TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
-  // build a hexa-gauss
+  // build a hexa-integrator
   auto coordinate = Coordinate {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
   };
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   // build an orthonormal basis on it
-  auto basis = Basis(gauss);
+  auto basis = Basis(integrator);
   // check orthonormality
   double residual = (Integrate([&basis](const Coord& xyz) {
     auto col = basis(xyz);
     A prod = col * col.transpose();
     return prod;
-  }, gauss) - A::Identity()).norm();
+  }, integrator) - A::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-14);
-  // build another hexa-gauss
+  // build another hexa-integrator
   Coord shift = {-1, 2, 3};
   coordinate = Coordinate {
     coordinate.GetGlobal(0) + shift,
@@ -67,15 +67,15 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
     coordinate.GetGlobal(6) + shift,
     coordinate.GetGlobal(7) + shift,
   };
-  gauss = Integrator(coordinate);
+  integrator = Integrator(coordinate);
   // build another orthonormal basis on it
-  basis = Basis(gauss);
+  basis = Basis(integrator);
   // check orthonormality
   residual = (Integrate([&basis](const Coord& xyz) {
     auto col = basis(xyz);
     A prod = col * col.transpose();
     return prod;
-  }, gauss) - A::Identity()).norm();
+  }, integrator) - A::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-14);
 }
 TEST_F(TestPolynomialHexahedronProjection, Projection) {
@@ -83,8 +83,8 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(+1, +1, -1), Coord(-1, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
   };
-  auto gauss = Integrator(coordinate);
-  auto scalar_pf = ScalarPF(gauss);
+  auto integrator = Integrator(coordinate);
+  auto scalar_pf = ScalarPF(integrator);
   scalar_pf.Approximate([](Coord const& xyz){
     return xyz[0] * xyz[1] + xyz[2];
   });
@@ -97,7 +97,7 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
   EXPECT_EQ(scalar_pf.coeff(), scalar_coeff);
   scalar_pf.AddCoeffTo(scalar_coeff, scalar_pf.coeff().data());
   EXPECT_EQ(scalar_pf.coeff(), scalar_coeff * 2);
-  auto vector_pf = VectorPF(gauss);
+  auto vector_pf = VectorPF(integrator);
   vector_pf.Approximate([](Coord const& xyz) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     Mat11x1 func(0, 1,
@@ -159,7 +159,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, StaticMethods) {
   }
 }
 TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
-  // build a hexa-gauss and a Lagrange basis on it
+  // build a hexa-integrator and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
   auto coordinate = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
@@ -167,18 +167,18 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
     Global(-a, -b, +c), Global(+a, -b, +c),
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   // build a vector function and its interpolation
   auto vector_func = [](Global const& xyz) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     Value value{ 0, 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
     return value;
   };
-  auto vector_interp = Interpolation(gauss);
+  auto vector_interp = Interpolation(integrator);
   vector_interp.Approximate(vector_func);
   // test values on nodes
   for (int ijk = 0; ijk < Basis::N; ++ijk) {
-    auto &global = vector_interp.gauss().GetGlobal(ijk);
+    auto &global = vector_interp.integrator().GetGlobal(ijk);
     auto value = vector_func(global);
     value -= vector_interp.GlobalToValue(global);
     EXPECT_NEAR(value.norm(), 0, 1e-13);
@@ -192,8 +192,8 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
     EXPECT_NEAR(value.norm(), 0, 1e-12);
   }
   // test value query methods
-  for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
-    Global global = vector_interp.gauss().GetGlobal(q);
+  for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
+    Global global = vector_interp.integrator().GetGlobal(q);
     Value value = vector_interp.GlobalToValue(global);
     EXPECT_NEAR((value - vector_interp.GetValue(q)).norm(), 0, 1e-13);
     vector_interp.SetValue(q, value);
@@ -213,7 +213,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
   using Local = typename Integrator::Local;
   std::srand(31415926);
   for (int i_cell = 1; i_cell > 0; --i_cell) {
-    // build a hexa-gauss and a Lagrange basis on it
+    // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
     auto coordinate = Coordinate {
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
@@ -225,7 +225,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
       Global(rand_f() + a, rand_f() + b, rand_f() + c),
       Global(rand_f() - a, rand_f() + b, rand_f() + c),
     };
-    auto gauss = Integrator(coordinate);
+    auto integrator = Integrator(coordinate);
     // build a vector function and its interpolation
     Value coeff = Value::Random();
     auto get_value = [&coeff](Global const& xyz) {
@@ -249,12 +249,12 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
       }
       return grad;
     };
-    auto interp = Interpolation(gauss);
+    auto interp = Interpolation(integrator);
     interp.Approximate(get_value);
     // test values and gradients on nodes
     for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
-      Local const &local = interp.gauss().GetLocal(ijk);
-      Global const &global = interp.gauss().GetGlobal(ijk);
+      Local const &local = interp.integrator().GetLocal(ijk);
+      Global const &global = interp.integrator().GetGlobal(ijk);
       Value value = interp.GetValue(ijk);
       EXPECT_NEAR((value - get_value(global)).norm(), 0, 1e-13);
       EXPECT_NEAR((value - interp.GlobalToValue(global)).norm(), 0, 1e-10);
@@ -282,7 +282,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
     for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
       Hessian hess = interp.GetGlobalHessian(ijk);
       // compare with O(h^2) finite difference derivatives
-      auto const &global = interp.gauss().GetGlobal(ijk);
+      auto const &global = interp.integrator().GetGlobal(ijk);
       auto x = global[X], y = global[Y], z = global[Z], h = 1e-5;
       Gradient grad_diff = (
           interp.GlobalToGlobalGradient(Global(x + h, y, z)) -
@@ -309,7 +309,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
   }
 }
 TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
-  // build a hexa-gauss and a Coordinate interpolation on it
+  // build a hexa-integrator and a Coordinate interpolation on it
   auto a = 2.0, b = 3.0, c = 4.0;
   auto cell_coordinate = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
@@ -317,25 +317,25 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
     Global(-a, -b, +c), Global(+a, -b, +c),
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
-  auto cell_gauss = Integrator(cell_coordinate);
-  auto interp = Interpolation(cell_gauss);
+  auto cell_integrator = Integrator(cell_coordinate);
+  auto interp = Interpolation(cell_integrator);
   using CoordinateOnFace = mini::coordinate::Quadrangle4<double, 3>;
   /* test on the x_local == +1 face */{
     auto face_coordinate = CoordinateOnFace {
       Global(+a, -b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(+a, -b, +c),
     };
-    auto face_gauss = mini::integrator::Quadrangle<3, IntegratorY, IntegratorZ>(face_coordinate);
-    auto const &face_gauss_ref = face_gauss;
+    auto face_integrator = mini::integrator::Quadrangle<3, IntegratorY, IntegratorZ>(face_coordinate);
+    auto const &face_integrator_ref = face_integrator;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 2);
-    for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobal(f);
+    for (int f = 0; f < face_integrator.CountPoints(); ++f) {
+      Global global = face_integrator_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), IntegratorX::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocal(ijk);
+        auto local = cell_integrator.GetLocal(ijk);
         EXPECT_EQ(local[0], IntegratorX::points[i]);
       }
     }
@@ -345,17 +345,17 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, -c), Global(-a, +b, -c),
       Global(-a, +b, +c), Global(-a, -b, +c),
     };
-    auto face_gauss = mini::integrator::Quadrangle<3, IntegratorY, IntegratorZ>(face_coordinate);
-    auto const &face_gauss_ref = face_gauss;
+    auto face_integrator = mini::integrator::Quadrangle<3, IntegratorY, IntegratorZ>(face_coordinate);
+    auto const &face_integrator_ref = face_integrator;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 4);
-    for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobal(f);
+    for (int f = 0; f < face_integrator.CountPoints(); ++f) {
+      Global global = face_integrator_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), IntegratorX::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocal(ijk);
+        auto local = cell_integrator.GetLocal(ijk);
         EXPECT_EQ(local[0], IntegratorX::points[i]);
       }
     }
@@ -365,17 +365,17 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, +b, -c), Global(+a, +b, -c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
-    auto face_gauss = mini::integrator::Quadrangle<3, IntegratorX, IntegratorZ>(face_coordinate);
-    auto const &face_gauss_ref = face_gauss;
+    auto face_integrator = mini::integrator::Quadrangle<3, IntegratorX, IntegratorZ>(face_coordinate);
+    auto const &face_integrator_ref = face_integrator;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 3);
-    for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobal(f);
+    for (int f = 0; f < face_integrator.CountPoints(); ++f) {
+      Global global = face_integrator_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), IntegratorY::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocal(ijk);
+        auto local = cell_integrator.GetLocal(ijk);
         EXPECT_EQ(local[1], IntegratorY::points[j]);
       }
     }
@@ -385,17 +385,17 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, -b, +c), Global(-a, -b, +c),
     };
-    auto face_gauss = mini::integrator::Quadrangle<3, IntegratorX, IntegratorZ>(face_coordinate);
-    auto const &face_gauss_ref = face_gauss;
+    auto face_integrator = mini::integrator::Quadrangle<3, IntegratorX, IntegratorZ>(face_coordinate);
+    auto const &face_integrator_ref = face_integrator;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 1);
-    for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobal(f);
+    for (int f = 0; f < face_integrator.CountPoints(); ++f) {
+      Global global = face_integrator_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), IntegratorY::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocal(ijk);
+        auto local = cell_integrator.GetLocal(ijk);
         EXPECT_EQ(local[1], IntegratorY::points[j]);
       }
     }
@@ -405,17 +405,17 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, +c), Global(+a, -b, +c),
       Global(+a, +b, +c), Global(-a, +b, +c),
     };
-    auto face_gauss = mini::integrator::Quadrangle<3, IntegratorX, IntegratorY>(face_coordinate);
-    auto const &face_gauss_ref = face_gauss;
+    auto face_integrator = mini::integrator::Quadrangle<3, IntegratorX, IntegratorY>(face_coordinate);
+    auto const &face_integrator_ref = face_integrator;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 5);
-    for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobal(f);
+    for (int f = 0; f < face_integrator.CountPoints(); ++f) {
+      Global global = face_integrator_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), IntegratorZ::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocal(ijk);
+        auto local = cell_integrator.GetLocal(ijk);
         EXPECT_EQ(local[2], IntegratorZ::points[k]);
       }
     }
@@ -425,17 +425,17 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       Global(-a, -b, -c), Global(+a, -b, -c),
       Global(+a, +b, -c), Global(-a, +b, -c),
     };
-    auto face_gauss = mini::integrator::Quadrangle<3, IntegratorX, IntegratorY>(face_coordinate);
-    auto const &face_gauss_ref = face_gauss;
+    auto face_integrator = mini::integrator::Quadrangle<3, IntegratorX, IntegratorY>(face_coordinate);
+    auto const &face_integrator_ref = face_integrator;
     int i_face = interp.FindFaceId(face_coordinate.center());
     EXPECT_EQ(i_face, 0);
-    for (int f = 0; f < face_gauss.CountPoints(); ++f) {
-      Global global = face_gauss_ref.GetGlobal(f);
+    for (int f = 0; f < face_integrator.CountPoints(); ++f) {
+      Global global = face_integrator_ref.GetGlobal(f);
       auto ijk_found = interp.FindCollinearPoints(global, i_face);
       EXPECT_EQ(ijk_found.size(), IntegratorZ::Q);
       for (int ijk : ijk_found) {
         auto [i, j, k] = interp.basis().index(ijk);
-        auto local = cell_gauss.GetLocal(ijk);
+        auto local = cell_integrator.GetLocal(ijk);
         EXPECT_EQ(local[2], IntegratorZ::points[k]);
       }
     }

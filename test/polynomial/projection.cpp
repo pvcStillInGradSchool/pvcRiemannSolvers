@@ -19,14 +19,14 @@ class TestProjection : public ::testing::Test {
   using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
   using Coord = typename Integrator::Global;
   Coordinate coordinate_;
-  Integrator gauss_;
+  Integrator integrator_;
 
   TestProjection() : coordinate_{
       Coord{-1, -1, -1}, Coord{+1, -1, -1},
       Coord{+1, +1, -1}, Coord{-1, +1, -1},
       Coord{-1, -1, +1}, Coord{+1, -1, +1},
       Coord{+1, +1, +1}, Coord{-1, +1, +1}
-    }, gauss_(coordinate_) {
+    }, integrator_(coordinate_) {
   }
 };
 
@@ -36,16 +36,16 @@ TEST_F(TestProjection, ScalarFunction) {
     return x * x + y * y + z * z;
   };
   using ProjFunc = mini::polynomial::Projection<double, 3, 2, 1>;
-  auto projection = ProjFunc(gauss_);
+  auto projection = ProjFunc(integrator_);
   projection.Approximate(func);
   static_assert(ProjFunc::K == 1);
   static_assert(ProjFunc::N == 10);
   EXPECT_NEAR(projection({0, 0, 0})[0], 0.0, 1e-14);
   EXPECT_NEAR(projection({0.3, 0.4, 0.5})[0], 0.5, 1e-14);
-  auto integral_f = mini::integrator::Integrate(func, gauss_);
+  auto integral_f = mini::integrator::Integrate(func, integrator_);
   auto integral_1 = mini::integrator::Integrate([](auto const &){
     return 1.0;
-  }, gauss_);
+  }, integrator_);
   EXPECT_NEAR(projection.average()[0], integral_f / integral_1, 1e-14);
 }
 TEST_F(TestProjection, VectorFunction) {
@@ -56,7 +56,7 @@ TEST_F(TestProjection, VectorFunction) {
     Value res = { 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
     return res;
   };
-  auto projection = ProjFunc(gauss_);
+  auto projection = ProjFunc(integrator_);
   projection.Approximate(func);
   static_assert(ProjFunc::K == 10);
   static_assert(ProjFunc::N == 10);
@@ -64,10 +64,10 @@ TEST_F(TestProjection, VectorFunction) {
   auto v_expect = Taylor::GetValue({0.3, 0.4, 0.5});
   Value res = v_actual - v_expect;
   EXPECT_NEAR(res.norm(), 0.0, 1e-14);
-  auto integral_f = mini::integrator::Integrate(func, gauss_);
+  auto integral_f = mini::integrator::Integrate(func, integrator_);
   auto integral_1 = mini::integrator::Integrate([](auto const &){
     return 1.0;
-  }, gauss_);
+  }, integrator_);
   res = projection.average() - integral_f / integral_1;
   EXPECT_NEAR(res.norm(), 0.0, 1e-14);
 }
@@ -81,7 +81,7 @@ TEST_F(TestProjection, CoeffConsistency) {
         std::exp(y * z), std::log(1 + z * z) };
     return res;
   };
-  auto projection = ProjFunc(gauss_);
+  auto projection = ProjFunc(integrator_);
   projection.Approximate(func);
   Coeff coeff_diff = projection.GetCoeffOnTaylorBasis()
       - projection.coeff() * projection.basis().coeff();
@@ -94,7 +94,7 @@ TEST_F(TestProjection, PartialDerivatives) {
   auto func = [](Coord const &point) {
     return Taylor::GetValue(point);
   };
-  auto projection = ProjFunc(gauss_);
+  auto projection = ProjFunc(integrator_);
   projection.Approximate(func);
   static_assert(ProjFunc::K == 10);
   static_assert(ProjFunc::N == 10);
@@ -135,7 +135,7 @@ TEST_F(TestProjection, ArithmaticOperations) {
     Value res = { 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
     return res;
   };
-  auto projection = ProjFunc(gauss_);
+  auto projection = ProjFunc(integrator_);
   projection.Approximate(func);
   using Wrapper = typename ProjFunc::Wrapper;
   auto projection_wrapper = Wrapper(projection);

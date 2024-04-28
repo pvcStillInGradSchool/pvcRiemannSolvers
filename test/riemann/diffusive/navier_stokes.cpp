@@ -149,7 +149,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   using Coeff = typename Interpolation::Coeff;
   using Value = typename Interpolation::Value;
   using Global = typename Integrator::Global;
-  // build a hexa-gauss and a Lagrange basis on it
+  // build a hexa-integrator and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
   auto coordinate = Coordinate {
     Global(-a, -b, -c), Global(+a, -b, -c),
@@ -157,8 +157,8 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
     Global(-a, -b, +c), Global(+a, -b, +c),
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
-  auto gauss = Integrator(coordinate);
-  auto interp = Interpolation(gauss);
+  auto integrator = Integrator(coordinate);
+  auto interp = Interpolation(integrator);
   // build a vector function and its interpolation
   Scalar rho = 1.29, p = 101325;
   NS::SetProperty(nu, prandtl);

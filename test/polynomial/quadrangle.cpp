@@ -24,25 +24,25 @@ TEST_F(TestQuadrangle4x4, OrthoNormal) {
   auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Integrator(coordinate);
-  auto basis = Basis(gauss);
+  auto integrator = Integrator(coordinate);
+  auto basis = Basis(integrator);
   using A = typename Basis::MatNxN;
   double residual = (Integrate([&basis](const Coord& xy) {
     auto col = basis(xy);
     A prod = col * col.transpose();
     return prod;
-  }, gauss) - A::Identity()).norm();
+  }, integrator) - A::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-14);
   auto x = left[0], y = left[1];
   coordinate = Coordinate {
     Coord(x-1, y-1), Coord(x+1, y-1), Coord(x+1, y+1), Coord(x-1, y+1)
   };
-  basis = Basis(gauss);
+  basis = Basis(integrator);
   residual = (Integrate([&basis](Coord const& xy) {
     auto col = basis(xy);
     A prod = col * col.transpose();
     return prod;
-  }, gauss) - A::Identity()).norm();
+  }, integrator) - A::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-12);
 }
 TEST_F(TestQuadrangle4x4, Projection) {
@@ -54,12 +54,12 @@ TEST_F(TestQuadrangle4x4, Projection) {
   auto coordinate = Coordinate {
     Coord(-1, -1), Coord(1, -1), Coord(1, 1), Coord(-1, 1)
   };
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   auto scalar_f = [](Coord const& xy){
     return xy[0] * xy[1];
   };
   using ScalarPF = mini::polynomial::Projection<double, 2, 2, 1>;
-  auto scalar_pf = ScalarPF(gauss);
+  auto scalar_pf = ScalarPF(integrator);
   scalar_pf.Approximate(scalar_f);
   using Mat1x6 = mini::algebra::Matrix<double, 1, 6>;
   double residual = (scalar_pf.GetCoeffOnTaylorBasis()
@@ -72,7 +72,7 @@ TEST_F(TestQuadrangle4x4, Projection) {
     return func;
   };
   using VectorPF = mini::polynomial::Projection<double, 2, 2, 7>;
-  auto vector_pf = VectorPF(gauss);
+  auto vector_pf = VectorPF(integrator);
   vector_pf.Approximate(vector_f);
   using Mat7x6 = mini::algebra::Matrix<double, 7, 6>;
   Mat7x6 exact_vector{

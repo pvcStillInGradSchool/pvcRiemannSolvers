@@ -30,7 +30,7 @@ template <class Part>
 Scalar Norm1(Part const &part){
   auto norm_1 = 0.0;
   for (auto &cell : part.GetLocalCells()) {
-    for (int i = 0, n = cell.gauss().CountPoints(); i < n; ++i) {
+    for (int i = 0, n = cell.integrator().CountPoints(); i < n; ++i) {
       auto v = cell.projection().GetValue(i);
       norm_1 += std::abs(v[0]) + std::abs(v[1]);
     }

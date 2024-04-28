@@ -18,25 +18,25 @@ TEST_F(TestIntegratorWedge, OnLinearElement) {
     Coord(-1, -1, -1), Coord(+1, -1, -1), Coord(0, +1, -1),
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(0, +1, +1)
   };
-  auto gauss = Integrator(coordinate);
-  static_assert(gauss.CellDim() == 3);
-  static_assert(gauss.PhysDim() == 3);
-  EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);
-  EXPECT_EQ(gauss.CountPoints(), 64);
+  auto integrator = Integrator(coordinate);
+  static_assert(integrator.CellDim() == 3);
+  static_assert(integrator.PhysDim() == 3);
+  EXPECT_NEAR(integrator.volume(), 4.0, 1e-14);
+  EXPECT_EQ(integrator.CountPoints(), 64);
   auto local_weight_sum = 0.0;
-  for (int i = 0; i < gauss.CountPoints(); ++i) {
-    local_weight_sum += gauss.GetLocalWeight(i);
+  for (int i = 0; i < integrator.CountPoints(); ++i) {
+    local_weight_sum += integrator.GetLocalWeight(i);
   }
-  EXPECT_NEAR(Quadrature([](Coord const&){ return 2.0; }, gauss),
+  EXPECT_NEAR(Quadrature([](Coord const&){ return 2.0; }, integrator),
       local_weight_sum * 2, 1e-15);
-  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, gauss),
-      gauss.volume() * 2, 1e-15);
+  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, integrator),
+      integrator.volume() * 2, 1e-15);
   auto f = [](Coord const& xyz){ return xyz[0]; };
   auto g = [](Coord const& xyz){ return xyz[1]; };
   auto h = [](Coord const& xyz){ return xyz[0] * xyz[1]; };
-  EXPECT_DOUBLE_EQ(Innerprod(f, g, gauss), Integrate(h, gauss));
-  EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
-  EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
+  EXPECT_DOUBLE_EQ(Innerprod(f, g, integrator), Integrate(h, integrator));
+  EXPECT_DOUBLE_EQ(Norm(f, integrator), std::sqrt(Innerprod(f, f, integrator)));
+  EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 TEST_F(TestIntegratorWedge, OnQuadraticElement) {
   using Integrator = mini::integrator::Wedge<double, 16, 4>;
@@ -49,25 +49,25 @@ TEST_F(TestIntegratorWedge, OnQuadraticElement) {
     Coord(-1, -1, 0), Coord(+1, -1, 0), Coord(0, +1, 0),
     Coord(0, -1, +1), Coord(0.5, 0, +1), Coord(-0.5, 0, +1),
   };
-  auto gauss = Integrator(coordinate);
-  static_assert(gauss.CellDim() == 3);
-  static_assert(gauss.PhysDim() == 3);
-  EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);
-  EXPECT_EQ(gauss.CountPoints(), 64);
+  auto integrator = Integrator(coordinate);
+  static_assert(integrator.CellDim() == 3);
+  static_assert(integrator.PhysDim() == 3);
+  EXPECT_NEAR(integrator.volume(), 4.0, 1e-14);
+  EXPECT_EQ(integrator.CountPoints(), 64);
   auto local_weight_sum = 0.0;
-  for (int i = 0; i < gauss.CountPoints(); ++i) {
-    local_weight_sum += gauss.GetLocalWeight(i);
+  for (int i = 0; i < integrator.CountPoints(); ++i) {
+    local_weight_sum += integrator.GetLocalWeight(i);
   }
-  EXPECT_NEAR(Quadrature([](Coord const&){ return 2.0; }, gauss),
+  EXPECT_NEAR(Quadrature([](Coord const&){ return 2.0; }, integrator),
       local_weight_sum * 2, 1e-15);
-  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, gauss),
-      gauss.volume() * 2, 1e-15);
+  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, integrator),
+      integrator.volume() * 2, 1e-15);
   auto f = [](Coord const& xyz){ return xyz[0]; };
   auto g = [](Coord const& xyz){ return xyz[1]; };
   auto h = [](Coord const& xyz){ return xyz[0] * xyz[1]; };
-  EXPECT_DOUBLE_EQ(Innerprod(f, g, gauss), Integrate(h, gauss));
-  EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
-  EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
+  EXPECT_DOUBLE_EQ(Innerprod(f, g, integrator), Integrate(h, integrator));
+  EXPECT_DOUBLE_EQ(Norm(f, integrator), std::sqrt(Innerprod(f, f, integrator)));
+  EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 TEST_F(TestIntegratorWedge, On18NodeQuadraticElement) {
   using Integrator = mini::integrator::Wedge<double, 16, 4>;
@@ -81,25 +81,25 @@ TEST_F(TestIntegratorWedge, On18NodeQuadraticElement) {
     Coord(0, -1, +1), Coord(0.5, 0, +1), Coord(-0.5, 0, +1),
     Coord(0, -1, 0), Coord(0.5, 0, 0), Coord(-0.5, 0, 0),
   };
-  auto gauss = Integrator(coordinate);
-  static_assert(gauss.CellDim() == 3);
-  static_assert(gauss.PhysDim() == 3);
-  EXPECT_NEAR(gauss.volume(), 4.0, 1e-14);
-  EXPECT_EQ(gauss.CountPoints(), 64);
+  auto integrator = Integrator(coordinate);
+  static_assert(integrator.CellDim() == 3);
+  static_assert(integrator.PhysDim() == 3);
+  EXPECT_NEAR(integrator.volume(), 4.0, 1e-14);
+  EXPECT_EQ(integrator.CountPoints(), 64);
   auto local_weight_sum = 0.0;
-  for (int i = 0; i < gauss.CountPoints(); ++i) {
-    local_weight_sum += gauss.GetLocalWeight(i);
+  for (int i = 0; i < integrator.CountPoints(); ++i) {
+    local_weight_sum += integrator.GetLocalWeight(i);
   }
-  EXPECT_NEAR(Quadrature([](Coord const&){ return 2.0; }, gauss),
+  EXPECT_NEAR(Quadrature([](Coord const&){ return 2.0; }, integrator),
       local_weight_sum * 2, 1e-15);
-  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, gauss),
-      gauss.volume() * 2, 1e-15);
+  EXPECT_NEAR(Integrate([](Coord const&){ return 2.0; }, integrator),
+      integrator.volume() * 2, 1e-15);
   auto f = [](Coord const& xyz){ return xyz[0]; };
   auto g = [](Coord const& xyz){ return xyz[1]; };
   auto h = [](Coord const& xyz){ return xyz[0] * xyz[1]; };
-  EXPECT_DOUBLE_EQ(Innerprod(f, g, gauss), Integrate(h, gauss));
-  EXPECT_DOUBLE_EQ(Norm(f, gauss), std::sqrt(Innerprod(f, f, gauss)));
-  EXPECT_DOUBLE_EQ(Norm(g, gauss), std::sqrt(Innerprod(g, g, gauss)));
+  EXPECT_DOUBLE_EQ(Innerprod(f, g, integrator), Integrate(h, integrator));
+  EXPECT_DOUBLE_EQ(Norm(f, integrator), std::sqrt(Innerprod(f, f, integrator)));
+  EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 
 int main(int argc, char* argv[]) {

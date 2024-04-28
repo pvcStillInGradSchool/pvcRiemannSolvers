@@ -130,7 +130,7 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
         auto &local_on_neighbor_i = local_on_neighbors_of_cell_i.emplace_back();
         auto const &coordinate_i = cell_ptr->adj_cells_[i_neighbor]->coordinate();
         for (int i_node = 0; i_node < Cell::N; ++i_node) {
-          auto &xyz = cell_ptr->gauss().GetGlobal(i_node);
+          auto &xyz = cell_ptr->integrator().GetGlobal(i_node);
           std::printf("%d %ld %d %d\n", part().mpi_rank(), cell_ptr->id(), i_neighbor, i_node);
           local_on_neighbor_i[i_node] = coordinate_i.GlobalToLocal(xyz);
         }

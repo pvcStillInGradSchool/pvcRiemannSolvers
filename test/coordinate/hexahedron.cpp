@@ -119,7 +119,7 @@ TEST_F(TestCoordinateHexahedron8, CoordinateMap) {
 TEST_F(TestCoordinateHexahedron8, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
-    // build a hexa-gauss and a Lagrange basis on it
+    // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
     auto cell = Coordinate {
       Global(rand_f() - a, rand_f() - b, rand_f() - c),
@@ -352,7 +352,7 @@ TEST_F(TestCoordinateHexahedron20, CoordinateMap) {
 TEST_F(TestCoordinateHexahedron20, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
-    // build a hexa-gauss and a Lagrange basis on it
+    // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
     auto cell = Coordinate {
       // corner nodes on the bottom face
@@ -622,7 +622,7 @@ TEST_F(TestCoordinateHexahedron27, CoordinateMap) {
 TEST_F(TestCoordinateHexahedron27, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
-    // build a hexa-gauss and a Lagrange basis on it
+    // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
     auto cell = Coordinate {
       // corner nodes on the bottom face
@@ -909,7 +909,7 @@ TEST_F(TestCoordinateHexahedron26, CoordinateMap) {
 TEST_F(TestCoordinateHexahedron26, GetJacobianGradient) {
   std::srand(31415926);
   for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
-    // build a hexa-gauss and a Lagrange basis on it
+    // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
     auto cell = Coordinate {
       // corner nodes on the bottom face

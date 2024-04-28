@@ -117,23 +117,23 @@ struct Face {
   using Global = typename Cell::Global;
 
   CoordinateUptr coordinate_ptr_;
-  IntegratorUptr gauss_ptr_;
+  IntegratorUptr integrator_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
   std::vector<Riemann> riemann_;
   Int id_{-1};
 
-  Face(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&gauss_ptr,
+  Face(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&integrator_ptr,
       Cell *holder, Cell *sharer, Int id = 0)
       : coordinate_ptr_(std::move(coordinate_ptr)),
-        gauss_ptr_(std::move(gauss_ptr)),
+        integrator_ptr_(std::move(integrator_ptr)),
         holder_(holder), sharer_(sharer),
         holder_to_sharer_(-holder->center()),
-        riemann_(gauss_ptr_->CountPoints()),
+        riemann_(integrator_ptr_->CountPoints()),
         id_(id) {
     holder_to_sharer_ += sharer ? sharer->center() : center();
     for (int i = 0, n = riemann_.size(); i < n; ++i) {
-      riemann_[i].Rotate(gauss().GetNormalFrame(i));
+      riemann_[i].Rotate(integrator().GetNormalFrame(i));
     }
   }
   Face(const Face &) = delete;
@@ -142,9 +142,9 @@ struct Face {
   Face &operator=(Face &&) noexcept = default;
   ~Face() noexcept = default;
 
-  Integrator const &gauss() const {
-    assert(gauss_ptr_);
-    return *gauss_ptr_;
+  Integrator const &integrator() const {
+    assert(integrator_ptr_);
+    return *integrator_ptr_;
   }
   Coordinate const &coordinate() const {
     assert(coordinate_ptr_);
@@ -154,10 +154,10 @@ struct Face {
     return riemann_[i];
   }
   Global center() const {
-    return gauss().center();
+    return integrator().center();
   }
   Scalar area() const {
-    return gauss().area();
+    return integrator().area();
   }
   Int id() const {
     return id_;
@@ -211,15 +211,15 @@ struct Cell {
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
   CoordinateUptr coordinate_ptr_;
-  IntegratorUptr gauss_ptr_;
+  IntegratorUptr integrator_ptr_;
   ProjectionUptr projection_ptr_;
   Int metis_id{-1}, id_{-1};
   bool inner_ = true;
 
-  Cell(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&gauss_ptr, Int m_cell)
+  Cell(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&integrator_ptr, Int m_cell)
       : coordinate_ptr_(std::move(coordinate_ptr)),
-        gauss_ptr_(std::move(gauss_ptr)),
-        projection_ptr_(std::make_unique<Proj>(*gauss_ptr_)),
+        integrator_ptr_(std::move(integrator_ptr)),
+        projection_ptr_(std::make_unique<Proj>(*integrator_ptr_)),
         metis_id(m_cell) {
   }
   Cell() = default;
@@ -230,7 +230,7 @@ struct Cell {
   ~Cell() noexcept = default;
 
   Scalar volume() const {
-    return gauss_ptr_->volume();
+    return integrator_ptr_->volume();
   }
   Int id() const {
     return id_;
@@ -242,11 +242,11 @@ struct Cell {
     return !inner_;
   }
   Global const &center() const {
-    return gauss().center();
+    return integrator().center();
   }
-  Integrator const &gauss() const {
-    assert(gauss_ptr_);
-    return *gauss_ptr_;
+  Integrator const &integrator() const {
+    assert(integrator_ptr_);
+    return *integrator_ptr_;
   }
   Coordinate const &coordinate() const {
     assert(coordinate_ptr_);
@@ -670,8 +670,8 @@ class Part {
     auto lagrange = std::make_unique<CoordinateOnTetrahedron>(
         GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]));
-    auto gauss = std::make_unique<IntegratorOnTetrahedron>(*lagrange);
-    return { std::move(lagrange), std::move(gauss) };
+    auto integrator = std::make_unique<IntegratorOnTetrahedron>(*lagrange);
+    return { std::move(lagrange), std::move(integrator) };
   }
   std::pair< std::unique_ptr<CoordinateOnPyramid>,
              std::unique_ptr<IntegratorOnPyramid> >
@@ -682,8 +682,8 @@ class Part {
         GetCoord(i_zone, i_node_list[4]),
     };
     auto lagrange = std::make_unique<CoordinateOnPyramid>(coords);
-    auto gauss = std::make_unique<IntegratorOnPyramid>(*lagrange);
-    return { std::move(lagrange), std::move(gauss) };
+    auto integrator = std::make_unique<IntegratorOnPyramid>(*lagrange);
+    return { std::move(lagrange), std::move(integrator) };
   }
   std::pair< std::unique_ptr<CoordinateOnWedge>,
              std::unique_ptr<IntegratorOnWedge> >
@@ -694,8 +694,8 @@ class Part {
         GetCoord(i_zone, i_node_list[4]), GetCoord(i_zone, i_node_list[5]),
     };
     auto lagrange = std::make_unique<CoordinateOnWedge>(coords);
-    auto gauss = std::make_unique<IntegratorOnWedge>(*lagrange);
-    return { std::move(lagrange), std::move(gauss) };
+    auto integrator = std::make_unique<IntegratorOnWedge>(*lagrange);
+    return { std::move(lagrange), std::move(integrator) };
   }
   std::pair< std::unique_ptr<CoordinateOnHexahedron>,
              std::unique_ptr<IntegratorOnHexahedron> >
@@ -707,8 +707,8 @@ class Part {
         GetCoord(i_zone, i_node_list[6]), GetCoord(i_zone, i_node_list[7]),
     };
     auto lagrange = std::make_unique<CoordinateOnHexahedron>(coords);
-    auto gauss = std::make_unique<IntegratorOnHexahedron>(*lagrange);
-    return { std::move(lagrange), std::move(gauss) };
+    auto integrator = std::make_unique<IntegratorOnHexahedron>(*lagrange);
+    return { std::move(lagrange), std::move(integrator) };
   }
   std::pair< typename Cell::CoordinateUptr, typename Cell::IntegratorUptr >
   BuildIntegratorForCell(int npe, int i_zone, Int const *i_node_list) const {
@@ -735,8 +735,8 @@ class Part {
         GetCoord(i_zone, i_node_list[2]),
     };
     auto lagrange = std::make_unique<CoordinateOnTriangle>(coords);
-    auto gauss = std::make_unique<IntegratorOnTriangle>(*lagrange);
-    return { std::move(lagrange), std::move(gauss) };
+    auto integrator = std::make_unique<IntegratorOnTriangle>(*lagrange);
+    return { std::move(lagrange), std::move(integrator) };
   }
   std::pair< std::unique_ptr<CoordinateOnQuadrangle>,
              std::unique_ptr<IntegratorOnQuadrangle> >
@@ -746,8 +746,8 @@ class Part {
         GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
     };
     auto lagrange = std::make_unique<CoordinateOnQuadrangle>(coords);
-    auto gauss = std::make_unique<IntegratorOnQuadrangle>(*lagrange);
-    return { std::move(lagrange), std::move(gauss) };
+    auto integrator = std::make_unique<IntegratorOnQuadrangle>(*lagrange);
+    return { std::move(lagrange), std::move(integrator) };
   }
   std::pair< typename Face::CoordinateUptr, typename Face::IntegratorUptr >
   BuildIntegratorForFace(int npe, int i_zone, Int const *i_node_list) const {
@@ -811,10 +811,10 @@ class Part {
       local_cells_[i_zone][i_sect] = std::move(section);
       for (int i_cell = head; i_cell < tail; ++i_cell) {
         auto *i_node_list = &nodes[(i_cell - head) * npe];
-        auto [coordinate_uptr, gauss_uptr]
+        auto [coordinate_uptr, integrator_uptr]
             = BuildIntegratorForCell(npe, i_zone, i_node_list);
         auto cell = Cell(std::move(coordinate_uptr),
-            std::move(gauss_uptr), metis_ids[i_cell]);
+            std::move(integrator_uptr), metis_ids[i_cell]);
         local_cells_[i_zone][i_sect][i_cell] = std::move(cell);
       }
     }
@@ -954,10 +954,10 @@ class Part {
             GhostCellIndex(i_source, index + 1, npe));
         int i_zone = recv_buf[index++];
         auto *i_node_list = &recv_buf[index];
-        auto [coordinate_uptr, gauss_uptr]
+        auto [coordinate_uptr, integrator_uptr]
             = BuildIntegratorForCell(npe, i_zone, i_node_list);
         auto cell = Cell(std::move(coordinate_uptr),
-            std::move(gauss_uptr), m_cell);
+            std::move(integrator_uptr), m_cell);
         ghost_cells_[m_cell] = std::move(cell);
         index += npe;
       }
@@ -1028,10 +1028,10 @@ class Part {
       auto *face_node_list = common_nodes.data();
       coordinate::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
-      auto [coordinate_uptr, gauss_uptr]
+      auto [coordinate_uptr, integrator_uptr]
           = BuildIntegratorForFace(face_npe, i_zone, face_node_list);
       auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
-          std::move(gauss_uptr), &holder, &sharer, local_faces_.size());
+          std::move(integrator_uptr), &holder, &sharer, local_faces_.size());
       holder.adj_faces_.emplace_back(face_uptr.get());
       sharer.adj_faces_.emplace_back(face_uptr.get());
       local_faces_.emplace_back(std::move(face_uptr));
@@ -1072,10 +1072,10 @@ class Part {
       auto *face_node_list = common_nodes.data();
       coordinate::SortNodesOnFace(holder.coordinate(), &holder_nodes[holder_head],
           face_node_list, face_npe);
-      auto [coordinate_uptr, gauss_uptr]
+      auto [coordinate_uptr, integrator_uptr]
           = BuildIntegratorForFace(face_npe, i_zone, face_node_list);
       auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
-          std::move(gauss_uptr), &holder, &sharer,
+          std::move(integrator_uptr), &holder, &sharer,
           local_faces_.size() + ghost_faces_.size());
       holder.adj_faces_.emplace_back(face_uptr.get());
       ghost_faces_.emplace_back(std::move(face_uptr));
@@ -1087,12 +1087,12 @@ class Part {
   Value MeasureL1Error(Callable &&exact_solution, Scalar t_curr) const {
     Value l1_error; l1_error.setZero();
     for (Cell const &cell : GetLocalCells()) {
-      auto &gauss = cell.gauss();
+      auto &integrator = cell.integrator();
       auto &projection = cell.projection();
-      for (int q = 0, n = gauss.CountPoints(); q < n; ++q) {
+      for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
         Value value = projection.GetValue(q);
-        value -= exact_solution(gauss.GetGlobal(q), t_curr);
-        value = value.cwiseAbs() * gauss.GetGlobalWeight(q);
+        value -= exact_solution(integrator.GetGlobal(q), t_curr);
+        value = value.cwiseAbs() * integrator.GetGlobalWeight(q);
         l1_error += value;
       }
     }
@@ -1529,13 +1529,13 @@ class Part {
             break;
           }
         }
-        auto [coordinate_uptr, gauss_uptr]
+        auto [coordinate_uptr, integrator_uptr]
             = BuildIntegratorForFace(npe, i_zone, face_node_list);
         auto face_uptr = std::make_unique<Face>(std::move(coordinate_uptr),
-            std::move(gauss_uptr), holder_ptr, nullptr, face_id++);
+            std::move(integrator_uptr), holder_ptr, nullptr, face_id++);
         // the face's normal vector always point from holder to the exterior
         assert((face_uptr->center() - holder_ptr->center()).dot(
-            face_uptr->gauss().GetNormalFrame(0)[0]) > 0);
+            face_uptr->integrator().GetNormalFrame(0)[0]) > 0);
         // holder_ptr->adj_faces_.emplace_back(face_uptr.get());
         faces.emplace_back(std::move(face_uptr));
       }

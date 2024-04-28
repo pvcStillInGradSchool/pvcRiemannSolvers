@@ -21,7 +21,7 @@ class TestTetrahedron : public ::testing::Test {
   using A = typename Basis::MatNxN;
 };
 TEST_F(TestTetrahedron, OrthoNormal) {
-  // build a tetra-gauss
+  // build a tetra-integrator
   auto coordinate = Coordinate {
     Coord(10, 10, 0), Coord(0, 10, 10),
     Coord(10, 0, 10), Coord(10, 10, 10)
@@ -36,7 +36,7 @@ TEST_F(TestTetrahedron, OrthoNormal) {
     return prod;
   }, tetra) - A::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-14);
-  // build another tetra-gauss
+  // build another tetra-integrator
   Coord shift = {10, 20, 30};
   coordinate = Coordinate {
     coordinate.GetGlobal(0) + shift,

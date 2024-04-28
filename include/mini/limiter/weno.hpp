@@ -110,7 +110,7 @@ auto GetSmoothness(const Projection &proj) {
     mat_pdv = mat_pdv.cwiseProduct(mat_pdv);
     return mat_pdv;
   };
-  auto integral = integrator::Integrate(mat_pdv_func, proj.gauss());
+  auto integral = integrator::Integrate(mat_pdv_func, proj.integrator());
   auto volume = proj.basis().Measure();
   return Smoothness<Scalar, K, P>::GetSmoothness(integral, volume);
 }

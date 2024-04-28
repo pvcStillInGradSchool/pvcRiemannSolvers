@@ -52,11 +52,11 @@ TEST_F(TestWenoLimiters, Smoothness) {
       Global{-1, -1, +1}, Global{+1, -1, +1},
       Global{+1, +1, +1}, Global{-1, +1, +1}
   };
-  auto gauss = Integrator(coordinate);
+  auto integrator = Integrator(coordinate);
   auto func = [](Coord const &point) {
     return Taylor::GetValue(point);
   };
-  auto projection = Projection(gauss);
+  auto projection = Projection(integrator);
   projection.Approximate(func);
   auto s_actual = mini::limiter::weno::GetSmoothness(projection);
   EXPECT_NEAR(s_actual[0], 0.0, 1e-14);
@@ -131,8 +131,8 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
     }
     auto coords = { p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7] };
     auto coordinate_uptr = std::make_unique<Coordinate>(coords);
-    auto gauss_ptr = std::make_unique<Integrator>(*coordinate_uptr);
-    cells.emplace_back(std::move(coordinate_uptr), std::move(gauss_ptr), i_cell);
+    auto integrator_ptr = std::make_unique<Integrator>(*coordinate_uptr);
+    cells.emplace_back(std::move(coordinate_uptr), std::move(integrator_ptr), i_cell);
     assert(&(cells[i_cell]) == &(cells.back()));
     cells[i_cell].Approximate(func);
   }

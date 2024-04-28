@@ -96,10 +96,10 @@ class OrthoNormal {
   using MatNxD = algebra::Matrix<Scalar, N, kDimensions>;
 
  public:
-  explicit OrthoNormal(const Integrator &gauss)
-      : gauss_ptr_(&gauss), basis_(gauss.center()) {
-    assert(gauss.PhysDim() == kDimensions);
-    OrthoNormalize(&basis_, gauss);
+  explicit OrthoNormal(const Integrator &integrator)
+      : integrator_ptr_(&integrator), basis_(integrator.center()) {
+    assert(integrator.PhysDim() == kDimensions);
+    OrthoNormalize(&basis_, integrator);
   }
   OrthoNormal() = default;
   OrthoNormal(const OrthoNormal &) = default;
@@ -114,8 +114,8 @@ class OrthoNormal {
   MatNxN const &coeff() const {
     return basis_.coeff();
   }
-  Integrator const &gauss() const {
-    return *gauss_ptr_;
+  Integrator const &integrator() const {
+    return *integrator_ptr_;
   }
   MatNx1 operator()(const Coord &global) const {
     auto local = global;
@@ -134,7 +134,7 @@ class OrthoNormal {
   }
 
  private:
-  Integrator const *gauss_ptr_;
+  Integrator const *integrator_ptr_;
   Linear basis_;
 };
 
