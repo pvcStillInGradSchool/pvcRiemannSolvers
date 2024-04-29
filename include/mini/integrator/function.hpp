@@ -15,19 +15,18 @@ namespace mini {
 namespace integrator {
 
 /**
- * @brief Perform Integratorian quadrature of a callable object on a Integrator object in the parametric space.
+ * @brief Integrate a callable object defined in parametric (local) coordinates by an Integrator object.
  * 
- * @tparam Callable the type of the integrand
+ * @tparam LocalToValue the type of the integrand
  * @tparam Integrator the type of the integrator
- * @param local_to_value the integrand using local coordinates as arguments
+ * @param local_to_value the integrand which takes local coordinates as arguments
  * @param integrator the Integrator object
- * @return auto the value of the integral
+ * @return the value of the integral
  */
-template <typename Callable, typename Integrator>
-auto Quadrature(Callable &&local_to_value, const Integrator &integrator) {
+template <typename LocalToValue, typename Integrator>
+auto Quadrature(LocalToValue &&local_to_value, const Integrator &integrator) {
   using Local = typename Integrator::Local;
-  static_assert(std::regular_invocable<Callable, Local>);
-  using Value = std::invoke_result_t<Callable, Local>;
+  using Value = std::invoke_result_t<LocalToValue, Local>;
   Value sum; algebra::SetZero(&sum);
   auto n = integrator.CountPoints();
   for (int i = 0; i < n; ++i) {
@@ -39,19 +38,18 @@ auto Quadrature(Callable &&local_to_value, const Integrator &integrator) {
 }
 
 /**
- * @brief Perform Integratorian quadrature of a callable object on a Integrator object in the physical space.
+ * @brief Integrate a callable object defined in physical (global) coordinates by an Integrator object.
  * 
- * @tparam Callable the type of the integrand
+ * @tparam GlobalToValue the type of the integrand
  * @tparam Integrator the type of the integrator
- * @param global_to_value the integrand using global coordinates as arguments
+ * @param global_to_value the integrand which takes global coordinates as arguments
  * @param integrator the Integrator object
- * @return auto the value of the integral
+ * @return the value of the integral
  */
-template <typename Callable, typename Integrator>
-auto Integrate(Callable &&global_to_value, const Integrator &integrator) {
+template <typename GlobalToValue, typename Integrator>
+auto Integrate(GlobalToValue &&global_to_value, const Integrator &integrator) {
   using Global = typename Integrator::Global;
-  static_assert(std::regular_invocable<Callable, Global>);
-  using Value = std::invoke_result_t<Callable, Global>;
+  using Value = std::invoke_result_t<GlobalToValue, Global>;
   Value sum; algebra::SetZero(&sum);
   auto n = integrator.CountPoints();
   for (int i = 0; i < n; ++i) {
@@ -63,7 +61,7 @@ auto Integrate(Callable &&global_to_value, const Integrator &integrator) {
 }
 
 /**
- * @brief Calculate the inner-product of two functions on a Integrator object.
+ * @brief Calculate the inner-product of two functions defined in physical (global) coordinates by an Integrator object.
  * 
  * @tparam Func1 the type of the first function
  * @tparam Func2 the type of the second function
@@ -71,7 +69,7 @@ auto Integrate(Callable &&global_to_value, const Integrator &integrator) {
  * @param f1 the first function
  * @param f2 the second function
  * @param integrator the Integrator object
- * @return auto the value of the innerproduct
+ * @return the value of the innerproduct
  */
 template <typename Func1, typename Func2, typename Integrator>
 auto Innerprod(Func1 &&f1, Func2 &&f2, const Integrator &integrator) {
@@ -84,17 +82,18 @@ auto Innerprod(Func1 &&f1, Func2 &&f2, const Integrator &integrator) {
 }
 
 /**
- * @brief Calculate the 2-norm of a function on a Integrator object.
+ * @brief Calculate the 2-norm of a scalar-valued function by an Integrator object.
  * 
- * @tparam Callable type of the function
+ * @tparam GlobalToScalar type of the function
  * @tparam Integrator the type of the integrator
- * @param f the function
+ * @param global_to_scalar the function
  * @param integrator the Integrator object
- * @return auto the value of the norm
+ * @return the value of the norm
  */
-template <typename Callable, typename Integrator>
-auto Norm(Callable &&f, const Integrator &integrator) {
-  auto ip = Innerprod(std::forward<Callable>(f), std::forward<Callable>(f),
+template <typename GlobalToScalar, typename Integrator>
+auto Norm(GlobalToScalar &&global_to_scalar, const Integrator &integrator) {
+  auto ip = Innerprod(
+      std::forward<GlobalToScalar>(global_to_scalar),std::forward<GlobalToScalar>(global_to_scalar),
       integrator);
   return std::sqrt(ip);
 }
