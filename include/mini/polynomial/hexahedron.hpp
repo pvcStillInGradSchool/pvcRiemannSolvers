@@ -59,6 +59,7 @@ class Hexahedron {
   using Basis = basis::lagrange::Hexahedron<Scalar, Px, Py, Pz>;
   static constexpr int N = Basis::N;
   static constexpr int K = kC;
+  static constexpr int D = 3;
 
  protected:
   using Mat6xN = algebra::Matrix<Scalar, 6, N>;

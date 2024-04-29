@@ -72,6 +72,7 @@ class Projection {
   static constexpr int N = Basis::N;
   static constexpr int K = kComponents;
   static constexpr int P = kDegrees;
+  static constexpr int D = kDimensions;
   using Integrator = typename Basis::Integrator;
   using Local = typename Integrator::Local;
   using Global = typename Integrator::Global;
