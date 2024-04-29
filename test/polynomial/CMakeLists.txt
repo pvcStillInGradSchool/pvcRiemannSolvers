@@ -3,6 +3,7 @@ set (cases
   quadrangle
   hexahedron
   tetrahedron
+  extrapolation
 )
 foreach(case ${cases})
   add_executable(test_polynomial_${case} ${case}.cpp)
