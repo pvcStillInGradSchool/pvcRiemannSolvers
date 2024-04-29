@@ -82,7 +82,7 @@ auto Innerprod(Func1 &&f1, Func2 &&f2, const Integrator &integrator) {
 }
 
 /**
- * @brief Calculate the 2-norm of a scalar-valued function by an Integrator object.
+ * @brief Calculate the \f$L_p\f$-norm of a scalar-valued function by an Integrator object.
  * 
  * @tparam GlobalToScalar type of the function
  * @tparam Integrator the type of the integrator
@@ -90,12 +90,16 @@ auto Innerprod(Func1 &&f1, Func2 &&f2, const Integrator &integrator) {
  * @param integrator the Integrator object
  * @return the value of the norm
  */
-template <typename GlobalToScalar, typename Integrator>
+template <typename GlobalToScalar, typename Integrator, int P = 2>
 auto Norm(GlobalToScalar &&global_to_scalar, const Integrator &integrator) {
-  auto ip = Innerprod(
-      std::forward<GlobalToScalar>(global_to_scalar),std::forward<GlobalToScalar>(global_to_scalar),
-      integrator);
-  return std::sqrt(ip);
+  using Global = typename Integrator::Global;
+  using Value = std::invoke_result_t<GlobalToScalar, Global>;
+  static_assert(std::is_scalar_v<Value>);
+  auto integral = Integrate([&global_to_scalar](Global const &global){
+    return std::pow(std::abs(global_to_scalar(global)), P);
+  }, integrator);
+  constexpr double one_over_p = 1.0 / P;
+  return std::pow(integral, one_over_p);
 }
 
 /**
