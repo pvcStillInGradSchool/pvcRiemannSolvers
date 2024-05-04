@@ -22,7 +22,7 @@ using std::sqrt;
 using namespace mini::constant::index;
 
 double rand_f() {
-  return -1 + 2 * std::rand() / (1.0 + RAND_MAX);
+  return -10 + 2 * std::rand() / (1.0 + RAND_MAX);
 }
 
 class TestPolynomialExtrapolation : public ::testing::Test {
@@ -36,10 +36,10 @@ TEST_F(TestPolynomialExtrapolation, Hexahedron) {
   using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
   using Global = typename Coordinate::Global;
   auto coordinate = Coordinate {
-    Global(-1, -1, -1), Global(+1, -1, -1),
-    Global(+1, +1, -1), Global(-1, +1, -1),
-    Global(-1, -1, +1), Global(+1, -1, +1),
-    Global(+1, +1, +1), Global(-1, +1, +1),
+    Global(-10, -10, -10), Global(+10, -10, -10),
+    Global(+10, +10, -10), Global(-10, +10, -10),
+    Global(-10, -10, +10), Global(+10, -10, +10),
+    Global(+10, +10, +10), Global(-10, +10, +10),
   };
   // build a hexa Integrator
   using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
@@ -49,8 +49,37 @@ TEST_F(TestPolynomialExtrapolation, Hexahedron) {
   using Interpolation = mini::polynomial::Hexahedron<
       Gx, Gx, Gx, kComponents, true>;
   static_assert(std::is_same_v<Integrator, typename Interpolation::Integrator>);
+  using Value = typename Interpolation::Value;
   using Extrapolation = mini::polynomial::Extrapolation<Interpolation>;
   auto extrapolation = Extrapolation(integrator);
+  // approximate a polynomial function
+  auto exact = [](Global const &global) -> Value {
+    using mini::constant::index::X;
+    using mini::constant::index::Y;
+    using mini::constant::index::Z;
+    Value value;
+    value[X] = std::sin(global[X]);
+    value[Y] = std::sin(global[Y]);
+    value[Z] = std::sin(global[Z]);
+    return value;
+  };
+  extrapolation.Approximate(exact);
+  auto norm = mini::integrator::Distance(exact,
+      [&](Global const &global){ return extrapolation.GlobalToValue(global); },
+      integrator);
+  std::cout << "norm(exact - interpolation) =\n"
+      << norm.transpose() << std::endl;
+  norm = mini::integrator::Distance(exact,
+      [&](Global const &global){ return extrapolation.Extrapolate(global); },
+      integrator);
+  std::cout << "norm(exact - extrapolation) =\n"
+      << norm.transpose() << std::endl;
+  norm = mini::integrator::Distance(
+      [&](Global const &global){ return extrapolation.Extrapolate(global); },
+      [&](Global const &global){ return extrapolation.GlobalToValue(global); },
+      integrator);
+  std::cout << "norm(extrapolation - interpolation) =\n"
+      << norm.transpose() << std::endl;
 }
 
 int main(int argc, char* argv[]) {
