@@ -82,24 +82,49 @@ auto Innerprod(Func1 &&f1, Func2 &&f2, const Integrator &integrator) {
 }
 
 /**
- * @brief Calculate the \f$L_p\f$-norm of a scalar-valued function by an Integrator object.
+ * @brief Calculate the \f$L_p\f$-norm of a function by an Integrator object.
  * 
- * @tparam GlobalToScalar type of the function
+ * If the function returns a matrix, the value of the norm is also a matrix, which is obtained in a coeff-wise way.
+ * 
+ * @tparam GlobalToValue type of the function
  * @tparam Integrator the type of the integrator
- * @param global_to_scalar the function
+ * @param global_to_value the function
  * @param integrator the Integrator object
  * @return the value of the norm
  */
-template <typename GlobalToScalar, typename Integrator, int P = 2>
-auto Norm(GlobalToScalar &&global_to_scalar, const Integrator &integrator) {
+template <typename GlobalToValue, typename Integrator, int P = 2>
+auto Norm(GlobalToValue &&global_to_value, const Integrator &integrator) {
   using Global = typename Integrator::Global;
-  using Value = std::invoke_result_t<GlobalToScalar, Global>;
-  static_assert(std::is_scalar_v<Value>);
-  auto integral = Integrate([&global_to_scalar](Global const &global){
-    return std::pow(std::abs(global_to_scalar(global)), P);
+  using Value = std::invoke_result_t<GlobalToValue, Global>;
+  auto integral = Integrate([&global_to_value](Global const &global){
+    return std::pow(std::abs(global_to_value(global)), P);
   }, integrator);
   constexpr double one_over_p = 1.0 / P;
   return std::pow(integral, one_over_p);
+}
+
+/**
+ * @brief Calculate the \f$L_p\f$-distance between two scalar-valued functions by an Integrator object.
+ * 
+ * @tparam Func1 
+ * @tparam Func2 
+ * @tparam Integrator 
+ * @tparam P 
+ * @param func1 
+ * @param func2 
+ * @param integrator 
+ * @return 
+ */
+template <typename Func1, typename Func2, typename Integrator, int P = 2>
+auto Distance(Func1 &&func1, Func2 &&func2, const Integrator &integrator) {
+  using Global = typename Integrator::Global;
+  using Value1 = std::invoke_result_t<Func1, Global>;
+  using Value2 = std::invoke_result_t<Func2, Global>;
+  static_assert(std::is_same_v<Value1, Value2>);
+  auto diff = [&func1, &func2](Global const &global) -> Value1 {
+    return func1(global) - func2(global);
+  };
+  return Norm(diff, integrator);
 }
 
 /**
