@@ -59,4 +59,21 @@ auto GetLowerTriangularView(MatrixType *matrix) {
 }  // namespace algebra
 }  // namespace mini
 
+namespace std {
+
+template <class Matrix>
+Matrix abs(Matrix const &matrix)
+    requires(!std::is_scalar_v<Matrix>) {
+  return matrix.array().abs();
+}
+
+template <class Matrix>
+Matrix pow(Matrix const &matrix, int e)
+    requires(!std::is_scalar_v<Matrix>) {
+  using Scalar = decltype(*matrix.data());
+  return matrix.unaryExpr([e](Scalar x){ return std::pow(x, e); });
+}
+
+}  // namespace std
+
 #endif  // MINI_ALGEBRA_EIGEN_HPP_
