@@ -67,9 +67,9 @@ Matrix abs(Matrix const &matrix)
   return matrix.array().abs();
 }
 
-template <class Matrix>
-Matrix pow(Matrix const &matrix, int e)
-    requires(!std::is_scalar_v<Matrix>) {
+template <class Matrix, class E>
+Matrix pow(Matrix const &matrix, E e)
+    requires(!std::is_scalar_v<Matrix> && std::is_scalar_v<E>) {
   using Scalar = decltype(*matrix.data());
   return matrix.unaryExpr([e](Scalar x){ return std::pow(x, e); });
 }
