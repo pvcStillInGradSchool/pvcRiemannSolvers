@@ -84,6 +84,18 @@ class Extrapolation : public Interpolation {
   Value Extrapolate(Global const &global) {
     return projection_.GlobalToValue(global);
   }
+
+  template <typename Callable>
+  void Approximate(Callable &&global_to_value) {
+    Interpolation::Approximate(std::forward<Callable>(global_to_value));
+    UpdateModalCoeff();
+  }
+
+  const Scalar *GetCoeffFrom(const Scalar *input) {
+    auto output = Interpolation::GetCoeffFrom(input);
+    UpdateModalCoeff();
+    return output;
+  }
 };
 
 }  // namespace polynomial
