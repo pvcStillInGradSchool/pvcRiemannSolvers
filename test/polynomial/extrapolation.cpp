@@ -1,4 +1,4 @@
-//  Copyright 2021 PEI Weicheng and JIANG Yuyan
+//  Copyright 2024 PEI Weicheng
 
 #include <cstdlib>
 #include <cmath>
@@ -64,22 +64,18 @@ TEST_F(TestPolynomialExtrapolation, Hexahedron) {
     return value;
   };
   extrapolation.Approximate(exact);
-  auto norm = mini::integrator::Distance(exact,
-      [&](Global const &global){ return extrapolation.GlobalToValue(global); },
-      integrator);
-  std::cout << "norm(exact - interpolation) =\n"
-      << norm.transpose() << std::endl;
-  norm = mini::integrator::Distance(exact,
-      [&](Global const &global){ return extrapolation.Extrapolate(global); },
-      integrator);
-  std::cout << "norm(exact - extrapolation) =\n"
-      << norm.transpose() << std::endl;
-  norm = mini::integrator::Distance(
-      [&](Global const &global){ return extrapolation.Extrapolate(global); },
-      [&](Global const &global){ return extrapolation.GlobalToValue(global); },
-      integrator);
-  std::cout << "norm(extrapolation - interpolation) =\n"
-      << norm.transpose() << std::endl;
+  auto interp = [&](Global const &global) {
+    return extrapolation.GlobalToValue(global);
+  };
+  auto extrap = [&](Global const &global) {
+    return extrapolation.Extrapolate(global);
+  };
+  std::cout << "norm(exact - interp) =\n"
+      << mini::integrator::Distance(exact, interp, integrator) << std::endl;
+  std::cout << "norm(exact - extrap) =\n"
+      << mini::integrator::Distance(exact, extrap, integrator) << std::endl;
+  std::cout << "norm(extrap - interp) =\n"
+      << mini::integrator::Distance(interp, extrap, integrator) << std::endl;
 }
 
 int main(int argc, char* argv[]) {
