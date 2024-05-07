@@ -1305,38 +1305,6 @@ class Part {
     }
   }
 
-  template <typename Callable>
-  void Reconstruct(Callable &&limiter) {
-    if (kDegrees == 0) {
-      return;
-    }
-    // run the limiter on inner cells that need no ghost cells
-    ShareGhostCellCoeffs();
-    Reconstruct(limiter, inner_and_inter_cells_[0]);
-    // run the limiter on inter cells that need ghost cells
-    UpdateGhostCellCoeffs();
-    Reconstruct(limiter, inner_and_inter_cells_[1]);
-  }
-
-  template <typename Limiter>
-  void Reconstruct(Limiter &&limiter, std::vector<Cell *> const &cell_ptrs) {
-    auto troubled_cells = std::vector<Cell *>();
-    for (Cell *cell_ptr : cell_ptrs) {
-      if (limiter.IsNotSmooth(*cell_ptr)) {
-        troubled_cells.push_back(cell_ptr);
-      }
-    }
-    auto new_projections = std::vector<typename Projection::Wrapper>();
-    for (Cell *cell_ptr : troubled_cells) {
-      new_projections.emplace_back(limiter(*cell_ptr));
-    }
-    int i = 0;
-    for (Cell *cell_ptr : troubled_cells) {
-      cell_ptr->projection().coeff() = new_projections[i++].coeff();
-    }
-    assert(i == troubled_cells.size());
-  }
-
   // Viewers of `Cell`s and `Face`s:
   /**
    * @brief Get a range of `(Cell const &)`.
@@ -1351,12 +1319,28 @@ class Part {
         | std::views::join;   // range of Cell
   }
   /**
-   * @brief Get a range of `(Cell *)`.
+   * @brief Get a range of `(Cell *)`, which contains all local `Cell`s.
    * 
    * @return std::ranges::input_range 
    */
   std::ranges::input_range auto GetLocalCellPointers() {
     return inner_and_inter_cells_ | std::views::join;
+  }
+  /**
+   * @brief Get all local `Cell`s not adjacent to ghost cells.
+   * 
+   * @return std::vector<Cell *> 
+   */
+  std::vector<Cell *> const &GetInnerCellPointers() {
+    return inner_and_inter_cells_[0];
+  }
+  /**
+   * @brief Get all local `Cell`s adjacent to ghost cells.
+   * 
+   * @return std::vector<Cell *> 
+   */
+  std::vector<Cell *> const &GetInterCellPointers() {
+    return inner_and_inter_cells_[1];
   }
   /**
    * @brief Get a range of `(const Face &)` for local `Face`s.

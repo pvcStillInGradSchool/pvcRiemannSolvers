@@ -117,6 +117,7 @@ auto GetSmoothness(const Projection &proj) {
 
 template <typename Cell>
 class Lazy {
+ public:
   using Scalar = typename Cell::Scalar;
   using Projection = typename Cell::Projection;
   using ProjectionWrapper = typename Projection::Wrapper;
@@ -124,6 +125,7 @@ class Lazy {
   using Global = typename Projection::Global;
   using Value = typename Projection::Value;
 
+ private:
   std::vector<ProjectionWrapper> old_projections_;
   ProjectionWrapper *new_projection_ptr_ = nullptr;
   const Cell *my_cell_ = nullptr;
@@ -210,6 +212,7 @@ class Lazy {
 
 template <typename Cell>
 class Eigen {
+ public:
   using Scalar = typename Cell::Scalar;
   using Projection = typename Cell::Projection;
   using ProjectionWrapper = typename Projection::Wrapper;
@@ -218,6 +221,7 @@ class Eigen {
   using Global = typename Projection::Global;
   using Value = typename Projection::Value;
 
+ private:
   ProjectionWrapper new_projection_;
   std::vector<ProjectionWrapper> old_projections_;
   const Cell *my_cell_ = nullptr;
@@ -347,6 +351,7 @@ class Eigen {
 
 template <typename Cell>
 class Dummy {
+ public:
   using Scalar = typename Cell::Scalar;
   using Projection = typename Cell::Projection;
   using ProjectionWrapper = typename Projection::Wrapper;
@@ -363,6 +368,42 @@ class Dummy {
 };
 
 }  // namespace weno
+
+template <class Part, class Limiter>
+void Reconstruct(Part *part_ptr, Limiter &&limiter) {
+  if (Part::kDegrees == 0) {
+    return;
+  }
+  using Cell = typename Part::Cell;
+  using ProjectionWrapper
+      = typename std::remove_reference_t<Limiter>::ProjectionWrapper;
+
+  auto act = [&limiter](std::vector<Cell *> const &cell_ptrs) {
+    auto troubled_cells = std::vector<Cell *>();
+    for (Cell *cell_ptr : cell_ptrs) {
+      if (limiter.IsNotSmooth(*cell_ptr)) {
+        troubled_cells.push_back(cell_ptr);
+      }
+    }
+    auto new_projections = std::vector<ProjectionWrapper>();
+    for (Cell *cell_ptr : troubled_cells) {
+      new_projections.emplace_back(limiter(*cell_ptr));
+    }
+    int i = 0;
+    for (Cell *cell_ptr : troubled_cells) {
+      cell_ptr->projection().coeff() = new_projections[i++].coeff();
+    }
+    assert(i == troubled_cells.size());
+  };
+
+  // run the limiter on inner cells that need no ghost cells
+  part_ptr->ShareGhostCellCoeffs();
+  act(part_ptr->GetInnerCellPointers());
+  // run the limiter on inter cells that need ghost cells
+  part_ptr->UpdateGhostCellCoeffs();
+  act(part_ptr->GetInterCellPointers());
+}
+
 }  // namespace limiter
 }  // namespace mini
 
