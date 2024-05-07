@@ -11,6 +11,7 @@
 #include <unordered_map>
 
 #include "mini/spatial/fem.hpp"
+#include "mini/limiter/weno.hpp"
 
 namespace mini {
 namespace spatial {
@@ -246,7 +247,7 @@ class WithLimiterAndSource : public General<Part> {
  public:  // implement pure virtual methods declared in Temporal
   void SetSolutionColumn(Column const &column) override {
     this->Base::SetSolutionColumn(column);
-    this->part_ptr_->Reconstruct(limiter_);
+    mini::limiter::Reconstruct(this->part_ptr_, limiter_);
   }
 
   Column GetResidualColumn() const override {

@@ -155,9 +155,9 @@ int main(int argc, char* argv[]) {
     }
 #ifdef DGFEM
     if (kDegrees > 0) {
-      part.Reconstruct(limiter);
+      mini::limiter::Reconstruct(&part, limiter);
       if (suffix == "tetra") {
-        part.Reconstruct(limiter);
+        mini::limiter::Reconstruct(&part, limiter);
       }
     }
 #endif

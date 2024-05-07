@@ -88,9 +88,9 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     }
 
 #ifdef DGFEM
-    part.Reconstruct(limiter);
+    mini::limiter::Reconstruct(&part, limiter);
     if (suffix == "tetra") {
-      part.Reconstruct(limiter);
+      mini::limiter::Reconstruct(&part, limiter);
     }
 #endif
     if (i_core == 0) {
