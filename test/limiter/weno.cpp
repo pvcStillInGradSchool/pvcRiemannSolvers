@@ -22,6 +22,7 @@
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
 #include "mini/riemann/rotated/single.hpp"
 #include "mini/riemann/rotated/euler.hpp"
 #include "mini/riemann/euler/exact.hpp"

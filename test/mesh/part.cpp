@@ -12,6 +12,7 @@
 #include "mini/mesh/part.hpp"
 #include "mini/mesh/vtk.hpp"
 #include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
 #include "mini/riemann/rotated/multiple.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"

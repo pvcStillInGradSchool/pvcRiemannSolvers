@@ -13,6 +13,7 @@
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/mesh/part.hpp"
 #include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
 #include "mini/temporal/rk.hpp"
 #include "mini/spatial/dg/general.hpp"
 #include "mini/spatial/dg/lobatto.hpp"

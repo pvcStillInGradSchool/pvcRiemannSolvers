@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 #include "mini/spatial/fem.hpp"
-#include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
 
 namespace mini {
 namespace spatial {

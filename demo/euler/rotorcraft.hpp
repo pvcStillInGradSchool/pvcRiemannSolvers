@@ -12,6 +12,7 @@
 #include "mini/polynomial/projection.hpp"
 #include "mini/mesh/part.hpp"
 #include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
 #include "mini/temporal/rk.hpp"
 #include "mini/spatial/dg/general.hpp"
 #include "mini/aircraft/source.hpp"

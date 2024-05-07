@@ -18,6 +18,7 @@
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/mesh/part.hpp"
 #include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
 #include "mini/temporal/rk.hpp"
 #include "mini/spatial/fem.hpp"
 #include "mini/spatial/dg/general.hpp"
