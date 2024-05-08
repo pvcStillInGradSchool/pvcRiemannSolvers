@@ -40,7 +40,7 @@ void Reconstruct(Part *part_ptr, Limiter &&limiter) {
     }
     int i = 0;
     for (Cell *cell_ptr : troubled_cells) {
-      cell_ptr->projection().coeff() = new_projections[i++].coeff();
+      cell_ptr->projection().SetCoeff(new_projections[i++].coeff());
     }
     assert(i == troubled_cells.size());
   };

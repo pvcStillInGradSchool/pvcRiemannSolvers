@@ -142,6 +142,12 @@ class Projection {
   Coeff &coeff() {
     return coeff_;
   }
+  void SetCoeff(Coeff const &coeff) {
+    coeff_ = coeff;
+  }
+  void SetCoeff(Coeff *coeff_ptr) const {
+    *coeff_ptr = coeff();
+  }
   Value average() const {
     return projection::GetAverage(*this);
   }
@@ -224,8 +230,11 @@ class ProjectionWrapper {
   explicit ProjectionWrapper(const Basis &basis)
       : basis_ptr_(&basis) {
   }
-  explicit ProjectionWrapper(const Base &that)
-      : coeff_(that.coeff()), basis_ptr_(&(that.basis())) {
+
+  template <class ProjectionLike>
+  explicit ProjectionWrapper(const ProjectionLike &that)
+      : basis_ptr_(&(that.basis())) {
+    that.SetCoeff(&coeff_);
   }
 
   ProjectionWrapper() = default;

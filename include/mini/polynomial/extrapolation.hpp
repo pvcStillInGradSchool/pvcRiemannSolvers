@@ -29,6 +29,8 @@ class Extrapolation : public Interpolation {
   using Projection = polynomial::Projection<Scalar, D, P, K>;
   static constexpr int M = Projection::N;  // number of modal basis
 
+  using Wrapper = typename Projection::Wrapper;
+
  private:
   using MatKxN = typename Interpolation::Coeff;
   using MatKxM = typename Projection::Coeff;
@@ -58,6 +60,12 @@ class Extrapolation : public Interpolation {
    */
   void UpdateModalCoeff() {
     projection_.coeff() = this->coeff() * modal_to_nodal_;
+  }
+  void UpdateNodalCoeff() {
+    for (int i = 0; i < N; ++i) {
+      auto const &global_i = this->integrator().GetGlobal(i);
+      this->SetValue(i, projection_.GlobalToValue(global_i));
+    }
   }
 
  public:
@@ -96,6 +104,27 @@ class Extrapolation : public Interpolation {
     auto output = Interpolation::GetCoeffFrom(input);
     UpdateModalCoeff();
     return output;
+  }
+
+  void SetCoeff(typename Projection::Coeff const &coeff) {
+    projection_.SetCoeff(coeff);
+    UpdateNodalCoeff();
+  }
+  void SetCoeff(typename Projection::Coeff *coeff_ptr) const {
+    projection_.SetCoeff(coeff_ptr);
+  }
+
+  Value average() const {
+    return projection_.average();
+  }
+
+  using Basis = typename Projection::Basis;
+  Basis const &basis() const {
+    return projection_.basis();
+  }
+
+  Value operator()(Global const &global) const {
+    return projection_.GlobalToValue(global);
   }
 };
 
