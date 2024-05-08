@@ -21,11 +21,11 @@
 #include "test/mesh/part.hpp"
 
 template <class Part>
-void Process(Part *part, const std::string &solution_name) {
-  part->SetFieldNames({"U1", "U2"});
+void Process(Part *part_ptr, const std::string &solution_name) {
+  part_ptr->SetFieldNames({"U1", "U2"});
   double volume = 0.0, area = 0.0;
   int n_cells = 0, n_faces = 0;
-  for (const auto &cell : part->GetLocalCells()) {
+  for (const auto &cell : part_ptr->GetLocalCells()) {
     volume += cell.volume();
     n_cells += 1;
     n_faces += cell.adj_faces_.size();
@@ -33,30 +33,30 @@ void Process(Part *part, const std::string &solution_name) {
       assert(face_ptr);
       area += face_ptr->area();
     }
-    assert(part->GetCellDataOffset(cell.id()) == cell.id() * cell.K * cell.N);
+    assert(part_ptr->GetCellDataOffset(cell.id()) == cell.id() * cell.K * cell.N);
   }
   using Cell = typename Part::Cell;
-  assert(part->GetCellDataSize() == n_cells * Cell::K * Cell::N);
+  assert(part_ptr->GetCellDataSize() == n_cells * Cell::K * Cell::N);
   std::printf("On proc[%d/%d], avg_volume = %f = %f / %d\n",
       i_core, n_core, volume / n_cells, volume, n_cells);
   std::printf("On proc[%d/%d], avg_area = %f = %f / %d\n",
       i_core, n_core, area / n_faces, area, n_faces);
   std::printf("Run Approximate() on proc[%d/%d] at %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);
-  for (auto *cell_ptr : part->GetLocalCellPointers()) {
+  for (auto *cell_ptr : part_ptr->GetLocalCellPointers()) {
     cell_ptr->Approximate(func);
   }
-  // std::printf("Run Reconstruct() on proc[%d/%d] at %f sec\n",
-  //     i_core, n_core, MPI_Wtime() - time_begin);
-  // using Cell = typename Part::Cell;
-  // auto lazy_limiter = mini::limiter::weno::Lazy<Cell>(
-  //     /* w0 = */0.001, /* eps = */1e-6, /* verbose = */false);
-  // part.Reconstruct(lazy_limiter);
+  std::printf("Run Reconstruct() on proc[%d/%d] at %f sec\n",
+      i_core, n_core, MPI_Wtime() - time_begin);
+  using Cell = typename Part::Cell;
+  auto lazy_limiter = mini::limiter::weno::Lazy<Cell>(
+      /* w0 = */0.001, /* eps = */1e-6, /* verbose = */false);
+  mini::limiter::Reconstruct(part_ptr, lazy_limiter);
   std::printf("Run Write() on proc[%d/%d] at %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);
-  part->GatherSolutions();
-  part->WriteSolutions(solution_name);
-  mini::mesh::vtk::Writer<Part>::WriteSolutions(*part, solution_name);
+  part_ptr->GatherSolutions();
+  part_ptr->WriteSolutions(solution_name);
+  mini::mesh::vtk::Writer<Part>::WriteSolutions(*part_ptr, solution_name);
 }
 
 // mpirun -n 4 ./part [<case_name> [<input_dir>]]]
