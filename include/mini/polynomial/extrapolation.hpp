@@ -63,15 +63,16 @@ class Extrapolation : public Interpolation {
  public:
   explicit Extrapolation(Integrator const &integrator)
       : Interpolation(integrator), projection_(integrator) {
-    auto basis_value_product = [this](Local const &local) -> MatNxM {
+    auto integrand = [this](Local const &local) -> MatNxM {
       // TODO(PVC): use Kronecker delta property
-      MatNx1 nodal_basis_values = this->basis().GetValues(local);
+      MatNx1 nodal_basis_values = this->Interpolation::basis().GetValues(local);
       Global global = this->coordinate().LocalToGlobal(local);
       Mat1xM modal_basis_values = this->projection_.basis()(global);
-      return nodal_basis_values * modal_basis_values;
+      MatNxM product = nodal_basis_values * modal_basis_values;
+      product *= this->coordinate().LocalToJacobian(local).determinant();
+      return product;
     };
-    modal_to_nodal_ = mini::integrator::Quadrature(basis_value_product,
-        integrator);
+    modal_to_nodal_ = mini::integrator::Quadrature(integrand, integrator);
   }
 
   Extrapolation() = default;
