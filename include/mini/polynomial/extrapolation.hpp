@@ -59,7 +59,7 @@ class Extrapolation : public Interpolation {
    * TODO(PVC): check consistency before invoking the expensive matrix production.
    */
   void UpdateModalCoeff() {
-    projection_.coeff() = this->coeff() * modal_to_nodal_;
+    projection_.coeff() = this->GetValues() * modal_to_nodal_;
   }
   void UpdateNodalCoeff() {
     for (int i = 0; i < N; ++i) {

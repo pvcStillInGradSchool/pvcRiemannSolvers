@@ -258,6 +258,13 @@ class Hexahedron {
   Value GetValue(int i) const requires(kLocal) {
     return coeff_.col(i) / jacobian_det_[i];
   }
+  Coeff GetValues() const requires(kLocal) {
+    Coeff coeff;
+    for (int j = 0; j < N; ++j) {
+      coeff.col(j) = GetValue(j);
+    }
+    return coeff;
+  }
   void SetValue(int i, Value const &value) requires(kLocal) {
     coeff_.col(i) = value;  // value in physical space
     coeff_.col(i) *= jacobian_det_[i];  // value in parametric space
@@ -272,6 +279,9 @@ class Hexahedron {
    */
   Value GetValue(int i) const requires(!kLocal) {
     return coeff_.col(i);
+  }
+  Coeff GetValues() const requires(!kLocal) {
+    return coeff_;
   }
   void SetValue(int i, Value const &value) requires(!kLocal) {
     coeff_.col(i) = value;
