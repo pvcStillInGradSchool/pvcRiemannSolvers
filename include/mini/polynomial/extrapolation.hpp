@@ -126,6 +126,12 @@ class Extrapolation : public Interpolation {
   Value operator()(Global const &global) const {
     return projection_.GlobalToValue(global);
   }
+
+  void LocalToGlobalAndValue(Local const &local,
+      Global *global, Value *value) const {
+    projection_.LocalToGlobalAndValue(local, global, value);
+  }
+
 };
 
 }  // namespace polynomial
