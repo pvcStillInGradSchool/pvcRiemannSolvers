@@ -16,6 +16,7 @@
 #include "mini/riemann/rotated/multiple.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"
+#include "mini/polynomial/extrapolation.hpp"
 #include "mini/input/path.hpp"  // defines INPUT_DIR
 
 #include "test/mesh/part.hpp"
@@ -101,8 +102,9 @@ int main(int argc, char* argv[]) {
 {
   std::printf("Run Part() on proc[%d/%d] at %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);
-  using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+  using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents>;
+  using Extrapolation = mini::polynomial::Extrapolation<Interpolation>;
+  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Extrapolation>;
   auto part = Part(case_name, i_core, n_core);
   Process(&part, "Interpolation");
 }
