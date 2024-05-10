@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "mini/algebra/eigen.hpp"
+#include "mini/algebra/root.hpp"
 #include "mini/constant/index.hpp"
 
 namespace mini {
@@ -83,58 +84,6 @@ class Element {
     element->_BuildCenter();
   }
 
-  /**
-   * @brief Mimic [`scipy.optimize.root`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.root.html).
-   * 
-   * @tparam Func 
-   * @tparam MatJ 
-   * @param func 
-   * @param x 
-   * @param matj 
-   * @param xtol 
-   * @return requires&& 
-   */
-  template <typename Func, typename MatJ>
-      requires std::is_same_v<Global, std::invoke_result_t<Func, Local const &>>
-          && std::is_same_v<Jacobian, std::invoke_result_t<MatJ, Local const &>>
-  static Global root(Func &&func, Global x, MatJ &&matj, Scalar xtol = 1e-5,
-      Scalar max_res_norm = 0.5, int cnt = 128) requires(kCellDim == kPhysDim) {
-    Global res;
-    Scalar res_norm;
-#ifndef NDEBUG
-    std::vector<Local> x_history;
-    x_history.reserve(cnt);
-    x_history.emplace_back(x);
-#endif
-    do {
-      /**
-       * The Jacobian matrix required here is the transpose of the one returned by `Element::LocalToJacobian`.
-       */
-      res = matj(x).transpose().partialPivLu().solve(func(x));
-      res_norm = res.norm();
-      if (res_norm > max_res_norm) {
-        res *= (max_res_norm / res_norm);
-        res_norm = max_res_norm;
-      }
-      x -= res;
-      cnt--;
-#ifndef NDEBUG
-      x_history.emplace_back(x);
-#endif
-    } while (cnt && res_norm > xtol);
-    if (cnt == 0 || std::isnan(res_norm)) {
-#ifndef NDEBUG
-      std::cerr << "x_history =\n";
-      for (int i = 0; i < x_history.size(); ++i) {
-        std::cerr << x_history[i].transpose() << "\n";
-      }
-      std::cerr << std::endl;
-#endif
-      throw std::runtime_error("Exceed maximum iteration steps.");
-    }
-    return x;
-  }
-
  public:
   Local GlobalToLocal(const Global &global,
       const Local &hint = Local::Zero()) const requires(kCellDim == kPhysDim) {
@@ -147,7 +96,7 @@ class Element {
     };
     Local local;
     try {
-      local = root(func, hint, jac);
+      local = mini::algebra::root::Newton(hint, func, jac);
     } catch(std::runtime_error &e) {
       std::cerr << "global = " << global.transpose() << "\n";
       std::cerr << "global_coords =" << "\n";
