@@ -20,7 +20,11 @@
 namespace mini {
 namespace polynomial {
 
-namespace projection {
+/**
+ * @brief Implement methods common in Projection-like class.
+ * 
+ */
+namespace {
 
 template <typename Projection, typename Callable>
 void Project(Projection *proj, Callable &&func) {
@@ -46,7 +50,7 @@ auto GetAverage(const Projection &proj) {
   return col_0;
 }
 
-}  // namespace projection
+}  // anonymous namespace
 
 template <std::floating_point Scalar, int kDimensions, int kDegrees,
     int kComponents>
@@ -149,7 +153,7 @@ class Projection {
     *coeff_ptr = coeff();
   }
   Value average() const {
-    return projection::GetAverage(*this);
+    return GetAverage(*this);
   }
   Mat3xN GlobalToBasisGradients(Global const &global) const {
     return basis_.GetGradValue(global).transpose();
@@ -166,7 +170,7 @@ class Projection {
 
   template <typename Callable>
   void Approximate(Callable &&func) {
-    projection::Project(this, std::forward<Callable>(func));
+    Project(this, std::forward<Callable>(func));
   }
   const Scalar *GetCoeffFrom(const Scalar *input) {
     std::memcpy(coeff_.data(), input, sizeof(Scalar) * coeff_.size());
@@ -263,14 +267,14 @@ class ProjectionWrapper {
     return basis().center();
   }
   Value average() const {
-    return projection::GetAverage(*this);
+    return GetAverage(*this);
   }
   Mat1xN GlobalToBasisValues(Global const &global) const {
     return basis()(global);
   }
   template <typename Callable>
   void Approximate(Callable &&func) {
-    projection::Project(this, std::forward<Callable>(func));
+    Project(this, std::forward<Callable>(func));
   }
   ProjectionWrapper &LeftMultiply(const MatKxK &left) {
     Coeff temp = left * coeff_;
