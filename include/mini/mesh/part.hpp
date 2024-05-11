@@ -26,15 +26,11 @@
 #include "mini/algebra/eigen.hpp"
 #include "mini/mesh/cgns.hpp"
 #include "mini/coordinate/cell.hpp"
-#include "mini/coordinate/triangle.hpp"
-#include "mini/coordinate/quadrangle.hpp"
 #include "mini/coordinate/tetrahedron.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/coordinate/pyramid.hpp"
 #include "mini/coordinate/wedge.hpp"
 #include "mini/integrator/cell.hpp"
-#include "mini/integrator/triangle.hpp"
-#include "mini/integrator/quadrangle.hpp"
 #include "mini/integrator/tetrahedron.hpp"
 #include "mini/integrator/hexahedron.hpp"
 #include "mini/integrator/pyramid.hpp"
@@ -439,15 +435,6 @@ class Part {
 
  private:
   using IntegratorOnLine = typename Projection::IntegratorOnLine;
-  using CoordinateOnTriangle = coordinate::Triangle3<Scalar, kPhysDim>;
-  using IntegratorOnTriangle = type::select_t<kDegrees,
-    integrator::Triangle<Scalar, kPhysDim, 1>,
-    integrator::Triangle<Scalar, kPhysDim, 3>,
-    integrator::Triangle<Scalar, kPhysDim, 6>,
-    integrator::Triangle<Scalar, kPhysDim, 12>>;
-  using CoordinateOnQuadrangle = coordinate::Quadrangle4<Scalar, kPhysDim>;
-  using IntegratorOnQuadrangle =
-    integrator::Quadrangle<kPhysDim, IntegratorOnLine, IntegratorOnLine>;
   using CoordinateOnTetrahedron = coordinate::Tetrahedron4<Scalar>;
   using IntegratorOnTetrahedron = type::select_t<kDegrees,
     integrator::Tetrahedron<Scalar, 1>,
@@ -474,11 +461,14 @@ class Part {
   Part(std::string const &directory, int rank, int size)
       : directory_(directory), cgns_file_(directory + "/shuffled.cgns"),
         rank_(rank), size_(size) {
+  }
+
+  void ReadCgnsFile() {
     int i_file;
     if (cgp_open(cgns_file_.c_str(), CG_MODE_READ, &i_file)) {
       cgp_error_exit();
     }
-    auto txt_file = directory + "/partition/" + std::to_string(rank) + ".txt";
+    auto txt_file = directory_ + "/partition/" + std::to_string(rank_) + ".txt";
     auto istrm = std::ifstream(txt_file);
     BuildLocalNodes(istrm, i_file);
     auto [recv_nodes, recv_coords] = ShareGhostNodes(istrm);
@@ -727,41 +717,30 @@ class Part {
     }
     return {nullptr, nullptr};
   }
-  std::pair< std::unique_ptr<CoordinateOnTriangle>,
-             std::unique_ptr<IntegratorOnTriangle> >
-  BuildTriangleUptr(int i_zone, Int const *i_node_list) const {
-    auto coords = {
-        GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
-        GetCoord(i_zone, i_node_list[2]),
-    };
-    auto lagrange = std::make_unique<CoordinateOnTriangle>(coords);
-    auto integrator = std::make_unique<IntegratorOnTriangle>(*lagrange);
-    return { std::move(lagrange), std::move(integrator) };
+
+ private:
+  std::unordered_map<int, typename Face::IntegratorUptr> face_prototypes_;
+
+ public:
+  void InstallPrototype(int npe,
+      typename Face::IntegratorUptr &&face_integrator) {
+    face_prototypes_.emplace(npe, std::move(face_integrator));
   }
-  std::pair< std::unique_ptr<CoordinateOnQuadrangle>,
-             std::unique_ptr<IntegratorOnQuadrangle> >
-  BuildQuadrangleUptr(int i_zone, Int const *i_node_list) const {
-    auto coords = {
-        GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
-        GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
-    };
-    auto lagrange = std::make_unique<CoordinateOnQuadrangle>(coords);
-    auto integrator = std::make_unique<IntegratorOnQuadrangle>(*lagrange);
-    return { std::move(lagrange), std::move(integrator) };
-  }
+
+ private:
   std::pair< typename Face::CoordinateUptr, typename Face::IntegratorUptr >
   BuildIntegratorForFace(int npe, int i_zone, Int const *i_node_list) const {
-    switch (npe) {
-      case 3:
-        return BuildTriangleUptr(i_zone, i_node_list); break;
-      case 4:
-        return BuildQuadrangleUptr(i_zone, i_node_list); break;
-      default:
-        assert(false);
-        break;
+    auto coords = std::vector<Global>();
+    coords.reserve(npe);
+    for (int i = 0; i < npe; ++i) {
+      coords.emplace_back(GetCoord(i_zone, i_node_list[i]));
     }
-    return { nullptr, nullptr };
+    assert(coords.size() == npe);
+    // TODO(PVC): use O(1) indexing
+    auto const &prototype = face_prototypes_.at(npe);
+    return prototype->Clone(coords);
   }
+
   void BuildLocalCells(std::ifstream &istrm, int i_file) {
     char line[kLineWidth];
     // build local cells
