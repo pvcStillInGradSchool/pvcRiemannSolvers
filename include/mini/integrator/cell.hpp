@@ -34,6 +34,16 @@ class Cell : public Element<Scalar, 3, 3> {
    * @return const Coordinate &  Reference to the coordinate::Cell object it uses for coordinate mapping.
    */
   virtual const Coordinate &coordinate() const = 0;
+
+  std::pair< std::unique_ptr<Coordinate>, std::unique_ptr<Cell> >
+  Clone(std::vector<Global> const &coords) const {
+    auto coordinate_uptr = coordinate().Clone(coords);
+    auto integrator_uptr = this->Clone(*coordinate_uptr);
+    return { std::move(coordinate_uptr), std::move(integrator_uptr) };
+  }
+
+ protected:
+  virtual std::unique_ptr<Cell> Clone(Coordinate const &) const = 0;
 };
 
 }  // namespace integrator

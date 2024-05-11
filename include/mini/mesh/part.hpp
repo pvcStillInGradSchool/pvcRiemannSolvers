@@ -25,18 +25,11 @@
 #include "pcgnslib.h"
 #include "mini/algebra/eigen.hpp"
 #include "mini/mesh/cgns.hpp"
+#include "mini/coordinate/face.hpp"
+#include "mini/integrator/face.hpp"
 #include "mini/coordinate/cell.hpp"
-#include "mini/coordinate/tetrahedron.hpp"
-#include "mini/coordinate/hexahedron.hpp"
-#include "mini/coordinate/pyramid.hpp"
-#include "mini/coordinate/wedge.hpp"
 #include "mini/integrator/cell.hpp"
-#include "mini/integrator/tetrahedron.hpp"
-#include "mini/integrator/hexahedron.hpp"
-#include "mini/integrator/pyramid.hpp"
-#include "mini/integrator/wedge.hpp"
 #include "mini/riemann/concept.hpp"
-#include "mini/type/select.hpp"
 
 namespace mini {
 namespace mesh {
@@ -433,30 +426,6 @@ class Part {
   static const MPI_Datatype kMpiIntType;
   static const MPI_Datatype kMpiRealType;
 
- private:
-  using IntegratorOnLine = typename Projection::IntegratorOnLine;
-  using CoordinateOnTetrahedron = coordinate::Tetrahedron4<Scalar>;
-  using IntegratorOnTetrahedron = type::select_t<kDegrees,
-    integrator::Tetrahedron<Scalar, 1>,
-    integrator::Tetrahedron<Scalar, 4>,
-    integrator::Tetrahedron<Scalar, 14>,
-    integrator::Tetrahedron<Scalar, 24>>;
-  using CoordinateOnHexahedron = coordinate::Hexahedron8<Scalar>;
-  using IntegratorOnHexahedron =
-      integrator::Hexahedron<IntegratorOnLine, IntegratorOnLine, IntegratorOnLine>;
-  using CoordinateOnPyramid = coordinate::Pyramid5<Scalar>;
-  using IntegratorOnPyramid = type::select_t<kDegrees,
-    integrator::Pyramid<Scalar, 1, 1, 1>,
-    integrator::Pyramid<Scalar, 2, 2, 2>,
-    integrator::Pyramid<Scalar, 3, 3, 3>,
-    integrator::Pyramid<Scalar, 4, 4, 4>>;
-  using CoordinateOnWedge = coordinate::Wedge6<Scalar>;
-  using IntegratorOnWedge = type::select_t<kDegrees,
-    integrator::Wedge<Scalar, 1, 1>,
-    integrator::Wedge<Scalar, 3, 2>,
-    integrator::Wedge<Scalar, 6, 3>,
-    integrator::Wedge<Scalar, 12, 4>>;
-
  public:
   Part(std::string const &directory, int rank, int size)
       : directory_(directory), cgns_file_(directory + "/shuffled.cgns"),
@@ -654,77 +623,19 @@ class Part {
       }
     }
   }
-  std::pair< std::unique_ptr<CoordinateOnTetrahedron>,
-             std::unique_ptr<IntegratorOnTetrahedron> >
-  BuildTetrahedronUptr(int i_zone, Int const *i_node_list) const {
-    auto lagrange = std::make_unique<CoordinateOnTetrahedron>(
-        GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
-        GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]));
-    auto integrator = std::make_unique<IntegratorOnTetrahedron>(*lagrange);
-    return { std::move(lagrange), std::move(integrator) };
-  }
-  std::pair< std::unique_ptr<CoordinateOnPyramid>,
-             std::unique_ptr<IntegratorOnPyramid> >
-  BuildPyramidUptr(int i_zone, Int const *i_node_list) const {
-    auto coords = {
-        GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
-        GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
-        GetCoord(i_zone, i_node_list[4]),
-    };
-    auto lagrange = std::make_unique<CoordinateOnPyramid>(coords);
-    auto integrator = std::make_unique<IntegratorOnPyramid>(*lagrange);
-    return { std::move(lagrange), std::move(integrator) };
-  }
-  std::pair< std::unique_ptr<CoordinateOnWedge>,
-             std::unique_ptr<IntegratorOnWedge> >
-  BuildWedgeUptr(int i_zone, Int const *i_node_list) const {
-    auto coords = {
-        GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
-        GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
-        GetCoord(i_zone, i_node_list[4]), GetCoord(i_zone, i_node_list[5]),
-    };
-    auto lagrange = std::make_unique<CoordinateOnWedge>(coords);
-    auto integrator = std::make_unique<IntegratorOnWedge>(*lagrange);
-    return { std::move(lagrange), std::move(integrator) };
-  }
-  std::pair< std::unique_ptr<CoordinateOnHexahedron>,
-             std::unique_ptr<IntegratorOnHexahedron> >
-  BuildHexahedronUptr(int i_zone, Int const *i_node_list) const {
-    auto coords = {
-        GetCoord(i_zone, i_node_list[0]), GetCoord(i_zone, i_node_list[1]),
-        GetCoord(i_zone, i_node_list[2]), GetCoord(i_zone, i_node_list[3]),
-        GetCoord(i_zone, i_node_list[4]), GetCoord(i_zone, i_node_list[5]),
-        GetCoord(i_zone, i_node_list[6]), GetCoord(i_zone, i_node_list[7]),
-    };
-    auto lagrange = std::make_unique<CoordinateOnHexahedron>(coords);
-    auto integrator = std::make_unique<IntegratorOnHexahedron>(*lagrange);
-    return { std::move(lagrange), std::move(integrator) };
-  }
-  std::pair< typename Cell::CoordinateUptr, typename Cell::IntegratorUptr >
-  BuildIntegratorForCell(int npe, int i_zone, Int const *i_node_list) const {
-    switch (npe) {
-      case 4:
-        return BuildTetrahedronUptr(i_zone, i_node_list); break;
-      case 5:
-        return BuildPyramidUptr(i_zone, i_node_list); break;
-      case 6:
-        return BuildWedgeUptr(i_zone, i_node_list); break;
-      case 8:
-        return BuildHexahedronUptr(i_zone, i_node_list); break;
-      default:
-        assert(false);
-        break;
-    }
-    return {nullptr, nullptr};
-  }
 
  private:
   std::unordered_map<int, typename Face::IntegratorUptr> face_prototypes_;
+  std::unordered_map<int, typename Cell::IntegratorUptr> cell_prototypes_;
 
  public:
   void InstallPrototype(int npe,
       typename Face::IntegratorUptr &&face_integrator) {
     face_prototypes_.emplace(npe, std::move(face_integrator));
+  }
+  void InstallPrototype(int npe,
+      typename Cell::IntegratorUptr &&cell_integrator) {
+    cell_prototypes_.emplace(npe, std::move(cell_integrator));
   }
 
  private:
@@ -738,6 +649,19 @@ class Part {
     assert(coords.size() == npe);
     // TODO(PVC): use O(1) indexing
     auto const &prototype = face_prototypes_.at(npe);
+    return prototype->Clone(coords);
+  }
+
+  std::pair< typename Cell::CoordinateUptr, typename Cell::IntegratorUptr >
+  BuildIntegratorForCell(int npe, int i_zone, Int const *i_node_list) const {
+    auto coords = std::vector<Global>();
+    coords.reserve(npe);
+    for (int i = 0; i < npe; ++i) {
+      coords.emplace_back(GetCoord(i_zone, i_node_list[i]));
+    }
+    assert(coords.size() == npe);
+    // TODO(PVC): use O(1) indexing
+    auto const &prototype = cell_prototypes_.at(npe);
     return prototype->Clone(coords);
   }
 
