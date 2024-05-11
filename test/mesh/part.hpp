@@ -8,7 +8,9 @@
 #include "mini/riemann/diffusive/direct_dg.hpp"
 #include "mini/integrator/lobatto.hpp"
 #include "mini/coordinate/quadrangle.hpp"
+#include "mini/coordinate/hexahedron.hpp"
 #include "mini/integrator/quadrangle.hpp"
+#include "mini/integrator/hexahedron.hpp"
 
 #include "mpi.h"
 #include "gtest/gtest.h"
@@ -54,6 +56,8 @@ double time_begin;
 using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 using QuadrangleIntegrator
     = mini::integrator::Quadrangle<kDimensions, Gx, Gx>;
+using HexahedronIntegrator
+    = mini::integrator::Hexahedron<Gx, Gx, Gx>;
 
 int Main(int argc, char* argv[]) {
   // Initialize MPI before any call to gtest_mpi

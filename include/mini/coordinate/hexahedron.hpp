@@ -23,9 +23,8 @@ namespace coordinate {
  */
 template <std::floating_point Scalar>
 class Hexahedron : public Cell<Scalar> {
-  using Base = Cell<Scalar>;
-
  public:
+  using Base = Cell<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -130,12 +129,12 @@ class Hexahedron26;
  */
 template <std::floating_point Scalar>
 class Hexahedron27 : public Hexahedron<Scalar> {
-  using Base = Hexahedron<Scalar>;
   friend class Hexahedron8<Scalar>;
   friend class Hexahedron20<Scalar>;
   friend class Hexahedron26<Scalar>;
 
  public:
+  using Base = Hexahedron<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -387,9 +386,8 @@ Hexahedron27<Scalar>::faces_{
  */
 template <std::floating_point Scalar>
 class Hexahedron8 : public Hexahedron<Scalar> {
-  using Base = Hexahedron<Scalar>;
-
  public:
+  using Base = Hexahedron<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -511,6 +509,20 @@ class Hexahedron8 : public Hexahedron<Scalar> {
   Hexahedron8(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
+
+  std::unique_ptr<typename Base::Base>
+  Clone(std::vector<Global> const &coords) const final {
+    auto cell_uptr = std::make_unique<Hexahedron8>();
+    for (int i = 0, n = this->CountNodes(); i < n; ++i) {
+      cell_uptr->global_coords_[i] = coords[i];
+    }
+    cell_uptr->_BuildCenter();
+    return cell_uptr;
+  }
+
+ private:
+  friend std::unique_ptr<Hexahedron8> std::make_unique<Hexahedron8>();
+  Hexahedron8() = default;
 };
 
 /**
@@ -520,9 +532,8 @@ class Hexahedron8 : public Hexahedron<Scalar> {
  */
 template <std::floating_point Scalar>
 class Hexahedron20 : public Hexahedron<Scalar> {
-  using Base = Hexahedron<Scalar>;
-
  public:
+  using Base = Hexahedron<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -799,9 +810,8 @@ Hexahedron20<Scalar>::old_shapes_on_new_nodes_ =
  */
 template <std::floating_point Scalar>
 class Hexahedron26 : public Hexahedron<Scalar> {
-  using Base = Hexahedron<Scalar>;
-
  public:
+  using Base = Hexahedron<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;

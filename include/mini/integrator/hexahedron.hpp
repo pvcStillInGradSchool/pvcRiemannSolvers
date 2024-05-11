@@ -39,6 +39,7 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
   using Jacobian = typename Coordinate::Jacobian;
+  using Base = Cell<Scalar>;
 
  private:
   static constexpr int Qx = IntegratorX::Q;
@@ -118,6 +119,12 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
   Scalar &GetGlobalWeight(int i) final {
     assert(0 <= i && i < CountPoints());
     return global_weights_[i];
+  }
+
+  std::unique_ptr<Base>
+  Clone(typename Coordinate::Base const &coordinate) const final {
+    return std::make_unique<Hexahedron>(
+        dynamic_cast<Coordinate const &>(coordinate));
   }
 
  public:

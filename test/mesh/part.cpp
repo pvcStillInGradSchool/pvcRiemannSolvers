@@ -27,6 +27,10 @@ void Process(Part *part_ptr, const std::string &solution_name) {
       Coord(), Coord(), Coord(), Coord() };
   part_ptr->InstallPrototype(4,
       std::make_unique<QuadrangleIntegrator>(quadrangle));
+  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>{
+      Coord(), Coord(), Coord(), Coord(), Coord(), Coord(), Coord(), Coord() };
+  part_ptr->InstallPrototype(8,
+      std::make_unique<HexahedronIntegrator>(hexahedron));
   part_ptr->ReadCgnsFile();
   part_ptr->SetFieldNames({"U1", "U2"});
   double volume = 0.0, area = 0.0;
