@@ -4,6 +4,10 @@
 
 #include <concepts>
 
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include "mini/coordinate/face.hpp"
 #include "mini/integrator/element.hpp"
 #include "mini/integrator/function.hpp"
@@ -40,8 +44,17 @@ class Face : public Element<Scalar, kPhysDim, 2> {
    * @return const Coordinate &  Reference to the coordinate::Face object it uses for coordinate mapping.
    */
   virtual const Coordinate &coordinate() const = 0;
+ 
+  std::pair< std::unique_ptr<Coordinate>, std::unique_ptr<Face> >
+  Clone(std::vector<Global> const &coords) const {
+    auto coordinate_uptr = coordinate().Clone(coords);
+    auto integrator_uptr = this->Clone(*coordinate_uptr);
+    return { std::move(coordinate_uptr), std::move(integrator_uptr) };
+  }
 
  protected:
+  virtual std::unique_ptr<Face> Clone(Coordinate const &) const = 0;
+
   static void BuildNormalFrames(Face *face) requires(kPhysDim == 2) {
   }
   static void BuildNormalFrames(Face *face) requires(kPhysDim == 3) {

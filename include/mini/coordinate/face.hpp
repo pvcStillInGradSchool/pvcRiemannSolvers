@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <type_traits>
 #include <vector>
 
@@ -25,14 +26,16 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   static constexpr int D = kPhysDim;
   static_assert(D == 2 || D == 3);
 
-  using Base = Element<Scalar, kPhysDim, 2>;
-
  public:
+  using Base = Element<Scalar, kPhysDim, 2>;
   using Real = typename Base::Real;
   using Local = typename Base::Local;
   using Global = typename Base::Global;
   using Jacobian = typename Base::Jacobian;
   using Frame = std::conditional_t<D == 3, std::array<Global, 3>, int>;
+
+  virtual std::unique_ptr<Face>
+  Clone(std::vector<Global> const &coords) const = 0;
 
   virtual std::vector<Scalar> LocalToShapeFunctions(Scalar, Scalar) const = 0;
   virtual std::vector<Local> LocalToShapeGradients(Scalar, Scalar) const = 0;

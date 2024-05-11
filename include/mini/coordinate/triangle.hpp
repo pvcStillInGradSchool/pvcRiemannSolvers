@@ -102,6 +102,15 @@ class Triangle3 : public Triangle<Scalar, kPhysDim> {
   Triangle3(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
+
+  std::unique_ptr<Triangle3>
+  Clone(std::vector<Global> const &coords) const final {
+    auto face_uptr = std::make_unique<Triangle3>();
+    for (int i = 0, n = this->CountNodes(); i < n; ++i) {
+      face_uptr->global_coords_[i] = coords[i];
+    }
+    return face_uptr;
+  }
 };
 // initialization of static const members:
 template <std::floating_point Scalar, int kPhysDim>

@@ -8,6 +8,7 @@
 
 #include <array>
 #include <initializer_list>
+#include <memory>
 #include <vector>
 
 #include "mini/coordinate/element.hpp"
@@ -23,9 +24,8 @@ namespace coordinate {
  */
 template <std::floating_point Scalar, int kPhysDim>
 class Quadrangle : public Face<Scalar, kPhysDim> {
-  using Base = Face<Scalar, kPhysDim>;
-
  public:
+  using Base = Face<Scalar, kPhysDim>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -53,9 +53,8 @@ class Quadrangle : public Face<Scalar, kPhysDim> {
  */
 template <std::floating_point Scalar, int kPhysDim>
 class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
-  using Base = Quadrangle<Scalar, kPhysDim>;
-
  public:
+  using Base = Quadrangle<Scalar, kPhysDim>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -131,6 +130,20 @@ class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
   Quadrangle4(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
+
+  std::unique_ptr<typename Base::Base>
+  Clone(std::vector<Global> const &coords) const final {
+    auto face_uptr = std::make_unique<Quadrangle4>();
+    for (int i = 0, n = this->CountNodes(); i < n; ++i) {
+      face_uptr->global_coords_[i] = coords[i];
+    }
+    face_uptr->_BuildCenter();
+    return face_uptr;
+  }
+
+ private:
+  friend std::unique_ptr<Quadrangle4> std::make_unique<Quadrangle4>();
+  Quadrangle4() = default;
 };
 // initialization of static const members:
 template <std::floating_point Scalar, int kPhysDim>

@@ -5,6 +5,7 @@
 #include <concepts>
 
 #include <cmath>
+#include <memory>
 
 #include <type_traits>
 
@@ -12,6 +13,7 @@
 
 #include "mini/integrator/line.hpp"
 #include "mini/integrator/face.hpp"
+#include "mini/coordinate/face.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 
 namespace mini {
@@ -39,9 +41,9 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   using Global = typename Coordinate::Global;
   using Jacobian = typename Coordinate::Jacobian;
   using Frame = typename Coordinate::Frame;
+  using Base = Face<Scalar, kPhysDim>;
 
  private:
-  using Base = Face<Scalar, kPhysDim>;
   static constexpr int Qx = IntegratorX::Q;
   static constexpr int Qy = IntegratorY::Q;
   static constexpr int Q = Qx * Qy;
@@ -120,6 +122,12 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
   Frame &GetNormalFrame(int i) final {
     assert(0 <= i && i < CountPoints());
     return normal_frames_[i];
+  }
+
+  std::unique_ptr<Base>
+  Clone(typename Coordinate::Base const &coordinate) const final {
+    return std::make_unique<Quadrangle>(
+        dynamic_cast<Coordinate const &>(coordinate));
   }
 
  public:
