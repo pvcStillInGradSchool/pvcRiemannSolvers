@@ -19,7 +19,7 @@ class Extrapolation : public Interpolation {
   using Global = typename Interpolation::Global;
   using Local = typename Interpolation::Local;
   using Value = typename Interpolation::Value;
-  using Integrator = typename Interpolation::IntegratorBase;
+  using Integrator = typename Interpolation::Integrator;
 
   static constexpr int D = Interpolation::D;
   static constexpr int P = Interpolation::P;
@@ -69,7 +69,7 @@ class Extrapolation : public Interpolation {
   }
 
  public:
-  explicit Extrapolation(Integrator const &integrator)
+  explicit Extrapolation(typename Integrator::Base const &integrator)
       : Interpolation(integrator), projection_(integrator) {
     auto integrand = [this](Local const &local) -> MatNxM {
       // TODO(PVC): use Kronecker delta property

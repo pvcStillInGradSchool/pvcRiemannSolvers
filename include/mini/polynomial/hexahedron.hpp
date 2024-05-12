@@ -48,7 +48,6 @@ class Hexahedron {
   using Scalar = typename Integrator::Scalar;
   using Local = typename Integrator::Local;
   using Global = typename Integrator::Global;
-  using IntegratorBase = integrator::Cell<Scalar>;
   using Coordinate = typename Integrator::Coordinate;
   using Jacobian = typename Coordinate::Jacobian;
   static constexpr int Px = Gx::Q - 1;
@@ -161,7 +160,7 @@ class Hexahedron {
   }
 
  public:
-  explicit Hexahedron(const IntegratorBase &integrator) requires(kLocal)
+  explicit Hexahedron(typename Integrator::Base const &integrator) requires(kLocal)
       : integrator_ptr_(dynamic_cast<const Integrator *>(&integrator)) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = integrator_ptr_->GetLocal(ijk);
@@ -210,7 +209,7 @@ class Hexahedron {
           (inv_T_grad[Z] / det2 + inv_T * (-2 * det_grad[Z] / det3));
     }
   }
-  explicit Hexahedron(const IntegratorBase &integrator) requires(!kLocal)
+  explicit Hexahedron(typename Integrator::Base const &integrator) requires(!kLocal)
       : integrator_ptr_(dynamic_cast<const Integrator *>(&integrator)) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = integrator_ptr_->GetLocal(ijk);
