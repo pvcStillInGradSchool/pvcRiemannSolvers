@@ -16,6 +16,7 @@
 #include <unordered_map>
 
 #include "mini/spatial/dg/general.hpp"
+#include "mini/polynomial/hexahedron.hpp"
 
 namespace mini {
 namespace spatial {
@@ -43,9 +44,7 @@ class Lobatto : public General<Part> {
   using Column = typename Base::Column;
 
  protected:
-  using IntegratorOnCell = typename Projection::Integrator;
-  using IntegratorOnLine = typename IntegratorOnCell::IntegratorX;
-  static constexpr int kLineQ = IntegratorOnLine::Q;
+  static constexpr int kLineQ = polynomial::LineIntegrator<Projection>::Q;
   static constexpr int kFaceQ = kLineQ * kLineQ;
 
   using FaceCache = std::array<int16_t, kFaceQ>;

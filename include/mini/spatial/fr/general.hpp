@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "mini/polynomial/hexahedron.hpp"
 #include "mini/riemann/concept.hpp"
 #include "mini/spatial/fem.hpp"
 #include "mini/basis/vincent.hpp"
@@ -47,11 +48,8 @@ class General : public spatial::FiniteElement<Part> {
 
  protected:
   using FluxMatrix = typename Riemann::FluxMatrix;
-  using IntegratorOnCell = typename Projection::Integrator;
-  using IntegratorOnLine = typename IntegratorOnCell::IntegratorX;
-  static_assert(std::is_same_v<IntegratorOnLine, typename IntegratorOnCell::IntegratorY>);
-  static_assert(std::is_same_v<IntegratorOnLine, typename IntegratorOnCell::IntegratorZ>);
-  static constexpr int kLineQ = IntegratorOnLine::Q;
+
+  static constexpr int kLineQ = polynomial::LineIntegrator<Projection>::Q;
   static constexpr int kFaceQ = kLineQ * kLineQ;
   static constexpr int kCellQ = kLineQ * kFaceQ;
 
@@ -108,7 +106,7 @@ class General : public spatial::FiniteElement<Part> {
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
-          for (k = 0; k < IntegratorOnLine::Q; ++k) {
+          for (k = 0; k < kLineQ; ++k) {
             auto ijk = cell_basis.index(i, j, k);
             auto &local = cell_integrator.GetLocal(ijk);
             auto g_prime = vincent_.LocalToLeftDerivative(local[Z]);
@@ -124,7 +122,7 @@ class General : public spatial::FiniteElement<Part> {
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
-          for (j = 0; j < IntegratorOnLine::Q; ++j) {
+          for (j = 0; j < kLineQ; ++j) {
             auto ijk = cell_basis.index(i, j, k);
             auto &local = cell_integrator.GetLocal(ijk);
             auto g_prime = vincent_.LocalToLeftDerivative(local[Y]);
@@ -134,13 +132,13 @@ class General : public spatial::FiniteElement<Part> {
           break;
         case 2:
           assert(i == -1);
-          flux_point.ijk = cell_basis.index(IntegratorOnLine::Q - 1, j, k);
+          flux_point.ijk = cell_basis.index(kLineQ - 1, j, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
-          for (i = 0; i < IntegratorOnLine::Q; ++i) {
+          for (i = 0; i < kLineQ; ++i) {
             auto ijk = cell_basis.index(i, j, k);
             auto &local = cell_integrator.GetLocal(ijk);
             auto g_prime = vincent_.LocalToRightDerivative(local[X]);
@@ -150,13 +148,13 @@ class General : public spatial::FiniteElement<Part> {
           break;
         case 3:
           assert(j == -1);
-          flux_point.ijk = cell_basis.index(i, IntegratorOnLine::Q - 1, k);
+          flux_point.ijk = cell_basis.index(i, kLineQ - 1, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
-          for (j = 0; j < IntegratorOnLine::Q; ++j) {
+          for (j = 0; j < kLineQ; ++j) {
             auto ijk = cell_basis.index(i, j, k);
             auto &local = cell_integrator.GetLocal(ijk);
             auto g_prime = vincent_.LocalToRightDerivative(local[Y]);
@@ -172,7 +170,7 @@ class General : public spatial::FiniteElement<Part> {
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
-          for (i = 0; i < IntegratorOnLine::Q; ++i) {
+          for (i = 0; i < kLineQ; ++i) {
             auto ijk = cell_basis.index(i, j, k);
             auto &local = cell_integrator.GetLocal(ijk);
             auto g_prime = vincent_.LocalToLeftDerivative(local[X]);
@@ -182,13 +180,13 @@ class General : public spatial::FiniteElement<Part> {
           break;
         case 5:
           assert(k == -1);
-          flux_point.ijk = cell_basis.index(i, j, IntegratorOnLine::Q - 1);
+          flux_point.ijk = cell_basis.index(i, j, kLineQ - 1);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
               cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
-          for (k = 0; k < IntegratorOnLine::Q; ++k) {
+          for (k = 0; k < kLineQ; ++k) {
             auto ijk = cell_basis.index(i, j, k);
             auto &local = cell_integrator.GetLocal(ijk);
             auto g_prime = vincent_.LocalToRightDerivative(local[Z]);
