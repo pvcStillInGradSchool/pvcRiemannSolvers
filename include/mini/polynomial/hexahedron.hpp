@@ -16,7 +16,6 @@
 
 #include "mini/algebra/eigen.hpp"
 #include "mini/integrator/cell.hpp"
-#include "mini/integrator/lobatto.hpp"
 #include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/element.hpp"
 #include "mini/basis/lagrange.hpp"
@@ -76,8 +75,6 @@ class Hexahedron {
   using Mat3xN = algebra::Matrix<Scalar, 3, N>;
   using Gradient = Mat3xK;
   using Hessian = Mat6xK;
-
-  using IntegratorOnLine = IntegratorX;
 
  private:
   const Integrator *integrator_ptr_ = nullptr;
@@ -943,6 +940,26 @@ std::array<typename Hexahedron<Gx, Gy, Gz, kC, kL>::Mat6xN,
                     Hexahedron<Gx, Gy, Gz, kC, kL>::N> const
 Hexahedron<Gx, Gy, Gz, kC, kL>::basis_local_hessians_ =
     Hexahedron<Gx, Gy, Gz, kC, kL>::BuildBasisLocalHessians();
+
+namespace {
+
+template <class Hexahedron>
+class _LineIntegrator {
+  using IntegratorX = typename Hexahedron::IntegratorX;
+  using IntegratorY = typename Hexahedron::IntegratorY;
+  using IntegratorZ = typename Hexahedron::IntegratorZ;
+
+  static_assert(std::is_same_v<IntegratorX, IntegratorY>);
+  static_assert(std::is_same_v<IntegratorX, IntegratorZ>);
+
+ public:
+  using type = IntegratorX;
+};
+
+}
+
+template <class Hexahedron>
+using LineIntegrator = _LineIntegrator<Hexahedron>::type;
 
 }  // namespace polynomial
 }  // namespace mini

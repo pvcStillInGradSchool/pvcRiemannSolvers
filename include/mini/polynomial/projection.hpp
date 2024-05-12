@@ -12,8 +12,6 @@
 #include <utility>
 
 #include "mini/algebra/eigen.hpp"
-#include "mini/integrator/legendre.hpp"
-#include "mini/integrator/hexahedron.hpp"
 #include "mini/integrator/function.hpp"
 #include "mini/basis/linear.hpp"
 
@@ -86,8 +84,6 @@ class Projection {
   using Coeff = algebra::Matrix<Scalar, K, N>;
   using Value = algebra::Matrix<Scalar, K, 1>;
   using Gradient = algebra::Matrix<Scalar, 3, K>;
-
-  using IntegratorOnLine = integrator::Legendre<Scalar, kDegrees + 1>;
 
  public:
   Coeff coeff_;
