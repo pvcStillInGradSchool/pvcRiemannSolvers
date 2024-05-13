@@ -333,6 +333,15 @@ class Hexahedron27 : public Hexahedron<Scalar> {
   Hexahedron27(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
+
+  Hexahedron27() = default;
+
+  std::unique_ptr<typename Base::Base>
+  Clone(std::vector<Global> const &coords) const final {
+    auto cell_uptr = std::make_unique<Hexahedron27>();
+    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
+    return cell_uptr;
+  }
 };
 template <std::floating_point Scalar>
 typename Hexahedron27<Scalar>::OldShapesOnNewNodes
@@ -792,6 +801,14 @@ class Hexahedron20 : public Hexahedron<Scalar> {
   Hexahedron20(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
+  Hexahedron20() = default;
+
+  std::unique_ptr<typename Base::Base>
+  Clone(std::vector<Global> const &coords) const final {
+    auto cell_uptr = std::make_unique<Hexahedron20>();
+    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
+    return cell_uptr;
+  }
 };
 template <std::floating_point Scalar>
 typename Hexahedron20<Scalar>::OldShapesOnNewNodes
@@ -1086,6 +1103,14 @@ class Hexahedron26 : public Hexahedron<Scalar> {
  public:
   Hexahedron26(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
+  }
+  Hexahedron26() = default;
+
+  std::unique_ptr<typename Base::Base>
+  Clone(std::vector<Global> const &coords) const final {
+    auto cell_uptr = std::make_unique<Hexahedron26>();
+    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
+    return cell_uptr;
   }
 };
 template <std::floating_point Scalar>

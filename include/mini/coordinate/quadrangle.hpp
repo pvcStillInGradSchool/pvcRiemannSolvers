@@ -256,6 +256,14 @@ class Quadrangle8 : public Quadrangle<Scalar, kPhysDim> {
   Quadrangle8(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
+  Quadrangle8() = default;
+
+  std::unique_ptr<typename Base::Base>
+  Clone(std::vector<Global> const &coords) const final {
+    auto face_uptr = std::make_unique<Quadrangle8>();
+    Element<Scalar, kPhysDim, 2>::_Build(face_uptr.get(), coords);
+    return face_uptr;
+  }
 };
 // initialization of static const members:
 template <std::floating_point Scalar, int kPhysDim>
@@ -378,6 +386,14 @@ class Quadrangle9 : public Quadrangle<Scalar, kPhysDim> {
 
   Quadrangle9(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
+  }
+  Quadrangle9() = default;
+
+  std::unique_ptr<typename Base::Base>
+  Clone(std::vector<Global> const &coords) const final {
+    auto face_uptr = std::make_unique<Quadrangle9>();
+    Element<Scalar, kPhysDim, 2>::_Build(face_uptr.get(), coords);
+    return face_uptr;
   }
 };
 // initialization of static const members:
