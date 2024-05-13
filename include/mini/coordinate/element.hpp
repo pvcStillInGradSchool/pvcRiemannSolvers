@@ -84,6 +84,15 @@ class Element {
     element->_BuildCenter();
   }
 
+  static void _Build(Element *element, std::vector<Global> vec) {
+    assert(vec.size() == element->CountNodes());
+    auto p = vec.begin();
+    for (int i = 0, n = element->CountNodes(); i < n; ++i) {
+      element->_GetGlobal(i) = p[i];
+    }
+    element->_BuildCenter();
+  }
+
  public:
   Local GlobalToLocal(const Global &global,
       const Local &hint = Local::Zero()) const requires(kCellDim == kPhysDim) {

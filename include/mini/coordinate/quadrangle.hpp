@@ -134,10 +134,7 @@ class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
   std::unique_ptr<typename Base::Base>
   Clone(std::vector<Global> const &coords) const final {
     auto face_uptr = std::make_unique<Quadrangle4>();
-    for (int i = 0, n = this->CountNodes(); i < n; ++i) {
-      face_uptr->global_coords_[i] = coords[i];
-    }
-    face_uptr->_BuildCenter();
+    Element<Scalar, kPhysDim, 2>::_Build(face_uptr.get(), coords);
     return face_uptr;
   }
 };

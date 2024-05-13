@@ -8,6 +8,7 @@
 
 #include <array>
 #include <initializer_list>
+#include <memory>
 #include <vector>
 
 #include "mini/coordinate/element.hpp"
@@ -514,10 +515,7 @@ class Hexahedron8 : public Hexahedron<Scalar> {
   std::unique_ptr<typename Base::Base>
   Clone(std::vector<Global> const &coords) const final {
     auto cell_uptr = std::make_unique<Hexahedron8>();
-    for (int i = 0, n = this->CountNodes(); i < n; ++i) {
-      cell_uptr->global_coords_[i] = coords[i];
-    }
-    cell_uptr->_BuildCenter();
+    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
     return cell_uptr;
   }
 };
