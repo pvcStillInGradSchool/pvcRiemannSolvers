@@ -506,6 +506,7 @@ class Hexahedron8 : public Hexahedron<Scalar> {
   }
 
  public:
+  Hexahedron8() = default;
   Hexahedron8(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
@@ -519,10 +520,6 @@ class Hexahedron8 : public Hexahedron<Scalar> {
     cell_uptr->_BuildCenter();
     return cell_uptr;
   }
-
- private:
-  friend std::unique_ptr<Hexahedron8> std::make_unique<Hexahedron8>();
-  Hexahedron8() = default;
 };
 
 /**

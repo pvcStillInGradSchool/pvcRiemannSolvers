@@ -126,7 +126,7 @@ class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
     global_coords_[2] = p2; global_coords_[3] = p3;
     this->_BuildCenter();
   }
-
+  Quadrangle4() = default;
   Quadrangle4(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
@@ -140,10 +140,6 @@ class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
     face_uptr->_BuildCenter();
     return face_uptr;
   }
-
- private:
-  friend std::unique_ptr<Quadrangle4> std::make_unique<Quadrangle4>();
-  Quadrangle4() = default;
 };
 // initialization of static const members:
 template <std::floating_point Scalar, int kPhysDim>
