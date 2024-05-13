@@ -336,7 +336,7 @@ class Hexahedron27 : public Hexahedron<Scalar> {
 
   Hexahedron27() = default;
 
-  std::unique_ptr<typename Base::Base>
+  std::unique_ptr<Cell<Scalar>>
   Clone(std::vector<Global> const &coords) const final {
     auto cell_uptr = std::make_unique<Hexahedron27>();
     Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
@@ -521,7 +521,7 @@ class Hexahedron8 : public Hexahedron<Scalar> {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
 
-  std::unique_ptr<typename Base::Base>
+  std::unique_ptr<Cell<Scalar>>
   Clone(std::vector<Global> const &coords) const final {
     auto cell_uptr = std::make_unique<Hexahedron8>();
     Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
@@ -803,7 +803,7 @@ class Hexahedron20 : public Hexahedron<Scalar> {
   }
   Hexahedron20() = default;
 
-  std::unique_ptr<typename Base::Base>
+  std::unique_ptr<Cell<Scalar>>
   Clone(std::vector<Global> const &coords) const final {
     auto cell_uptr = std::make_unique<Hexahedron20>();
     Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
@@ -1106,7 +1106,7 @@ class Hexahedron26 : public Hexahedron<Scalar> {
   }
   Hexahedron26() = default;
 
-  std::unique_ptr<typename Base::Base>
+  std::unique_ptr<Cell<Scalar>>
   Clone(std::vector<Global> const &coords) const final {
     auto cell_uptr = std::make_unique<Hexahedron26>();
     Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);

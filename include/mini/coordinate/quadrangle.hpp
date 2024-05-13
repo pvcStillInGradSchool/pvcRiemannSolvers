@@ -131,7 +131,7 @@ class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
 
-  std::unique_ptr<typename Base::Base>
+  std::unique_ptr<Face<Scalar, kPhysDim>>
   Clone(std::vector<Global> const &coords) const final {
     auto face_uptr = std::make_unique<Quadrangle4>();
     Element<Scalar, kPhysDim, 2>::_Build(face_uptr.get(), coords);
@@ -258,7 +258,7 @@ class Quadrangle8 : public Quadrangle<Scalar, kPhysDim> {
   }
   Quadrangle8() = default;
 
-  std::unique_ptr<typename Base::Base>
+  std::unique_ptr<Face<Scalar, kPhysDim>>
   Clone(std::vector<Global> const &coords) const final {
     auto face_uptr = std::make_unique<Quadrangle8>();
     Element<Scalar, kPhysDim, 2>::_Build(face_uptr.get(), coords);
@@ -389,7 +389,7 @@ class Quadrangle9 : public Quadrangle<Scalar, kPhysDim> {
   }
   Quadrangle9() = default;
 
-  std::unique_ptr<typename Base::Base>
+  std::unique_ptr<Face<Scalar, kPhysDim>>
   Clone(std::vector<Global> const &coords) const final {
     auto face_uptr = std::make_unique<Quadrangle9>();
     Element<Scalar, kPhysDim, 2>::_Build(face_uptr.get(), coords);
