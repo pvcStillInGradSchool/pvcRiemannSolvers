@@ -32,6 +32,7 @@ class TestSpatialViscosity : public ::testing::Test {
 };
 TEST_F(TestSpatialViscosity, LobattoFR) {
   auto part = Part(case_name, i_core, n_core);
+  InstallPrototype(&part);
   using Spatial = mini::spatial::fr::Lobatto<Part>;
   auto spatial = Spatial(&part);
   using Viscosity = mini::spatial::EnergyBasedViscosity<Part>;

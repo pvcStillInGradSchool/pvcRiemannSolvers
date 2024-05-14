@@ -59,6 +59,17 @@ using QuadrangleIntegrator
 using HexahedronIntegrator
     = mini::integrator::Hexahedron<Gx, Gx, Gx>;
 
+template <class Part>
+void InstallPrototype(Part *part_ptr) {
+  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
+  part_ptr->InstallPrototype(4,
+      std::make_unique<QuadrangleIntegrator>(quadrangle));
+  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
+  part_ptr->InstallPrototype(8,
+      std::make_unique<HexahedronIntegrator>(hexahedron));
+  part_ptr->ReadCgnsFile();
+}
+
 int Main(int argc, char* argv[]) {
   // Initialize MPI before any call to gtest_mpi
   MPI_Init(&argc, &argv);

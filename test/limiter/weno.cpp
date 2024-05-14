@@ -18,8 +18,11 @@
 #include "mini/mesh/mapper.hpp"
 #include "mini/mesh/shuffler.hpp"
 #include "mini/mesh/part.hpp"
-#include "mini/integrator/hexahedron.hpp"
+#include "mini/coordinate/quadrangle.hpp"
 #include "mini/coordinate/hexahedron.hpp"
+#include "mini/integrator/legendre.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/integrator/hexahedron.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/limiter/weno.hpp"
 #include "mini/limiter/reconstruct.hpp"
@@ -220,6 +223,13 @@ TEST_F(TestWenoLimiters, For3dEulerEquations) {
   using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
   using Value = typename Part::Value;
   auto part = Part(case_name, i_core, n_core);
+  auto quadrangle = mini::coordinate::Quadrangle4<double, 3>();
+  auto hexahedron = mini::coordinate::Hexahedron8<double>();
+  part.InstallPrototype(4, std::make_unique<
+      mini::integrator::Quadrangle<3, Gx, Gx>>(quadrangle));
+  part.InstallPrototype(8, std::make_unique<
+      mini::integrator::Hexahedron<Gx, Gx, Gx>>(hexahedron));
+  part.ReadCgnsFile();
   // project the function
   auto func = [](Coord const &xyz) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];

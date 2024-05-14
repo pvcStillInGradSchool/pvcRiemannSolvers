@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
       Scalar, kDimensions, kDegrees, kComponents>;
   using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
   auto part = Part(case_name, i_core, n_core);
+  InstallPrototype(&part);
   using Cell = typename Part::Cell;
   using Limiter = mini::limiter::weno::Lazy<Cell>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
@@ -105,6 +106,7 @@ int main(int argc, char* argv[]) {
   using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
   using Spatial = mini::spatial::dg::Lobatto<Part>;
   auto part = Part(case_name, i_core, n_core);
+  InstallPrototype(&part);
   auto spatial = Spatial(&part);
   spatial.SetSmartBoundary("4_S_27", moving);  // Top
   spatial.SetSmartBoundary("4_S_31", moving);  // Left
@@ -151,6 +153,7 @@ int main(int argc, char* argv[]) {
   using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
   using Spatial = mini::spatial::dg::Lobatto<Part>;
   auto part = Part(case_name, i_core, n_core);
+  InstallPrototype(&part);
   auto spatial = Spatial(&part);
   spatial.SetSmartBoundary("4_S_27", moving);  // Top
   spatial.SetSmartBoundary("4_S_31", moving);  // Left
