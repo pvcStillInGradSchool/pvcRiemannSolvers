@@ -66,8 +66,12 @@ class Element {
   virtual const Global &GetGlobal(int i) const = 0;
   virtual const Global &center() const = 0;
 
+  void SetGlobal(int i, Global const &global_i) {
+    this->_GetGlobal(i) = global_i;
+  }
+  virtual void BuildCenter() = 0;
+
  protected:
-  virtual void _BuildCenter() = 0;
   Global &_GetGlobal(int i) {
     const Global &global
         = const_cast<const Element *>(this)->GetGlobal(i);
@@ -79,18 +83,9 @@ class Element {
     assert(il.size() == element->CountNodes());
     auto p = il.begin();
     for (int i = 0, n = element->CountNodes(); i < n; ++i) {
-      element->_GetGlobal(i) = p[i];
+      element->SetGlobal(i, p[i]);
     }
-    element->_BuildCenter();
-  }
-
-  static void _Build(Element *element, std::vector<Global> vec) {
-    assert(vec.size() == element->CountNodes());
-    auto p = vec.begin();
-    for (int i = 0, n = element->CountNodes(); i < n; ++i) {
-      element->_GetGlobal(i) = p[i];
-    }
-    element->_BuildCenter();
+    element->BuildCenter();
   }
 
  public:

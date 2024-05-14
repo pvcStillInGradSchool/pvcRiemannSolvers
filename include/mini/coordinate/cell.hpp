@@ -28,8 +28,7 @@ class Cell : public Element<Scalar, 3, 3> {
   using Global = typename Base::Global;
   using Jacobian = typename Base::Jacobian;
 
-  virtual std::unique_ptr<Cell>
-  Clone(std::vector<Global> const &coords) const = 0;
+  virtual std::unique_ptr<Cell>Clone() const = 0;
 
   /**
    * @brief The type of (geometric) Hessian matrix of a scalar function \f$ f \f$, which is defined as \f$ \begin{bmatrix}\partial_{\xi}\partial_{\xi}f & \partial_{\xi}\partial_{\eta}f & \partial_{\xi}\partial_{\zeta}f\\ \partial_{\eta}\partial_{\xi}f & \partial_{\eta}\partial_{\eta}f & \partial_{\eta}\partial_{\zeta}f\\ \partial_{\zeta}\partial_{\xi}f & \partial_{\zeta}\partial_{\eta}f & \partial_{\zeta}\partial_{\zeta}f \end{bmatrix} \f$.

@@ -121,13 +121,13 @@ class Hexahedron : public Cell<typename Gx::Scalar> {
     return global_weights_[i];
   }
 
+ public:
   std::unique_ptr<Base>
   Clone(typename Coordinate::Base const &coordinate) const final {
     return std::make_unique<Hexahedron>(
         dynamic_cast<Coordinate const &>(coordinate));
   }
 
- public:
   explicit Hexahedron(Coordinate const &lagrange)
       : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();

@@ -35,6 +35,15 @@ class Hexahedron : public Cell<Scalar> {
   int CountCorners() const final {
     return 8;
   }
+
+ protected:
+  Global center_;
+
+ public:
+  void BuildCenter() final {
+    Scalar a = 0;
+    center_ = this->LocalToGlobal(a, a, a);
+  }
   const Global &center() const final {
     return center_;
   }
@@ -70,13 +79,6 @@ class Hexahedron : public Cell<Scalar> {
       assert(false);
     }
     return normal;
-  }
-
- protected:
-  Global center_;
-  void _BuildCenter() final {
-    Scalar a = 0;
-    center_ = this->LocalToGlobal(a, a, a);
   }
 
   static int GetFaceId(const size_t *cell_nodes, size_t *face_nodes,
@@ -336,11 +338,8 @@ class Hexahedron27 : public Hexahedron<Scalar> {
 
   Hexahedron27() = default;
 
-  std::unique_ptr<Cell<Scalar>>
-  Clone(std::vector<Global> const &coords) const final {
-    auto cell_uptr = std::make_unique<Hexahedron27>();
-    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
-    return cell_uptr;
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Hexahedron27>();
   }
 };
 template <std::floating_point Scalar>
@@ -521,11 +520,8 @@ class Hexahedron8 : public Hexahedron<Scalar> {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
 
-  std::unique_ptr<Cell<Scalar>>
-  Clone(std::vector<Global> const &coords) const final {
-    auto cell_uptr = std::make_unique<Hexahedron8>();
-    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
-    return cell_uptr;
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Hexahedron8>();
   }
 };
 
@@ -803,11 +799,8 @@ class Hexahedron20 : public Hexahedron<Scalar> {
   }
   Hexahedron20() = default;
 
-  std::unique_ptr<Cell<Scalar>>
-  Clone(std::vector<Global> const &coords) const final {
-    auto cell_uptr = std::make_unique<Hexahedron20>();
-    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
-    return cell_uptr;
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Hexahedron20>();
   }
 };
 template <std::floating_point Scalar>
@@ -1106,11 +1099,8 @@ class Hexahedron26 : public Hexahedron<Scalar> {
   }
   Hexahedron26() = default;
 
-  std::unique_ptr<Cell<Scalar>>
-  Clone(std::vector<Global> const &coords) const final {
-    auto cell_uptr = std::make_unique<Hexahedron26>();
-    Element<Scalar, 3, 3>::_Build(cell_uptr.get(), coords);
-    return cell_uptr;
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Hexahedron26>();
   }
 };
 template <std::floating_point Scalar>

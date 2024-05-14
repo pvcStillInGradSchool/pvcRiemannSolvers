@@ -124,13 +124,13 @@ class Quadrangle : public Face<typename Gx::Scalar, kPhysDim> {
     return normal_frames_[i];
   }
 
+ public:
   std::unique_ptr<Base>
   Clone(typename Coordinate::Base const &coordinate) const final {
     return std::make_unique<Quadrangle>(
         dynamic_cast<Coordinate const &>(coordinate));
   }
 
- public:
   explicit Quadrangle(Coordinate const &lagrange)
       : coordinate_(&lagrange) {
     area_ = this->BuildQuadraturePoints();

@@ -34,8 +34,7 @@ class Face : public Element<Scalar, kPhysDim, 2> {
   using Jacobian = typename Base::Jacobian;
   using Frame = std::conditional_t<D == 3, std::array<Global, 3>, int>;
 
-  virtual std::unique_ptr<Face>
-  Clone(std::vector<Global> const &coords) const = 0;
+  virtual std::unique_ptr<Face> Clone() const = 0;
 
   virtual std::vector<Scalar> LocalToShapeFunctions(Scalar, Scalar) const = 0;
   virtual std::vector<Local> LocalToShapeGradients(Scalar, Scalar) const = 0;

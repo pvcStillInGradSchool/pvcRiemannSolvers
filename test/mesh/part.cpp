@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -23,12 +24,10 @@
 
 template <class Part>
 void Process(Part *part_ptr, const std::string &solution_name) {
-  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>{
-      Coord(), Coord(), Coord(), Coord() };
+  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
   part_ptr->InstallPrototype(4,
       std::make_unique<QuadrangleIntegrator>(quadrangle));
-  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>{
-      Coord(), Coord(), Coord(), Coord(), Coord(), Coord(), Coord(), Coord() };
+  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
   part_ptr->InstallPrototype(8,
       std::make_unique<HexahedronIntegrator>(hexahedron));
   part_ptr->ReadCgnsFile();

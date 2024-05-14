@@ -641,28 +641,30 @@ class Part {
  private:
   std::pair< typename Face::CoordinateUptr, typename Face::IntegratorUptr >
   BuildIntegratorForFace(int npe, int i_zone, Int const *i_node_list) const {
-    auto coords = std::vector<Global>();
-    coords.reserve(npe);
-    for (int i = 0; i < npe; ++i) {
-      coords.emplace_back(GetCoord(i_zone, i_node_list[i]));
-    }
-    assert(coords.size() == npe);
     // TODO(PVC): use O(1) indexing
     auto const &prototype = face_prototypes_.at(npe);
-    return prototype->Clone(coords);
+    auto coordinate_uptr = prototype->coordinate().Clone();
+    assert(coordinate_uptr->CountNodes() == npe);
+    for (int i = 0; i < npe; ++i) {
+      coordinate_uptr->SetGlobal(i, GetCoord(i_zone, i_node_list[i]));
+    }
+    coordinate_uptr->BuildCenter();
+    auto integrator_uptr = prototype->Clone(*coordinate_uptr);
+    return { std::move(coordinate_uptr), std::move(integrator_uptr) };
   }
 
   std::pair< typename Cell::CoordinateUptr, typename Cell::IntegratorUptr >
   BuildIntegratorForCell(int npe, int i_zone, Int const *i_node_list) const {
-    auto coords = std::vector<Global>();
-    coords.reserve(npe);
-    for (int i = 0; i < npe; ++i) {
-      coords.emplace_back(GetCoord(i_zone, i_node_list[i]));
-    }
-    assert(coords.size() == npe);
     // TODO(PVC): use O(1) indexing
     auto const &prototype = cell_prototypes_.at(npe);
-    return prototype->Clone(coords);
+    auto coordinate_uptr = prototype->coordinate().Clone();
+    assert(coordinate_uptr->CountNodes() == npe);
+    for (int i = 0; i < npe; ++i) {
+      coordinate_uptr->SetGlobal(i, GetCoord(i_zone, i_node_list[i]));
+    }
+    coordinate_uptr->BuildCenter();
+    auto integrator_uptr = prototype->Clone(*coordinate_uptr);
+    return { std::move(coordinate_uptr), std::move(integrator_uptr) };
   }
 
   void BuildLocalCells(std::ifstream &istrm, int i_file) {
