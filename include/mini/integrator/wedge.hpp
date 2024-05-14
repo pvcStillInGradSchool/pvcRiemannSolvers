@@ -32,6 +32,7 @@ class Wedge : public Cell<Scalar> {
   static constexpr int kPoints = Qt * Qz;
 
  public:
+  using Base = Cell<Scalar>;
   using IntegratorT = Triangle<Scalar, 2, Qt>;
   using IntegratorZ = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qz>, Lobatto<Scalar, Qz> >;
@@ -110,6 +111,12 @@ class Wedge : public Cell<Scalar> {
   }
 
  public:
+  std::unique_ptr<Base>
+  Clone(typename Coordinate::Base const &coordinate) const final {
+    return std::make_unique<Wedge>(
+        dynamic_cast<Coordinate const &>(coordinate));
+  }
+
   explicit Wedge(Coordinate const &lagrange)
       : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();

@@ -24,9 +24,8 @@ namespace coordinate {
  */
 template <std::floating_point Scalar, int kPhysDim>
 class Triangle : public Face<Scalar, kPhysDim> {
-  using Base = Face<Scalar, kPhysDim>;
-
  public:
+  using Base = Face<Scalar, kPhysDim>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -35,15 +34,16 @@ class Triangle : public Face<Scalar, kPhysDim> {
   int CountCorners() const final {
     return 3;
   }
-  const Global &center() const final {
-    return center_;
-  }
-
  protected:
   Global center_;
-  void _BuildCenter() final {
+
+ public:
+  void BuildCenter() final {
     Scalar a = 1.0 / 3;
     center_ = this->LocalToGlobal(a, a);
+  }
+  const Global &center() const final {
+    return center_;
   }
 };
 
@@ -55,9 +55,8 @@ class Triangle : public Face<Scalar, kPhysDim> {
  */
 template <std::floating_point Scalar, int kPhysDim>
 class Triangle3 : public Triangle<Scalar, kPhysDim> {
-  using Base = Triangle<Scalar, kPhysDim>;
-
  public:
+  using Base = Triangle<Scalar, kPhysDim>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -103,13 +102,9 @@ class Triangle3 : public Triangle<Scalar, kPhysDim> {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
 
-  std::unique_ptr<Triangle3>
-  Clone(std::vector<Global> const &coords) const final {
-    auto face_uptr = std::make_unique<Triangle3>();
-    for (int i = 0, n = this->CountNodes(); i < n; ++i) {
-      face_uptr->global_coords_[i] = coords[i];
-    }
-    return face_uptr;
+  Triangle3() = default;
+  std::unique_ptr<Face<Scalar, kPhysDim>> Clone() const final {
+    return std::make_unique<Triangle3>();
   }
 };
 // initialization of static const members:
@@ -128,9 +123,8 @@ Triangle3<Scalar, kPhysDim>::local_coords_{
  */
 template <std::floating_point Scalar, int kPhysDim>
 class Triangle6 : public Triangle<Scalar, kPhysDim> {
-  using Base = Triangle<Scalar, kPhysDim>;
-
  public:
+  using Base = Triangle<Scalar, kPhysDim>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -199,6 +193,11 @@ class Triangle6 : public Triangle<Scalar, kPhysDim> {
  public:
   Triangle6(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
+  }
+  Triangle6() = default;
+
+  std::unique_ptr<Face<Scalar, kPhysDim>> Clone() const final {
+    return std::make_unique<Triangle6>();
   }
 };
 // initialization of static const members:

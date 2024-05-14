@@ -23,9 +23,8 @@ namespace coordinate {
  */
 template <std::floating_point Scalar>
 class Wedge : public Cell<Scalar> {
-  using Base = Cell<Scalar>;
-
  public:
+  using Base = Cell<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -34,17 +33,20 @@ class Wedge : public Cell<Scalar> {
   int CountCorners() const final {
     return 6;
   }
+
+ protected:
+  Global center_;
+
+ public:
+  void BuildCenter() final {
+    Scalar a = 1.0 / 3;
+    center_ = this->LocalToGlobal(a, a, 0);
+  }
   const Global &center() const final {
     return center_;
   }
 
  protected:
-  Global center_;
-  void _BuildCenter() final {
-    Scalar a = 1.0 / 3;
-    center_ = this->LocalToGlobal(a, a, 0);
-  }
-
   static int GetTriangleId(const size_t *cell_nodes, size_t *face_nodes,
       int face_n_node/* number of nodes on triangle */) {
     int i_face = 0;
@@ -86,9 +88,8 @@ class Wedge : public Cell<Scalar> {
  */
 template <std::floating_point Scalar>
 class Wedge6 : public Wedge<Scalar> {
-  using Base = Wedge<Scalar>;
-
  public:
+  using Base = Wedge<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -192,6 +193,11 @@ class Wedge6 : public Wedge<Scalar> {
   Wedge6(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
+  Wedge6() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Wedge6>();
+  }
 };
 // initialization of static const members:
 template <std::floating_point Scalar>
@@ -226,10 +232,10 @@ class Wedge18;
  */
 template <std::floating_point Scalar>
 class Wedge15 : public Wedge<Scalar> {
-  using Base = Wedge<Scalar>;
   friend class Wedge18<Scalar>;
 
  public:
+  using Base = Wedge<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -402,6 +408,11 @@ class Wedge15 : public Wedge<Scalar> {
   Wedge15(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
+  Wedge15() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Wedge15>();
+  }
 };
 // initialization of static const members:
 template <std::floating_point Scalar>
@@ -443,9 +454,8 @@ Wedge15<Scalar>::quadrangles_{
  */
 template <std::floating_point Scalar>
 class Wedge18 : public Wedge<Scalar> {
-  using Base = Wedge<Scalar>;
-
  public:
+  using Base = Wedge<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -633,6 +643,11 @@ class Wedge18 : public Wedge<Scalar> {
  public:
   Wedge18(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
+  }
+  Wedge18() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Wedge18>();
   }
 };
 // initialization of static const members:

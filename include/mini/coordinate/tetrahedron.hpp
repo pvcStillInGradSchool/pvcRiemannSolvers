@@ -23,9 +23,8 @@ namespace coordinate {
  */
 template <std::floating_point Scalar>
 class Tetrahedron : public Cell<Scalar> {
-  using Base = Cell<Scalar>;
-
  public:
+  using Base = Cell<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -34,15 +33,17 @@ class Tetrahedron : public Cell<Scalar> {
   int CountCorners() const final {
     return 4;
   }
-  const Global &center() const final {
-    return center_;
-  }
 
  protected:
   Global center_;
-  void _BuildCenter() final {
+
+ public:
+  void BuildCenter() final {
     Scalar a = 1.0 / 4;
     center_ = this->LocalToGlobal(a, a, a);
+  }
+  const Global &center() const final {
+    return center_;
   }
 };
 
@@ -125,11 +126,16 @@ class Tetrahedron4 : public Tetrahedron<Scalar> {
       Global const &p2, Global const &p3) {
     global_coords_[0] = p0; global_coords_[1] = p1;
     global_coords_[2] = p2; global_coords_[3] = p3;
-    this->_BuildCenter();
+    this->BuildCenter();
   }
 
   Tetrahedron4(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
+  }
+  Tetrahedron4() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Tetrahedron4>();
   }
 };
 // initialization of static const members:
@@ -288,6 +294,11 @@ class Tetrahedron10 : public Tetrahedron<Scalar> {
  public:
   Tetrahedron10(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
+  }
+  Tetrahedron10() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Tetrahedron10>();
   }
 };
 // initialization of static const members:

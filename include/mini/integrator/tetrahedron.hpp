@@ -9,6 +9,7 @@
 #include <cstring>
 
 #include <algorithm>
+#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -30,6 +31,7 @@ class Tetrahedron : public Cell<Scalar> {
       || kPoints == 24 || kPoints == 46);
 
  public:
+  using Base = Cell<Scalar>;
   using Coordinate = coordinate::Tetrahedron<Scalar>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
@@ -78,6 +80,12 @@ class Tetrahedron : public Cell<Scalar> {
   }
 
  public:
+  std::unique_ptr<Base>
+  Clone(typename Coordinate::Base const &coordinate) const final {
+    return std::make_unique<Tetrahedron>(
+        dynamic_cast<Coordinate const &>(coordinate));
+  }
+
   explicit Tetrahedron(Coordinate const &lagrange)
       : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();

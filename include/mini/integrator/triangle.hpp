@@ -94,6 +94,12 @@ class Triangle : public Face<Scalar, kPhysDim> {
   }
 
  public:
+  std::unique_ptr<Base>
+  Clone(typename Coordinate::Base const &coordinate) const final {
+    return std::make_unique<Triangle>(
+        dynamic_cast<Coordinate const &>(coordinate));
+  }
+
   explicit Triangle(Coordinate const &lagrange)
       : coordinate_(&lagrange) {
     area_ = this->BuildQuadraturePoints();

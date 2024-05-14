@@ -24,9 +24,8 @@ namespace coordinate {
  */
 template <std::floating_point Scalar>
 class Pyramid : public Cell<Scalar> {
-  using Base = Cell<Scalar>;
-
  public:
+  using Base = Cell<Scalar>;
   using typename Base::Real;
   using typename Base::Local;
   using typename Base::Global;
@@ -35,14 +34,16 @@ class Pyramid : public Cell<Scalar> {
   int CountCorners() const final {
     return 5;
   }
-  const Global &center() const final {
-    return center_;
-  }
 
  protected:
   Global center_;
-  void _BuildCenter() final {
+
+ public:
+  void BuildCenter() final {
     center_ = this->LocalToGlobal(0, 0, -0.5);
+  }
+  const Global &center() const final {
+    return center_;
   }
 
   static int GetFaceId(const size_t *cell_nodes, size_t *face_nodes,
@@ -180,6 +181,11 @@ class Pyramid5 : public Pyramid<Scalar> {
  public:
   Pyramid5(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
+  }
+  Pyramid5() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Pyramid5>();
   }
 };
 // initialization of static const members:
@@ -371,6 +377,11 @@ class Pyramid13 : public Pyramid<Scalar> {
   Pyramid13(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }
+  Pyramid13() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Pyramid13>();
+  }
 };
 // initialization of static const members:
 template <std::floating_point Scalar>
@@ -521,6 +532,11 @@ class Pyramid14 : public Pyramid<Scalar> {
  public:
   Pyramid14(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
+  }
+  Pyramid14() = default;
+
+  std::unique_ptr<Cell<Scalar>> Clone() const final {
+    return std::make_unique<Pyramid14>();
   }
 };
 // initialization of static const members:

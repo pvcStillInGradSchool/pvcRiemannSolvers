@@ -6,7 +6,6 @@
 
 #include <cmath>
 #include <memory>
-
 #include <type_traits>
 
 #include "mini/algebra/eigen.hpp"

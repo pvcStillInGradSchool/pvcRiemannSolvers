@@ -30,6 +30,7 @@ template <std::floating_point Scalar, int Qx, int Qy, int Qz,
     Rule kRule = Rule::kLegendre>
 class Pyramid : public Cell<Scalar> {
  public:
+  using Base = Cell<Scalar>;
   using IntegratorX = std::conditional_t< kRule == Rule::kLegendre,
       Legendre<Scalar, Qx>, Lobatto<Scalar, Qx> >;
   using IntegratorY = std::conditional_t< kRule == Rule::kLegendre,
@@ -114,6 +115,12 @@ class Pyramid : public Cell<Scalar> {
   }
 
  public:
+  std::unique_ptr<Base>
+  Clone(typename Coordinate::Base const &coordinate) const final {
+    return std::make_unique<Pyramid>(
+        dynamic_cast<Coordinate const &>(coordinate));
+  }
+
   explicit Pyramid(Coordinate const &lagrange)
       : coordinate_(&lagrange) {
     volume_ = this->BuildQuadraturePoints();
