@@ -40,8 +40,8 @@ class Lobatto : public General<Part> {
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
-  using Projection = typename Base::Projection;
-  static_assert(Projection::kLocal);
+  using Polynomial = typename Base::Polynomial;
+  static_assert(Polynomial::kLocal);
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;
@@ -51,7 +51,7 @@ class Lobatto : public General<Part> {
  protected:
   using FluxMatrix = typename Riemann::FluxMatrix;
 
-  static constexpr int kLineQ = polynomial::LineIntegrator<Projection>::Q;
+  static constexpr int kLineQ = polynomial::LineIntegrator<Polynomial>::Q;
   static constexpr int kFaceQ = kLineQ * kLineQ;
   static constexpr int kCellQ = kLineQ * kFaceQ;
 
@@ -228,9 +228,9 @@ class Lobatto : public General<Part> {
             holder.projection(), holder_flux_point,
             sharer.projection(), sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;
-        Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+        Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         f_sharer *= sharer_flux_point.g_prime;
-        Projection::MinusValue(f_sharer, sharer_data, sharer_flux_point.ijk);
+        Polynomial::MinusValue(f_sharer, sharer_data, sharer_flux_point.ijk);
       }
     }
   }
@@ -249,7 +249,7 @@ class Lobatto : public General<Part> {
             holder.projection(), holder_flux_point,
             sharer.projection(), sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;
-        Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+        Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
       }
     }
   }
@@ -269,7 +269,7 @@ class Lobatto : public General<Part> {
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           f_holder *= holder_flux_point.g_prime;
-          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+          Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
       }
     }
@@ -316,7 +316,7 @@ class Lobatto : public General<Part> {
               distance,
               wall_value, holder.projection(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
-          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+          Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
       }
     }
@@ -335,7 +335,7 @@ class Lobatto : public General<Part> {
           f_holder *= holder_flux_point.g_prime;
           assert(f_holder.norm() < 1e-6);
           assert(0 <= holder_flux_point.ijk && holder_flux_point.ijk < kCellQ);
-          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+          Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
       }
     }
@@ -358,7 +358,7 @@ class Lobatto : public General<Part> {
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           f_holder *= holder_flux_point.g_prime;
-          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+          Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
       }
     }
@@ -381,7 +381,7 @@ class Lobatto : public General<Part> {
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           f_holder *= holder_flux_point.g_prime;
-          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+          Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
       }
     }
@@ -404,7 +404,7 @@ class Lobatto : public General<Part> {
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           f_holder *= holder_flux_point.g_prime;
-          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+          Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
       }
     }
@@ -427,7 +427,7 @@ class Lobatto : public General<Part> {
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           f_holder *= holder_flux_point.g_prime;
-          Projection::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+          Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
       }
     }

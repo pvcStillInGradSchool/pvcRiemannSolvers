@@ -119,11 +119,11 @@ template <typename Cell>
 class Lazy {
  public:
   using Scalar = typename Cell::Scalar;
-  using Projection = typename Cell::Projection;
-  using ProjectionWrapper = typename Projection::Wrapper;
-  using Basis = typename Projection::Basis;
-  using Global = typename Projection::Global;
-  using Value = typename Projection::Value;
+  using Polynomial = typename Cell::Polynomial;
+  using ProjectionWrapper = typename Polynomial::Wrapper;
+  using Basis = typename ProjectionWrapper::Basis;
+  using Global = typename ProjectionWrapper::Global;
+  using Value = typename ProjectionWrapper::Value;
 
  private:
   std::vector<ProjectionWrapper> old_projections_;
@@ -213,13 +213,13 @@ class Lazy {
 template <typename Cell>
 class Eigen {
  public:
-  using Scalar = typename Cell::Scalar;
-  using Projection = typename Cell::Projection;
-  using ProjectionWrapper = typename Projection::Wrapper;
   using Face = typename Cell::Face;
-  using Basis = typename Projection::Basis;
-  using Global = typename Projection::Global;
-  using Value = typename Projection::Value;
+  using Scalar = typename Cell::Scalar;
+  using Polynomial = typename Cell::Polynomial;
+  using ProjectionWrapper = typename Polynomial::Wrapper;
+  using Basis = typename ProjectionWrapper::Basis;
+  using Global = typename ProjectionWrapper::Global;
+  using Value = typename ProjectionWrapper::Value;
 
  private:
   ProjectionWrapper new_projection_;
@@ -353,8 +353,8 @@ template <typename Cell>
 class Dummy {
  public:
   using Scalar = typename Cell::Scalar;
-  using Projection = typename Cell::Projection;
-  using ProjectionWrapper = typename Projection::Wrapper;
+  using Polynomial = typename Cell::Polynomial;
+  using ProjectionWrapper = typename Polynomial::Wrapper;
 
  public:
   Dummy(Scalar w0, Scalar eps, bool verbose = false) {

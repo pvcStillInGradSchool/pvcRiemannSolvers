@@ -32,7 +32,7 @@ class Rotorcraft {
   using Face = typename Cell::Face;
   static_assert(std::is_same_v<Scalar, typename Cell::Scalar>);
   using Global = typename Cell::Global;
-  using Coeff = typename Cell::Projection::Coeff;
+  using Coeff = typename Cell::Polynomial::Coeff;
   using Conservative = typename Part::Riemann::Conservative;
   using Rotor = mini::aircraft::Rotor<Scalar>;
   using Blade = typename Rotor::Blade;

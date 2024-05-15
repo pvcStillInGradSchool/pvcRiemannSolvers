@@ -45,9 +45,9 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   using Index = typename Part::Index;
   using Global = typename Cell::Global;
   using Integrator = typename Cell::Integrator;
-  using Projection = typename Cell::Projection;
-  using Coeff = typename Projection::Coeff;
-  using Value = typename Projection::Value;
+  using Polynomial = typename Cell::Polynomial;
+  using Coeff = typename Polynomial::Coeff;
+  using Value = typename Polynomial::Value;
   using Temporal = temporal::System<typename Part::Scalar>;
   using Column = typename Temporal::Column;
 
@@ -273,11 +273,11 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   virtual void AddFluxOnSmartBoundaries(Column *residual) const = 0;
 
  public:
-  static FluxMatrix GetFluxMatrix(const Projection &projection, int q)
+  static FluxMatrix GetFluxMatrix(const Polynomial &projection, int q)
       requires(!mini::riemann::Diffusive<Riemann>) {
     return Riemann::GetFluxMatrix(projection.GetValue(q));
   }
-  static FluxMatrix GetFluxMatrix(const Projection &projection, int q)
+  static FluxMatrix GetFluxMatrix(const Polynomial &projection, int q)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     const auto &value = projection.GetValue(q);
     FluxMatrix flux_matrix = Riemann::GetFluxMatrix(value);

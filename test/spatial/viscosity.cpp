@@ -19,8 +19,8 @@
 
 #include "test/mesh/part.hpp"
 
-using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
-using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+using Polynomial = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+using Part = mini::mesh::part::Part<cgsize_t, Riemann, Polynomial>;
 
 auto case_name = PROJECT_BINARY_DIR + std::string("/test/mesh/double_mach");
 

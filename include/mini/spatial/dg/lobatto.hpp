@@ -37,14 +37,14 @@ class Lobatto : public General<Part> {
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
   using Integrator = typename Base::Integrator;
-  using Projection = typename Base::Projection;
+  using Polynomial = typename Base::Polynomial;
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;
   using Column = typename Base::Column;
 
  protected:
-  static constexpr int kLineQ = polynomial::LineIntegrator<Projection>::Q;
+  static constexpr int kLineQ = polynomial::LineIntegrator<Polynomial>::Q;
   static constexpr int kFaceQ = kLineQ * kLineQ;
 
   using FaceCache = std::array<int16_t, kFaceQ>;
@@ -73,7 +73,7 @@ class Lobatto : public General<Part> {
     }
   }
 
-  static constexpr bool kLocal = Projection::kLocal;
+  static constexpr bool kLocal = Polynomial::kLocal;
   static Scalar GetWeight(const Integrator &integrator, int q) requires(kLocal) {
     return integrator.GetLocalWeight(q);
   }

@@ -140,8 +140,8 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
     assert(&(cells[i_cell]) == &(cells.back()));
     cells[i_cell].Approximate(func);
   }
-  using Projection = typename Cell::Projection;
-  using ProjectionWrapper = typename Projection::Wrapper;
+  using Polynomial = typename Cell::Polynomial;
+  using ProjectionWrapper = typename Polynomial::Wrapper;
   auto adj_projections = std::vector<std::vector<ProjectionWrapper>>(n_cells);
   using Mat1x1 = mini::algebra::Matrix<double, 1, 1>;
   auto adj_smoothness = std::vector<std::vector<Mat1x1>>(n_cells);

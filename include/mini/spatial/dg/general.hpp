@@ -26,7 +26,7 @@ class General : public spatial::FiniteElement<Part> {
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
-  using Projection = typename Base::Projection;
+  using Polynomial = typename Base::Polynomial;
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;
@@ -223,7 +223,7 @@ class WithLimiterAndSource : public General<Part> {
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
-  using Projection = typename Base::Projection;
+  using Polynomial = typename Base::Polynomial;
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;

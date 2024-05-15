@@ -39,8 +39,8 @@ class General : public spatial::FiniteElement<Part> {
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
-  using Projection = typename Base::Projection;
-  static_assert(Projection::kLocal);
+  using Polynomial = typename Base::Polynomial;
+  static_assert(Polynomial::kLocal);
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;
@@ -49,7 +49,7 @@ class General : public spatial::FiniteElement<Part> {
  protected:
   using FluxMatrix = typename Riemann::FluxMatrix;
 
-  static constexpr int kLineQ = polynomial::LineIntegrator<Projection>::Q;
+  static constexpr int kLineQ = polynomial::LineIntegrator<Polynomial>::Q;
   static constexpr int kFaceQ = kLineQ * kLineQ;
   static constexpr int kCellQ = kLineQ * kFaceQ;
 
@@ -241,13 +241,13 @@ class General : public spatial::FiniteElement<Part> {
       for (int k = 1; k < n; ++k) {
         value += flux[k] * grad.col(k);
       }
-      Projection::MinusValue(value, data, q);
+      Polynomial::MinusValue(value, data, q);
     }
   }
   template <typename Cache>
   static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
-      const Projection &holder_projection, Cache const &holder_cache,
-      const Projection &sharer_projection, Cache const &sharer_cache)
+      const Polynomial &holder_projection, Cache const &holder_cache,
+      const Polynomial &sharer_projection, Cache const &sharer_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Riemann const &riemann = face.riemann(f);
     Value u_holder = holder_projection.GetValue(holder_cache.ijk);
@@ -262,8 +262,8 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
-      const Projection &holder_projection, Cache const &holder_cache,
-      const Projection &sharer_projection, Cache const &sharer_cache)
+      const Polynomial &holder_projection, Cache const &holder_cache,
+      const Polynomial &sharer_projection, Cache const &sharer_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Riemann const &riemann = face.riemann(f);
     Value u_holder = holder_projection.GetValue(holder_cache.ijk);
@@ -314,11 +314,11 @@ class General : public spatial::FiniteElement<Part> {
             sharer.projection(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
           Value f_correction = f_holder * g_prime;
-          Projection::MinusValue(f_correction, holder_data, ijk);
+          Polynomial::MinusValue(f_correction, holder_data, ijk);
         }
         for (auto [g_prime, ijk] : sharer_solution_points) {
           Value f_correction = f_sharer * g_prime;
-          Projection::MinusValue(f_correction, sharer_data, ijk);
+          Polynomial::MinusValue(f_correction, sharer_data, ijk);
         }
       }
     }
@@ -339,7 +339,7 @@ class General : public spatial::FiniteElement<Part> {
             sharer.projection(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
           Value f_correction = f_holder * g_prime;
-          Projection::MinusValue(f_correction, holder_data, ijk);
+          Polynomial::MinusValue(f_correction, holder_data, ijk);
         }
       }
     }
@@ -361,7 +361,7 @@ class General : public spatial::FiniteElement<Part> {
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
-            Projection::MinusValue(f_correction, holder_data, ijk);
+            Polynomial::MinusValue(f_correction, holder_data, ijk);
           }
         }
       }
@@ -370,7 +370,7 @@ class General : public spatial::FiniteElement<Part> {
   template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
       Scalar distance, Value const &wall_value,
-      const Projection &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_projection, Cache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value value;
     return value;
@@ -378,7 +378,7 @@ class General : public spatial::FiniteElement<Part> {
   template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
       Scalar distance, Value const &wall_value,
-      const Projection &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_projection, Cache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Value u_holder = holder_projection.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
@@ -398,7 +398,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
-      const Projection &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_projection, Cache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value u_holder = holder_projection.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
@@ -409,7 +409,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
-      const Projection &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_projection, Cache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Value u_holder = holder_projection.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
@@ -441,7 +441,7 @@ class General : public spatial::FiniteElement<Part> {
             Value f_correction = f_holder * g_prime;
             assert(f_correction.norm() < 1e-6);
             assert(0 <= ijk && ijk < kCellQ);
-            Projection::MinusValue(f_correction, holder_data, ijk);
+            Polynomial::MinusValue(f_correction, holder_data, ijk);
           }
         }
       }
@@ -466,7 +466,7 @@ class General : public spatial::FiniteElement<Part> {
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
-            Projection::MinusValue(f_correction, holder_data, ijk);
+            Polynomial::MinusValue(f_correction, holder_data, ijk);
           }
         }
       }
@@ -491,7 +491,7 @@ class General : public spatial::FiniteElement<Part> {
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
-            Projection::MinusValue(f_correction, holder_data, ijk);
+            Polynomial::MinusValue(f_correction, holder_data, ijk);
           }
         }
       }
@@ -516,7 +516,7 @@ class General : public spatial::FiniteElement<Part> {
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
-            Projection::MinusValue(f_correction, holder_data, ijk);
+            Polynomial::MinusValue(f_correction, holder_data, ijk);
           }
         }
       }
@@ -541,7 +541,7 @@ class General : public spatial::FiniteElement<Part> {
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
-            Projection::MinusValue(f_correction, holder_data, ijk);
+            Polynomial::MinusValue(f_correction, holder_data, ijk);
           }
         }
       }

@@ -88,7 +88,7 @@ struct Coordinates {
   }
 };
 
-template <std::integral Int, class Riemann, class Projection>
+template <std::integral Int, class Riemann, class Polynomial>
 struct Cell;
 
 template <std::integral Int, class R, class P>
@@ -172,43 +172,43 @@ struct Face {
   }
 };
 
-template <std::integral Int, class R, class Proj>
+template <std::integral Int, class Riem, class Poly>
 struct Cell {
-  using Riemann = R;
-  using Projection = Proj;
-  using ProjectionUptr = std::unique_ptr<Proj>;
+  using Riemann = Riem;
+  using Polynomial = Poly;
+  using PolynomialUptr = std::unique_ptr<Polynomial>;
   using FluxMatrix = typename Riemann::FluxMatrix;
   using Scalar = typename Riemann::Scalar;
   using Integrator = integrator::Cell<Scalar>;
   using IntegratorUptr = std::unique_ptr<Integrator>;
   using Coordinate = coordinate::Cell<Scalar>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
-  using Basis = typename Projection::Basis;
-  using Local = typename Projection::Local;
-  using Global = typename Projection::Global;
-  using Value = typename Projection::Value;
-  using Coeff = typename Projection::Coeff;
-  static constexpr int K = Projection::K;  // number of functions
-  static constexpr int N = Projection::N;  // size of the basis
-  static constexpr int P = Projection::P;  // degree of the basis
+  using Basis = typename Polynomial::Basis;
+  using Local = typename Polynomial::Local;
+  using Global = typename Polynomial::Global;
+  using Value = typename Polynomial::Value;
+  using Coeff = typename Polynomial::Coeff;
+  static constexpr int K = Polynomial::K;  // number of functions
+  static constexpr int N = Polynomial::N;  // size of the basis
+  static constexpr int P = Polynomial::P;  // degree of the basis
   static constexpr int D = 3;  // dimension of the physical space
-  static_assert(Riemann::kComponents == Projection::K);
+  static_assert(Riemann::kComponents == Polynomial::K);
   static_assert(Riemann::kDimensions == D);
   static constexpr int kFields = K * N;
-  using Face = part::Face<Int, Riemann, Projection>;
+  using Face = part::Face<Int, Riemann, Polynomial>;
 
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
   CoordinateUptr coordinate_ptr_;
   IntegratorUptr integrator_ptr_;
-  ProjectionUptr projection_ptr_;
+  PolynomialUptr projection_ptr_;
   Int metis_id{-1}, id_{-1};
   bool inner_ = true;
 
   Cell(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&integrator_ptr, Int m_cell)
       : coordinate_ptr_(std::move(coordinate_ptr)),
         integrator_ptr_(std::move(integrator_ptr)),
-        projection_ptr_(std::make_unique<Proj>(*integrator_ptr_)),
+        projection_ptr_(std::make_unique<Polynomial>(*integrator_ptr_)),
         metis_id(m_cell) {
   }
   Cell() = default;
@@ -241,10 +241,10 @@ struct Cell {
     assert(coordinate_ptr_);
     return *coordinate_ptr_;
   }
-  Projection const &projection() const {
+  Polynomial const &projection() const {
     return *projection_ptr_;
   }
-  Projection &projection() {
+  Polynomial &projection() {
     return *projection_ptr_;
   }
   Global LocalToGlobal(const Local &local) const {
@@ -277,11 +277,11 @@ struct Cell {
  * 
  * @tparam Int  Type of integers.
  * @tparam Riemann  Type of the Riemann solver on each Face.
- * @tparam Projection  Type of the approximation on each Cell.
+ * @tparam Polynomial  Type of the approximation on each Cell.
  */
-template <std::integral Int, class Riemann, class Projection>
+template <std::integral Int, class Riemann, class Polynomial>
 class Section {
-  using Cell = part::Cell<Int, Riemann, Projection>;
+  using Cell = part::Cell<Int, Riemann, Polynomial>;
   using Scalar = typename Cell::Scalar;
 
   cgns::ShiftedVector<Cell> cells_;
@@ -392,13 +392,13 @@ class Part {
  public:
   using Index = Int;
   using Riemann = R;
-  using Projection = P;
-  using Face = part::Face<Int, Riemann, Projection>;
-  using Cell = part::Cell<Int, Riemann, Projection>;
+  using Polynomial = P;
+  using Face = part::Face<Int, Riemann, Polynomial>;
+  using Cell = part::Cell<Int, Riemann, Polynomial>;
   using Scalar = typename Riemann::Scalar;
   using Global = typename Cell::Global;
   using Value = typename Cell::Value;
-  constexpr static int kDegrees = Projection::P;
+  constexpr static int kDegrees = Polynomial::P;
   constexpr static int kComponents = Riemann::kComponents;
   constexpr static int kPhysDim = Riemann::kDimensions;
 
@@ -1467,11 +1467,11 @@ class Part {
         std::ios::out | (binary ? (std::ios::binary) : std::ios::out));
   }
 };
-template <std::integral Int, class Riemann, class Projection>
-MPI_Datatype const Part<Int, Riemann, Projection>::kMpiIntType
+template <std::integral Int, class Riemann, class Polynomial>
+MPI_Datatype const Part<Int, Riemann, Polynomial>::kMpiIntType
     = sizeof(Int) == 8 ? MPI_LONG : MPI_INT;
-template <std::integral Int, class Riemann, class Projection>
-MPI_Datatype const Part<Int, Riemann, Projection>::kMpiRealType
+template <std::integral Int, class Riemann, class Polynomial>
+MPI_Datatype const Part<Int, Riemann, Polynomial>::kMpiRealType
     = sizeof(Scalar) == 8 ? MPI_DOUBLE : MPI_FLOAT;
 
 }  // namespace part
