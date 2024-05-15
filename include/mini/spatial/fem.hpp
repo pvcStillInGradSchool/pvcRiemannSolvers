@@ -158,7 +158,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     for (Cell *cell_ptr: this->part_ptr_->GetLocalCellPointers()) {
       auto i_cell = cell_ptr->id();
       Scalar const *data = AddCellDataOffset(column, i_cell);
-      data = cell_ptr->projection().GetCoeffFrom(data);
+      data = cell_ptr->polynomial().GetCoeffFrom(data);
       assert(data == column.data() + column.size()
           || data == AddCellDataOffset(column, i_cell + 1));
     }
@@ -168,7 +168,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     for (const Cell &cell : part().GetLocalCells()) {
       auto i_cell = cell.id();
       Scalar *data = AddCellDataOffset(&column, i_cell);
-      data = cell.projection().WriteCoeffTo(data);
+      data = cell.polynomial().WriteCoeffTo(data);
       assert(data == column.data() + column.size()
           || data == AddCellDataOffset(column, i_cell + 1));
     }
@@ -286,7 +286,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     return flux_matrix;
   }
   static FluxMatrix GetFluxMatrix(const Cell &cell, int q) {
-    return GetFluxMatrix(cell.projection(), q);
+    return GetFluxMatrix(cell.polynomial(), q);
   }
 };
 

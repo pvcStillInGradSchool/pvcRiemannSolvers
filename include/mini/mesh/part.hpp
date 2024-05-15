@@ -246,34 +246,34 @@ struct Cell {
     assert(coordinate_ptr_);
     return *coordinate_ptr_;
   }
-  Polynomial const &projection() const {
+  Polynomial const &polynomial() const {
     return *polynomial_ptr_;
   }
-  Polynomial &projection() {
+  Polynomial &polynomial() {
     return *polynomial_ptr_;
   }
   Global LocalToGlobal(const Local &local) const {
     return coordinate().LocalToGlobal(local);
   }
   Value GlobalToValue(const Global &global) const {
-    return projection().GlobalToValue(global);
+    return polynomial().GlobalToValue(global);
   }
   Basis const &basis() const {
-    return projection().basis();
+    return polynomial().basis();
   }
   int CountCorners() const {
     return coordinate().CountCorners();
   }
   int CountFields() const {
-    return projection().coeff().cols() * projection().coeff().rows();
+    return polynomial().coeff().cols() * polynomial().coeff().rows();
   }
   auto GlobalToBasisValues(const Global &global) const {
-    return projection().GlobalToBasisValues(global);
+    return polynomial().GlobalToBasisValues(global);
   }
 
   template <class Callable>
   void Approximate(Callable &&func) {
-    projection().Approximate(std::forward<Callable>(func));
+    polynomial().Approximate(std::forward<Callable>(func));
   }
 };
 
@@ -368,7 +368,7 @@ class Section {
   void GatherFields() {
     for (int i_cell = head(); i_cell < tail(); ++i_cell) {
       const auto &cell = cells_.at(i_cell);
-      const auto &coeff = cell.projection().coeff();
+      const auto &coeff = cell.polynomial().coeff();
       for (int i_field = 1; i_field <= kFields; ++i_field) {
         fields_.at(i_field).at(i_cell) = coeff.reshaped()[i_field-1];
       }
@@ -377,7 +377,7 @@ class Section {
   void ScatterFields() {
     for (int i_cell = head(); i_cell < tail(); ++i_cell) {
       auto &cell = cells_.at(i_cell);
-      auto &coeff = cell.projection().coeff();
+      auto &coeff = cell.polynomial().coeff();
       for (int i_field = 1; i_field <= kFields; ++i_field) {
         coeff.reshaped()[i_field-1] = fields_.at(i_field).at(i_cell);
       }
@@ -998,7 +998,7 @@ class Part {
     Value l1_error; l1_error.setZero();
     for (Cell const &cell : GetLocalCells()) {
       auto &integrator = cell.integrator();
-      auto &projection = cell.projection();
+      auto &projection = cell.polynomial();
       for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
         Value value = projection.GetValue(q);
         value -= exact_solution(integrator.GetGlobal(q), t_curr);
@@ -1171,13 +1171,13 @@ class Part {
   }
   void ShareGhostCellCoeffs() {
     int i_req = 0;
-    // send cell.projection().coeff_
+    // send cell.polynomial().coeff_
     int i_buf = 0;
     for (auto &[i_part, cell_ptrs] : send_cell_ptrs_) {
       auto &send_buf = send_coeffs_[i_buf++];
       Scalar *data = send_buf.data();
       for (auto *cell_ptr : cell_ptrs) {
-        data = cell_ptr->projection().WriteCoeffTo(data);
+        data = cell_ptr->polynomial().WriteCoeffTo(data);
       }
       assert(data == send_buf.data() + send_buf.size());
       int tag = i_part;
@@ -1185,7 +1185,7 @@ class Part {
       MPI_Isend(send_buf.data(), send_buf.size(), kMpiRealType, i_part, tag,
           MPI_COMM_WORLD, &request);
     }
-    // recv cell.projection().coeff_
+    // recv cell.polynomial().coeff_
     i_buf = 0;
     for (auto &[i_part, cell_ptrs] : recv_cell_ptrs_) {
       auto &recv_buf = recv_coeffs_[i_buf++];
@@ -1209,7 +1209,7 @@ class Part {
       auto &recv_buf = recv_coeffs_[i_buf++];
       Scalar const *data = recv_buf.data();
       for (auto *cell_ptr : cell_ptrs) {
-        data = cell_ptr->projection().GetCoeffFrom(data);
+        data = cell_ptr->polynomial().GetCoeffFrom(data);
       }
       assert(data == recv_buf.data() + recv_buf.size());
     }

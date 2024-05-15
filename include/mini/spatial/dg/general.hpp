@@ -55,9 +55,9 @@ class General : public spatial::FiniteElement<Part> {
       const auto &xyz = integrator.GetGlobal(q);
       auto flux = cell_to_flux(cell, q);
       flux *= integrator.GetGlobalWeight(q);
-      auto grad = cell.projection().GlobalToBasisGradients(xyz);
+      auto grad = cell.polynomial().GlobalToBasisGradients(xyz);
       Coeff prod = flux * grad;
-      cell.projection().AddCoeffTo(prod, data);
+      cell.polynomial().AddCoeffTo(prod, data);
     }
   }
   void AddFluxDivergence(CellToFlux cell_to_flux,
@@ -81,9 +81,9 @@ class General : public spatial::FiniteElement<Part> {
         Value flux = face.riemann(q).GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(q);
         Coeff prod = flux * holder.GlobalToBasisValues(coord);
-        holder.projection().MinusCoeff(prod, holder_data);
+        holder.polynomial().MinusCoeff(prod, holder_data);
         prod = flux * sharer.GlobalToBasisValues(coord);
-        sharer.projection().AddCoeffTo(prod, sharer_data);
+        sharer.polynomial().AddCoeffTo(prod, sharer_data);
       }
     }
   }
@@ -100,7 +100,7 @@ class General : public spatial::FiniteElement<Part> {
         Value flux = face.riemann(q).GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(q);
         Coeff prod = flux * holder.GlobalToBasisValues(coord);
-        holder.projection().MinusCoeff(prod, holder_data);
+        holder.polynomial().MinusCoeff(prod, holder_data);
       }
     }
   }
@@ -118,7 +118,7 @@ class General : public spatial::FiniteElement<Part> {
           Value flux = face.riemann(q).GetFluxOnInviscidWall(u_holder);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
-          holder.projection().MinusCoeff(prod, holder_data);
+          holder.polynomial().MinusCoeff(prod, holder_data);
         }
       }
     }
@@ -135,7 +135,7 @@ class General : public spatial::FiniteElement<Part> {
           Value flux = face.riemann(q).GetFluxOnSupersonicOutlet(u_holder);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
-          holder.projection().MinusCoeff(prod, holder_data);
+          holder.polynomial().MinusCoeff(prod, holder_data);
         }
       }
     }
@@ -152,7 +152,7 @@ class General : public spatial::FiniteElement<Part> {
           Value flux = face.riemann(q).GetFluxOnSupersonicInlet(u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
-          holder.projection().MinusCoeff(prod, holder_data);
+          holder.polynomial().MinusCoeff(prod, holder_data);
         }
       }
     }
@@ -170,7 +170,7 @@ class General : public spatial::FiniteElement<Part> {
           Value flux = face.riemann(q).GetFluxOnSubsonicInlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
-          holder.projection().MinusCoeff(prod, holder_data);
+          holder.polynomial().MinusCoeff(prod, holder_data);
         }
       }
     }
@@ -188,7 +188,7 @@ class General : public spatial::FiniteElement<Part> {
           Value flux = face.riemann(q).GetFluxOnSubsonicOutlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
-          holder.projection().MinusCoeff(prod, holder_data);
+          holder.polynomial().MinusCoeff(prod, holder_data);
         }
       }
     }
@@ -206,7 +206,7 @@ class General : public spatial::FiniteElement<Part> {
           Value flux = face.riemann(q).GetFluxOnSmartBoundary(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
-          holder.projection().MinusCoeff(prod, holder_data);
+          holder.polynomial().MinusCoeff(prod, holder_data);
         }
       }
     }

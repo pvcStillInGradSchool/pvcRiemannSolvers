@@ -86,7 +86,7 @@ void Prepare(const typename Cell::Local locals[], int n, const Cell &cell,
   for (int i = 0; i < n; ++i) {
     auto &global = coords->emplace_back();
     auto &value = values->emplace_back();
-    cell.projection().LocalToGlobalAndValue(locals[i], &global, &value);
+    cell.polynomial().LocalToGlobalAndValue(locals[i], &global, &value);
   }
 }
 

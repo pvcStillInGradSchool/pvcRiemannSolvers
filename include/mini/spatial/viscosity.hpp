@@ -52,7 +52,7 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   using DiffusionRiemann = mini::riemann::diffusive::DirectDG<Diffusion>;
 
   static FluxMatrix GetDiffusiveFluxMatrix(const Cell &cell, int q) {
-    const auto &projection = cell.projection();
+    const auto &projection = cell.polynomial();
     const auto &value = projection.GetValue(q);
     FluxMatrix flux_matrix; flux_matrix.setZero();
     const auto &gradient = projection.GetGlobalGradient(q);
@@ -94,11 +94,11 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
     for (Cell *cell_ptr: base_ptr_->part_ptr()->GetLocalCellPointers()) {
       // Nullify all its neighbors' coeffs:
       for (Cell *neighbor : cell_ptr->adj_cells_) {
-        neighbor->projection().coeff().setZero();
+        neighbor->polynomial().coeff().setZero();
       }
       // Build the damping matrix column by column:
       auto &matrix = matrices.at(cell_ptr->id());
-      auto &solution = cell_ptr->projection().coeff();
+      auto &solution = cell_ptr->polynomial().coeff();
       solution.setZero();
       for (int c = 0; c < Cell::N; ++c) {
         solution.col(c).setOnes();

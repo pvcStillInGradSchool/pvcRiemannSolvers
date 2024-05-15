@@ -88,7 +88,7 @@ class General : public spatial::FiniteElement<Part> {
       const auto &cell = face_to_cell(face);
       const auto &cell_integrator = cell.integrator();
       const auto &cell_basis = cell.basis();
-      const auto &cell_projection = cell.projection();
+      const auto &cell_projection = cell.polynomial();
       int i_face = cell_projection.FindFaceId(face.coordinate().center());
       assert(kFaceQ == face.integrator().CountPoints());
       for (int f = 0; f < kFaceQ; ++f) {
@@ -233,10 +233,10 @@ class General : public spatial::FiniteElement<Part> {
     std::array<FluxMatrix, kCellQ> flux;
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
       FluxMatrix global_flux = cell_to_flux(cell, q);
-      flux[q] = cell.projection().GlobalFluxToLocalFlux(global_flux, q);
+      flux[q] = cell.polynomial().GlobalFluxToLocalFlux(global_flux, q);
     }
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-      auto const &grad = cell.projection().GetBasisGradients(q);
+      auto const &grad = cell.polynomial().GetBasisGradients(q);
       Value value = flux[0] * grad.col(0);
       for (int k = 1; k < n; ++k) {
         value += flux[k] * grad.col(k);
@@ -310,8 +310,8 @@ class General : public spatial::FiniteElement<Part> {
         auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
         auto [f_holder, f_sharer] = GetFluxOnLocalFace(face, f,
-            holder.projection(), holder_flux_point,
-            sharer.projection(), sharer_flux_point);
+            holder.polynomial(), holder_flux_point,
+            sharer.polynomial(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
           Value f_correction = f_holder * g_prime;
           Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -335,8 +335,8 @@ class General : public spatial::FiniteElement<Part> {
         auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
         auto [f_holder, _] = GetFluxOnLocalFace(face, f,
-            holder.projection(), holder_flux_point,
-            sharer.projection(), sharer_flux_point);
+            holder.polynomial(), holder_flux_point,
+            sharer.polynomial(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
           Value f_correction = f_holder * g_prime;
           Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -353,7 +353,7 @@ class General : public spatial::FiniteElement<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value f_upwind = face.riemann(f).GetFluxOnInviscidWall(u_holder);
           Value f_holder = f_upwind * holder_flux_point.scale;
@@ -436,7 +436,7 @@ class General : public spatial::FiniteElement<Part> {
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
           auto f_holder = GetFluxOnSupersonicOutlet(face.riemann(f),
-              holder.projection(), holder_flux_point);
+              holder.polynomial(), holder_flux_point);
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
             assert(f_correction.norm() < 1e-6);
@@ -457,7 +457,7 @@ class General : public spatial::FiniteElement<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
@@ -482,7 +482,7 @@ class General : public spatial::FiniteElement<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicInlet(u_holder, u_given);
@@ -507,7 +507,7 @@ class General : public spatial::FiniteElement<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicOutlet(u_holder, u_given);
@@ -532,7 +532,7 @@ class General : public spatial::FiniteElement<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSmartBoundary(u_holder, u_given);

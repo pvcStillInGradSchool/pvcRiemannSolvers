@@ -80,7 +80,7 @@ class Lobatto : public General<Part> {
       const auto &cell = face_to_cell(face);
       const auto &cell_integrator = cell.integrator();
       const auto &cell_basis = cell.basis();
-      const auto &cell_projection = cell.projection();
+      const auto &cell_projection = cell.polynomial();
       int i_face = cell_projection.FindFaceId(face.coordinate().center());
       assert(kFaceQ == face.integrator().CountPoints());
       for (int f = 0; f < kFaceQ; ++f) {
@@ -225,8 +225,8 @@ class Lobatto : public General<Part> {
         auto &holder_flux_point = holder_cache[f];
         auto &sharer_flux_point = sharer_cache[f];
         auto [f_holder, f_sharer] = Base::GetFluxOnLocalFace(face, f,
-            holder.projection(), holder_flux_point,
-            sharer.projection(), sharer_flux_point);
+            holder.polynomial(), holder_flux_point,
+            sharer.polynomial(), sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;
         Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         f_sharer *= sharer_flux_point.g_prime;
@@ -246,8 +246,8 @@ class Lobatto : public General<Part> {
         auto &holder_flux_point = holder_cache[f];
         auto &sharer_flux_point = sharer_cache[f];
         auto [f_holder, _] = Base::GetFluxOnLocalFace(face, f,
-            holder.projection(), holder_flux_point,
-            sharer.projection(), sharer_flux_point);
+            holder.polynomial(), holder_flux_point,
+            sharer.polynomial(), sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;
         Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
       }
@@ -262,7 +262,7 @@ class Lobatto : public General<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value f_upwind = face.riemann(f).GetFluxOnInviscidWall(u_holder);
           Value f_holder = f_upwind * holder_flux_point.scale;
@@ -283,7 +283,7 @@ class Lobatto : public General<Part> {
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     for (const auto &[name, func] : this->no_slip_wall_) {
       for (Face *face_ptr : this->part_ptr()->GetBoundaryFacePointers(name)) {
-        auto &holder_projection = face_ptr->holder_ptr()->projection();
+        auto &holder_projection = face_ptr->holder_ptr()->polynomial();
         auto const &holder_cache = holder_cache_[face_ptr->id()];
         auto const &integrator = face_ptr->integrator();
         assert(kFaceQ == integrator.CountPoints());
@@ -314,7 +314,7 @@ class Lobatto : public General<Part> {
           Scalar distance = direction.dot(face.riemann(f).normal());        assert(distance > 0);
           Value f_holder = Base::GetFluxOnNoSlipWall(face.riemann(f),
               distance,
-              wall_value, holder.projection(), holder_flux_point);
+              wall_value, holder.polynomial(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
@@ -331,7 +331,7 @@ class Lobatto : public General<Part> {
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
           auto f_holder = Base::GetFluxOnSupersonicOutlet(face.riemann(f),
-              holder.projection(), holder_flux_point);
+              holder.polynomial(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           assert(f_holder.norm() < 1e-6);
           assert(0 <= holder_flux_point.ijk && holder_flux_point.ijk < kCellQ);
@@ -350,7 +350,7 @@ class Lobatto : public General<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
@@ -373,7 +373,7 @@ class Lobatto : public General<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicInlet(u_holder, u_given);
@@ -396,7 +396,7 @@ class Lobatto : public General<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSubsonicOutlet(u_holder, u_given);
@@ -419,7 +419,7 @@ class Lobatto : public General<Part> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder.projection().GetValue(
+          Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = face.riemann(f).GetFluxOnSmartBoundary(u_holder, u_given);

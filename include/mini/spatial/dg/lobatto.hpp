@@ -85,7 +85,7 @@ class Lobatto : public General<Part> {
   static FluxMatrix GetWeightedFluxMatrix(CellToFlux cell_to_flux,
       const Cell &cell, int q) requires(kLocal) {
     auto flux = cell_to_flux(cell, q);
-    flux = cell.projection().GlobalFluxToLocalFlux(flux, q);
+    flux = cell.polynomial().GlobalFluxToLocalFlux(flux, q);
     flux *= GetWeight(cell.integrator(), q);
     return flux;
   }
@@ -129,7 +129,7 @@ class Lobatto : public General<Part> {
       const auto &integrator = cell.integrator();
       for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
         auto scale = 1.0 / GetWeight(integrator, q);
-        data = cell.projection().ScaleValueAt(scale, data);
+        data = cell.polynomial().ScaleValueAt(scale, data);
       }
       assert(data == residual.data() + residual.size()
           || data == this->AddCellDataOffset(&residual, i_cell + 1));
@@ -143,9 +143,9 @@ class Lobatto : public General<Part> {
     const auto &integrator = cell.integrator();
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
       auto flux = GetWeightedFluxMatrix(cell_to_flux, cell, q);
-      auto const &grad = cell.projection().GetBasisGradients(q);
+      auto const &grad = cell.polynomial().GetBasisGradients(q);
       Coeff prod = flux * grad;
-      cell.projection().AddCoeffTo(prod, data);
+      cell.polynomial().AddCoeffTo(prod, data);
     }
   }
   void AddFluxDivergence(CellToFlux cell_to_flux,
@@ -164,12 +164,12 @@ class Lobatto : public General<Part> {
       for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
         auto c_holder = i_node_on_holder[f];
         auto c_sharer = i_node_on_sharer[f];
-        Value u_holder = holder.projection().GetValue(c_holder);
-        Value u_sharer = sharer.projection().GetValue(c_sharer);
+        Value u_holder = holder.polynomial().GetValue(c_holder);
+        Value u_sharer = sharer.polynomial().GetValue(c_sharer);
         Value flux = face.riemann(f).GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(f);
-        holder.projection().MinusValue(flux, holder_data, c_holder);
-        sharer.projection().AddValueTo(flux, sharer_data, c_sharer);
+        holder.polynomial().MinusValue(flux, holder_data, c_holder);
+        sharer.polynomial().AddValueTo(flux, sharer_data, c_sharer);
       }
     }
   }
@@ -184,11 +184,11 @@ class Lobatto : public General<Part> {
       for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
         auto c_holder = i_node_on_holder[f];
         auto c_sharer = i_node_on_sharer[f];
-        Value u_holder = holder.projection().GetValue(c_holder);
-        Value u_sharer = sharer.projection().GetValue(c_sharer);
+        Value u_holder = holder.polynomial().GetValue(c_holder);
+        Value u_sharer = sharer.polynomial().GetValue(c_sharer);
         Value flux = face.riemann(f).GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(f);
-        holder.projection().MinusValue(flux, holder_data, c_holder);
+        holder.polynomial().MinusValue(flux, holder_data, c_holder);
       }
     }
   }
@@ -201,10 +201,10 @@ class Lobatto : public General<Part> {
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
-          Value u_holder = holder.projection().GetValue(c_holder);
+          Value u_holder = holder.polynomial().GetValue(c_holder);
           Value flux = face.riemann(f).GetFluxOnInviscidWall(u_holder);
           flux *= integrator.GetGlobalWeight(f);
-          holder.projection().MinusValue(flux, holder_data, c_holder);
+          holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
       }
     }
@@ -218,10 +218,10 @@ class Lobatto : public General<Part> {
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
-          Value u_holder = holder.projection().GetValue(c_holder);
+          Value u_holder = holder.polynomial().GetValue(c_holder);
           Value flux = face.riemann(f).GetFluxOnSupersonicOutlet(u_holder);
           flux *= integrator.GetGlobalWeight(f);
-          holder.projection().MinusValue(flux, holder_data, c_holder);
+          holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
       }
     }
@@ -238,7 +238,7 @@ class Lobatto : public General<Part> {
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
           flux *= integrator.GetGlobalWeight(f);
-          holder.projection().MinusValue(flux, holder_data, c_holder);
+          holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
       }
     }
@@ -252,11 +252,11 @@ class Lobatto : public General<Part> {
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
-          Value u_inner = holder.projection().GetValue(c_holder);
+          Value u_inner = holder.polynomial().GetValue(c_holder);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSubsonicInlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(f);
-          holder.projection().MinusValue(flux, holder_data, c_holder);
+          holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
       }
     }
@@ -270,11 +270,11 @@ class Lobatto : public General<Part> {
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
-          Value u_inner = holder.projection().GetValue(c_holder);
+          Value u_inner = holder.polynomial().GetValue(c_holder);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSubsonicOutlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(f);
-          holder.projection().MinusValue(flux, holder_data, c_holder);
+          holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
       }
     }
@@ -288,11 +288,11 @@ class Lobatto : public General<Part> {
         auto &i_node_on_holder = i_node_on_holder_[face.id()];
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
-          Value u_inner = holder.projection().GetValue(c_holder);
+          Value u_inner = holder.polynomial().GetValue(c_holder);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value flux = face.riemann(f).GetFluxOnSmartBoundary(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(f);
-          holder.projection().MinusValue(flux, holder_data, c_holder);
+          holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
       }
     }
