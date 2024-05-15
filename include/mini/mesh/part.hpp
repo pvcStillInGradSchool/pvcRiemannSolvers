@@ -199,16 +199,21 @@ struct Cell {
 
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
+
+ private:
   CoordinateUptr coordinate_ptr_;
   IntegratorUptr integrator_ptr_;
-  PolynomialUptr projection_ptr_;
+  PolynomialUptr polynomial_ptr_;
+
+ public:
   Int metis_id{-1}, id_{-1};
   bool inner_ = true;
 
+ public:
   Cell(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&integrator_ptr, Int m_cell)
       : coordinate_ptr_(std::move(coordinate_ptr)),
         integrator_ptr_(std::move(integrator_ptr)),
-        projection_ptr_(std::make_unique<Polynomial>(*integrator_ptr_)),
+        polynomial_ptr_(std::make_unique<Polynomial>(*integrator_ptr_)),
         metis_id(m_cell) {
   }
   Cell() = default;
@@ -242,10 +247,10 @@ struct Cell {
     return *coordinate_ptr_;
   }
   Polynomial const &projection() const {
-    return *projection_ptr_;
+    return *polynomial_ptr_;
   }
   Polynomial &projection() {
-    return *projection_ptr_;
+    return *polynomial_ptr_;
   }
   Global LocalToGlobal(const Local &local) const {
     return coordinate().LocalToGlobal(local);
