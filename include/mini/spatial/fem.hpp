@@ -273,15 +273,15 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   virtual void AddFluxOnSmartBoundaries(Column *residual) const = 0;
 
  public:
-  static FluxMatrix GetFluxMatrix(const Polynomial &projection, int q)
+  static FluxMatrix GetFluxMatrix(const Polynomial &polynomial, int q)
       requires(!mini::riemann::Diffusive<Riemann>) {
-    return Riemann::GetFluxMatrix(projection.GetValue(q));
+    return Riemann::GetFluxMatrix(polynomial.GetValue(q));
   }
-  static FluxMatrix GetFluxMatrix(const Polynomial &projection, int q)
+  static FluxMatrix GetFluxMatrix(const Polynomial &polynomial, int q)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    const auto &value = projection.GetValue(q);
+    const auto &value = polynomial.GetValue(q);
     FluxMatrix flux_matrix = Riemann::GetFluxMatrix(value);
-    const auto &gradient = projection.GetGlobalGradient(q);
+    const auto &gradient = polynomial.GetGlobalGradient(q);
     Riemann::MinusViscousFlux(value, gradient, &flux_matrix);
     return flux_matrix;
   }

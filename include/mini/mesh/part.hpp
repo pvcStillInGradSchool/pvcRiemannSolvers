@@ -998,9 +998,9 @@ class Part {
     Value l1_error; l1_error.setZero();
     for (Cell const &cell : GetLocalCells()) {
       auto &integrator = cell.integrator();
-      auto &projection = cell.polynomial();
+      auto &polynomial = cell.polynomial();
       for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-        Value value = projection.GetValue(q);
+        Value value = polynomial.GetValue(q);
         value -= exact_solution(integrator.GetGlobal(q), t_curr);
         value = value.cwiseAbs() * integrator.GetGlobalWeight(q);
         l1_error += value;

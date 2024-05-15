@@ -80,22 +80,22 @@ class Lobatto : public General<Part> {
       const auto &cell = face_to_cell(face);
       const auto &cell_integrator = cell.integrator();
       const auto &cell_basis = cell.basis();
-      const auto &cell_projection = cell.polynomial();
-      int i_face = cell_projection.FindFaceId(face.coordinate().center());
+      const auto &cell_polynomial = cell.polynomial();
+      int i_face = cell_polynomial.FindFaceId(face.coordinate().center());
       assert(kFaceQ == face.integrator().CountPoints());
       for (int f = 0; f < kFaceQ; ++f) {
         Global const &face_normal = face.riemann(f).normal();
         assert(face_normal == face_integrator.GetNormalFrame(f)[0]);
         auto &flux_point = curr_face.at(f);
         auto &flux_point_coord = face_integrator.GetGlobal(f);
-        auto [i, j, k] = cell_projection.FindCollinearIndex(flux_point_coord, i_face);
+        auto [i, j, k] = cell_polynomial.FindCollinearIndex(flux_point_coord, i_face);
         switch (i_face) {
         case 0:
           assert(k == -1);
           flux_point.ijk = cell_basis.index(i, j, 0);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Z);
           assert(Collinear(face_normal, flux_point.normal));
           flux_point.scale = -flux_point.normal.norm();
           flux_point.g_prime = -g_prime;
@@ -105,7 +105,7 @@ class Lobatto : public General<Part> {
           flux_point.ijk = cell_basis.index(i, 0, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Y);
           assert(Collinear(face_normal, flux_point.normal));
           flux_point.scale = -flux_point.normal.norm();
           flux_point.g_prime = -g_prime;
@@ -115,7 +115,7 @@ class Lobatto : public General<Part> {
           flux_point.ijk = cell_basis.index(kLineQ - 1, j, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(X);
           assert(Collinear(face_normal, flux_point.normal));
           flux_point.scale = +flux_point.normal.norm();
           flux_point.g_prime = +g_prime;
@@ -125,7 +125,7 @@ class Lobatto : public General<Part> {
           flux_point.ijk = cell_basis.index(i, kLineQ - 1, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Y);
           assert(Collinear(face_normal, flux_point.normal));
           flux_point.scale = +flux_point.normal.norm();
           flux_point.g_prime = +g_prime;
@@ -135,7 +135,7 @@ class Lobatto : public General<Part> {
           flux_point.ijk = cell_basis.index(0, j, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(X);
           assert(Collinear(face_normal, flux_point.normal));
           flux_point.scale = -flux_point.normal.norm();
           flux_point.g_prime = -g_prime;
@@ -145,7 +145,7 @@ class Lobatto : public General<Part> {
           flux_point.ijk = cell_basis.index(i, j, kLineQ - 1);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Z);
           assert(Collinear(face_normal, flux_point.normal));
           flux_point.scale = +flux_point.normal.norm();
           flux_point.g_prime = +g_prime;
@@ -283,16 +283,16 @@ class Lobatto : public General<Part> {
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     for (const auto &[name, func] : this->no_slip_wall_) {
       for (Face *face_ptr : this->part_ptr()->GetBoundaryFacePointers(name)) {
-        auto &holder_projection = face_ptr->holder_ptr()->polynomial();
+        auto &holder_polynomial = face_ptr->holder_ptr()->polynomial();
         auto const &holder_cache = holder_cache_[face_ptr->id()];
         auto const &integrator = face_ptr->integrator();
         assert(kFaceQ == integrator.CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder_projection.GetValue(holder_flux_point.ijk);
+          Value u_holder = holder_polynomial.GetValue(holder_flux_point.ijk);
           Value wall_value = func(integrator.GetGlobal(f), this->t_curr_);
           Riemann::SetValueOnNoSlipWall(wall_value, &u_holder);
-          holder_projection.SetValue(holder_flux_point.ijk, u_holder);
+          holder_polynomial.SetValue(holder_flux_point.ijk, u_holder);
         }
       }
     }

@@ -52,10 +52,10 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   using DiffusionRiemann = mini::riemann::diffusive::DirectDG<Diffusion>;
 
   static FluxMatrix GetDiffusiveFluxMatrix(const Cell &cell, int q) {
-    const auto &projection = cell.polynomial();
-    const auto &value = projection.GetValue(q);
+    const auto &polynomial = cell.polynomial();
+    const auto &value = polynomial.GetValue(q);
     FluxMatrix flux_matrix; flux_matrix.setZero();
-    const auto &gradient = projection.GetGlobalGradient(q);
+    const auto &gradient = polynomial.GetGlobalGradient(q);
     DiffusionRiemann::MinusViscousFlux(value, gradient, &flux_matrix);
     return flux_matrix;
   }

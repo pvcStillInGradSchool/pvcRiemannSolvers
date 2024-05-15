@@ -88,22 +88,22 @@ class General : public spatial::FiniteElement<Part> {
       const auto &cell = face_to_cell(face);
       const auto &cell_integrator = cell.integrator();
       const auto &cell_basis = cell.basis();
-      const auto &cell_projection = cell.polynomial();
-      int i_face = cell_projection.FindFaceId(face.coordinate().center());
+      const auto &cell_polynomial = cell.polynomial();
+      int i_face = cell_polynomial.FindFaceId(face.coordinate().center());
       assert(kFaceQ == face.integrator().CountPoints());
       for (int f = 0; f < kFaceQ; ++f) {
         Global const &face_normal = face.riemann(f).normal();
         assert(face_normal == face_integrator.GetNormalFrame(f)[0]);
         auto &[curr_line, flux_point] = curr_face.at(f);
         auto &flux_point_coord = face_integrator.GetGlobal(f);
-        auto [i, j, k] = cell_projection.FindCollinearIndex(flux_point_coord, i_face);
+        auto [i, j, k] = cell_polynomial.FindCollinearIndex(flux_point_coord, i_face);
         switch (i_face) {
         case 0:
           assert(k == -1);
           flux_point.ijk = cell_basis.index(i, j, 0);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (k = 0; k < kLineQ; ++k) {
@@ -119,7 +119,7 @@ class General : public spatial::FiniteElement<Part> {
           flux_point.ijk = cell_basis.index(i, 0, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (j = 0; j < kLineQ; ++j) {
@@ -135,7 +135,7 @@ class General : public spatial::FiniteElement<Part> {
           flux_point.ijk = cell_basis.index(kLineQ - 1, j, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (i = 0; i < kLineQ; ++i) {
@@ -151,7 +151,7 @@ class General : public spatial::FiniteElement<Part> {
           flux_point.ijk = cell_basis.index(i, kLineQ - 1, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Y);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (j = 0; j < kLineQ; ++j) {
@@ -167,7 +167,7 @@ class General : public spatial::FiniteElement<Part> {
           flux_point.ijk = cell_basis.index(0, j, k);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(X);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = -flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (i = 0; i < kLineQ; ++i) {
@@ -183,7 +183,7 @@ class General : public spatial::FiniteElement<Part> {
           flux_point.ijk = cell_basis.index(i, j, kLineQ - 1);
           assert(Near(flux_point_coord, cell_integrator.GetGlobal(flux_point.ijk)));
           flux_point.normal =
-              cell_projection.GetJacobianAssociated(flux_point.ijk).col(Z);
+              cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = +flux_point.normal.norm();
           assert(Collinear(face_normal, flux_point.normal));
           for (k = 0; k < kLineQ; ++k) {
@@ -246,12 +246,12 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
-      const Polynomial &holder_projection, Cache const &holder_cache,
-      const Polynomial &sharer_projection, Cache const &sharer_cache)
+      const Polynomial &holder_polynomial, Cache const &holder_cache,
+      const Polynomial &sharer_polynomial, Cache const &sharer_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Riemann const &riemann = face.riemann(f);
-    Value u_holder = holder_projection.GetValue(holder_cache.ijk);
-    Value u_sharer = sharer_projection.GetValue(sharer_cache.ijk);
+    Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
+    Value u_sharer = sharer_polynomial.GetValue(sharer_cache.ijk);
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
     assert(Collinear(holder_cache.normal, sharer_cache.normal));
     Value f_holder = f_upwind * holder_cache.scale;
@@ -262,22 +262,22 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
-      const Polynomial &holder_projection, Cache const &holder_cache,
-      const Polynomial &sharer_projection, Cache const &sharer_cache)
+      const Polynomial &holder_polynomial, Cache const &holder_cache,
+      const Polynomial &sharer_polynomial, Cache const &sharer_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Riemann const &riemann = face.riemann(f);
-    Value u_holder = holder_projection.GetValue(holder_cache.ijk);
-    Value u_sharer = sharer_projection.GetValue(sharer_cache.ijk);
+    Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
+    Value u_sharer = sharer_polynomial.GetValue(sharer_cache.ijk);
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
-    auto du_local_holder = holder_projection.GetLocalGradient(holder_cache.ijk);
-    auto du_local_sharer = sharer_projection.GetLocalGradient(sharer_cache.ijk);
-    auto du_holder = holder_projection.GetGlobalGradient(
+    auto du_local_holder = holder_polynomial.GetLocalGradient(holder_cache.ijk);
+    auto du_local_sharer = sharer_polynomial.GetLocalGradient(sharer_cache.ijk);
+    auto du_holder = holder_polynomial.GetGlobalGradient(
         u_holder, du_local_holder, holder_cache.ijk);
-    auto du_sharer = sharer_projection.GetGlobalGradient(
+    auto du_sharer = sharer_polynomial.GetGlobalGradient(
         u_sharer, du_local_sharer, sharer_cache.ijk);
-    auto ddu_holder = holder_projection.GetGlobalHessian(
+    auto ddu_holder = holder_polynomial.GetGlobalHessian(
         du_local_holder, holder_cache.ijk);
-    auto ddu_sharer = sharer_projection.GetGlobalHessian(
+    auto ddu_sharer = sharer_polynomial.GetGlobalHessian(
         du_local_sharer, sharer_cache.ijk);
     assert(Collinear(holder_cache.normal, sharer_cache.normal));
     const auto &normal = riemann.normal();
@@ -370,7 +370,7 @@ class General : public spatial::FiniteElement<Part> {
   template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
       Scalar distance, Value const &wall_value,
-      const Polynomial &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_polynomial, Cache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value value;
     return value;
@@ -378,12 +378,12 @@ class General : public spatial::FiniteElement<Part> {
   template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
       Scalar distance, Value const &wall_value,
-      const Polynomial &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_polynomial, Cache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    Value u_holder = holder_projection.GetValue(holder_cache.ijk);
+    Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
-    auto du_local_holder = holder_projection.GetLocalGradient(holder_cache.ijk);
-    auto du_holder = holder_projection.GetGlobalGradient(
+    auto du_local_holder = holder_polynomial.GetLocalGradient(holder_cache.ijk);
+    auto du_holder = holder_polynomial.GetGlobalGradient(
         u_holder, du_local_holder, holder_cache.ijk);
     auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
     Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
@@ -398,9 +398,9 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
-      const Polynomial &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_polynomial, Cache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
-    Value u_holder = holder_projection.GetValue(holder_cache.ijk);
+    Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
     auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
     Value f_holder = f_upwind * holder_cache.scale;
@@ -409,12 +409,12 @@ class General : public spatial::FiniteElement<Part> {
   }
   template <typename Cache>
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
-      const Polynomial &holder_projection, Cache const &holder_cache)
+      const Polynomial &holder_polynomial, Cache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    Value u_holder = holder_projection.GetValue(holder_cache.ijk);
+    Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
-    auto du_local_holder = holder_projection.GetLocalGradient(holder_cache.ijk);
-    auto du_holder = holder_projection.GetGlobalGradient(
+    auto du_local_holder = holder_polynomial.GetLocalGradient(holder_cache.ijk);
+    auto du_holder = holder_polynomial.GetGlobalGradient(
         u_holder, du_local_holder, holder_cache.ijk);
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
