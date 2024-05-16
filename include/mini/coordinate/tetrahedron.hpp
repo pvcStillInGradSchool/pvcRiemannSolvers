@@ -121,14 +121,6 @@ class Tetrahedron4 : public Tetrahedron<Scalar> {
   }
 
  public:
-  Tetrahedron4(
-      Global const &p0, Global const &p1,
-      Global const &p2, Global const &p3) {
-    global_coords_[0] = p0; global_coords_[1] = p1;
-    global_coords_[2] = p2; global_coords_[3] = p3;
-    this->BuildCenter();
-  }
-
   Tetrahedron4(std::initializer_list<Global> il) {
     Element<Scalar, 3, 3>::_Build(this, il);
   }

@@ -101,8 +101,8 @@ class Triangle3 : public Triangle<Scalar, kPhysDim> {
   Triangle3(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
-
   Triangle3() = default;
+
   std::unique_ptr<Face<Scalar, kPhysDim>> Clone() const final {
     return std::make_unique<Triangle3>();
   }

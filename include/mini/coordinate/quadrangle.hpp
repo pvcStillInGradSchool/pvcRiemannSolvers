@@ -121,18 +121,11 @@ class Quadrangle4 : public Quadrangle<Scalar, kPhysDim> {
   }
 
  public:
-  Quadrangle4(
-      Global const &p0, Global const &p1,
-      Global const &p2, Global const &p3) {
-    global_coords_[0] = p0; global_coords_[1] = p1;
-    global_coords_[2] = p2; global_coords_[3] = p3;
-    this->BuildCenter();
-  }
   Quadrangle4(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }
-
   Quadrangle4() = default;
+
   std::unique_ptr<Face<Scalar, kPhysDim>> Clone() const final {
     return std::make_unique<Quadrangle4>();
   }
@@ -367,19 +360,6 @@ class Quadrangle9 : public Quadrangle<Scalar, kPhysDim> {
   }
 
  public:
-  Quadrangle9(
-      Global const &p0, Global const &p1,
-      Global const &p2, Global const &p3,
-      Global const &p4, Global const &p5,
-      Global const &p6, Global const &p7, Global const &p8) {
-    global_coords_[0] = p0; global_coords_[1] = p1;
-    global_coords_[2] = p2; global_coords_[3] = p3;
-    global_coords_[4] = p4; global_coords_[5] = p5;
-    global_coords_[6] = p6; global_coords_[7] = p7;
-    global_coords_[8] = p8;
-    this->BuildCenter();
-  }
-
   Quadrangle9(std::initializer_list<Global> il) {
     Element<Scalar, kPhysDim, 2>::_Build(this, il);
   }

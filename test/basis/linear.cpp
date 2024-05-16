@@ -106,7 +106,7 @@ TEST_F(TestBasisOrthoNormal, OnQuadrangle) {
   using Integrator = mini::integrator::Quadrangle<2, Gx, Gx>;
   using Coord = Integrator::Global;
   Coord p0{-1, -1}, p1{+1, -1}, p2{+1, +1}, p3{-1, +1};
-  auto coordinate = Coordinate(p0, p1, p2, p3);
+  auto coordinate = Coordinate{p0, p1, p2, p3};
   auto integrator = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 2, 2>;
   auto basis = Basis(integrator);
@@ -127,7 +127,7 @@ TEST_F(TestBasisOrthoNormal, OnTetrahedron) {
   using Coordinate = mini::coordinate::Tetrahedron4<double>;
   using Coord = Integrator::Global;
   Coord p0{0, 0, 0}, p1{3, 0, 0}, p2{0, 3, 0}, p3{0, 0, 3};
-  auto coordinate = Coordinate(p0, p1, p2, p3);
+  auto coordinate = Coordinate{p0, p1, p2, p3};
   auto integrator = Integrator(coordinate);
   using Basis = mini::basis::OrthoNormal<double, 3, 2>;
   auto basis = Basis(integrator);
