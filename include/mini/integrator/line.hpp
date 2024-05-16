@@ -7,12 +7,9 @@
 
 #include "mini/algebra/eigen.hpp"
 #include "mini/integrator/legendre.hpp"
-#include "mini/integrator/lobatto.hpp"
 
 namespace mini {
 namespace integrator {
-
-enum class Rule { kLegendre, kLobatto };
 
 template <typename S, int D, int Q>
 class Line {

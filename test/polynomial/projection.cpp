@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "mini/integrator/function.hpp"
+#include "mini/integrator/legendre.hpp"
 #include "mini/integrator/hexahedron.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/basis/linear.hpp"

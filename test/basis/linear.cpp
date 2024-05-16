@@ -4,6 +4,7 @@
 #include <cstdlib>
 
 #include "mini/integrator/function.hpp"
+#include "mini/integrator/legendre.hpp"
 #include "mini/integrator/tetrahedron.hpp"
 #include "mini/coordinate/tetrahedron.hpp"
 #include "mini/integrator/hexahedron.hpp"

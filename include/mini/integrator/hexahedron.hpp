@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "mini/integrator/line.hpp"
 #include "mini/integrator/cell.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 

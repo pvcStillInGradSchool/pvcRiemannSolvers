@@ -10,6 +10,7 @@
 #include "mini/riemann/diffusive/navier_stokes.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/integrator/hexahedron.hpp"
+#include "mini/integrator/lobatto.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 
 class TestRiemannDiffusiveNavierStokes : public ::testing::Test {

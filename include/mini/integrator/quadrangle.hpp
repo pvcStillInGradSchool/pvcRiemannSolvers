@@ -10,7 +10,6 @@
 
 #include "mini/algebra/eigen.hpp"
 
-#include "mini/integrator/line.hpp"
 #include "mini/integrator/face.hpp"
 #include "mini/coordinate/face.hpp"
 #include "mini/coordinate/quadrangle.hpp"

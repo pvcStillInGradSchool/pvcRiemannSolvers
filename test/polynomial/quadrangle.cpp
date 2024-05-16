@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "mini/integrator/function.hpp"
+#include "mini/integrator/legendre.hpp"
 #include "mini/integrator/quadrangle.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 #include "mini/basis/linear.hpp"
