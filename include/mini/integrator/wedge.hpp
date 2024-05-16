@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <type_traits>
 
-#include "mini/integrator/line.hpp"
 #include "mini/integrator/cell.hpp"
 #include "mini/integrator/triangle.hpp"
 #include "mini/coordinate/wedge.hpp"
@@ -21,47 +20,49 @@ namespace integrator {
 /**
  * @brief Numerical integrators on hexahedral elements.
  * 
- * @tparam Scalar  Type of scalar variables.
  * @tparam Qt  Number of qudrature points in each layer of triangle.
- * @tparam Qz  Number of qudrature points in the \f$\zeta\f$ direction.
- * @tparam kRule  The type of Integratorian quadrature rule.
+ * @tparam Gx  The quadrature rule in the \f$\zeta\f$ direction.
  */
-template <std::floating_point Scalar, int Qt, int Qz,
-    Rule kRule = Rule::kLegendre>
-class Wedge : public Cell<Scalar> {
-  static constexpr int kPoints = Qt * Qz;
-
+template <int Qt, class Gx>
+class Wedge : public Cell<typename Gx::Scalar> {
  public:
+  using Scalar = typename Gx::Scalar;
   using Base = Cell<Scalar>;
   using IntegratorT = Triangle<Scalar, 2, Qt>;
-  using IntegratorZ = std::conditional_t< kRule == Rule::kLegendre,
-      Legendre<Scalar, Qz>, Lobatto<Scalar, Qz> >;
+  using IntegratorZ = Gx;
   using Coordinate = coordinate::Wedge<Scalar>;
   using Real = typename Coordinate::Real;
   using Local = typename Coordinate::Local;
   using Global = typename Coordinate::Global;
+  static_assert(std::is_same_v<Local, Global>);
   using Jacobian = typename Coordinate::Jacobian;
 
+  static constexpr int Q = Qt * Gx::Q;
+
  private:
-  static const std::array<Local, Qt * Qz> local_coords_;
-  static const std::array<Scalar, Qt * Qz> local_weights_;
-  std::array<Global, kPoints> global_coords_;
-  std::array<Scalar, kPoints> global_weights_;
+  using Points = std::array<Local, Q>;
+  static const Points local_coords_;
+
+  using Weights = std::array<Scalar, Q>;
+  static const Weights local_weights_;
+
+  Points global_coords_;
+  Weights global_weights_;
   Coordinate const *coordinate_;
   Scalar volume_;
 
  public:
   int CountPoints() const final {
-    return kPoints;
+    return Q;
   }
 
  private:
   static constexpr auto BuildLocalCoords() {
-    std::array<Local, kPoints> points;
+    Points points;
     auto triangle_points = IntegratorT::BuildLocalCoords();
     int n = 0;
     for (int i = 0; i < Qt; ++i) {
-      for (int k = 0; k < Qz; ++k) {
+      for (int k = 0; k < IntegratorZ::Q; ++k) {
         points[n][X] = triangle_points[i][X];
         points[n][Y] = triangle_points[i][Y];
         points[n][Z] = IntegratorZ::points[k];
@@ -71,11 +72,11 @@ class Wedge : public Cell<Scalar> {
     return points;
   }
   static constexpr auto BuildLocalWeights() {
-    std::array<Scalar, Qt * Qz> weights;
+    Weights weights;
     auto triangle_weights = IntegratorT::BuildLocalWeights();
     int n = 0;
     for (int i = 0; i < Qt; ++i) {
-      for (int k = 0; k < Qz; ++k) {
+      for (int k = 0; k < IntegratorZ::Q; ++k) {
         weights[n++] = triangle_weights[i] * IntegratorZ::weights[k];
       }
     }
@@ -136,15 +137,15 @@ class Wedge : public Cell<Scalar> {
   }
 };
 
-template <std::floating_point Scalar, int Qt, int Qz, Rule R>
-std::array<typename Wedge<Scalar, Qt, Qz, R>::Local, Qt * Qz> const
-Wedge<Scalar, Qt, Qz, R>::local_coords_
-    = Wedge<Scalar, Qt, Qz, R>::BuildLocalCoords();
+template <int Qt, class Gz>
+typename Wedge<Qt, Gz>::Points const
+Wedge<Qt, Gz>::local_coords_
+    = Wedge<Qt, Gz>::BuildLocalCoords();
 
-template <std::floating_point Scalar, int Qt, int Qz, Rule R>
-std::array<Scalar, Qt * Qz> const
-Wedge<Scalar, Qt, Qz, R>::local_weights_
-    = Wedge<Scalar, Qt, Qz, R>::BuildLocalWeights();
+template <int Qt, class Gz>
+typename Wedge<Qt, Gz>::Weights const
+Wedge<Qt, Gz>::local_weights_
+    = Wedge<Qt, Gz>::BuildLocalWeights();
 
 }  // namespace integrator
 }  // namespace mini

@@ -3,15 +3,18 @@
 #include <cmath>
 
 #include "mini/integrator/function.hpp"
+#include "mini/integrator/legendre.hpp"
 #include "mini/integrator/wedge.hpp"
 #include "mini/coordinate/wedge.hpp"
 
 #include "gtest/gtest.h"
 
 class TestIntegratorWedge : public ::testing::Test {
+ protected:
+  using Integrator = mini::integrator::Wedge<
+      16, mini::integrator::Legendre<double, 4>>;
 };
 TEST_F(TestIntegratorWedge, OnLinearElement) {
-  using Integrator = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge6<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -39,7 +42,6 @@ TEST_F(TestIntegratorWedge, OnLinearElement) {
   EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 TEST_F(TestIntegratorWedge, OnQuadraticElement) {
-  using Integrator = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge15<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {
@@ -70,7 +72,6 @@ TEST_F(TestIntegratorWedge, OnQuadraticElement) {
   EXPECT_DOUBLE_EQ(Norm(g, integrator), std::sqrt(Innerprod(g, g, integrator)));
 }
 TEST_F(TestIntegratorWedge, On18NodeQuadraticElement) {
-  using Integrator = mini::integrator::Wedge<double, 16, 4>;
   using Coordinate = mini::coordinate::Wedge18<double>;
   using Coord = typename Coordinate::Global;
   auto coordinate = Coordinate {

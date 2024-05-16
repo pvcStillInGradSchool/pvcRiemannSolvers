@@ -3,16 +3,19 @@
 #include <cmath>
 
 #include "mini/integrator/function.hpp"
+#include "mini/integrator/legendre.hpp"
 #include "mini/integrator/pyramid.hpp"
 #include "mini/coordinate/pyramid.hpp"
 
 #include "gtest/gtest.h"
 
 class TestIntegratorPyramid : public ::testing::Test {
+ protected:
+  using Legendre4 = mini::integrator::Legendre<double, 4>;
 };
 TEST_F(TestIntegratorPyramid, OnLinearElement) {
   using Coordinate = mini::coordinate::Pyramid5<double>;
-  using Integrator = mini::integrator::Pyramid<double, 4, 4, 3>;
+  using Integrator = mini::integrator::Pyramid<Legendre4, Legendre4, 3>;
   using Coord = typename Integrator::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
@@ -37,7 +40,7 @@ TEST_F(TestIntegratorPyramid, OnLinearElement) {
 }
 TEST_F(TestIntegratorPyramid, OnQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid13<double>;
-  using Integrator = mini::integrator::Pyramid<double, 4, 4, 3>;
+  using Integrator = mini::integrator::Pyramid<Legendre4, Legendre4, 3>;
   using Coord = typename Integrator::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
@@ -64,7 +67,7 @@ TEST_F(TestIntegratorPyramid, OnQuadraticElement) {
 }
 TEST_F(TestIntegratorPyramid, On14NodeQuadraticElement) {
   using Coordinate = mini::coordinate::Pyramid14<double>;
-  using Integrator = mini::integrator::Pyramid<double, 4, 4, 3>;
+  using Integrator = mini::integrator::Pyramid<Legendre4, Legendre4, 3>;
   using Coord = typename Integrator::Global;
   auto a = 2.0, b = 3.0, h = 4.0;
   auto coordinate = Coordinate{
