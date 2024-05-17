@@ -183,7 +183,6 @@ struct Cell {
   using IntegratorUptr = std::unique_ptr<Integrator>;
   using Coordinate = coordinate::Cell<Scalar>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
-  using Basis = typename Polynomial::Basis;
   using Local = typename Polynomial::Local;
   using Global = typename Polynomial::Global;
   using Value = typename Polynomial::Value;
@@ -257,9 +256,6 @@ struct Cell {
   }
   Value GlobalToValue(const Global &global) const {
     return polynomial().GlobalToValue(global);
-  }
-  Basis const &basis() const {
-    return polynomial().basis();
   }
   int CountCorners() const {
     return coordinate().CountCorners();

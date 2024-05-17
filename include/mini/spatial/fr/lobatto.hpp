@@ -79,8 +79,8 @@ class Lobatto : public General<Part> {
       const auto &face_integrator = face.integrator();
       const auto &cell = face_to_cell(face);
       const auto &cell_integrator = cell.integrator();
-      const auto &cell_basis = cell.basis();
       const auto &cell_polynomial = cell.polynomial();
+      const auto &cell_basis = cell_polynomial.interpolation().basis();
       int i_face = cell_polynomial.FindFaceId(face.coordinate().center());
       assert(kFaceQ == face.integrator().CountPoints());
       for (int f = 0; f < kFaceQ; ++f) {

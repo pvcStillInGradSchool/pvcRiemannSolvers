@@ -100,6 +100,10 @@ class Projection {
   Projection(Projection &&that) noexcept = default;
   ~Projection() noexcept = default;
 
+  Projection const &projection() const {
+    return *this;
+  }
+
   Mat1xN GlobalToBasisValues(Global const &global) const {
     return basis_(global);
   }
@@ -144,9 +148,6 @@ class Projection {
   }
   void SetCoeff(Coeff const &coeff) {
     coeff_ = coeff;
-  }
-  void SetCoeff(Coeff *coeff_ptr) const {
-    *coeff_ptr = coeff();
   }
   Value average() const {
     return GetAverage(*this);
@@ -231,10 +232,9 @@ class ProjectionWrapper {
       : basis_ptr_(&basis) {
   }
 
-  template <class ProjectionLike>
-  explicit ProjectionWrapper(const ProjectionLike &that)
+  explicit ProjectionWrapper(const Base &that)
       : basis_ptr_(&(that.basis())) {
-    that.SetCoeff(&coeff_);
+    coeff_ = that.coeff();
   }
 
   ProjectionWrapper() = default;

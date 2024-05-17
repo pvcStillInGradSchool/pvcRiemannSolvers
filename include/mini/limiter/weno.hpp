@@ -158,12 +158,13 @@ class Lazy {
   void Borrow() {
     old_projections_.clear();
     old_projections_.reserve(my_cell_->adj_cells_.size() + 1);
-    auto my_average = my_cell_->polynomial().average();
+    auto const &my_projection = my_cell_->polynomial().projection();
+    auto my_average = my_projection.average();
     for (auto *adj_cell : my_cell_->adj_cells_) {
       assert(adj_cell);
-      auto &adj_proj = old_projections_.emplace_back(my_cell_->basis());
-      assert(&(adj_proj.basis()) == &(my_cell_->basis()));
-      adj_proj.Approximate(adj_cell->polynomial());
+      auto &adj_proj = old_projections_.emplace_back(my_projection.basis());
+      assert(&(adj_proj.basis()) == &(my_projection.basis()));
+      adj_proj.Approximate(adj_cell->polynomial().projection());
       adj_proj += my_average - adj_proj.average();
       if (verbose_) {
         std::cout << "\n  adj smoothness[" << adj_cell->metis_id << "] = ";
@@ -171,14 +172,14 @@ class Lazy {
             GetSmoothness(adj_proj).transpose();
       }
     }
-    old_projections_.emplace_back(my_cell_->polynomial());
+    old_projections_.emplace_back(my_projection);
     if (verbose_) {
       std::cout << "\n  old smoothness[" << my_cell_->metis_id << "] = ";
       std::cout << std::scientific << std::setprecision(3) <<
           GetSmoothness(old_projections_.back()).transpose();
     }
     new_projection_ptr_ = &(old_projections_.back());
-    assert(&(new_projection_ptr_->basis()) == &(my_cell_->basis()));
+    assert(&(new_projection_ptr_->basis()) == &(my_projection.basis()));
   }
   void Reconstruct() {
     int adj_cnt = my_cell_->adj_cells_.size();
@@ -279,13 +280,14 @@ class Eigen {
   void Borrow() {
     old_projections_.clear();
     old_projections_.reserve(my_cell_->adj_cells_.size() + 1);
-    auto my_average = my_cell_->polynomial().average();
+    auto const &my_projection = my_cell_->polynomial().projection();
+    auto my_average = my_projection.average();
     for (auto *adj_cell : my_cell_->adj_cells_) {
-      auto &adj_proj = old_projections_.emplace_back(my_cell_->basis());
-      adj_proj.Approximate(adj_cell->polynomial());
+      auto &adj_proj = old_projections_.emplace_back(my_projection.basis());
+      adj_proj.Approximate(adj_cell->polynomial().projection());
       adj_proj += my_average - adj_proj.average();
     }
-    old_projections_.emplace_back(my_cell_->polynomial());
+    old_projections_.emplace_back(my_projection);
   }
   /**
    * @brief Rotate borrowed projections onto the interface between cells
@@ -339,7 +341,8 @@ class Eigen {
    * 
    */
   void Reconstruct() {
-    new_projection_ = ProjectionWrapper(my_cell_->basis());
+    auto const &my_basis = my_cell_->polynomial().projection().basis();
+    new_projection_ = ProjectionWrapper(my_basis);
     new_projection_.coeff().setZero();
     total_volume_ = 0.0;
     for (auto *adj_face : my_cell_->adj_faces_) {

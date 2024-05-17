@@ -147,6 +147,7 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
   auto adj_smoothness = std::vector<std::vector<Mat1x1>>(n_cells);
   for (int i_cell = 0; i_cell < n_cells; ++i_cell) {
     auto &cell_i = cells[i_cell];
+    auto const &projection_i = cell_i.polynomial().projection();
     adj_smoothness[i_cell].emplace_back(
         mini::limiter::weno::GetSmoothness(cell_i.polynomial()));
     for (auto j_cell : cell_adjs[i_cell]) {
@@ -154,7 +155,7 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
         return cells[j_cell].GlobalToValue(xyz);
       };
       auto &adj_projection =
-          adj_projections[i_cell].emplace_back(cell_i.basis());
+          adj_projections[i_cell].emplace_back(projection_i.basis());
       adj_projection.Approximate(adj_func);
       Mat1x1 diff = cell_i.polynomial().average()
           - adj_projection.average();

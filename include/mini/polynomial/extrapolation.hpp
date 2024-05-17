@@ -106,21 +106,21 @@ class Extrapolation : public Interpolation {
     return output;
   }
 
+  Interpolation const &interpolation() const {
+    return *this;
+  }
+
+  Projection const &projection() const {
+    return projection_;
+  }
+
   void SetCoeff(typename Projection::Coeff const &coeff) {
     projection_.SetCoeff(coeff);
     UpdateNodalCoeff();
   }
-  void SetCoeff(typename Projection::Coeff *coeff_ptr) const {
-    projection_.SetCoeff(coeff_ptr);
-  }
 
   Value average() const {
     return projection_.average();
-  }
-
-  using Basis = typename Projection::Basis;
-  Basis const &basis() const {
-    return projection_.basis();
   }
 
   Value operator()(Global const &global) const {

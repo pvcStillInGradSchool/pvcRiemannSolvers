@@ -225,6 +225,10 @@ class Hexahedron {
   Hexahedron &operator=(Hexahedron &&) noexcept = default;
   ~Hexahedron() noexcept = default;
 
+  Hexahedron const &interpolation() const {
+    return *this;
+  }
+
   Value LocalToValue(Local const &local) const requires(kLocal) {
     Value value = coeff_ * basis_.GetValues(local).transpose();
     value /= coordinate().LocalToJacobian(local).determinant();
