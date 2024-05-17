@@ -27,7 +27,7 @@ namespace polynomial {
 using namespace mini::constant::index;
 
 /**
- * @brief A vector-valued function interpolated on an given basis::lagrange::Hexahedron basis.
+ * @brief A vector-valued function interpolated on an given `basis::lagrange::Hexahedron` basis.
  * 
  * The interpolation nodes are collocated with quadrature points.
  * 

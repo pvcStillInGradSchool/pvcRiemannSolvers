@@ -1,7 +1,4 @@
 // Copyright 2021 PEI Weicheng and YANG Minghao and JIANG Yuyan
-/**
- * This file defines wrappers of APIs and types in CGNS/MLL.
- */
 #ifndef MINI_MESH_CGNS_HPP_
 #define MINI_MESH_CGNS_HPP_
 
@@ -28,6 +25,11 @@
 
 namespace mini {
 namespace mesh {
+
+/**
+ * @brief Wrappers of APIs and types in [CGNS/MLL](http://cgns.github.io/CGNS_docs_current/midlevel/index.html).
+ * 
+ */
 namespace cgns {
 
 using ElementType = CGNS_ENUMT(ElementType_t);

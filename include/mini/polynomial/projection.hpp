@@ -55,7 +55,7 @@ template <std::floating_point Scalar, int kDimensions, int kDegrees,
 class ProjectionWrapper;
 
 /**
- * @brief A vector-valued function projected onto an given orthonormal basis.
+ * @brief A vector-valued function projected onto an given `basis::OrthoNormal` basis.
  * 
  * @tparam S the data type of scalar components
  * @tparam kDimensions the dimension of the underlying physical space

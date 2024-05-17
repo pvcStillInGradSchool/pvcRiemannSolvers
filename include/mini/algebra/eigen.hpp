@@ -1,7 +1,4 @@
 // Copyright 2021 PEI Weicheng and JIANG Yuyan
-/**
- * This file defines parser of partition info txt.
- */
 #ifndef MINI_ALGEBRA_EIGEN_HPP_
 #define MINI_ALGEBRA_EIGEN_HPP_
 
@@ -59,6 +56,10 @@ auto GetLowerTriangularView(MatrixType *matrix) {
 }  // namespace algebra
 }  // namespace mini
 
+/**
+ * @brief Extends utilities defined in the C++ standard library.
+ * 
+ */
 namespace std {
 
 template <class Matrix>
