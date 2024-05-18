@@ -8,6 +8,7 @@
 #include "mini/mesh/cgns.hpp"
 #include "mini/mesh/part.hpp"
 #include "mini/polynomial/hexahedron.hpp"
+#include "mini/polynomial/extrapolation.hpp"
 
 #include "mini/spatial/viscosity.hpp"
 #include "mini/spatial/fem.hpp"
@@ -19,8 +20,10 @@
 
 #include "test/mesh/part.hpp"
 
-using Polynomial = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+using Polynomial = mini::polynomial::Extrapolation<
+    mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true> >;
 using Part = mini::mesh::part::Part<cgsize_t, Riemann, Polynomial>;
+using Global = typename Part::Global;
 
 auto case_name = PROJECT_BINARY_DIR + std::string("/test/mesh/double_mach");
 
@@ -39,20 +42,20 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   auto viscosity = Viscosity(&spatial);
   // auto matrices = viscosity.BuildDampingMatrices();
   std::cout << "[Done] BuildDampingMatrices" << std::endl;
-  auto local_on_neighbors = viscosity.BuildCoordinates();
-  std::cout << "[Done] BuildCoordinates" << std::endl;
-  for (auto &cell_i : part.GetLocalCells()) {
-    int i_cell = cell_i.id();
-    auto &local_on_neighbors_of_cell_i = local_on_neighbors.at(i_cell);
-    int n_neighbor = cell_i.adj_cells_.size();
-    for (int i_neighbor = 0; i_neighbor < n_neighbor; ++i_neighbor) {
-      auto &local_on_neighbor_i = local_on_neighbors_of_cell_i.at(i_neighbor);
-      auto *neighbor_i = cell_i.adj_cells_.at(i_neighbor);
-      for (int i_node = 0; i_node < cell_i.N; ++i_node) {
-        auto &global = cell_i.integrator().GetGlobal(i_node);
-        auto global_from_neighbor
-            = neighbor_i->coordinate().LocalToGlobal(local_on_neighbor_i.at(i_node));
-        EXPECT_NEAR((global - global_from_neighbor).norm(), 0, 1e-10);
+  auto value_jumps = viscosity.BuildValueJumps();
+  std::cout << "[Done] BuildValueJumps" << std::endl;
+  for (auto &curr_cell : part.GetLocalCells()) {
+    auto &value_jumps_on_curr_cell = value_jumps.at(curr_cell.id());
+    for (int i_node = 0; i_node < curr_cell.N; ++i_node) {
+      auto &value_jumps_on_curr_node = value_jumps_on_curr_cell.at(i_node);
+      Global const &global_i = curr_cell.integrator().GetGlobal(i_node);
+      Value value_i = curr_cell.polynomial().GetValue(i_node);
+      for (auto *neighbor_i : curr_cell.adj_cells_) {
+        Value jump_i = value_i - neighbor_i->polynomial().Extrapolate(global_i);
+        jump_i = std::abs(jump_i);
+        for (int k = 0; k < curr_cell.K; k++) {
+          EXPECT_LE(jump_i[k], value_jumps_on_curr_node[k]);
+        }
       }
     }
   }

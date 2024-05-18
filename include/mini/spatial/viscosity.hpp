@@ -84,9 +84,6 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
  protected:  // data for generating artificial viscosity
   std::vector<DampingMatrix> damping_matrices_;
 
-  // [i_cell][i_neighbor][i_node]
-  std::vector<std::vector<std::array<Local, Cell::N>>> local_on_neighbors_;
-
  public:  // methods for generating artificial viscosity
   std::vector<DampingMatrix> BuildDampingMatrices() const {
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
@@ -119,25 +116,31 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
     return matrices;
   }
 
-  std::vector<std::vector<std::array<Local, Cell::N>>> BuildCoordinates() const {
-    std::vector<std::vector<std::array<Local, Cell::N>>> local_on_neighbors;
-    local_on_neighbors.reserve(part().CountLocalCells());
-    for (Cell *cell_ptr : base_ptr_->part_ptr()->GetLocalCellPointers()) {
-      auto &local_on_neighbors_of_cell_i = local_on_neighbors.emplace_back();
-      int n_neighbor = cell_ptr->adj_cells_.size();
-      local_on_neighbors_of_cell_i.reserve(n_neighbor);
-      for (int i_neighbor = 0; i_neighbor < n_neighbor; ++i_neighbor) {
-        auto &local_on_neighbor_i = local_on_neighbors_of_cell_i.emplace_back();
-        auto const &coordinate_i = cell_ptr->adj_cells_[i_neighbor]->coordinate();
-        for (int i_node = 0; i_node < Cell::N; ++i_node) {
-          auto &xyz = cell_ptr->integrator().GetGlobal(i_node);
-          std::printf("%d %ld %d %d\n", part().mpi_rank(), cell_ptr->id(), i_neighbor, i_node);
-          local_on_neighbor_i[i_node] = coordinate_i.GlobalToLocal(xyz);
+ protected:
+  // [i_cell][i_node][i_comp]
+  std::vector<std::array<Value, Cell::N>> value_jumps_;
+
+ public:
+  std::vector<std::array<Value, Cell::N>> BuildValueJumps() const {
+    std::vector<std::array<Value, Cell::N>> value_jumps;
+    value_jumps.reserve(part().CountLocalCells());
+    for (Cell *curr_cell : base_ptr_->part_ptr()->GetLocalCellPointers()) {
+      auto &value_jumps_on_curr_cell = value_jumps.emplace_back();
+      for (int i_node = 0; i_node < Cell::N; ++i_node) {
+        auto &value_jump_on_curr_node = value_jumps_on_curr_cell[i_node];
+        // Initialize value jumps to 0's:
+        value_jump_on_curr_node.fill(0);
+        // Update value jumps by each neighbor:
+        Global const &global_i = curr_cell->integrator().GetGlobal(i_node);
+        Value value_i = curr_cell->polynomial().GetValue(i_node);
+        for (Cell *neighbor_i : curr_cell->adj_cells_) {
+          Value jump_i = value_i - neighbor_i->polynomial().Extrapolate(global_i);
+          mini::algebra::Maximize(&value_jump_on_curr_node, std::abs(jump_i));
         }
       }
     }
-    assert(local_on_neighbors.size() == part().CountLocalCells());
-    return local_on_neighbors;
+    assert(value_jumps.size() == part().CountLocalCells());
+    return value_jumps;
   }
 
  public:  // override virtual methods defined in Base

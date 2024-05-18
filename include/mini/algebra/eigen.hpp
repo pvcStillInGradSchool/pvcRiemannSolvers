@@ -41,6 +41,16 @@ inline void SetZero(algebra::Matrix<Scalar, M, N>* m) {
   m->setZero();
 }
 
+template <class Matrix>
+void Maximize(Matrix *lhs, Matrix const &rhs)
+    requires(!std::is_scalar_v<Matrix>) {
+  auto *l_data = lhs->data();
+  auto const *r_data = rhs.data();
+  for (int k = 0, K = lhs->size(); k < K; ++k) {
+    l_data[k] = std::max(l_data[k], r_data[k]);
+  }
+}
+
 template <class MatrixType>
 using LowerTriangularView = Eigen::TriangularView<MatrixType, Eigen::Lower>;
 
