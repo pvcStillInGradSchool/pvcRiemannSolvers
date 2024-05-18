@@ -116,11 +116,6 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
     return matrices;
   }
 
- protected:
-  // [i_cell][i_node][i_comp]
-  std::vector<std::array<Value, Cell::N>> value_jumps_;
-
- public:
   std::vector<std::array<Value, Cell::N>> BuildValueJumps() const {
     std::vector<std::array<Value, Cell::N>> value_jumps;
     value_jumps.reserve(part().CountLocalCells());
@@ -141,6 +136,24 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
     }
     assert(value_jumps.size() == part().CountLocalCells());
     return value_jumps;
+  }
+
+  std::vector<Value>
+  IntegrateJumps(std::vector<std::array<Value, Cell::N>> const jumps) const {
+    std::vector<Value> jump_integrals;
+    jump_integrals.reserve(part().CountLocalCells());
+    for (Cell *curr_cell : base_ptr_->part_ptr()->GetLocalCellPointers()) {
+      auto &integral_on_curr_cell = jump_integrals.emplace_back(Value::Zero());
+      auto &jump_integral_on_curr_cell = jumps.at(curr_cell->id());
+      auto const &integrator = curr_cell->integrator();
+      assert(integrator.CountPoints() == Cell::N);
+      for (int i_node = 0; i_node < Cell::N; ++i_node) {
+        integral_on_curr_cell += integrator.GetGlobalWeight(i_node)
+            * std::pow(jump_integral_on_curr_cell[i_node], 2);
+      }
+    }
+    assert(jump_integrals.size() == part().CountLocalCells());
+    return jump_integrals;
   }
 
  public:  // override virtual methods defined in Base

@@ -44,6 +44,8 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   std::cout << "[Done] BuildDampingMatrices" << std::endl;
   auto value_jumps = viscosity.BuildValueJumps();
   std::cout << "[Done] BuildValueJumps" << std::endl;
+  auto jump_integrals = viscosity.IntegrateJumps(value_jumps);
+  std::cout << "[Done] IntegrateJumps" << std::endl;
   for (auto &curr_cell : part.GetLocalCells()) {
     auto &value_jumps_on_curr_cell = value_jumps.at(curr_cell.id());
     for (int i_node = 0; i_node < curr_cell.N; ++i_node) {
@@ -57,6 +59,10 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
           EXPECT_LE(jump_i[k], value_jumps_on_curr_node[k]);
         }
       }
+    }
+    auto &jump_integral_on_curr_cell = jump_integrals.at(curr_cell.id());
+    for (int k = 0; k < curr_cell.K; k++) {
+      EXPECT_LE(0.0, jump_integral_on_curr_cell[k]);
     }
   }
 }
