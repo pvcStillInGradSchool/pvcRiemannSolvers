@@ -112,6 +112,14 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
           assert((residual.row(r) - residual.row(0)).squaredNorm() == 0);
         }
       }
+      // Scale the damping matrix by local weight over Jacobian:
+      assert(cell_ptr->polynomial().kLocal);
+      for (int r = 0; r < Cell::N; ++r) {
+        Scalar scale
+            = cell_ptr->integrator().GetLocalWeight(r)
+            / cell_ptr->integrator().GetJacobianDeterminant(r);
+        matrix.row(r) *= scale;
+      }
     }
     return matrices;
   }

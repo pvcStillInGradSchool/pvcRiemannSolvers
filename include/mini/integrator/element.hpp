@@ -76,6 +76,16 @@ class Element {
   virtual const Real &GetGlobalWeight(int i) const = 0;
 
   /**
+   * @brief Get the determinant of Jacobian at the i-th quadrature point.
+   * 
+   * @param i 0-based index of the i-th quadrature point.
+   * @return the determinant of Jacobian at the i-th quadrature point.
+   */
+  Real GetJacobianDeterminant(int i) const {
+    return GetGlobalWeight(i) / GetLocalWeight(i);
+  }
+
+  /**
    * @brief Get a reference to the coordinate::Element object it uses for coordinate mapping.
    * 
    * @return const Coordinate &  Reference to the coordinate::Element object it uses for coordinate mapping.
