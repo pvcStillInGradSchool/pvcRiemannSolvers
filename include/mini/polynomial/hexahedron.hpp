@@ -159,9 +159,8 @@ class Hexahedron {
     return hessians;
   }
 
- public:
-  explicit Hexahedron(typename Integrator::Base const &integrator) requires(kLocal)
-      : integrator_ptr_(dynamic_cast<const Integrator *>(&integrator)) {
+ private:
+  void InitializeJacobian() requires(kLocal) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = integrator_ptr_->GetLocal(ijk);
       Jacobian mat = coordinate().LocalToJacobian(local);
@@ -209,14 +208,20 @@ class Hexahedron {
           (inv_T_grad[Z] / det2 + inv_T * (-2 * det_grad[Z] / det3));
     }
   }
-  explicit Hexahedron(typename Integrator::Base const &integrator) requires(!kLocal)
-      : integrator_ptr_(dynamic_cast<const Integrator *>(&integrator)) {
+
+  void InitializeJacobian() requires(!kLocal) {
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = integrator_ptr_->GetLocal(ijk);
       Jacobian jacobian = coordinate().LocalToJacobian(local);
       basis_global_gradients_[ijk] = LocalGradientsToGlobalGradients(
           jacobian, basis_local_gradients_[ijk]);
     }
+  }
+
+ public:
+  explicit Hexahedron(typename Integrator::Base const &integrator)
+      : integrator_ptr_(dynamic_cast<const Integrator *>(&integrator)) {
+    InitializeJacobian();
   }
   Hexahedron() = default;
   Hexahedron(const Hexahedron &) = default;
@@ -229,63 +234,101 @@ class Hexahedron {
     return *this;
   }
 
-  Value LocalToValue(Local const &local) const requires(kLocal) {
+ private:
+  Value _LocalToValue(Local const &local) const requires(kLocal) {
     Value value = coeff_ * basis_.GetValues(local).transpose();
     value /= coordinate().LocalToJacobian(local).determinant();
     return value;
   }
-  Value LocalToValue(Local const &local) const requires(!kLocal) {
+  Value _LocalToValue(Local const &local) const requires(!kLocal) {
     return coeff_ * basis_.GetValues(local).transpose();
   }
+ 
+ public:
+  /**
+   * @brief Get the value of \f$ u(x,y,z) \f$ at a point given by `Local`.
+   * 
+   */
+  Value LocalToValue(Local const &local) const {
+    return _LocalToValue(local);
+  }
+
   void LocalToGlobalAndValue(Local const &local,
       Global *global, Value *value) const {
     *global = integrator().coordinate().LocalToGlobal(local);
     *value = LocalToValue(local);
   }
 
+  /**
+   * @brief Get the value of \f$ u(x,y,z) \f$ at a point given by `Global`.
+   * 
+   * It might be expensive since it has to call `Coordinate::GlobalToLocal` first.
+   */
   Value GlobalToValue(Global const &global) const {
     Local local = coordinate().GlobalToLocal(global);
     return LocalToValue(local);
   }
-  /**
-   * @brief Get the value of \f$ u(x,y,z) \equiv \det(\mathbf{J})^{-1}\,U(\xi,\eta,\zeta) \f$ at a Integratorian point.
-   * 
-   * This version is compiled only if `kLocal` is `true`.
-   * 
-   * @param ijk the index of the Integratorian point
-   * @return Value the value \f$ u(x_i,y_i,z_i) \f$
-   */
-  Value GetValue(int i) const requires(kLocal) {
+
+ private:
+  Value _GetValue(int i) const requires(kLocal) {
     return coeff_.col(i) / jacobian_det_[i];
   }
-  Coeff GetValues() const requires(kLocal) {
+  Value _GetValue(int i) const requires(!kLocal) {
+    return coeff_.col(i);
+  }
+
+ public:
+  /**
+   * @brief Get the value of \f$ u(x,y,z) \f$ at a given integratorian point.
+   * 
+   * @param i the index of the integratorian point
+   * @return the value \f$ u(x_i,y_i,z_i) \f$
+   */
+  Value GetValue(int i) const {
+    return _GetValue(i);
+  }
+
+ private:
+  Coeff _GetValues() const requires(kLocal) {
     Coeff coeff;
     for (int j = 0; j < N; ++j) {
       coeff.col(j) = GetValue(j);
     }
     return coeff;
   }
-  void SetValue(int i, Value const &value) requires(kLocal) {
+  Coeff _GetValues() const requires(!kLocal) {
+    return coeff_;
+  }
+
+ public:
+  /**
+   * @brief Get the values of \f$ u(x,y,z) \f$ at all integratorian points.
+   * 
+   */
+  Coeff GetValues() const {
+    return _GetValues();
+  }
+
+ private:
+  void _SetValue(int i, Value const &value) requires(kLocal) {
     coeff_.col(i) = value;  // value in physical space
     coeff_.col(i) *= jacobian_det_[i];  // value in parametric space
   }
-  /**
-   * @brief Get the value of \f$ u(x,y,z) \f$ at a Integratorian point.
-   * 
-   * This version is compiled only if `kLocal` is `false`.
-   * 
-   * @param ijk the index of the Integratorian point
-   * @return Value the value \f$ u(x_i,y_i,z_i) \f$
-   */
-  Value GetValue(int i) const requires(!kLocal) {
-    return coeff_.col(i);
-  }
-  Coeff GetValues() const requires(!kLocal) {
-    return coeff_;
-  }
-  void SetValue(int i, Value const &value) requires(!kLocal) {
+  void _SetValue(int i, Value const &value) requires(!kLocal) {
     coeff_.col(i) = value;
   }
+
+ public:
+  /**
+   * @brief Set the value of \f$ u(x,y,z) \f$ at a given integratorian point.
+   * 
+   * @param i the index of the integratorian point
+   * @param value the value \f$ u(x_i,y_i,z_i) \f$
+   */
+  void SetValue(int i, Value const &value) {
+    _SetValue(i, value);
+  }
+
   Mat1xN GlobalToBasisValues(Global const &global) const {
     Local local = coordinate().GlobalToLocal(global);
     return basis_.GetValues(local);
@@ -300,29 +343,29 @@ class Hexahedron {
     return LocalGradientsToGlobalGradients(jacobian, grad);
   }
   /**
-   * @brief Get the local gradients of basis at a Integratorian point.
+   * @brief Get the local gradients of basis at a given integratorian point.
    * 
    * This version is compiled only if `kLocal` is `true`.
    * 
-   * @param ijk the index of the Integratorian point
+   * @param ijk the index of the integratorian point
    * @return const Mat3xN& the local gradients of basis
    */
   const Mat3xN &GetBasisGradients(int ijk) const requires(kLocal) {
     return basis_local_gradients_[ijk];
   }
   /**
-   * @brief Get the global gradients of basis at a Integratorian point.
+   * @brief Get the global gradients of basis at a given integratorian point.
    * 
    * This version is compiled only if `kLocal` is `false`.
    * 
-   * @param ijk the index of the Integratorian point
+   * @param ijk the index of the integratorian point
    * @return const Mat3xN& the global gradients of basis
    */
   const Mat3xN &GetBasisGradients(int ijk) const requires(!kLocal) {
     return basis_global_gradients_[ijk];
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a Integratorian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a given integratorian point.
    * 
    */
   Gradient GetLocalGradient(int ijk) const requires(kLocal) {
@@ -358,25 +401,17 @@ class Hexahedron {
     auto local = coordinate().GlobalToLocal(global);
     return LocalToGlobalGradient(local);
   }
-  /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Integratorian point.
-   * 
-   * This version is compiled only if `kLocal` is `false`.
-   * 
-   */
-  Gradient GetGlobalGradient(int ijk) const requires(!kLocal) {
+
+ private:
+  Gradient _GetGlobalGradient(int ijk) const requires(!kLocal) {
     Mat3xN const &basis_grad = GetBasisGradients(ijk);
     return basis_grad * coeff().transpose();
   }
-  /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Integratorian point.
-   * 
-   * This version is compiled only if `kLocal` is `true`.
-   * 
-   */
-  Gradient GetGlobalGradient(int ijk) const requires(kLocal) {
+  Gradient _GetGlobalGradient(int ijk) const requires(kLocal) {
     return GetGlobalGradient(GetValue(ijk), GetLocalGradient(ijk), ijk);
   }
+
+ public:
   Gradient GetGlobalGradient(Value const &value_ijk, Gradient local_grad_ijk,
       int ijk) const requires(kLocal) {
     auto &value_grad = local_grad_ijk;
@@ -386,18 +421,26 @@ class Hexahedron {
     return GetJacobianAssociated(ijk) * value_grad;
   }
   /**
-   * @brief Get the local Hessians of basis at a Integratorian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a given integratorian point.
+   * 
+   */
+  Gradient GetGlobalGradient(int ijk) const {
+    return _GetGlobalGradient(ijk);
+  }
+
+  /**
+   * @brief Get the local Hessians of basis at a given integratorian point.
    * 
    * This version is compiled only if `kLocal` is `true`.
    * 
-   * @param ijk the index of the Integratorian point
+   * @param ijk the index of the integratorian point
    * @return const Mat6xN& the local Hessians of basis
    */
   const Mat6xN &GetBasisHessians(int ijk) const requires(kLocal) {
     return basis_local_hessians_[ijk];
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\partial_{\xi}\\ \partial_{\xi}\partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a Integratorian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\partial_{\xi}\\ \partial_{\xi}\partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a given integratorian point.
    * 
    */
   Hessian GetLocalHessian(int ijk) const requires(kLocal) {
@@ -409,7 +452,7 @@ class Hexahedron {
     return value_hess;
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{x}\partial_{x}\\ \partial_{x}\partial_{y}\\ \cdots \end{bmatrix} u \f$ at a Integratorian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{x}\partial_{x}\\ \partial_{x}\partial_{y}\\ \cdots \end{bmatrix} u \f$ at a given integratorian point.
    * 
    */
   Hessian GetGlobalHessian(int ijk) const requires(kLocal) {
@@ -467,13 +510,13 @@ class Hexahedron {
   }
 
   /**
-   * @brief Convert a flux matrix from global to local at a given Integratorian point.
+   * @brief Convert a flux matrix from global to local at a given integratorian point.
    * 
    * \f$ \begin{bmatrix}F^{\xi} & F^{\eta} & F^{\zeta}\end{bmatrix}=\begin{bmatrix}f^{x} & f^{y} & f^{z}\end{bmatrix}\mathbf{J}^{*} \f$, in which \f$ \mathbf{J}^{*} = \det(\mathbf{J}) \begin{bmatrix}\partial_{x}\\\partial_{y}\\\partial_{z}\end{bmatrix}\begin{bmatrix}\xi & \eta & \zeta\end{bmatrix} \f$ is returned by `Hexahedron::GetJacobianAssociated`.
    * 
    * @tparam FluxMatrix a matrix type which has 3 columns
    * @param global_flux the global flux
-   * @param ijk the index of the Integratorian point
+   * @param ijk the index of the integratorian point
    * @return FluxMatrix the local flux
    */
   template <class FluxMatrix>
@@ -484,11 +527,11 @@ class Hexahedron {
   }
 
   /**
-   * @brief Get the associated matrix of the Jacobian at a given Integratorian point.
+   * @brief Get the associated matrix of the Jacobian at a given integratorian point.
    * 
    * \f$ \mathbf{J}^{*}=\det(\mathbf{J})\,\mathbf{J}^{-1} \f$, in which \f$ \mathbf{J}^{-1}=\begin{bmatrix}\partial_{x}\\\partial_{y}\\\partial_{z}\end{bmatrix}\begin{bmatrix}\xi & \eta & \zeta\end{bmatrix} \f$ is the inverse of `coordinate::Element::Jacobian`.
    * 
-   * @param ijk the index of the Integratorian point
+   * @param ijk the index of the integratorian point
    * @return Jacobian const& the associated matrix of \f$ \mathbf{J} \f$.
    */
   Jacobian const &GetJacobianAssociated(int ijk) const
