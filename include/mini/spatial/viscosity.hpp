@@ -152,16 +152,40 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
     jump_integrals.reserve(part().CountLocalCells());
     for (Cell *curr_cell : base_ptr_->part_ptr()->GetLocalCellPointers()) {
       auto &integral_on_curr_cell = jump_integrals.emplace_back(Value::Zero());
-      auto &jump_integral_on_curr_cell = jumps.at(curr_cell->id());
+      auto &jump_on_curr_cell = jumps.at(curr_cell->id());
       auto const &integrator = curr_cell->integrator();
       assert(integrator.CountPoints() == Cell::N);
       for (int i_node = 0; i_node < Cell::N; ++i_node) {
         integral_on_curr_cell += integrator.GetGlobalWeight(i_node)
-            * std::pow(jump_integral_on_curr_cell[i_node], 2);
+            * std::pow(jump_on_curr_cell[i_node], 2);
       }
     }
     assert(jump_integrals.size() == part().CountLocalCells());
     return jump_integrals;
+  }
+
+  std::vector<Value> GetViscosityValues(
+      std::vector<Value> const &jump_integrals,
+      std::vector<DampingMatrix> const &damping_matrices) const {
+    std::vector<Value> viscosity_values;
+    viscosity_values.reserve(part().CountLocalCells());
+    for (Cell *curr_cell : base_ptr_->part_ptr()->GetLocalCellPointers()) {
+      auto &viscosity_on_curr_cell = viscosity_values.emplace_back();
+      auto &jump_integral_on_curr_cell = jump_integrals.at(curr_cell->id());
+      auto &damping_matrix_on_curr_cell = damping_matrices.at(curr_cell->id());
+      auto const &coeff = curr_cell->polynomial().coeff();
+      assert(coeff.rows() == Cell::K);
+      assert(coeff.cols() == Cell::N);
+      for (int k = 0; k < Cell::K; ++k) {
+        auto const &u_row = coeff.row(k);
+        auto const &u_col = u_row.transpose();
+        Scalar damping_rate = u_row.dot(damping_matrix_on_curr_cell * u_col);
+        viscosity_on_curr_cell[k] = jump_integral_on_curr_cell[k]
+            / (damping_rate * this->TimeScale());
+      }
+    }
+    assert(viscosity_values.size() == part().CountLocalCells());
+    return viscosity_values;
   }
 
  public:  // override virtual methods defined in Base
@@ -177,6 +201,15 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   void SetTime(double t_curr) override {
     base_ptr_->SetTime(t_curr);
   }
+  Scalar TimeScale() const {
+    return time_scale_;
+  }
+  Scalar &TimeScale() {
+    return time_scale_;
+  }
+
+ private:
+  Scalar time_scale_;
 
  protected:  // override virtual methods defined in Base
   void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,

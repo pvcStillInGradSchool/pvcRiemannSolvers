@@ -40,12 +40,16 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   auto spatial = Spatial(&part);
   using Viscosity = mini::spatial::EnergyBasedViscosity<Part>;
   auto viscosity = Viscosity(&spatial);
-  // auto matrices = viscosity.BuildDampingMatrices();
+  auto damping_matrices = viscosity.BuildDampingMatrices();
   std::cout << "[Done] BuildDampingMatrices" << std::endl;
   auto value_jumps = viscosity.BuildValueJumps();
   std::cout << "[Done] BuildValueJumps" << std::endl;
   auto jump_integrals = viscosity.IntegrateJumps(value_jumps);
   std::cout << "[Done] IntegrateJumps" << std::endl;
+  viscosity.TimeScale() = 1e-3;
+  auto viscosity_values = viscosity.GetViscosityValues(
+        jump_integrals, damping_matrices);
+  std::cout << "[Done] GetViscosityValues" << std::endl;
   for (auto &curr_cell : part.GetLocalCells()) {
     auto &value_jumps_on_curr_cell = value_jumps.at(curr_cell.id());
     for (int i_node = 0; i_node < curr_cell.N; ++i_node) {
@@ -64,6 +68,8 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
     for (int k = 0; k < curr_cell.K; k++) {
       EXPECT_LE(0.0, jump_integral_on_curr_cell[k]);
     }
+    auto &viscosity_on_curr_cell = viscosity_values.at(curr_cell.id());
+    std::cout << curr_cell.id() << " " << viscosity_on_curr_cell.transpose() << "\n";
   }
 }
 
