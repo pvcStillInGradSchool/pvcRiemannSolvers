@@ -109,9 +109,20 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
         for (int r = 1; r < Cell::K; ++r) {
-          assert((residual.row(r) - residual.row(0)).squaredNorm() == 0);
+          assert(residual.row(r) == residual.row(0));
         }
       }
+#ifndef NDEBUG
+      Coeff residual; residual.setZero();
+      solution.setOnes();
+      base().AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
+          residual.data());
+      for (int k = 0; k < Cell::K; ++k) {
+        auto const &residual_col = residual.row(k).transpose();
+        auto const &solution_col = solution.row(k).transpose();
+        assert((residual_col - matrix * solution_col).norm() < 1e-10);
+      }
+#endif
       // Scale the damping matrix by local weight over Jacobian:
       assert(cell_ptr->polynomial().kLocal);
       for (int r = 0; r < Cell::N; ++r) {
