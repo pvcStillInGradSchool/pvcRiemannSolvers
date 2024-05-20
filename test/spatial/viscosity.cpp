@@ -42,6 +42,9 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   auto viscosity = Viscosity(&spatial);
   auto damping_matrices = viscosity.BuildDampingMatrices();
   std::cout << "[Done] BuildDampingMatrices" << std::endl;
+  for (auto *cell_ptr : part.GetLocalCellPointers()) {
+    cell_ptr->Approximate(func);
+  }
   auto value_jumps = viscosity.BuildValueJumps();
   std::cout << "[Done] BuildValueJumps" << std::endl;
   auto jump_integrals = viscosity.IntegrateJumps(value_jumps);
