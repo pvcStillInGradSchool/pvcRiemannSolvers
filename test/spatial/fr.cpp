@@ -82,7 +82,7 @@ auto GetResidualColumn(Spatial &spatial, Part &part) {
 }
 TEST_F(TestSpatialFR, CompareResiduals) {
   auto part = Part(case_name, i_core, n_core);
-  InstallPrototype(&part);
+  InstallIntegratorPrototypes(&part);
   /* aproximated by Lagrange basis on Lobatto roots with general correction functions */
   time_begin = MPI_Wtime();
   using General = mini::spatial::fr::General<Part>;

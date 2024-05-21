@@ -24,7 +24,7 @@
 
 template <class Part>
 void Process(Part *part_ptr, const std::string &solution_name) {
-  InstallPrototype(part_ptr);
+  InstallIntegratorPrototypes(part_ptr);
   part_ptr->SetFieldNames({"U1", "U2"});
   double volume = 0.0, area = 0.0;
   int n_cells = 0, n_faces = 0;

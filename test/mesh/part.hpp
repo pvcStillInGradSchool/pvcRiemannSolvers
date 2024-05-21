@@ -60,7 +60,7 @@ using HexahedronIntegrator
     = mini::integrator::Hexahedron<Gx, Gx, Gx>;
 
 template <class Part>
-void InstallPrototype(Part *part_ptr) {
+void InstallIntegratorPrototypes(Part *part_ptr) {
   auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
   part_ptr->InstallPrototype(4,
       std::make_unique<QuadrangleIntegrator>(quadrangle));
