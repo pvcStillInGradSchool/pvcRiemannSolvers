@@ -11,6 +11,8 @@ namespace mini {
 namespace mesh {
 namespace vtk {
 
+namespace {
+
 using Byte = char;
 
 std::string EncodeBase64(Byte const *input_data, std::size_t n_char) {
@@ -88,6 +90,8 @@ void Prepare(const typename Cell::Local locals[], int n, const Cell &cell,
     auto &value = values->emplace_back();
     cell.polynomial().LocalToGlobalAndValue(locals[i], &global, &value);
   }
+}
+
 }
 
 /**
@@ -338,6 +342,14 @@ class Writer {
     return n_nodes;
   }
 
+  /**
+   * @brief Append the data carried by a given Cell to the vectors to be written.
+   * 
+   * @param cell 
+   * @param types 
+   * @param coords 
+   * @param values 
+   */
   static void Prepare(const Cell &cell, std::vector<CellType> *types,
       std::vector<Coord> *coords, std::vector<Value> *values) {
     auto type = GetCellType(cell.CountCorners());
@@ -379,6 +391,13 @@ class Writer {
   static bool LittleEndian() {
     return std::endian::native == std::endian::little;
   }
+
+  /**
+   * @brief Write the solution carried by a given Part to a pvtu file with a given name.
+   * 
+   * @param part 
+   * @param soln_name 
+   */
   static void WriteSolutions(const Part &part, std::string const &soln_name) {
     std::string endianness
         = LittleEndian() ? "\"LittleEndian\"" : "\"BigEndian\"";
@@ -389,6 +408,7 @@ class Writer {
     for (const Cell &cell : part.GetLocalCells()) {
       Prepare(cell, &types, &coords, &values);
     }
+    // create the pvtu file (which refers to vtu files created by rank[0] and other ranks) by rank[0]
     if (part.mpi_rank() == 0) {
       char temp[1024];
       std::snprintf(temp, sizeof(temp), "%s/%s.pvtu",
@@ -414,7 +434,7 @@ class Writer {
       pvtu << "  </PUnstructuredGrid>\n";
       pvtu << "</VTKFile>\n";
     }
-    // write to an ofstream
+    // create the vtu file by each rank
     bool binary = false;
     auto format = binary ? "\"binary\"" : "\"ascii\"";
     auto vtu = part.GetFileStream(soln_name, binary, "vtu");
