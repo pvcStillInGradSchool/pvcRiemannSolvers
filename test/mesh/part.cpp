@@ -59,7 +59,10 @@ void Process(Part *part_ptr, const std::string &solution_name) {
       i_core, n_core, MPI_Wtime() - time_begin);
   part_ptr->GatherSolutions();
   part_ptr->WriteSolutions(solution_name);
-  mini::mesh::vtk::Writer<Part>::WriteSolutions(*part_ptr, solution_name);
+  using VtkWriter = mini::mesh::vtk::Writer<Part>;
+  VtkWriter::AddExtraFieldName("U1+U2");
+  VtkWriter::AddExtraFieldName("U1-U2");
+  VtkWriter::WriteSolutions(*part_ptr, solution_name);
 }
 
 // mpirun -n 4 ./part [<case_name> [<input_dir>]]]

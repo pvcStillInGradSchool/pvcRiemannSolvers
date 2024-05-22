@@ -387,9 +387,20 @@ class Writer {
     }
   }
 
+  static std::vector<std::string> extra_field_names_;
+
  public:
   static bool LittleEndian() {
     return std::endian::native == std::endian::little;
+  }
+
+  /**
+   * @brief Add the name of an field other than the conservative variables carried by Part.
+   * 
+   * @param name 
+   */
+  static void AddExtraFieldName(std::string const &name) {
+    extra_field_names_.emplace_back(name);
   }
 
   /**
@@ -421,6 +432,10 @@ class Writer {
       for (int k = 0; k < Part::kComponents; ++k) {
         pvtu << "      <PDataArray type=\"Float64\" Name=\""
             << part.GetFieldName(k) << "\"/>\n";
+      }
+      for (auto &name : extra_field_names_) {
+        pvtu << "      <PDataArray type=\"Float64\" Name=\""
+            << name << "\"/>\n";
       }
       pvtu << "    </PPointData>\n";
       pvtu << "    <PPoints>\n";
@@ -503,6 +518,9 @@ class Writer {
     vtu << "</VTKFile>\n";
   }
 };
+
+template <typename Part>
+std::vector<std::string> Writer<Part>::extra_field_names_;
 
 }  // namespace vtk
 }  // namespace mesh
