@@ -7,6 +7,7 @@
 
 #include "mini/mesh/cgns.hpp"
 #include "mini/mesh/part.hpp"
+#include "mini/mesh/vtk.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/polynomial/extrapolation.hpp"
 
@@ -36,6 +37,7 @@ class TestSpatialViscosity : public ::testing::Test {
 TEST_F(TestSpatialViscosity, LobattoFR) {
   auto part = Part(case_name, i_core, n_core);
   InstallIntegratorPrototypes(&part);
+  part.SetFieldNames({"U1", "U2"});
   using Spatial = mini::spatial::fr::Lobatto<Part>;
   auto spatial = Spatial(&part);
   using Viscosity = mini::spatial::EnergyBasedViscosity<Part>;
@@ -53,6 +55,21 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   auto viscosity_values = viscosity.GetViscosityValues(
         jump_integrals, damping_matrices);
   std::cout << "[Done] GetViscosityValues" << std::endl;
+  using VtkWriter = mini::mesh::vtk::Writer<Part>;
+  using Cell = typename Part::Cell;
+  VtkWriter::AddExtraField("Energy1", [&](Cell const &cell, Global const &global, Value const &value){
+    return jump_integrals.at(cell.id())[0];
+  });
+  VtkWriter::AddExtraField("Energy2", [&](Cell const &cell, Global const &global, Value const &value){
+    return jump_integrals.at(cell.id())[1];
+  });
+  VtkWriter::AddExtraField("Viscosity1", [&](Cell const &cell, Global const &global, Value const &value){
+    return viscosity_values.at(cell.id())[0];
+  });
+  VtkWriter::AddExtraField("Viscosity2", [&](Cell const &cell, Global const &global, Value const &value){
+    return viscosity_values.at(cell.id())[1];
+  });
+  VtkWriter::WriteSolutions(part, "Viscosity");
   for (auto &curr_cell : part.GetLocalCells()) {
     auto &value_jumps_on_curr_cell = value_jumps.at(curr_cell.id());
     for (int i_node = 0; i_node < curr_cell.N; ++i_node) {
@@ -71,8 +88,6 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
     for (int k = 0; k < curr_cell.K; k++) {
       EXPECT_LE(0.0, jump_integral_on_curr_cell[k]);
     }
-    auto &viscosity_on_curr_cell = viscosity_values.at(curr_cell.id());
-    std::cout << curr_cell.id() << " " << viscosity_on_curr_cell.transpose() << "\n";
   }
 }
 
