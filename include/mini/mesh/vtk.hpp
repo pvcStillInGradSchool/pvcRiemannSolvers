@@ -341,7 +341,8 @@ class Writer {
    * @param values 
    */
   static void Prepare(const Cell &cell, std::vector<CellType> *types,
-      std::vector<Coord> *coords, std::vector<Value> *values) {
+      std::vector<Coord> *coords, std::vector<Value> *values,
+      std::vector<std::vector<Scalar>> *extra_values) {
     auto type = GetCellType(cell.CountCorners());
     types->push_back(type);
     // TODO(PVC): dispatch by virtual functions?
@@ -388,6 +389,11 @@ class Writer {
       auto &global = coords->emplace_back();
       auto &value = values->emplace_back();
       cell.polynomial().LocalToGlobalAndValue(locals[i], &global, &value);
+      // append values of extra fields, if there is any
+      for (int k = 0, K = extra_fields_.size(); k < K; ++k) {
+        auto &func = extra_fields_[k].second;
+        (*extra_values)[k].emplace_back(func(cell, global, value));
+      }
     }
   }
 
@@ -423,8 +429,10 @@ class Writer {
     auto types = std::vector<CellType>();
     auto coords = std::vector<Coord>();
     auto values = std::vector<Value>();
+    auto extra_values = std::vector<std::vector<Scalar>>();
+    extra_values.resize(extra_fields_.size());
     for (const Cell &cell : part.GetLocalCells()) {
-      Prepare(cell, &types, &coords, &values);
+      Prepare(cell, &types, &coords, &values, &extra_values);
     }
     // create the pvtu file (which refers to vtu files created by rank[0] and other ranks) by rank[0]
     if (part.mpi_rank() == 0) {
@@ -466,12 +474,22 @@ class Writer {
     vtu << "    <Piece NumberOfPoints=\"" << coords.size()
         << "\" NumberOfCells=\"" << types.size() << "\">\n";
     vtu << "      <PointData>\n";
-    int K = values[0].size();
-    for (int k = 0; k < K; ++k) {
+    // Write the value of conservative variables carried by each Cell:
+    for (int k = 0; k < Cell::K; ++k) {
       vtu << "        <DataArray type=\"Float64\" Name=\""
           << part.GetFieldName(k) << "\" format=" << format << ">\n";
-      for (auto &f : values) {
-        vtu << f[k] << ' ';
+      for (Value const &value : values) {
+        vtu << value[k] << ' ';
+      }
+      vtu << "\n        </DataArray>\n";
+    }
+    // Write the value of extra fields:
+    for (int k = 0; k < extra_fields_.size(); ++k) {
+      auto &[name, _] = extra_fields_.at(k);
+      vtu << "        <DataArray type=\"Float64\" Name=\""
+          << name << "\" format=" << format << ">\n";
+      for (Scalar value : extra_values.at(k)) {
+        vtu << value << ' ';
       }
       vtu << "\n        </DataArray>\n";
     }
