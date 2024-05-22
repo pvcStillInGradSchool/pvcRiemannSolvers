@@ -60,16 +60,14 @@ void Process(Part *part_ptr, const std::string &solution_name) {
   part_ptr->GatherSolutions();
   part_ptr->WriteSolutions(solution_name);
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
-  VtkWriter::AddExtraFieldName("U1+U2");
   auto plus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
     return value[0] + value[1];
   };
-  VtkWriter::AddExtraFieldFunction(plus);
-  VtkWriter::AddExtraFieldName("U1-U2");
+  VtkWriter::AddExtraField("U1+U2", plus);
   auto minus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
     return value[0] - value[1];
   };
-  VtkWriter::AddExtraFieldFunction(minus);
+  VtkWriter::AddExtraField("U1-U2", minus);
   VtkWriter::WriteSolutions(*part_ptr, solution_name);
 }
 

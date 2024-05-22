@@ -292,6 +292,7 @@ class Writer {
   using Coord = typename Cell::Global;
   using Scalar = typename Cell::Scalar;
   using Function = std::function<Scalar(Cell const &, Coord const &, Value const &)>;
+  using ExtraField = std::pair<std::string, Function>;
 
   static CellType GetCellType(int n_corners) {
     CellType cell_type;
@@ -390,8 +391,7 @@ class Writer {
     }
   }
 
-  static std::vector<std::string> extra_field_names_;
-  static std::vector<Function> extra_field_functions_;
+  static std::vector<ExtraField> extra_fields_;
 
  public:
   static bool LittleEndian() {
@@ -399,23 +399,15 @@ class Writer {
   }
 
   /**
-   * @brief Add the name of an field other than the conservative variables carried by Part.
-   * 
-   * @param name 
-   */
-  static void AddExtraFieldName(std::string const &name) {
-    extra_field_names_.emplace_back(name);
-  }
-
-  /**
-   * @brief Add the function of an field other than the conservative variables carried by Part.
+   * @brief Add an extra field other than the conservative variables carried by Part.
    * 
    * @tparam F 
+   * @param name 
    * @param f 
    */
   template <class F>
-  static void AddExtraFieldFunction(F &&f) {
-    extra_field_functions_.emplace_back(std::forward<F>(f));
+  static void AddExtraField(std::string const &name, F &&f) {
+    extra_fields_.emplace_back(name, std::forward<F>(f));
   }
 
   /**
@@ -448,7 +440,7 @@ class Writer {
         pvtu << "      <PDataArray type=\"Float64\" Name=\""
             << part.GetFieldName(k) << "\"/>\n";
       }
-      for (auto &name : extra_field_names_) {
+      for (auto &[name, func] : extra_fields_) {
         pvtu << "      <PDataArray type=\"Float64\" Name=\""
             << name << "\"/>\n";
       }
@@ -535,11 +527,8 @@ class Writer {
 };
 
 template <typename Part>
-std::vector<std::string> Writer<Part>::extra_field_names_;
-
-template <typename Part>
-std::vector<typename Writer<Part>::Function>
-Writer<Part>::extra_field_functions_;
+std::vector<typename Writer<Part>::ExtraField>
+Writer<Part>::extra_fields_;
 
 }  // namespace vtk
 }  // namespace mesh
