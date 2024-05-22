@@ -4,7 +4,9 @@
 
 #include <bit>
 #include <fstream>
+#include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace mini {
@@ -289,6 +291,7 @@ class Writer {
   using Value = typename Cell::Value;
   using Coord = typename Cell::Global;
   using Scalar = typename Cell::Scalar;
+  using Function = std::function<Scalar(Cell const &, Coord const &, Value const &)>;
 
   static CellType GetCellType(int n_corners) {
     CellType cell_type;
@@ -388,6 +391,7 @@ class Writer {
   }
 
   static std::vector<std::string> extra_field_names_;
+  static std::vector<Function> extra_field_functions_;
 
  public:
   static bool LittleEndian() {
@@ -401,6 +405,17 @@ class Writer {
    */
   static void AddExtraFieldName(std::string const &name) {
     extra_field_names_.emplace_back(name);
+  }
+
+  /**
+   * @brief Add the function of an field other than the conservative variables carried by Part.
+   * 
+   * @tparam F 
+   * @param f 
+   */
+  template <class F>
+  static void AddExtraFieldFunction(F &&f) {
+    extra_field_functions_.emplace_back(std::forward<F>(f));
   }
 
   /**
@@ -521,6 +536,10 @@ class Writer {
 
 template <typename Part>
 std::vector<std::string> Writer<Part>::extra_field_names_;
+
+template <typename Part>
+std::vector<typename Writer<Part>::Function>
+Writer<Part>::extra_field_functions_;
 
 }  // namespace vtk
 }  // namespace mesh
