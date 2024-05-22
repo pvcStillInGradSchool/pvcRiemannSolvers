@@ -13,8 +13,6 @@ namespace mini {
 namespace mesh {
 namespace vtk {
 
-namespace {
-
 using Byte = char;
 
 std::string EncodeBase64(Byte const *input_data, std::size_t n_char) {
@@ -82,19 +80,6 @@ enum class CellType {
   kHexahedron27 = 29,
   kHexahedron64 = 72,
 };
-
-template <typename Cell>
-void Prepare(const typename Cell::Local locals[], int n, const Cell &cell,
-    std::vector<typename Cell::Global> *coords,
-    std::vector<typename Cell::Value> *values) {
-  for (int i = 0; i < n; ++i) {
-    auto &global = coords->emplace_back();
-    auto &value = values->emplace_back();
-    cell.polynomial().LocalToGlobalAndValue(locals[i], &global, &value);
-  }
-}
-
-}
 
 /**
  * @brief Mimic VTK's cells.
@@ -289,6 +274,7 @@ template <typename Part>
 class Writer {
   using Cell = typename Part::Cell;
   using Value = typename Cell::Value;
+  using Local = typename Cell::Local;
   using Coord = typename Cell::Global;
   using Scalar = typename Cell::Scalar;
   using Function = std::function<Scalar(Cell const &, Coord const &, Value const &)>;
@@ -359,35 +345,49 @@ class Writer {
     auto type = GetCellType(cell.CountCorners());
     types->push_back(type);
     // TODO(PVC): dispatch by virtual functions?
+    Local const *locals;
+    int n;
     switch (type) {
     case CellType::kTetrahedron4:
-      vtk::Prepare<Cell>(Tetrahedron4<Coord>::locals, 4, cell, coords, values);
+      locals = &Tetrahedron4<Coord>::locals[0];
+      n = 4;
       break;
     case CellType::kTetrahedron10:
-      vtk::Prepare<Cell>(Tetrahedron10<Coord>::locals, 10, cell, coords,
-          values);
+      locals = &Tetrahedron10<Coord>::locals[0];
+      n = 10;
       break;
     case CellType::kWedge6:
-      vtk::Prepare<Cell>(Wedge6<Coord>::locals, 6, cell, coords, values);
+      locals = &Wedge6<Coord>::locals[0];
+      n = 6;
       break;
     case CellType::kWedge15:
-      vtk::Prepare<Cell>(Wedge15<Coord>::locals, 15, cell, coords, values);
+      locals = &Wedge15<Coord>::locals[0];
+      n = 15;
       break;
     case CellType::kHexahedron8:
-      vtk::Prepare<Cell>(Hexahedron8<Coord>::locals, 8, cell, coords, values);
+      locals = &Hexahedron8<Coord>::locals[0];
+      n = 8;
       break;
     case CellType::kHexahedron20:
-      vtk::Prepare<Cell>(Hexahedron20<Coord>::locals, 20, cell, coords, values);
+      locals = &Hexahedron20<Coord>::locals[0];
+      n = 20;
       break;
     case CellType::kHexahedron27:
-      vtk::Prepare<Cell>(Hexahedron27<Coord>::locals, 27, cell, coords, values);
+      locals = &Hexahedron27<Coord>::locals[0];
+      n = 27;
       break;
     case CellType::kHexahedron64:
-      vtk::Prepare<Cell>(Hexahedron64<Coord>::locals, 64, cell, coords, values);
+      locals = &Hexahedron64<Coord>::locals[0];
+      n = 64;
       break;
     default:
       assert(false);
       break;
+    }
+    for (int i = 0; i < n; ++i) {
+      auto &global = coords->emplace_back();
+      auto &value = values->emplace_back();
+      cell.polynomial().LocalToGlobalAndValue(locals[i], &global, &value);
     }
   }
 
