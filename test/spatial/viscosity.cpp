@@ -59,16 +59,16 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   std::cout << "[Done] GetViscosityValues" << std::endl;
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
   using Cell = typename Part::Cell;
-  VtkWriter::AddExtraField("Energy1", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddExtraField("CellEnergy1", [&](Cell const &cell, Global const &global, Value const &value){
     return jump_integrals.at(cell.id())[0];
   });
-  VtkWriter::AddExtraField("Energy2", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddExtraField("CellEnergy2", [&](Cell const &cell, Global const &global, Value const &value){
     return jump_integrals.at(cell.id())[1];
   });
-  VtkWriter::AddExtraField("Viscosity1", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddExtraField("CellViscosity1", [&](Cell const &cell, Global const &global, Value const &value){
     return viscosity_values.at(cell.id())[0];
   });
-  VtkWriter::AddExtraField("Viscosity2", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddExtraField("CellViscosity2", [&](Cell const &cell, Global const &global, Value const &value){
     return viscosity_values.at(cell.id())[1];
   });
   VtkWriter::WriteSolutions(part, "Viscosity");
