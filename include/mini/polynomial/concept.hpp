@@ -41,6 +41,15 @@ concept General =
     HasGeneralTypes<P> &&
     HasGeneralMethods<P, typename P::Global>;
 
+template <typename P>
+concept Modal = requires(P p) {
+  requires General<P>;
+
+  { p.projection() };
+
+  { p.average() } -> std::same_as<typename P::Value>;
+};
+
 }  // namespace polynomial
 }  // namespace mini
 

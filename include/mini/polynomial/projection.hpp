@@ -212,6 +212,7 @@ class ProjectionWrapper {
   static constexpr int N = Base::N;
   static constexpr int K = Base::K;
   static constexpr int P = Base::P;
+  static constexpr int D = Base::D;
   using Integrator = typename Base::Integrator;
   using Local = typename Base::Local;
   using Global = typename Base::Global;
@@ -242,6 +243,10 @@ class ProjectionWrapper {
   ProjectionWrapper(ProjectionWrapper &&that) noexcept = default;
   ~ProjectionWrapper() noexcept = default;
 
+  ProjectionWrapper const &projection() const {
+    return *this;
+  }
+
   Basis const &basis() const {
     return *basis_ptr_;
   }
@@ -266,6 +271,10 @@ class ProjectionWrapper {
   Mat1xN GlobalToBasisValues(Global const &global) const {
     return basis()(global);
   }
+  Value GlobalToValue(Global const &global) const {
+    return coeff() * GlobalToBasisValues(global);
+  }
+
   template <typename Callable>
   void Approximate(Callable &&func) {
     Project(this, std::forward<Callable>(func));

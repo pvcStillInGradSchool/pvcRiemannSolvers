@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "mini/basis/taylor.hpp"
+#include "mini/polynomial/concept.hpp"
 
 namespace mini {
 namespace limiter {
@@ -96,7 +97,7 @@ class Smoothness {
   }
 };
 
-template <typename Projection>
+template <mini::polynomial::Modal Projection>
 auto GetSmoothness(const Projection &proj) {
   using Coeff = typename Projection::Coeff;
   using Global = typename Projection::Global;
@@ -116,6 +117,7 @@ auto GetSmoothness(const Projection &proj) {
 }
 
 template <typename Cell>
+    requires mini::polynomial::Modal<typename Cell::Polynomial>
 class Lazy {
  public:
   using Scalar = typename Cell::Scalar;
@@ -215,6 +217,7 @@ class Lazy {
 };
 
 template <typename Cell>
+    requires mini::polynomial::Modal<typename Cell::Polynomial>
 class Eigen {
  public:
   using Face = typename Cell::Face;
@@ -359,6 +362,7 @@ class Eigen {
 };
 
 template <typename Cell>
+    requires mini::polynomial::Modal<typename Cell::Polynomial>
 class Dummy {
  public:
   using Scalar = typename Cell::Scalar;
