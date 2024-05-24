@@ -33,7 +33,7 @@ void Project(Projection *proj, Callable &&func) {
   using Return = std::invoke_result_t<Callable, Global>;
   static_assert(std::is_same_v<Return, Value> || std::is_scalar_v<Return>);
   proj->coeff() = integrator::Integrate([&](Global const &xyz) {
-    auto f_col = std::forward<Callable>(func)(xyz);
+    auto f_col = func(xyz);
     Mat1xN b_row = proj->GlobalToBasisValues(xyz);
     Coeff prod = f_col * b_row;
     return prod;
@@ -110,9 +110,7 @@ class Projection {
   Value GlobalToValue(Global const &global) const {
     return coeff_ * basis_(global);
   }
-  Value operator()(Global const &global) const {
-    return GlobalToValue(global);
-  }
+
   /**
    * @brief Get the value of \f$ u(x,y,z) \f$ at a Integratorian point.
    * 

@@ -164,7 +164,10 @@ class Lazy {
       assert(adj_cell);
       auto &adj_proj = old_projections_.emplace_back(my_projection.basis());
       assert(&(adj_proj.basis()) == &(my_projection.basis()));
-      adj_proj.Approximate(adj_cell->polynomial().projection());
+      auto adj_func = [&adj_cell](Global const &global) {
+        return adj_cell->polynomial().GlobalToValue(global);
+      };
+      adj_proj.Approximate(adj_func);
       adj_proj += my_average - adj_proj.average();
       if (verbose_) {
         std::cout << "\n  adj smoothness[" << adj_cell->metis_id << "] = ";
@@ -284,7 +287,10 @@ class Eigen {
     auto my_average = my_projection.average();
     for (auto *adj_cell : my_cell_->adj_cells_) {
       auto &adj_proj = old_projections_.emplace_back(my_projection.basis());
-      adj_proj.Approximate(adj_cell->polynomial().projection());
+      auto adj_func = [&adj_cell](Global const &global) {
+        return adj_cell->polynomial().GlobalToValue(global);
+      };
+      adj_proj.Approximate(adj_func);
       adj_proj += my_average - adj_proj.average();
     }
     old_projections_.emplace_back(my_projection);

@@ -123,7 +123,11 @@ class Extrapolation : public Interpolation {
     return projection_.average();
   }
 
-  Value operator()(Global const &global) const {
+  /**
+   * @brief A wrapper of `projection().GlobalToValue()`.
+   * 
+   */
+  Value GlobalToValue(Global const &global) const {
     return projection_.GlobalToValue(global);
   }
 

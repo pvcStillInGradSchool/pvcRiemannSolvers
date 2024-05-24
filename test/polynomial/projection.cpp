@@ -41,8 +41,8 @@ TEST_F(TestProjection, ScalarFunction) {
   projection.Approximate(func);
   static_assert(ProjFunc::K == 1);
   static_assert(ProjFunc::N == 10);
-  EXPECT_NEAR(projection({0, 0, 0})[0], 0.0, 1e-14);
-  EXPECT_NEAR(projection({0.3, 0.4, 0.5})[0], 0.5, 1e-14);
+  EXPECT_NEAR(projection.GlobalToValue({0, 0, 0})[0], 0.0, 1e-14);
+  EXPECT_NEAR(projection.GlobalToValue({0.3, 0.4, 0.5})[0], 0.5, 1e-14);
   auto integral_f = mini::integrator::Integrate(func, integrator_);
   auto integral_1 = mini::integrator::Integrate([](auto const &){
     return 1.0;
@@ -61,7 +61,7 @@ TEST_F(TestProjection, VectorFunction) {
   projection.Approximate(func);
   static_assert(ProjFunc::K == 10);
   static_assert(ProjFunc::N == 10);
-  auto v_actual = projection({0.3, 0.4, 0.5});
+  auto v_actual = projection.GlobalToValue({0.3, 0.4, 0.5});
   auto v_expect = Taylor::GetValue({0.3, 0.4, 0.5});
   Value res = v_actual - v_expect;
   EXPECT_NEAR(res.norm(), 0.0, 1e-14);
