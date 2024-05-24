@@ -16,6 +16,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "mini/polynomial/concept.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/riemann/concept.hpp"
 #include "mini/spatial/fem.hpp"
@@ -31,6 +32,7 @@ namespace fr {
  * @tparam Part 
  */
 template <typename Part>
+    requires mini::polynomial::Nodal<typename Part::Polynomial>
 class General : public spatial::FiniteElement<Part> {
  public:
   using Base = spatial::FiniteElement<Part>;

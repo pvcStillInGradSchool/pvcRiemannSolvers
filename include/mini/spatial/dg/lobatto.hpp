@@ -16,6 +16,7 @@
 #include <unordered_map>
 
 #include "mini/spatial/dg/general.hpp"
+#include "mini/polynomial/concept.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 
 namespace mini {
@@ -28,6 +29,7 @@ namespace dg {
  * @tparam Part 
  */
 template <typename Part>
+    requires mini::polynomial::Nodal<typename Part::Polynomial>
 class Lobatto : public General<Part> {
  public:
   using Base = General<Part>;

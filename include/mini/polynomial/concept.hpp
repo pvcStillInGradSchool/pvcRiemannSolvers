@@ -50,6 +50,15 @@ concept Modal = requires(P p) {
   { p.average() } -> std::same_as<typename P::Value>;
 };
 
+template <typename P>
+concept Nodal = requires(P p) {
+  requires General<P>;
+
+  { p.interpolation() };
+
+  { p.GetValue(0) } -> std::same_as<typename P::Value>;
+};
+
 }  // namespace polynomial
 }  // namespace mini
 
