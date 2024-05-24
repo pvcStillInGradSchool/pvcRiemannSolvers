@@ -30,6 +30,7 @@
 #include "mini/coordinate/cell.hpp"
 #include "mini/integrator/cell.hpp"
 #include "mini/riemann/concept.hpp"
+#include "mini/polynomial/concept.hpp"
 
 namespace mini {
 namespace mesh {
@@ -88,10 +89,12 @@ struct Coordinates {
   }
 };
 
-template <std::integral Int, class Riemann, class Polynomial>
+template <std::integral Int, class Riemann,
+    mini::polynomial::General Polynomial>
 struct Cell;
 
-template <std::integral Int, class R, class P>
+template <std::integral Int, class R,
+    mini::polynomial::General P>
 struct Face {
   static_assert(mini::riemann::Convective<R>);
   using Riemann = R;
@@ -172,7 +175,8 @@ struct Face {
   }
 };
 
-template <std::integral Int, class Riem, class Poly>
+template <std::integral Int, class Riem,
+    mini::polynomial::General Poly>
 struct Cell {
   using Riemann = Riem;
   using Polynomial = Poly;
@@ -280,7 +284,8 @@ struct Cell {
  * @tparam Riemann  Type of the Riemann solver on each Face.
  * @tparam Polynomial  Type of the approximation on each Cell.
  */
-template <std::integral Int, class Riemann, class Polynomial>
+template <std::integral Int, class Riemann,
+    mini::polynomial::General Polynomial>
 class Section {
   using Cell = part::Cell<Int, Riemann, Polynomial>;
   using Scalar = typename Cell::Scalar;
@@ -388,7 +393,8 @@ class Section {
  * @tparam R  Type of the Riemann solver on each Face.
  * @tparam P  Type of the approximation on each Cell.
  */
-template <std::integral Int, class R, class P>
+template <std::integral Int, class R,
+    mini::polynomial::General P>
 class Part {
  public:
   using Index = Int;
@@ -1468,10 +1474,12 @@ class Part {
         std::ios::out | (binary ? (std::ios::binary) : std::ios::out));
   }
 };
-template <std::integral Int, class Riemann, class Polynomial>
+template <std::integral Int, class Riemann,
+    mini::polynomial::General Polynomial>
 MPI_Datatype const Part<Int, Riemann, Polynomial>::kMpiIntType
     = sizeof(Int) == 8 ? MPI_LONG : MPI_INT;
-template <std::integral Int, class Riemann, class Polynomial>
+template <std::integral Int, class Riemann,
+    mini::polynomial::General Polynomial>
 MPI_Datatype const Part<Int, Riemann, Polynomial>::kMpiRealType
     = sizeof(Scalar) == 8 ? MPI_DOUBLE : MPI_FLOAT;
 
