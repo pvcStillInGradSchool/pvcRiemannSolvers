@@ -67,7 +67,7 @@ void InstallIntegratorPrototypes(Part *part_ptr) {
   auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
   part_ptr->InstallPrototype(8,
       std::make_unique<HexahedronIntegrator>(hexahedron));
-  part_ptr->ReadCgnsFile();
+  part_ptr->BuildGeometry();
 }
 
 int Main(int argc, char* argv[]) {

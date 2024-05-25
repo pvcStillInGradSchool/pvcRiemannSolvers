@@ -439,7 +439,13 @@ class Part {
         rank_(rank), size_(size) {
   }
 
-  void ReadCgnsFile() {
+  /**
+   * @brief Build the geometry by reading the mesh from the underlying CGNS file.
+   * 
+   * It should be called after calling `Part::InstallPrototype`.
+   * 
+   */
+  void BuildGeometry() {
     int i_file;
     if (cgp_open(cgns_file_.c_str(), CG_MODE_READ, &i_file)) {
       cgp_error_exit();

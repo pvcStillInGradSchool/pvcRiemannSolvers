@@ -230,7 +230,7 @@ TEST_F(TestWenoLimiters, For3dEulerEquations) {
       mini::integrator::Quadrangle<3, Gx, Gx>>(quadrangle));
   part.InstallPrototype(8, std::make_unique<
       mini::integrator::Hexahedron<Gx, Gx, Gx>>(hexahedron));
-  part.ReadCgnsFile();
+  part.BuildGeometry();
   // project the function
   auto func = [](Coord const &xyz) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];

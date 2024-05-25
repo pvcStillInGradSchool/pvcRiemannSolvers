@@ -69,6 +69,13 @@ class Element {
   void SetGlobal(int i, Global const &global_i) {
     this->_GetGlobal(i) = global_i;
   }
+
+  /**
+   * @brief Update the center of this Element.
+   * 
+   * It should be called after calling any non-`const` method.
+   * 
+   */
   virtual void BuildCenter() = 0;
 
  protected:
