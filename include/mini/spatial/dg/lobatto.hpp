@@ -150,10 +150,6 @@ class Lobatto : public General<Part> {
       cell.polynomial().AddCoeffTo(prod, data);
     }
   }
-  void AddFluxDivergence(CellToFlux cell_to_flux,
-      Column *residual) const override {
-    return this->Base::AddFluxDivergence(cell_to_flux, residual);
-  }
   void AddFluxOnLocalFaces(Column *residual) const override {
     for (const Face &face : this->part().GetLocalFaces()) {
       const auto &integrator = face.integrator();

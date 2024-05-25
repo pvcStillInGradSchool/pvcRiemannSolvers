@@ -60,13 +60,6 @@ class General : public spatial::FiniteElement<Part> {
       cell.polynomial().AddCoeffTo(prod, data);
     }
   }
-  void AddFluxDivergence(CellToFlux cell_to_flux,
-      Column *residual) const override {
-    // Integrate the dot-product of flux and basis gradient, if there is any.
-    if (Part::kDegrees > 0) {
-      this->Base::AddFluxDivergence(cell_to_flux, residual);
-    }
-  }
   void AddFluxOnLocalFaces(Column *residual) const override {
     for (const Face &face : this->part().GetLocalFaces()) {
       const auto &integrator = face.integrator();

@@ -48,6 +48,7 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
  private:
   Base *base_ptr_;
 
+  // TODO(PVC): avoid overriding Base::Riemann
   using Diffusion = mini::riemann::diffusive::Isotropic<Scalar, Cell::K>;
   using DiffusionRiemann = mini::riemann::diffusive::DirectDG<Diffusion>;
 
@@ -226,10 +227,6 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
   void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
       Scalar *data) const override {
     base().AddFluxDivergence(cell_to_flux, cell, data);
-  }
-  void AddFluxDivergence(CellToFlux cell_to_flux,
-      Column *residual) const override {
-    base().AddFluxDivergence(cell_to_flux, residual);
   }
   void AddFluxOnGhostFaces(Column *residual) const override {
     base().AddFluxOnGhostFaces(residual);

@@ -208,12 +208,14 @@ int main(int argc, char* argv[]) {
         : Spatial(part_ptr) {
     }
 
-    void AddFluxDivergence(Column *residual) const {
+    void AddFluxDivergenceOnLocalCells(Column *residual) const {
       residual->setZero();
       CellToFlux cell_to_flux = &FEM::Base::GetFluxMatrix;
-      this->SEM::AddFluxDivergence(cell_to_flux, residual);
+      dynamic_cast<SEM const *>(this)->AddFluxDivergenceOnLocalCells(
+          cell_to_flux, residual);
       *residual *= -1.0;
-      this->FEM::AddFluxDivergence(cell_to_flux, residual);
+      dynamic_cast<FEM const *>(this)->AddFluxDivergenceOnLocalCells(
+          cell_to_flux, residual);
     }
     void AddFluxOnLocalFaces(Column *residual) const override {
       residual->setZero();
@@ -274,7 +276,7 @@ int main(int argc, char* argv[]) {
   test.SetSupersonicOutlet("4_S_15");  // Gap
 
   time_begin = MPI_Wtime();
-  test.AddFluxDivergence(&column);
+  test.AddFluxDivergenceOnLocalCells(&column);
   std::printf("AddFluxDivergence.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);

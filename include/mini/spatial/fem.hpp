@@ -178,7 +178,7 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
     this->part_ptr_->ShareGhostCellCoeffs();
     auto residual = Column(cell_data_size_);
     residual.setZero();
-    this->AddFluxDivergence(&GetFluxMatrix, &residual);
+    this->AddFluxDivergenceOnLocalCells(&GetFluxMatrix, &residual);
     this->AddFluxOnLocalFaces(&residual);
     this->AddFluxOnBoundaries(&residual);
     this->part_ptr_->UpdateGhostCellCoeffs();
@@ -242,20 +242,26 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   /**
    * @brief Add the flux divergence to the residual column of the given Cell.
    * 
-   * @param cell_to_flux the pointer of a function that gets the FluxMatrix on a given Integratorian point of a Cell
+   * @param cell_to_flux the pointer to a function that gets the FluxMatrix on a given integratorian point of a Cell
    * @param cell the Cell to be processed
    * @param data the residual column of the given Cell
    */
   virtual void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
       Scalar *data) const = 0;
+
   /**
    * @brief Add the flux divergence to the residual column of the given Part.
    * 
-   * @param cell_to_flux the pointer of a function that gets the FluxMatrix on a given Integratorian point of a Cell
-   * @param data the residual column of the given Part
+   * It delegates the work to the pure virtual method FiniteElement::AddFluxDivergence, which must be implemented in a concrete class.
+   * 
+   * @param cell_to_flux the pointer to a function that gets the FluxMatrix on a given integratorian point of a Cell
+   * @param residual the residual column of the given Part
    */
-  virtual void AddFluxDivergence(CellToFlux cell_to_flux,
+  void AddFluxDivergenceOnLocalCells(CellToFlux cell_to_flux,
       Column *residual) const {
+    if (Part::kDegrees == 0) {
+      return;
+    }
     for (const Cell &cell : part().GetLocalCells()) {
       auto *data = this->AddCellDataOffset(residual, cell.id());
       this->AddFluxDivergence(cell_to_flux, cell, data);
