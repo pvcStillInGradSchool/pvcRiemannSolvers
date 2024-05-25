@@ -246,10 +246,9 @@ class General : public spatial::FiniteElement<Part> {
       Polynomial::MinusValue(value, data, q);
     }
   }
-  template <typename Cache>
   static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
-      const Polynomial &holder_polynomial, Cache const &holder_cache,
-      const Polynomial &sharer_polynomial, Cache const &sharer_cache)
+      const Polynomial &holder_polynomial, FluxPointCache const &holder_cache,
+      const Polynomial &sharer_polynomial, FluxPointCache const &sharer_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Riemann const &riemann = face.riemann(f);
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
@@ -262,10 +261,9 @@ class General : public spatial::FiniteElement<Part> {
     f_sharer -= Riemann::GetFluxMatrix(u_sharer) * sharer_cache.normal;
     return { f_holder, f_sharer };
   }
-  template <typename Cache>
   static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
-      const Polynomial &holder_polynomial, Cache const &holder_cache,
-      const Polynomial &sharer_polynomial, Cache const &sharer_cache)
+      const Polynomial &holder_polynomial, FluxPointCache const &holder_cache,
+      const Polynomial &sharer_polynomial, FluxPointCache const &sharer_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Riemann const &riemann = face.riemann(f);
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);

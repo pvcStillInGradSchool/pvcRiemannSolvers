@@ -55,13 +55,11 @@ class Lobatto : public General<Part> {
   static constexpr int kFaceQ = kLineQ * kLineQ;
   static constexpr int kCellQ = kLineQ * kFaceQ;
 
-  struct FluxPointCache {
-    Global normal;  // normal_flux = normal * flux_matrix
-    Scalar scale;  // riemann_flux_local = scale * riemann_flux_global
+  struct LineCache : Base::FluxPointCache {
     Scalar g_prime;
-    int ijk;
   };
-  using FaceCache = std::array<FluxPointCache, kFaceQ>;
+
+  using FaceCache = std::array<LineCache, kFaceQ>;
   std::vector<FaceCache> holder_cache_;
   std::vector<FaceCache> sharer_cache_;
 
