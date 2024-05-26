@@ -29,7 +29,6 @@
 #include "mini/integrator/face.hpp"
 #include "mini/coordinate/cell.hpp"
 #include "mini/integrator/cell.hpp"
-#include "mini/riemann/concept.hpp"
 #include "mini/polynomial/concept.hpp"
 
 namespace mini {
@@ -89,30 +88,25 @@ struct Coordinates {
   }
 };
 
-template <std::integral Int, class Riemann,
-    mini::polynomial::General Polynomial>
+template <std::integral Int, mini::polynomial::General Polynomial>
 struct Cell;
 
-template <std::integral Int, class R,
-    mini::polynomial::General P>
+template <std::integral Int, mini::polynomial::General Polynomial>
 struct Face {
-  static_assert(mini::riemann::Convective<R>);
-  using Riemann = R;
-  using Scalar = typename Riemann::Scalar;
-  constexpr static int kComponents = Riemann::kComponents;
-  constexpr static int kPhysDim = Riemann::kDimensions;
+  using Scalar = typename Polynomial::Scalar;
+  constexpr static int kComponents = Polynomial::K;
+  constexpr static int kPhysDim = Polynomial::D;
   using Integrator = integrator::Face<Scalar, kPhysDim>;
   using IntegratorUptr = std::unique_ptr<Integrator>;
   using Coordinate = coordinate::Face<Scalar, kPhysDim>;
   using CoordinateUptr = std::unique_ptr<Coordinate>;
-  using Cell = part::Cell<Int, Riemann, P>;
+  using Cell = part::Cell<Int, Polynomial>;
   using Global = typename Cell::Global;
 
   CoordinateUptr coordinate_ptr_;
   IntegratorUptr integrator_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
-  std::vector<Riemann> riemann_;
   Int id_{-1};
 
   Face(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&integrator_ptr,
@@ -121,12 +115,8 @@ struct Face {
         integrator_ptr_(std::move(integrator_ptr)),
         holder_(holder), sharer_(sharer),
         holder_to_sharer_(-holder->center()),
-        riemann_(integrator_ptr_->CountPoints()),
         id_(id) {
     holder_to_sharer_ += sharer ? sharer->center() : center();
-    for (int i = 0, n = riemann_.size(); i < n; ++i) {
-      riemann_[i].Rotate(integrator().GetNormalFrame(i));
-    }
   }
   Face(const Face &) = delete;
   Face &operator=(const Face &) = delete;
@@ -141,9 +131,6 @@ struct Face {
   Coordinate const &coordinate() const {
     assert(coordinate_ptr_);
     return *coordinate_ptr_;
-  }
-  Riemann const &riemann(int i) const {
-    return riemann_[i];
   }
   Global center() const {
     return integrator().center();
@@ -175,14 +162,11 @@ struct Face {
   }
 };
 
-template <std::integral Int, class Riem,
-    mini::polynomial::General Poly>
+template <std::integral Int, mini::polynomial::General Poly>
 struct Cell {
-  using Riemann = Riem;
   using Polynomial = Poly;
   using PolynomialUptr = std::unique_ptr<Polynomial>;
-  using FluxMatrix = typename Riemann::FluxMatrix;
-  using Scalar = typename Riemann::Scalar;
+  using Scalar = typename Polynomial::Scalar;
   using Integrator = integrator::Cell<Scalar>;
   using IntegratorUptr = std::unique_ptr<Integrator>;
   using Coordinate = coordinate::Cell<Scalar>;
@@ -194,11 +178,10 @@ struct Cell {
   static constexpr int K = Polynomial::K;  // number of functions
   static constexpr int N = Polynomial::N;  // size of the basis
   static constexpr int P = Polynomial::P;  // degree of the basis
-  static constexpr int D = 3;  // dimension of the physical space
-  static_assert(Riemann::kComponents == Polynomial::K);
-  static_assert(Riemann::kDimensions == D);
+  static constexpr int D = Polynomial::D;  // dimension of the physical space
+
   static constexpr int kFields = K * N;
-  using Face = part::Face<Int, Riemann, Polynomial>;
+  using Face = part::Face<Int, Polynomial>;
 
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
@@ -281,13 +264,11 @@ struct Cell {
  * @brief Mimic CGNS's `Elements_t`, but partitioned.
  * 
  * @tparam Int  Type of integers.
- * @tparam Riemann  Type of the Riemann solver on each Face.
  * @tparam Polynomial  Type of the approximation on each Cell.
  */
-template <std::integral Int, class Riemann,
-    mini::polynomial::General Polynomial>
+template <std::integral Int, mini::polynomial::General Polynomial>
 class Section {
-  using Cell = part::Cell<Int, Riemann, Polynomial>;
+  using Cell = part::Cell<Int, Polynomial>;
   using Scalar = typename Cell::Scalar;
 
   cgns::ShiftedVector<Cell> cells_;
@@ -390,24 +371,21 @@ class Section {
  * @brief Mimic CGNS's `Base_t`, but partitioned.
  * 
  * @tparam Int  Type of integers.
- * @tparam R  Type of the Riemann solver on each Face.
- * @tparam P  Type of the approximation on each Cell.
+ * @tparam Poly  Type of the approximation on each Cell.
  */
-template <std::integral Int, class R,
-    mini::polynomial::General P>
+template <std::integral Int, mini::polynomial::General Poly>
 class Part {
  public:
   using Index = Int;
-  using Riemann = R;
-  using Polynomial = P;
-  using Face = part::Face<Int, Riemann, Polynomial>;
-  using Cell = part::Cell<Int, Riemann, Polynomial>;
-  using Scalar = typename Riemann::Scalar;
+  using Polynomial = Poly;
+  using Face = part::Face<Int, Polynomial>;
+  using Cell = part::Cell<Int, Polynomial>;
+  using Scalar = typename Cell::Scalar;
   using Global = typename Cell::Global;
   using Value = typename Cell::Value;
   constexpr static int kDegrees = Polynomial::P;
-  constexpr static int kComponents = Riemann::kComponents;
-  constexpr static int kPhysDim = Riemann::kDimensions;
+  constexpr static int kComponents = Polynomial::K;
+  constexpr static int kPhysDim = Polynomial::D;
 
  private:
   struct Connectivity {
@@ -417,11 +395,10 @@ class Part {
     ElementType_t type;
     char name[33];
   };
-  using Mat3x1 = algebra::Matrix<Scalar, 3, 1>;
   using NodeIndex = cgns::NodeIndex<Int>;
   using CellIndex = cgns::CellIndex<Int>;
   using Coordinates = part::Coordinates<Int, Scalar>;
-  using Section = part::Section<Int, R, P>;
+  using Section = part::Section<Int, Poly>;
   static constexpr int kLineWidth = 128;
   static constexpr int kFields = Section::kFields;
   static constexpr int i_base = 1;
@@ -1320,8 +1297,8 @@ class Part {
  private:
   std::map<Int, Coordinates>
       local_nodes_;  // [i_zone] -> a Coordinates obj
-  std::unordered_map<Int, std::unordered_map<Int, Mat3x1>>
-      ghost_nodes_;  // [i_zone][i_node] -> a Mat3x1 obj
+  std::unordered_map<Int, std::unordered_map<Int, Global>>
+      ghost_nodes_;  // [i_zone][i_node] -> a Global obj
   std::unordered_map<Int, NodeIndex>
       m_to_node_index_;  // [m_node] -> a NodeIndex obj
   std::unordered_map<Int, CellIndex>
@@ -1450,8 +1427,8 @@ class Part {
     }
   }
 
-  Mat3x1 GetCoord(int i_zone, int i_node) const {
-    Mat3x1 coord;
+  Global GetCoord(int i_zone, int i_node) const {
+    Global coord;
     auto iter_zone = local_nodes_.find(i_zone);
     if (iter_zone != local_nodes_.end() && iter_zone->second.has(i_node)) {
       coord[0] = iter_zone->second.x_[i_node];
@@ -1480,13 +1457,13 @@ class Part {
         std::ios::out | (binary ? (std::ios::binary) : std::ios::out));
   }
 };
-template <std::integral Int, class Riemann,
-    mini::polynomial::General Polynomial>
-MPI_Datatype const Part<Int, Riemann, Polynomial>::kMpiIntType
+
+template <std::integral Int, mini::polynomial::General Polynomial>
+MPI_Datatype const Part<Int, Polynomial>::kMpiIntType
     = sizeof(Int) == 8 ? MPI_LONG : MPI_INT;
-template <std::integral Int, class Riemann,
-    mini::polynomial::General Polynomial>
-MPI_Datatype const Part<Int, Riemann, Polynomial>::kMpiRealType
+
+template <std::integral Int, mini::polynomial::General Polynomial>
+MPI_Datatype const Part<Int, Polynomial>::kMpiRealType
     = sizeof(Scalar) == 8 ? MPI_DOUBLE : MPI_FLOAT;
 
 }  // namespace part

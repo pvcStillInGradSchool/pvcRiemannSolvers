@@ -14,7 +14,6 @@
 #include "mini/mesh/vtk.hpp"
 #include "mini/limiter/weno.hpp"
 #include "mini/limiter/reconstruct.hpp"
-#include "mini/riemann/rotated/multiple.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/polynomial/extrapolation.hpp"
@@ -105,7 +104,7 @@ int main(int argc, char* argv[]) {
       i_core, n_core, MPI_Wtime() - time_begin);
   using Projection = mini::polynomial::Projection<
       Scalar, kDimensions, kDegrees, kComponents>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
   auto part = Part(case_name, i_core, n_core);
   Process(&part, "Projection");
 }
@@ -115,7 +114,7 @@ int main(int argc, char* argv[]) {
       i_core, n_core, MPI_Wtime() - time_begin);
   using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
   using Extrapolation = mini::polynomial::Extrapolation<Interpolation>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Extrapolation>;
+  using Part = mini::mesh::part::Part<cgsize_t, Extrapolation>;
   auto part = Part(case_name, i_core, n_core);
   Process(&part, "Interpolation");
 }

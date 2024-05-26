@@ -2,10 +2,7 @@
 #ifndef TEST_MESH_PART_HPP_
 #define TEST_MESH_PART_HPP_
 
-#include "mini/riemann/concept.hpp"
-#include "mini/riemann/rotated/multiple.hpp"
-#include "mini/riemann/diffusive/linear.hpp"
-#include "mini/riemann/diffusive/direct_dg.hpp"
+#include "mini/algebra/eigen.hpp"
 #include "mini/integrator/lobatto.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 #include "mini/coordinate/hexahedron.hpp"
@@ -19,26 +16,8 @@
 constexpr int kComponents{2}, kDimensions{3}, kDegrees{2};
 
 using Scalar = double;
-using Convection = mini::
-    riemann::rotated::Multiple<Scalar, kComponents, kDimensions>;
-using Diffusion = mini::riemann::diffusive::DirectDG<
-    mini::riemann::diffusive::Isotropic<Scalar, kComponents>
->;
-using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
-
-void ResetRiemann() {
-  using Jacobian = typename Riemann::Jacobian;
-  Riemann::SetConvectionCoefficient(
-    Jacobian{ {3., 0.}, {0., 4.} },
-    Jacobian{ {5., 0.}, {0., 6.} },
-    Jacobian{ {7., 0.}, {0., 8.} }
-  );
-  Riemann::SetDiffusionCoefficient(1.0);
-  Riemann::SetBetaValues(2.0, 1.0 / 12);
-}
-
-using Coord = typename Riemann::Vector;
-using Value = typename Riemann::Conservative;
+using Value = mini::algebra::Vector<Scalar, kComponents>;
+using Coord = mini::algebra::Vector<Scalar, kDimensions>;
 
 Value func(const Coord& xyz) {
   auto r = std::hypot(xyz[0] - 2, xyz[1] - 0.5);
