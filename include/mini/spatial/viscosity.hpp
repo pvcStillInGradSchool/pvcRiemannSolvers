@@ -14,6 +14,9 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include <fstream>
+#include <iomanip>
+
 #include "mini/algebra/eigen.hpp"
 #include "mini/riemann/concept.hpp"
 #include "mini/temporal/ode.hpp"
@@ -194,6 +197,10 @@ class EnergyBasedViscosity : public FiniteElement<Part> {
         Scalar damping_rate = u_row.dot(damping_matrix_on_curr_cell * u_col);
         viscosity_on_curr_cell[k] = jump_integral_on_curr_cell[k]
             / (damping_rate * this->TimeScale());
+      }
+      if (curr_cell->id() == 0) {
+        std::fstream log{ "damping" + std::to_string(part().mpi_rank()) + ".txt", log.out };
+        log << std::scientific << std::setprecision(2) << damping_matrix_on_curr_cell << "\n";
       }
     }
     assert(viscosity_values.size() == part().CountLocalCells());
