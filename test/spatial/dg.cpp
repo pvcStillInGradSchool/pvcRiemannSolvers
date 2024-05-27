@@ -13,7 +13,6 @@
 #include "mini/mesh/vtk.hpp"
 #include "mini/limiter/weno.hpp"
 #include "mini/limiter/reconstruct.hpp"
-#include "mini/riemann/rotated/multiple.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/spatial/fem.hpp"
@@ -23,6 +22,7 @@
 #include "mini/input/path.hpp"  // defines PROJECT_BINARY_DIR
 
 #include "test/mesh/part.hpp"
+#include "test/spatial/riemann.hpp"
 
 mini::temporal::Euler<Scalar> temporal;
 double t_curr = 1.5, dt = 1e-3;
@@ -51,20 +51,21 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(MPI_COMM_WORLD, &i_core);
   cgp_mpi_comm(MPI_COMM_WORLD);
 
-  ResetRiemann();
+  test::spatial::ResetRiemann();
 
   /* aproximated by Projection on OrthoNormal basis */
 {
   time_begin = MPI_Wtime();
   using Projection = mini::polynomial::Projection<
       Scalar, kDimensions, kDegrees, kComponents>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
   auto part = Part(case_name, i_core, n_core);
   InstallIntegratorPrototypes(&part);
   using Cell = typename Part::Cell;
   using Limiter = mini::limiter::weno::Lazy<Cell>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
-  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Limiter>;
+  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part,
+      test::spatial::Riemann, Limiter>;
   auto spatial = Spatial(&part, limiter);
   spatial.SetSmartBoundary("4_S_27", moving);  // Top
   spatial.SetSmartBoundary("4_S_31", moving);  // Left
@@ -103,8 +104,8 @@ int main(int argc, char* argv[]) {
   /* Check equivalence between local and global formulation. */
 {
   using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
-  using Spatial = mini::spatial::dg::Lobatto<Part>;
+  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
+  using Spatial = mini::spatial::dg::Lobatto<Part, test::spatial::Riemann>;
   auto part = Part(case_name, i_core, n_core);
   InstallIntegratorPrototypes(&part);
   auto spatial = Spatial(&part);
@@ -150,8 +151,8 @@ int main(int argc, char* argv[]) {
   MPI_Barrier(MPI_COMM_WORLD);
 }
   using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
-  using Spatial = mini::spatial::dg::Lobatto<Part>;
+  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
+  using Spatial = mini::spatial::dg::Lobatto<Part, test::spatial::Riemann>;
   auto part = Part(case_name, i_core, n_core);
   InstallIntegratorPrototypes(&part);
   auto spatial = Spatial(&part);

@@ -9,6 +9,7 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 
 #include "mini/riemann/concept.hpp"
@@ -35,10 +36,10 @@ class DummySource {
   }
 };
 
-template <typename Part>
+template <typename Part, mini::riemann::Convective Riem>
 class FiniteElement : public temporal::System<typename Part::Scalar> {
  public:
-  using Riemann = typename Part::Riemann;
+  using Riemann = Riem;
   using Scalar = typename Part::Scalar;
   using Face = typename Part::Face;
   using Cell = typename Part::Cell;
@@ -51,11 +52,19 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   using Temporal = temporal::System<typename Part::Scalar>;
   using Column = typename Temporal::Column;
 
+  static_assert(std::is_same_v<Scalar, typename Riemann::Scalar>);
+  static_assert(std::is_same_v<Scalar, typename Riemann::Scalar>);
+  static_assert(Riemann::kComponents == Polynomial::K);
+  static_assert(Riemann::kDimensions == Polynomial::D);
+
  protected:
   std::vector<std::string> supersonic_outlet_, inviscid_wall_;
   using Function = std::function<Value(const Global &, double)>;
   std::unordered_map<std::string, Function> supersonic_inlet_,
       subsonic_inlet_, subsonic_outlet_, smart_boundary_, no_slip_wall_;
+
+  // [i_face][i_gauss]
+  std::vector<std::vector<Riemann>> riemann_;
 
   Part *part_ptr_;
   double t_curr_;
@@ -68,6 +77,31 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   explicit FiniteElement(Part *part_ptr)
       : part_ptr_(part_ptr), cell_data_size_(part_ptr->GetCellDataSize()) {
     assert(cell_data_size_ == Cell::kFields * part_ptr->CountLocalCells());
+    // TODO(PVC): use a single range concatenating the three
+    for (Face const &face : part_ptr->GetLocalFaces()) {
+      assert(face.id() == riemann_.size());
+      auto const &integrator = face.integrator();
+      auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
+      for (int i = 0, n = riemanns.size(); i < n; ++i) {
+        riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+      }
+    }
+    for (Face const &face : part_ptr->GetGhostFaces()) {
+      assert(face.id() == riemann_.size());
+      auto const &integrator = face.integrator();
+      auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
+      for (int i = 0, n = riemanns.size(); i < n; ++i) {
+        riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+      }
+    }
+    for (Face const &face : part_ptr->GetBoundaryFaces()) {
+      assert(face.id() == riemann_.size());
+      auto const &integrator = face.integrator();
+      auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
+      for (int i = 0, n = riemanns.size(); i < n; ++i) {
+        riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+      }
+    }
 #ifdef ENABLE_LOGGING
     log_ = std::make_unique<std::ofstream>();
 #endif
@@ -96,6 +130,20 @@ class FiniteElement : public temporal::System<typename Part::Scalar> {
   }
   Part const &part() const {
     return *part_ptr_;
+  }
+
+  /**
+   * @brief Get the Riemann solvers on a given Face.
+   * 
+   * @param face the given Face
+   * @return a vector of Riemann solvers indexed by quadrature points.
+   */
+  std::vector<Riemann> const &GetRiemannSolvers(Face const &face) const {
+#ifdef NDEBUG
+    return riemann_[face.id()];
+#else
+    return riemann_.at(face.id());
+#endif
   }
 
 #ifdef ENABLE_LOGGING

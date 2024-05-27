@@ -27,12 +27,13 @@ namespace dg {
  * @brief A specialized version of DG using a Lagrange expansion on Lobatto roots. 
  * 
  * @tparam Part 
+ * @tparam Riem 
  */
-template <typename Part>
+template <typename Part, typename Riem>
     requires mini::polynomial::Nodal<typename Part::Polynomial>
-class Lobatto : public General<Part> {
+class Lobatto : public General<Part, Riem> {
  public:
-  using Base = General<Part>;
+  using Base = General<Part, Riem>;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
@@ -152,6 +153,7 @@ class Lobatto : public General<Part> {
   }
   void AddFluxOnLocalFaces(Column *residual) const override {
     for (const Face &face : this->part().GetLocalFaces()) {
+      const auto &riemanns = this->GetRiemannSolvers(face);
       const auto &integrator = face.integrator();
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
@@ -164,7 +166,7 @@ class Lobatto : public General<Part> {
         auto c_sharer = i_node_on_sharer[f];
         Value u_holder = holder.polynomial().GetValue(c_holder);
         Value u_sharer = sharer.polynomial().GetValue(c_sharer);
-        Value flux = face.riemann(f).GetFluxUpwind(u_holder, u_sharer);
+        Value flux = riemanns[f].GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(f);
         holder.polynomial().MinusValue(flux, holder_data, c_holder);
         sharer.polynomial().AddValueTo(flux, sharer_data, c_sharer);
@@ -173,6 +175,7 @@ class Lobatto : public General<Part> {
   }
   void AddFluxOnGhostFaces(Column *residual) const override {
     for (const Face &face : this->part().GetGhostFaces()) {
+      const auto &riemanns = this->GetRiemannSolvers(face);
       const auto &integrator = face.integrator();
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
@@ -184,7 +187,7 @@ class Lobatto : public General<Part> {
         auto c_sharer = i_node_on_sharer[f];
         Value u_holder = holder.polynomial().GetValue(c_holder);
         Value u_sharer = sharer.polynomial().GetValue(c_sharer);
-        Value flux = face.riemann(f).GetFluxUpwind(u_holder, u_sharer);
+        Value flux = riemanns[f].GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(f);
         holder.polynomial().MinusValue(flux, holder_data, c_holder);
       }
@@ -193,6 +196,7 @@ class Lobatto : public General<Part> {
   void AddFluxOnInviscidWalls(Column *residual) const override {
     for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -200,7 +204,7 @@ class Lobatto : public General<Part> {
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_holder = holder.polynomial().GetValue(c_holder);
-          Value flux = face.riemann(f).GetFluxOnInviscidWall(u_holder);
+          Value flux = riemanns[f].GetFluxOnInviscidWall(u_holder);
           flux *= integrator.GetGlobalWeight(f);
           holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
@@ -210,6 +214,7 @@ class Lobatto : public General<Part> {
   void AddFluxOnSupersonicOutlets(Column *residual) const override {
     for (const auto &name : this->supersonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -217,7 +222,7 @@ class Lobatto : public General<Part> {
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_holder = holder.polynomial().GetValue(c_holder);
-          Value flux = face.riemann(f).GetFluxOnSupersonicOutlet(u_holder);
+          Value flux = riemanns[f].GetFluxOnSupersonicOutlet(u_holder);
           flux *= integrator.GetGlobalWeight(f);
           holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
@@ -227,6 +232,7 @@ class Lobatto : public General<Part> {
   void AddFluxOnSupersonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->supersonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -234,7 +240,7 @@ class Lobatto : public General<Part> {
         for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
           auto c_holder = i_node_on_holder[f];
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value flux = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
+          Value flux = riemanns[f].GetFluxOnSupersonicInlet(u_given);
           flux *= integrator.GetGlobalWeight(f);
           holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
@@ -244,6 +250,7 @@ class Lobatto : public General<Part> {
   void AddFluxOnSubsonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -252,7 +259,7 @@ class Lobatto : public General<Part> {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.polynomial().GetValue(c_holder);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value flux = face.riemann(f).GetFluxOnSubsonicInlet(u_inner, u_given);
+          Value flux = riemanns[f].GetFluxOnSubsonicInlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(f);
           holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
@@ -262,6 +269,7 @@ class Lobatto : public General<Part> {
   void AddFluxOnSubsonicOutlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -270,7 +278,7 @@ class Lobatto : public General<Part> {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.polynomial().GetValue(c_holder);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value flux = face.riemann(f).GetFluxOnSubsonicOutlet(u_inner, u_given);
+          Value flux = riemanns[f].GetFluxOnSubsonicOutlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(f);
           holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }
@@ -280,6 +288,7 @@ class Lobatto : public General<Part> {
   void AddFluxOnSmartBoundaries(Column *residual) const override {
     for (auto &[name, func] : this->smart_boundary_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -288,7 +297,7 @@ class Lobatto : public General<Part> {
           auto c_holder = i_node_on_holder[f];
           Value u_inner = holder.polynomial().GetValue(c_holder);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value flux = face.riemann(f).GetFluxOnSmartBoundary(u_inner, u_given);
+          Value flux = riemanns[f].GetFluxOnSmartBoundary(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(f);
           holder.polynomial().MinusValue(flux, holder_data, c_holder);
         }

@@ -107,10 +107,10 @@ struct Face {
   IntegratorUptr integrator_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
-  Int id_{-1};
+  Int id_;  // 0-based, local first, then ghost, then boundary
 
   Face(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&integrator_ptr,
-      Cell *holder, Cell *sharer, Int id = 0)
+      Cell *holder, Cell *sharer, Int id)
       : coordinate_ptr_(std::move(coordinate_ptr)),
         integrator_ptr_(std::move(integrator_ptr)),
         holder_(holder), sharer_(sharer),

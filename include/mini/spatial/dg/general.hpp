@@ -17,10 +17,10 @@ namespace mini {
 namespace spatial {
 namespace dg {
 
-template <typename Part>
-class General : public spatial::FiniteElement<Part> {
+template <typename Part, typename Riem>
+class General : public spatial::FiniteElement<Part, Riem> {
  public:
-  using Base = spatial::FiniteElement<Part>;
+  using Base = spatial::FiniteElement<Part, Riem>;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
@@ -62,6 +62,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   void AddFluxOnLocalFaces(Column *residual) const override {
     for (const Face &face : this->part().GetLocalFaces()) {
+      const auto &riemanns = this->GetRiemannSolvers(face);
       const auto &integrator = face.integrator();
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
@@ -71,7 +72,7 @@ class General : public spatial::FiniteElement<Part> {
         const auto &coord = integrator.GetGlobal(q);
         Value u_holder = holder.GlobalToValue(coord);
         Value u_sharer = sharer.GlobalToValue(coord);
-        Value flux = face.riemann(q).GetFluxUpwind(u_holder, u_sharer);
+        Value flux = riemanns[q].GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(q);
         Coeff prod = flux * holder.GlobalToBasisValues(coord);
         holder.polynomial().MinusCoeff(prod, holder_data);
@@ -82,6 +83,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   void AddFluxOnGhostFaces(Column *residual) const override {
     for (const Face &face : this->part().GetGhostFaces()) {
+      const auto &riemanns = this->GetRiemannSolvers(face);
       const auto &integrator = face.integrator();
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
@@ -90,7 +92,7 @@ class General : public spatial::FiniteElement<Part> {
         const auto &coord = integrator.GetGlobal(q);
         Value u_holder = holder.GlobalToValue(coord);
         Value u_sharer = sharer.GlobalToValue(coord);
-        Value flux = face.riemann(q).GetFluxUpwind(u_holder, u_sharer);
+        Value flux = riemanns[q].GetFluxUpwind(u_holder, u_sharer);
         flux *= integrator.GetGlobalWeight(q);
         Coeff prod = flux * holder.GlobalToBasisValues(coord);
         holder.polynomial().MinusCoeff(prod, holder_data);
@@ -102,13 +104,14 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnInviscidWalls(Column *residual) const override {
     for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
           const auto &coord = integrator.GetGlobal(q);
           Value u_holder = holder.GlobalToValue(coord);
-          Value flux = face.riemann(q).GetFluxOnInviscidWall(u_holder);
+          Value flux = riemanns[q].GetFluxOnInviscidWall(u_holder);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
           holder.polynomial().MinusCoeff(prod, holder_data);
@@ -119,13 +122,14 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSupersonicOutlets(Column *residual) const override {
     for (const auto &name : this->supersonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
           const auto &coord = integrator.GetGlobal(q);
           Value u_holder = holder.GlobalToValue(coord);
-          Value flux = face.riemann(q).GetFluxOnSupersonicOutlet(u_holder);
+          Value flux = riemanns[q].GetFluxOnSupersonicOutlet(u_holder);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
           holder.polynomial().MinusCoeff(prod, holder_data);
@@ -136,13 +140,14 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSupersonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->supersonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
         for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
           const auto &coord = integrator.GetGlobal(q);
           Value u_given = func(coord, this->t_curr_);
-          Value flux = face.riemann(q).GetFluxOnSupersonicInlet(u_given);
+          Value flux = riemanns[q].GetFluxOnSupersonicInlet(u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
           holder.polynomial().MinusCoeff(prod, holder_data);
@@ -153,6 +158,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSubsonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -160,7 +166,7 @@ class General : public spatial::FiniteElement<Part> {
           const auto &coord = integrator.GetGlobal(q);
           Value u_inner = holder.GlobalToValue(coord);
           Value u_given = func(coord, this->t_curr_);
-          Value flux = face.riemann(q).GetFluxOnSubsonicInlet(u_inner, u_given);
+          Value flux = riemanns[q].GetFluxOnSubsonicInlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
           holder.polynomial().MinusCoeff(prod, holder_data);
@@ -171,6 +177,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSubsonicOutlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -178,7 +185,7 @@ class General : public spatial::FiniteElement<Part> {
           const auto &coord = integrator.GetGlobal(q);
           Value u_inner = holder.GlobalToValue(coord);
           Value u_given = func(coord, this->t_curr_);
-          Value flux = face.riemann(q).GetFluxOnSubsonicOutlet(u_inner, u_given);
+          Value flux = riemanns[q].GetFluxOnSubsonicOutlet(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
           holder.polynomial().MinusCoeff(prod, holder_data);
@@ -189,6 +196,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSmartBoundaries(Column *residual) const override {
     for (auto &[name, func] : this->smart_boundary_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -196,7 +204,7 @@ class General : public spatial::FiniteElement<Part> {
           const auto &coord = integrator.GetGlobal(q);
           Value u_inner = holder.GlobalToValue(coord);
           Value u_given = func(coord, this->t_curr_);
-          Value flux = face.riemann(q).GetFluxOnSmartBoundary(u_inner, u_given);
+          Value flux = riemanns[q].GetFluxOnSmartBoundary(u_inner, u_given);
           flux *= integrator.GetGlobalWeight(q);
           Coeff prod = flux * holder.GlobalToBasisValues(coord);
           holder.polynomial().MinusCoeff(prod, holder_data);
@@ -206,9 +214,10 @@ class General : public spatial::FiniteElement<Part> {
   }
 };
 
-template <typename Part, typename Limiter, typename Source = DummySource<Part>>
-class WithLimiterAndSource : public General<Part> {
-  using Base = General<Part>;
+template <typename Part, typename Riem, typename Limiter,
+    typename Source = DummySource<Part>>
+class WithLimiterAndSource : public General<Part, Riem> {
+  using Base = General<Part, Riem>;
 
  public:
   using Riemann = typename Base::Riemann;
