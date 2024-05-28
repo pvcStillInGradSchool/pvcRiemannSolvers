@@ -240,12 +240,17 @@ class Eigen {
   Scalar total_volume_;
 
  public:
-  template <typename FaceToRiemann>
-  Eigen(Scalar w0, Scalar eps, FaceToRiemann &&face_to_riemanns)
-      : eps_(eps), face_to_riemanns_(face_to_riemanns) {
+  Eigen(Scalar w0, Scalar eps)
+      : eps_(eps) {
     weights_.setOnes();
     weights_ *= w0;
   }
+
+  template <typename FaceToRiemann>
+  void InstallRiemannSolvers(FaceToRiemann &&face_to_riemanns) {
+    face_to_riemanns_ = std::forward<FaceToRiemann>(face_to_riemanns);
+  }
+
   static bool IsNotSmooth(const Cell &cell) {
     constexpr int components[] = { 0, Cell::K-1 };
     auto max_abs_averages = cell.polynomial().average();

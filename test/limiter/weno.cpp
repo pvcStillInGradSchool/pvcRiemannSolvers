@@ -249,6 +249,8 @@ TEST_F(TestWenoLimiters, For3dEulerEquations) {
   using Cell = typename Part::Cell;
   using Face = typename Part::Face;
   auto n_cells = part.CountLocalCells();
+  auto eigen_limiter = mini::limiter::weno::Eigen<Cell, Riemann>(
+      /* w0 = */0.01, /* eps = */1e-6);
   // build Riemann solvers for weno::Eigen
   auto all_riemanns = std::vector<std::vector<Riemann>>();
   for (Face const &face : part.GetLocalFaces()) {
@@ -262,8 +264,7 @@ TEST_F(TestWenoLimiters, For3dEulerEquations) {
   auto face_to_riemanns = [&all_riemanns](Face const &face) -> auto const & {
     return all_riemanns.at(face.id());
   };
-  auto eigen_limiter = mini::limiter::weno::Eigen<Cell, Riemann>(
-      /* w0 = */0.01, /* eps = */1e-6, face_to_riemanns);
+  eigen_limiter.InstallRiemannSolvers(face_to_riemanns);
   auto lazy_limiter = mini::limiter::weno::Lazy<Cell>(
       /* w0 = */0.01, /* eps = */1e-6, /* verbose = */true);
   using ProjectionWrapper = typename Projection::Wrapper;
