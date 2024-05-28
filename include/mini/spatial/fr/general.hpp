@@ -18,7 +18,6 @@
 
 #include "mini/polynomial/concept.hpp"
 #include "mini/polynomial/hexahedron.hpp"
-#include "mini/riemann/concept.hpp"
 #include "mini/spatial/fem.hpp"
 #include "mini/basis/vincent.hpp"
 
@@ -30,12 +29,13 @@ namespace fr {
  * @brief A general version of FR using a Lagrange expansion whose flux points are also solution points.
  * 
  * @tparam Part 
+ * @tparam Riem 
  */
-template <typename Part>
+template <typename Part, typename Riem>
     requires mini::polynomial::Nodal<typename Part::Polynomial>
-class General : public spatial::FiniteElement<Part> {
+class General : public spatial::FiniteElement<Part, Riem> {
  public:
-  using Base = spatial::FiniteElement<Part>;
+  using Base = spatial::FiniteElement<Part, Riem>;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
@@ -94,8 +94,7 @@ class General : public spatial::FiniteElement<Part> {
       int i_face = cell_polynomial.FindFaceId(face.coordinate().center());
       assert(kFaceQ == face.integrator().CountPoints());
       for (int f = 0; f < kFaceQ; ++f) {
-        Global const &face_normal = face.riemann(f).normal();
-        assert(face_normal == face_integrator.GetNormalFrame(f)[0]);
+        Global const &face_normal = face_integrator.GetNormalFrame(f)[0];
         auto &[curr_line, flux_point] = curr_face.at(f);
         auto &flux_point_coord = face_integrator.GetGlobal(f);
         auto [i, j, k] = cell_polynomial.FindCollinearIndex(flux_point_coord, i_face);
@@ -246,11 +245,11 @@ class General : public spatial::FiniteElement<Part> {
       Polynomial::MinusValue(value, data, q);
     }
   }
-  static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
+  static std::pair<Value, Value> GetFluxOnLocalFace(
+      const Riemann &riemann, Scalar distance/* only used in viscous */,
       const Polynomial &holder_polynomial, FluxPointCache const &holder_cache,
       const Polynomial &sharer_polynomial, FluxPointCache const &sharer_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
-    Riemann const &riemann = face.riemann(f);
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value u_sharer = sharer_polynomial.GetValue(sharer_cache.ijk);
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
@@ -261,11 +260,11 @@ class General : public spatial::FiniteElement<Part> {
     f_sharer -= Riemann::GetFluxMatrix(u_sharer) * sharer_cache.normal;
     return { f_holder, f_sharer };
   }
-  static std::pair<Value, Value> GetFluxOnLocalFace(Face const &face, int f,
+  static std::pair<Value, Value> GetFluxOnLocalFace(
+      const Riemann &riemann, Scalar distance/* only used in viscous */,
       const Polynomial &holder_polynomial, FluxPointCache const &holder_cache,
       const Polynomial &sharer_polynomial, FluxPointCache const &sharer_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    Riemann const &riemann = face.riemann(f);
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value u_sharer = sharer_polynomial.GetValue(sharer_cache.ijk);
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
@@ -281,7 +280,6 @@ class General : public spatial::FiniteElement<Part> {
         du_local_sharer, sharer_cache.ijk);
     assert(Collinear(holder_cache.normal, sharer_cache.normal));
     const auto &normal = riemann.normal();
-    auto distance = normal.dot(face.HolderToSharer());
     assert(distance > 0);
     auto du_common = riemann.GetCommonGradient(distance, normal,
         u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
@@ -299,6 +297,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   void AddFluxOnLocalFaces(Column *residual) const override {
     for (const Face &face : this->part().GetLocalFaces()) {
+      const auto &riemanns = this->GetRiemannSolvers(face);
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
       auto *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -309,7 +308,8 @@ class General : public spatial::FiniteElement<Part> {
       for (int f = 0; f < kFaceQ; ++f) {
         auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
-        auto [f_holder, f_sharer] = GetFluxOnLocalFace(face, f,
+        auto [f_holder, f_sharer] = GetFluxOnLocalFace(riemanns[f],
+            riemanns[f].normal().dot(face.HolderToSharer()),
             holder.polynomial(), holder_flux_point,
             sharer.polynomial(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
@@ -325,6 +325,7 @@ class General : public spatial::FiniteElement<Part> {
   }
   void AddFluxOnGhostFaces(Column *residual) const override {
     for (const Face &face : this->part().GetGhostFaces()) {
+      const auto &riemanns = this->GetRiemannSolvers(face);
       const auto &holder = face.holder();
       const auto &sharer = face.sharer();
       auto *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -334,7 +335,8 @@ class General : public spatial::FiniteElement<Part> {
       for (int f = 0; f < kFaceQ; ++f) {
         auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
-        auto [f_holder, _] = GetFluxOnLocalFace(face, f,
+        auto [f_holder, _] = GetFluxOnLocalFace(riemanns[f],
+            riemanns[f].normal().dot(face.HolderToSharer()),
             holder.polynomial(), holder_flux_point,
             sharer.polynomial(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
@@ -347,6 +349,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnInviscidWalls(Column *residual) const override {
     for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &holder = face.holder();
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto const &holder_cache = holder_cache_[face.id()];
@@ -355,7 +358,7 @@ class General : public spatial::FiniteElement<Part> {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
           Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
-          Value f_upwind = face.riemann(f).GetFluxOnInviscidWall(u_holder);
+          Value f_upwind = riemanns[f].GetFluxOnInviscidWall(u_holder);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
@@ -389,6 +392,7 @@ class General : public spatial::FiniteElement<Part> {
     Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
+    assert(distance > 0);
     Scalar value_penalty = Riemann::GetValuePenalty(distance);
     Riemann::MinusViscousFluxOnNoSlipWall(wall_value,
         u_holder, du_holder, normal, value_penalty, &f_upwind);
@@ -429,13 +433,14 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSupersonicOutlets(Column *residual) const override {
     for (const auto &name : this->supersonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &holder = face.holder();
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto const &holder_cache = holder_cache_[face.id()];
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-          auto f_holder = GetFluxOnSupersonicOutlet(face.riemann(f),
+          auto f_holder = GetFluxOnSupersonicOutlet(riemanns[f],
               holder.polynomial(), holder_flux_point);
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
@@ -450,6 +455,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSupersonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->supersonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -460,7 +466,7 @@ class General : public spatial::FiniteElement<Part> {
           Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value f_upwind = face.riemann(f).GetFluxOnSupersonicInlet(u_given);
+          Value f_upwind = riemanns[f].GetFluxOnSupersonicInlet(u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
@@ -475,6 +481,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSubsonicInlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_inlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -485,7 +492,7 @@ class General : public spatial::FiniteElement<Part> {
           Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value f_upwind = face.riemann(f).GetFluxOnSubsonicInlet(u_holder, u_given);
+          Value f_upwind = riemanns[f].GetFluxOnSubsonicInlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
@@ -500,6 +507,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSubsonicOutlets(Column *residual) const override {
     for (auto &[name, func] : this->subsonic_outlet_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -510,7 +518,7 @@ class General : public spatial::FiniteElement<Part> {
           Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value f_upwind = face.riemann(f).GetFluxOnSubsonicOutlet(u_holder, u_given);
+          Value f_upwind = riemanns[f].GetFluxOnSubsonicOutlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
@@ -525,6 +533,7 @@ class General : public spatial::FiniteElement<Part> {
   void AddFluxOnSmartBoundaries(Column *residual) const override {
     for (auto &[name, func] : this->smart_boundary_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {
+        const auto &riemanns = this->GetRiemannSolvers(face);
         const auto &integrator = face.integrator();
         const auto &holder = face.holder();
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
@@ -535,7 +544,7 @@ class General : public spatial::FiniteElement<Part> {
           Value u_holder = holder.polynomial().GetValue(
               holder_flux_point.ijk);
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
-          Value f_upwind = face.riemann(f).GetFluxOnSmartBoundary(u_holder, u_given);
+          Value f_upwind = riemanns[f].GetFluxOnSmartBoundary(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
               Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;

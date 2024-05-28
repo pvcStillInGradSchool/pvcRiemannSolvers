@@ -16,9 +16,10 @@
 #include "mini/input/path.hpp"  // defines PROJECT_BINARY_DIR
 
 #include "test/mesh/part.hpp"
+#include "test/spatial/riemann.hpp"
 
 using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
-using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+using Part = mini::mesh::part::Part<cgsize_t, Projection>;
 
 auto case_name = PROJECT_BINARY_DIR + std::string("/test/mesh/double_mach");
 
@@ -27,7 +28,7 @@ class TestSpatialFR : public ::testing::Test {
   void SetUp() override;
 };
 void TestSpatialFR::SetUp() {
-  ResetRiemann();
+  test::spatial::ResetRiemann();
 }
 template <typename Spatial>
 auto GetResidualColumn(Spatial &spatial, Part &part) {
@@ -85,13 +86,13 @@ TEST_F(TestSpatialFR, CompareResiduals) {
   InstallIntegratorPrototypes(&part);
   /* aproximated by Lagrange basis on Lobatto roots with general correction functions */
   time_begin = MPI_Wtime();
-  using General = mini::spatial::fr::General<Part>;
+  using General = mini::spatial::fr::General<Part, test::spatial::Riemann>;
   using Vincent = mini::basis::Vincent<Scalar>;
   auto general = General(&part, Vincent::HuynhLumpingLobatto(kDegrees));
   auto general_residual = GetResidualColumn(general, part);
   /* aproximated by Lagrange basis on Lobatto roots with Huynh's correction functions */
   time_begin = MPI_Wtime();
-  using Lobatto = mini::spatial::fr::Lobatto<Part>;
+  using Lobatto = mini::spatial::fr::Lobatto<Part, test::spatial::Riemann>;
   auto lobatto = Lobatto(&part);
   auto lobatto_residual = GetResidualColumn(lobatto, part);
   EXPECT_NEAR(0, (general_residual - lobatto_residual).squaredNorm(), 1e-15);
