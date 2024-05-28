@@ -2,8 +2,6 @@
 #ifndef MINI_AIRCRAFT_SOURCE_HPP_
 #define MINI_AIRCRAFT_SOURCE_HPP_
 
-#include <concepts>
-
 #include <algorithm>
 #include <type_traits>
 #include <utility>
@@ -14,6 +12,7 @@
 #include "mini/geometry/intersect.hpp"
 #include "mini/integrator/line.hpp"
 #include "mini/aircraft/rotor.hpp"
+#include "mini/riemann/euler/types.hpp"
 
 namespace mini {
 namespace aircraft {
@@ -22,18 +21,17 @@ namespace aircraft {
  * @brief A rotorcraft is an aircraft that has multiple rotors.
  * 
  * @tparam P 
- * @tparam Scalar 
  */
-template <typename P, std::floating_point Scalar>
+template <typename P>
 class Rotorcraft {
  public:
   using Part = P;
   using Cell = typename Part::Cell;
   using Face = typename Cell::Face;
-  static_assert(std::is_same_v<Scalar, typename Cell::Scalar>);
+  using Scalar = typename Cell::Scalar;
   using Global = typename Cell::Global;
   using Coeff = typename Cell::Polynomial::Coeff;
-  using Conservative = typename Part::Riemann::Conservative;
+  using Conservative = mini::riemann::euler::Conservatives<Scalar, 3>;
   using Rotor = mini::aircraft::Rotor<Scalar>;
   using Blade = typename Rotor::Blade;
   using Section = typename Blade::Section;

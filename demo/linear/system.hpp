@@ -59,7 +59,7 @@ using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents,
     true>;
 #endif
 
-using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+using Part = mini::mesh::part::Part<cgsize_t, Projection>;
 using Cell = typename Part::Cell;
 using Face = typename Part::Face;
 using Global = typename Cell::Global;
@@ -67,10 +67,10 @@ using Value = typename Cell::Value;
 using Coeff = typename Cell::Coeff;
 
 #ifdef DG
-using Spatial = mini::spatial::dg::Lobatto<Part>;
+using Spatial = mini::spatial::dg::Lobatto<Part, Riemann>;
 #endif
 #ifdef FR
-using Spatial = mini::spatial::fr::Lobatto<Part>;
+using Spatial = mini::spatial::fr::Lobatto<Part, Riemann>;
 #endif
 
 /* Choose the time-stepping scheme. */

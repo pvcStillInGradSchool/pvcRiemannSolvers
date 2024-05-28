@@ -45,7 +45,7 @@ constexpr int kDegrees = 2;
   using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, 5, true>;
 #endif
 
-using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+using Part = mini::mesh::part::Part<cgsize_t, Projection>;
 using Cell = typename Part::Cell;
 using Face = typename Part::Face;
 using Global = typename Cell::Global;
@@ -57,13 +57,13 @@ using Limiter = mini::limiter::weno::Dummy<Cell>;
 #endif
 
 #ifdef DGFEM
-using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Limiter>;
+using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
 #endif
 #ifdef DGSEM
-using Spatial = mini::spatial::dg::Lobatto<Part>;
+using Spatial = mini::spatial::dg::Lobatto<Part, Riemann>;
 #endif
 #ifdef FR
-using Spatial = mini::spatial::fr::Lobatto<Part>;
+using Spatial = mini::spatial::fr::Lobatto<Part, Riemann>;
 #endif
 
 /* Choose the time-stepping scheme. */

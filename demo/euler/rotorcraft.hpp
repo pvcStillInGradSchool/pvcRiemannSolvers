@@ -30,7 +30,7 @@ using Riemann = mini::riemann::rotated::Euler<Unrotated>;
 /* Define spatial discretization. */
 constexpr int kDegrees = 2;
 using Projection = mini::polynomial::Projection<double, kDimensions, kDegrees, 5>;
-using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+using Part = mini::mesh::part::Part<cgsize_t, Projection>;
 using Cell = typename Part::Cell;
 using Face = typename Part::Face;
 using Global = typename Cell::Global;
@@ -39,13 +39,13 @@ using Coeff = typename Cell::Coeff;
 
 using Limiter = mini::limiter::weno::Eigen<Cell>;
 
-using Source = mini::aircraft::Rotorcraft<Part, Scalar>;
+using Source = mini::aircraft::Rotorcraft<Part>;
 using Rotor = mini::aircraft::Rotor<Scalar>;
 using Blade = typename Rotor::Blade;
 using Frame = typename Blade::Frame;
 using Airfoil = typename Blade::Airfoil;
 
-using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Limiter, Source>;
+using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter, Source>;
 
 /* Choose the time-stepping scheme. */
 constexpr int kOrders = std::min(3, kDegrees + 1);

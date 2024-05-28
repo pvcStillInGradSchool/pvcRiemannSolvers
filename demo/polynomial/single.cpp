@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
 
   constexpr int kDegrees = 2;
   using Projection = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, 1>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
   using Cell = typename Part::Cell;
   using Face = typename Part::Face;
   using Global = typename Cell::Global;
