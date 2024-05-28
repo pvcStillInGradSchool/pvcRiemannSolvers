@@ -110,7 +110,7 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
   // build cells and project the function on them
   using Riemann = mini::riemann::rotated::Single<double, 3>;
   using Projection = mini::polynomial::Projection<double, 3, 2, 1>;
-  using Cell = mini::mesh::part::Cell<cgsize_t, Riemann, Projection>;
+  using Cell = mini::mesh::part::Cell<cgsize_t, Projection>;
   auto cells = std::vector<Cell>();
   cells.reserve(n_cells);
   auto &zone = cgns_mesh.GetBase(1).GetZone(1);
@@ -221,7 +221,7 @@ TEST_F(TestWenoLimiters, For3dEulerEquations) {
   using Unrotated = mini::riemann::euler::Exact<Gas, 3>;
   using Riemann = mini::riemann::rotated::Euler<Unrotated>;
   using Projection = mini::polynomial::Projection<double, 3, 2, 5>;
-  using Part = mini::mesh::part::Part<cgsize_t, Riemann, Projection>;
+  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
   using Value = typename Part::Value;
   auto part = Part(case_name, i_core, n_core);
   auto quadrangle = mini::coordinate::Quadrangle4<double, 3>();
@@ -247,9 +247,23 @@ TEST_F(TestWenoLimiters, For3dEulerEquations) {
   }
   // reconstruct using a `limiter::weno::Eigen` object
   using Cell = typename Part::Cell;
+  using Face = typename Part::Face;
   auto n_cells = part.CountLocalCells();
-  auto eigen_limiter = mini::limiter::weno::Eigen<Cell>(
-      /* w0 = */0.01, /* eps = */1e-6);
+  // build Riemann solvers for weno::Eigen
+  auto all_riemanns = std::vector<std::vector<Riemann>>();
+  for (Face const &face : part.GetLocalFaces()) {
+    assert(face.id() == all_riemanns.size());
+    auto const &integrator = face.integrator();
+    auto &riemanns = all_riemanns.emplace_back(integrator.CountPoints());
+    for (int i = 0, n = riemanns.size(); i < n; ++i) {
+      riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+    }
+  }
+  auto face_to_riemanns = [&all_riemanns](Face const &face) -> auto const & {
+    return all_riemanns.at(face.id());
+  };
+  auto eigen_limiter = mini::limiter::weno::Eigen<Cell, Riemann>(
+      /* w0 = */0.01, /* eps = */1e-6, face_to_riemanns);
   auto lazy_limiter = mini::limiter::weno::Lazy<Cell>(
       /* w0 = */0.01, /* eps = */1e-6, /* verbose = */true);
   using ProjectionWrapper = typename Projection::Wrapper;

@@ -6,6 +6,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <numeric>
@@ -15,6 +16,7 @@
 
 #include "mini/basis/taylor.hpp"
 #include "mini/polynomial/concept.hpp"
+#include "mini/riemann/concept.hpp"
 
 namespace mini {
 namespace limiter {
@@ -216,7 +218,7 @@ class Lazy {
   }
 };
 
-template <typename Cell>
+template <typename Cell, mini::riemann::Convective Riemann>
     requires mini::polynomial::Modal<typename Cell::Polynomial>
 class Eigen {
  public:
@@ -229,6 +231,7 @@ class Eigen {
   using Value = typename ProjectionWrapper::Value;
 
  private:
+  std::function<std::vector<Riemann> const &(Face const &)> face_to_riemanns_;
   ProjectionWrapper new_projection_;
   std::vector<ProjectionWrapper> old_projections_;
   const Cell *my_cell_ = nullptr;
@@ -237,8 +240,9 @@ class Eigen {
   Scalar total_volume_;
 
  public:
-  Eigen(Scalar w0, Scalar eps)
-      : eps_(eps) {
+  template <typename FaceToRiemann>
+  Eigen(Scalar w0, Scalar eps, FaceToRiemann &&face_to_riemanns)
+      : eps_(eps), face_to_riemanns_(face_to_riemanns) {
     weights_.setOnes();
     weights_ *= w0;
   }
@@ -307,7 +311,9 @@ class Eigen {
     int adj_cnt = my_cell_->adj_faces_.size();
     // build eigen-matrices in the rotated coordinate system
     const auto &big_u = my_cell_->polynomial().average();
-    auto *riemann = const_cast<typename Face::Riemann *>(&adj_face.riemann(0));
+    // TODO(PVC): take average of eigen matrices on all quadrature points
+    const auto &const_riemann = face_to_riemanns_(adj_face).at(0);
+    auto *riemann = const_cast<Riemann *>(&const_riemann);
     riemann->UpdateEigenMatrices(big_u);
     // initialize weights
     auto weights = std::vector<Value>(adj_cnt + 1, weights_);
