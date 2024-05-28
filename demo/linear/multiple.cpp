@@ -98,8 +98,15 @@ int main(int argc, char* argv[]) {
   part.SetFieldNames({"U1", "U2"});
 
   /* Build a `Limiter` object. */
-  using Limiter = mini::limiter::weno::Eigen<Cell>;
+  using Limiter = mini::limiter::weno::Eigen<Cell, Riemann>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
+
+  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
+  auto spatial = Spatial(&part, limiter);
+  auto face_to_riemanns = [&spatial](Face const &face) -> auto const & {
+    return spatial.GetRiemannSolvers(face);
+  };
+  spatial.limiter_ptr()->InstallRiemannSolvers(face_to_riemanns);
 
   /* Set initial conditions. */
   Value value_right{ 12., -4. }, value_left{ 0., 0. };
@@ -135,9 +142,9 @@ int main(int argc, char* argv[]) {
           n_core, MPI_Wtime() - time_begin);
     }
     if (kDegrees > 0) {
-      mini::limiter::Reconstruct(&part, limiter);
+      mini::limiter::Reconstruct(&part, *spatial.limiter_ptr());
       if (suffix == "tetra") {
-        mini::limiter::Reconstruct(&part, limiter);
+        mini::limiter::Reconstruct(&part, *spatial.limiter_ptr());
       }
     }
 
@@ -158,9 +165,6 @@ int main(int argc, char* argv[]) {
     part.ReadSolutions(soln_name);
     part.ScatterSolutions();
   }
-
-  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
-  auto spatial = Spatial(&part, limiter);
 
   /* Define the temporal solver. */
   constexpr int kOrders = std::min(3, kDegrees + 1);

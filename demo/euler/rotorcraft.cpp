@@ -124,6 +124,10 @@ int Main(int argc, char* argv[], IC ic, BC bc, Source source) {
     }
   }
   auto spatial = Spatial(&part, limiter);
+  auto face_to_riemanns = [&spatial](Face const &face) -> auto const & {
+    return spatial.GetRiemannSolvers(face);
+  };
+  spatial.limiter_ptr()->InstallRiemannSolvers(face_to_riemanns);
 
   /* Define the temporal solver. */
   auto temporal = Temporal();

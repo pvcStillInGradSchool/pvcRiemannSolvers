@@ -247,6 +247,10 @@ class WithLimiterAndSource : public General<Part, Riem> {
   ~WithLimiterAndSource() noexcept = default;
 
  public:  // implement pure virtual methods declared in Temporal
+  Limiter *limiter_ptr() {
+    return &limiter_;
+  }
+
   void SetSolutionColumn(Column const &column) override {
     this->Base::SetSolutionColumn(column);
     mini::limiter::Reconstruct(this->part_ptr_, limiter_);

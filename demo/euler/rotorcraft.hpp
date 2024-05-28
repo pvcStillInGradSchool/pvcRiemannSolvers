@@ -37,7 +37,7 @@ using Global = typename Cell::Global;
 using Value = typename Cell::Value;
 using Coeff = typename Cell::Coeff;
 
-using Limiter = mini::limiter::weno::Eigen<Cell>;
+using Limiter = mini::limiter::weno::Eigen<Cell, Riemann>;
 
 using Source = mini::aircraft::Rotorcraft<Part>;
 using Rotor = mini::aircraft::Rotor<Scalar>;
