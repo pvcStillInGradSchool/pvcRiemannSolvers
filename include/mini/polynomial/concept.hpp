@@ -23,6 +23,7 @@ concept HasGeneralTypes = requires {
   typename P::Value;
   typename P::Coeff;
   typename P::Basis;
+  typename P::Integrator;
 };
 
 template <typename P, typename G>
@@ -32,6 +33,10 @@ concept HasGeneralMethods = requires(P const &cp, P *p, G const &g,
 
   requires std::same_as<G, typename P::Global>;
   { cp.GlobalToValue(g) } -> std::same_as<typename P::Value>;
+
+  { cp.basis() } -> std::same_as<typename P::Basis const &>;
+  { cp.coeff() } -> std::same_as<typename P::Coeff const &>;
+  { cp.integrator() } -> std::same_as<typename P::Integrator const &>;
 
   { p->Approximate(f) } -> std::same_as<void>;
 };
@@ -57,6 +62,9 @@ concept Nodal = requires(P const &cp, P *p) {
   { cp.interpolation() };
 
   { cp.GetValue(0) } -> std::same_as<typename P::Value>;
+  { cp.LocalToValue(typename P::Local()) } -> std::same_as<typename P::Value>;
+
+  { p->SetValue(0, typename P::Value()) } -> std::same_as<void>;
 };
 
 }  // namespace polynomial
