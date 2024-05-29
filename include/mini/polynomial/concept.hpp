@@ -26,14 +26,14 @@ concept HasGeneralTypes = requires {
 };
 
 template <typename P, typename G>
-concept HasGeneralMethods = requires(P p, G const &g,
+concept HasGeneralMethods = requires(P const &cp, P *p, G const &g,
     typename P::Value (*f)(G const &)) {
   requires HasGeneralTypes<P>;
 
   requires std::same_as<G, typename P::Global>;
-  { p.GlobalToValue(g) } -> std::same_as<typename P::Value>;
+  { cp.GlobalToValue(g) } -> std::same_as<typename P::Value>;
 
-  { p.Approximate(f) } -> std::same_as<void>;
+  { p->Approximate(f) } -> std::same_as<void>;
 };
 
 template <typename P>
@@ -42,21 +42,21 @@ concept General =
     HasGeneralMethods<P, typename P::Global>;
 
 template <typename P>
-concept Modal = requires(P p) {
+concept Modal = requires(P const &cp, P *p) {
   requires General<P>;
 
-  { p.projection() };
+  { cp.projection() };
 
-  { p.average() } -> std::same_as<typename P::Value>;
+  { cp.average() } -> std::same_as<typename P::Value>;
 };
 
 template <typename P>
-concept Nodal = requires(P p) {
+concept Nodal = requires(P const &cp, P *p) {
   requires General<P>;
 
-  { p.interpolation() };
+  { cp.interpolation() };
 
-  { p.GetValue(0) } -> std::same_as<typename P::Value>;
+  { cp.GetValue(0) } -> std::same_as<typename P::Value>;
 };
 
 }  // namespace polynomial
