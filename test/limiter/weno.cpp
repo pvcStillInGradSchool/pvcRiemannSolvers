@@ -275,13 +275,13 @@ TEST_F(TestWenoLimiters, For3dEulerEquations) {
   for (const Cell &cell : part.GetLocalCells()) {
     //  lasy limiter
     auto lazy_smoothness = mini::limiter::weno::GetSmoothness(
-        lazy_projections.emplace_back(lazy_limiter(cell)));
+        lazy_projections.emplace_back(lazy_limiter.Reconstruct(cell)));
     std::cout << "\n lazy smoothness[" << cell.metis_id << "] = ";
     std::cout << std::scientific << std::setprecision(3)
         << lazy_smoothness.transpose();
     // eigen limiter;
     auto eigen_smoothness = mini::limiter::weno::GetSmoothness(
-        eigen_projections.emplace_back(eigen_limiter(cell)));
+        eigen_projections.emplace_back(eigen_limiter.Reconstruct(cell)));
     std::cout << "\neigen smoothness[" << cell.metis_id << "] = ";
     std::cout << std::scientific << std::setprecision(3)
         << eigen_smoothness.transpose();

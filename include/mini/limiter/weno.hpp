@@ -146,7 +146,7 @@ class Lazy {
   bool IsNotSmooth(const Cell &cell) {
     return true;
   }
-  ProjectionWrapper operator()(const Cell &cell) {
+  ProjectionWrapper Reconstruct(const Cell &cell) {
     my_cell_ = &cell;
     Borrow();
     Reconstruct();
@@ -280,7 +280,7 @@ class Eigen {
     }
     return false;  // if all components are smooth
   }
-  ProjectionWrapper operator()(const Cell &cell) {
+  ProjectionWrapper Reconstruct(const Cell &cell) {
     my_cell_ = &cell;
     Borrow();
     Reconstruct();
@@ -386,7 +386,7 @@ class Dummy {
   bool IsNotSmooth(const Cell &cell) {
     return true;
   }
-  ProjectionWrapper operator()(const Cell &cell) {
+  ProjectionWrapper Reconstruct(const Cell &cell) {
     return ProjectionWrapper(cell.polynomial());
   }
 };

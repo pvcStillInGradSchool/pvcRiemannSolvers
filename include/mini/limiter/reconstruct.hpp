@@ -36,7 +36,7 @@ void Reconstruct(Part *part_ptr, Limiter *limiter_ptr) {
     }
     auto new_projections = std::vector<ProjectionWrapper>();
     for (Cell *cell_ptr : troubled_cells) {
-      new_projections.emplace_back(limiter_ptr->operator()(*cell_ptr));
+      new_projections.emplace_back(limiter_ptr->Reconstruct(*cell_ptr));
     }
     int i = 0;
     for (Cell *cell_ptr : troubled_cells) {
