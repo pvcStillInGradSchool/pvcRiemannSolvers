@@ -253,7 +253,7 @@ class WithLimiterAndSource : public General<Part, Riem> {
 
   void SetSolutionColumn(Column const &column) override {
     this->Base::SetSolutionColumn(column);
-    mini::limiter::Reconstruct(this->part_ptr_, limiter_);
+    mini::limiter::Reconstruct(this->part_ptr(), limiter_ptr());
   }
 
   Column GetResidualColumn() const override {

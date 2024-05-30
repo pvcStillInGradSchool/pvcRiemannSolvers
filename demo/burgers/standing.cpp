@@ -112,9 +112,9 @@ int main(int argc, char* argv[]) {
           n_core, MPI_Wtime() - time_begin);
     }
     if (kDegrees > 0) {
-      mini::limiter::Reconstruct(&part, limiter);
+      mini::limiter::Reconstruct(&part, &limiter);
       if (suffix == "tetra") {
-        mini::limiter::Reconstruct(&part, limiter);
+        mini::limiter::Reconstruct(&part, &limiter);
       }
     }
 

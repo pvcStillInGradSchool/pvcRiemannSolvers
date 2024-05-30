@@ -156,9 +156,9 @@ int main(int argc, char* argv[]) {
     }
 #ifdef DGFEM
     if (kDegrees > 0) {
-      mini::limiter::Reconstruct(&part, limiter);
+      mini::limiter::Reconstruct(&part, &limiter);
       if (suffix == "tetra") {
-        mini::limiter::Reconstruct(&part, limiter);
+        mini::limiter::Reconstruct(&part, &limiter);
       }
     }
 #endif

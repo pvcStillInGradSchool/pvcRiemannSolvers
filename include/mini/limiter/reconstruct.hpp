@@ -19,24 +19,24 @@ namespace mini {
 namespace limiter {
 
 template <class Part, class Limiter>
-void Reconstruct(Part *part_ptr, Limiter &&limiter) {
-  if (Part::kDegrees == 0) {
+void Reconstruct(Part *part_ptr, Limiter *limiter_ptr) {
+  if (!(Part::kDegrees && limiter_ptr)) {
     return;
   }
   using Cell = typename Part::Cell;
   using ProjectionWrapper
       = typename std::remove_reference_t<Limiter>::ProjectionWrapper;
 
-  auto act = [&limiter](std::vector<Cell *> const &cell_ptrs) {
+  auto act = [limiter_ptr](std::vector<Cell *> const &cell_ptrs) {
     auto troubled_cells = std::vector<Cell *>();
     for (Cell *cell_ptr : cell_ptrs) {
-      if (limiter.IsNotSmooth(*cell_ptr)) {
+      if (limiter_ptr->IsNotSmooth(*cell_ptr)) {
         troubled_cells.push_back(cell_ptr);
       }
     }
     auto new_projections = std::vector<ProjectionWrapper>();
     for (Cell *cell_ptr : troubled_cells) {
-      new_projections.emplace_back(limiter(*cell_ptr));
+      new_projections.emplace_back(limiter_ptr->operator()(*cell_ptr));
     }
     int i = 0;
     for (Cell *cell_ptr : troubled_cells) {

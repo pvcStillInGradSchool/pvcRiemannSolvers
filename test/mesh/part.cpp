@@ -53,7 +53,7 @@ void Process(Part *part_ptr, const std::string &solution_name) {
   using Cell = typename Part::Cell;
   auto lazy_limiter = mini::limiter::weno::Lazy<Cell>(
       /* w0 = */0.001, /* eps = */1e-6, /* verbose = */false);
-  mini::limiter::Reconstruct(part_ptr, lazy_limiter);
+  mini::limiter::Reconstruct(part_ptr, &lazy_limiter);
   std::printf("Run Write() on proc[%d/%d] at %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);
   part_ptr->GatherSolutions();

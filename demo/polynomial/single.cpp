@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
     }
     if (kDegrees > 0) {
       for (int i = 0; i < n_limiter; ++i) {
-        mini::limiter::Reconstruct(&part, limiter);
+        mini::limiter::Reconstruct(&part, &limiter);
       }
     }
     if (i_core == 0) {
