@@ -2,17 +2,25 @@
 #ifndef MINI_SPATIAL_LIMITED_HPP_
 #define MINI_SPATIAL_LIMITED_HPP_
 
+#include <concepts>
+
 #include "mini/spatial/fem.hpp"
 
 namespace mini {
 namespace spatial {
 
-template <typename Part, typename Limiter>
-class Limited : public FiniteElement<Part> {
-  using Base = FiniteElement<Part>;
-
+/**
+ * @brief Augment a concrete FiniteElement with a concrete Limiter.
+ * 
+ */
+template <typename ConcreteFiniteElement, typename Limiter>
+class Limited : public ConcreteFiniteElement {
  public:
+  using Base = ConcreteFiniteElement;
+  using Part = typename Base::Part;
   using Riemann = typename Base::Riemann;
+  static_assert(std::derived_from<Base, FiniteElement<Part, Riemann>>);
+
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
@@ -24,12 +32,12 @@ class Limited : public FiniteElement<Part> {
   using Column = typename Base::Column;
 
  protected:
-  Limiter limiter_;
+  Limiter *limiter_ptr_;
 
  public:
-  Limited(Part *part_ptr,
-          const Limiter &limiter)
-      : Base(part_ptr), limiter_(limiter) {
+  template <class... Args>
+  Limited(Args&&... args, Limiter *limiter_ptr)
+      : Base(std::forward<Args>(args)...), limiter_ptr_(limiter_ptr) {
   }
   Limited(const Limited &) = default;
   Limited &operator=(const Limited &) = default;
@@ -37,10 +45,14 @@ class Limited : public FiniteElement<Part> {
   Limited &operator=(Limited &&) noexcept = default;
   ~Limited() noexcept = default;
 
+  Limiter *limiter_ptr() const {
+    return limiter_ptr_;
+  }
+
  public:  // implement pure virtual methods declared in Temporal
   void SetSolutionColumn(Column const &column) override {
     this->Base::SetSolutionColumn(column);
-    mini::limiter::Reconstruct(this->part_ptr_, limiter_);
+    mini::limiter::Reconstruct(this->part_ptr_, limiter_ptr_);
   }
 };
 
