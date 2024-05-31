@@ -32,10 +32,11 @@ namespace fr {
  * @tparam Part 
  * @tparam Riem 
  */
-template <typename Part, typename Riem>
-class Lobatto : public General<Part, Riem> {
+template <typename P, typename R>
+class Lobatto : public General<P, R> {
  public:
-  using Base = General<Part, Riem>;
+  using Base = General<P, R>;
+  using Part = typename Base::Part;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
@@ -68,8 +69,8 @@ class Lobatto : public General<Part, Riem> {
     return std::abs(1 - std::abs(a.dot(b) / a.norm() / b.norm())) < 1e-8;
   }
 
-  template <std::ranges::input_range R, class FaceToCell>
-  void CacheCorrectionGradients(R &&faces, FaceToCell &&face_to_cell,
+  template <std::ranges::input_range Range, class FaceToCell>
+  void CacheCorrectionGradients(Range &&faces, FaceToCell &&face_to_cell,
       std::vector<FaceCache> *cache) {
     Scalar g_prime = this->vincent_.LocalToRightDerivative(1);
     for (const Face &face : faces) {

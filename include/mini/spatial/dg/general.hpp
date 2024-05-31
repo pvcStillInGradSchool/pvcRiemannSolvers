@@ -17,10 +17,11 @@ namespace mini {
 namespace spatial {
 namespace dg {
 
-template <typename Part, typename Riem>
-class General : public spatial::FiniteElement<Part, Riem> {
+template <typename P, typename R>
+class General : public spatial::FiniteElement<P, R> {
  public:
-  using Base = spatial::FiniteElement<Part, Riem>;
+  using Base = spatial::FiniteElement<P, R>;
+  using Part = typename Base::Part;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
@@ -214,12 +215,13 @@ class General : public spatial::FiniteElement<Part, Riem> {
   }
 };
 
-template <typename Part, typename Riem, typename Limiter,
-    typename Source = DummySource<Part>>
-class WithLimiterAndSource : public General<Part, Riem> {
-  using Base = General<Part, Riem>;
+template <typename P, typename R, typename Limiter,
+    typename Source = DummySource<P>>
+class WithLimiterAndSource : public General<P, R> {
 
  public:
+  using Base = General<P, R>;
+  using Part = typename Base::Part;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;

@@ -29,11 +29,12 @@ namespace dg {
  * @tparam Part 
  * @tparam Riem 
  */
-template <typename Part, typename Riem>
-    requires mini::polynomial::Nodal<typename Part::Polynomial>
-class Lobatto : public General<Part, Riem> {
+template <typename P, typename R>
+    requires mini::polynomial::Nodal<typename P::Polynomial>
+class Lobatto : public General<P, R> {
  public:
-  using Base = General<Part, Riem>;
+  using Base = General<P, R>;
+  using Part = typename Base::Part;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
@@ -54,8 +55,8 @@ class Lobatto : public General<Part, Riem> {
   std::vector<FaceCache> i_node_on_holder_;
   std::vector<FaceCache> i_node_on_sharer_;
 
-  template <std::ranges::input_range R, class FaceToCell>
-  void MatchIntegratorianPoints(R &&faces, FaceToCell &&face_to_cell,
+  template <std::ranges::input_range Range, class FaceToCell>
+  void MatchIntegratorianPoints(Range &&faces, FaceToCell &&face_to_cell,
       std::vector<FaceCache> *cache) {
     for (const Face &face : faces) {
       assert(cache->size() == face.id());

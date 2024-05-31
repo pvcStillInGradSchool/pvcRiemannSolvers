@@ -36,10 +36,11 @@ class DummySource {
   }
 };
 
-template <typename Part, mini::riemann::Convective Riem>
-class FiniteElement : public temporal::System<typename Part::Scalar> {
+template <typename P, mini::riemann::Convective R>
+class FiniteElement : public temporal::System<typename P::Scalar> {
  public:
-  using Riemann = Riem;
+  using Part = P;
+  using Riemann = R;
   using Scalar = typename Part::Scalar;
   using Face = typename Part::Face;
   using Cell = typename Part::Cell;
