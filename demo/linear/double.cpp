@@ -17,6 +17,7 @@
 #include "mini/limiter/reconstruct.hpp"
 #include "mini/temporal/rk.hpp"
 #include "mini/spatial/dg/general.hpp"
+#include "mini/spatial/with_limiter.hpp"
 
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
@@ -99,8 +100,6 @@ int main(int argc, char* argv[]) {
   using Limiter = mini::limiter::weno::Lazy<Cell>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
 
-
-
   /* Set initial conditions. */
   Value value_right{ 10, 5 }, value_left{ -10, -5 };
   double x_0 = 0.0;
@@ -146,8 +145,9 @@ int main(int argc, char* argv[]) {
     part.ScatterSolutions();
   }
 
-  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
-  auto spatial = Spatial(&part, limiter);
+  using General = mini::spatial::dg::General<Part, Riemann>;
+  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+  auto spatial = Spatial(&limiter, &part);
 
   /* Define the temporal solver. */
   constexpr int kOrders = std::min(3, kDegrees + 1);

@@ -17,6 +17,7 @@
 #include "mini/limiter/reconstruct.hpp"
 #include "mini/temporal/rk.hpp"
 #include "mini/spatial/dg/general.hpp"
+#include "mini/spatial/with_limiter.hpp"
 
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
@@ -101,8 +102,9 @@ int main(int argc, char* argv[]) {
   using Limiter = mini::limiter::weno::Eigen<Cell, Riemann>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
 
-  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
-  auto spatial = Spatial(&part, limiter);
+  using General = mini::spatial::dg::General<Part, Riemann>;
+  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+  auto spatial = Spatial(&limiter, &part);
   auto face_to_riemanns = [&spatial](Face const &face) -> auto const & {
     return spatial.GetRiemannSolvers(face);
   };

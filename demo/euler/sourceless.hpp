@@ -18,8 +18,9 @@
 #include "mini/spatial/dg/general.hpp"
 #include "mini/spatial/dg/lobatto.hpp"
 #include "mini/spatial/fr/lobatto.hpp"
+#include "mini/spatial/with_limiter.hpp"
 
-#define FR
+#define DGFEM
 
 using Scalar = double;
 
@@ -34,18 +35,18 @@ using Riemann = mini::riemann::rotated::Euler<Unrotated>;
 /* Define spatial discretization. */
 constexpr int kDegrees = 2;
 #ifdef DGFEM
-  using Projection = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, 5>;
+  using Polynomial = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, 5>;
 #else
   using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 #endif
 #ifdef DGSEM
-  using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, 5, false>;
+  using Polynomial = mini::polynomial::Hexahedron<Gx, Gx, Gx, 5, false>;
 #endif
 #ifdef FR
-  using Projection = mini::polynomial::Hexahedron<Gx, Gx, Gx, 5, true>;
+  using Polynomial = mini::polynomial::Hexahedron<Gx, Gx, Gx, 5, true>;
 #endif
 
-using Part = mini::mesh::part::Part<cgsize_t, Projection>;
+using Part = mini::mesh::part::Part<cgsize_t, Polynomial>;
 using Cell = typename Part::Cell;
 using Face = typename Part::Face;
 using Global = typename Cell::Global;
@@ -57,7 +58,8 @@ using Limiter = mini::limiter::weno::Dummy<Cell>;
 #endif
 
 #ifdef DGFEM
-using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
+using General = mini::spatial::dg::General<Part, Riemann>;
+using Spatial = mini::spatial::WithLimiter<General, Limiter>;
 #endif
 #ifdef DGSEM
 using Spatial = mini::spatial::dg::Lobatto<Part, Riemann>;

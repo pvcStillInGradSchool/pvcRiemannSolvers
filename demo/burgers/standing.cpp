@@ -15,6 +15,7 @@
 #include "mini/limiter/reconstruct.hpp"
 #include "mini/temporal/rk.hpp"
 #include "mini/spatial/dg/general.hpp"
+#include "mini/spatial/with_limiter.hpp"
 #include "mini/polynomial/projection.hpp"
 
 int main(int argc, char* argv[]) {
@@ -136,8 +137,9 @@ int main(int argc, char* argv[]) {
     part.ScatterSolutions();
   }
 
-  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
-  auto spatial = Spatial(&part, limiter);
+  using General = mini::spatial::dg::General<Part, Riemann>;
+  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+  auto spatial = Spatial(&limiter, &part);
 
   /* Define the temporal solver. */
   constexpr int kOrders = std::min(3, kDegrees + 1);

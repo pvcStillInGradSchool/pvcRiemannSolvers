@@ -24,8 +24,9 @@
 #include "mini/spatial/dg/general.hpp"
 #include "mini/spatial/dg/lobatto.hpp"
 #include "mini/spatial/fr/lobatto.hpp"
+#include "mini/spatial/with_limiter.hpp"
 
-#define FR
+#define DGFEM
 
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
@@ -182,8 +183,9 @@ int main(int argc, char* argv[]) {
   }
 
 #ifdef DGFEM
-  using Spatial = mini::spatial::dg::WithLimiterAndSource<Part, Riemann, Limiter>;
-  auto spatial = Spatial(&part, limiter);
+  using General = mini::spatial::dg::General<Part, Riemann>;
+  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+  auto spatial = Spatial(&limiter, &part);
 #endif
 #ifdef DGSEM
   using Spatial = mini::spatial::dg::Lobatto<Part, Riemann>;

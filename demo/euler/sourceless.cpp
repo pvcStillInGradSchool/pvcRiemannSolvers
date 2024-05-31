@@ -117,7 +117,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   }
 
 #ifdef DGFEM
-  auto spatial = Spatial(&part, limiter);
+  auto spatial = Spatial(&limiter, &part);
 #else
   auto spatial = Spatial(&part);
 #endif
