@@ -1,6 +1,6 @@
 // Copyright 2023 PEI Weicheng
-#ifndef MINI_SPATIAL_LIMITED_HPP_
-#define MINI_SPATIAL_LIMITED_HPP_
+#ifndef MINI_SPATIAL_WITH_LIMITER_HPP_
+#define MINI_SPATIAL_WITH_LIMITER_HPP_
 
 #include <concepts>
 
@@ -14,7 +14,7 @@ namespace spatial {
  * 
  */
 template <typename ConcreteFiniteElement, typename Limiter>
-class Limited : public ConcreteFiniteElement {
+class WithLimiter : public ConcreteFiniteElement {
  public:
   using Base = ConcreteFiniteElement;
   using Part = typename Base::Part;
@@ -25,7 +25,6 @@ class Limited : public ConcreteFiniteElement {
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
-  using Projection = typename Base::Projection;
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;
@@ -36,14 +35,14 @@ class Limited : public ConcreteFiniteElement {
 
  public:
   template <class... Args>
-  Limited(Args&&... args, Limiter *limiter_ptr)
+  WithLimiter(Limiter *limiter_ptr, Args&&... args)
       : Base(std::forward<Args>(args)...), limiter_ptr_(limiter_ptr) {
   }
-  Limited(const Limited &) = default;
-  Limited &operator=(const Limited &) = default;
-  Limited(Limited &&) noexcept = default;
-  Limited &operator=(Limited &&) noexcept = default;
-  ~Limited() noexcept = default;
+  WithLimiter(const WithLimiter &) = default;
+  WithLimiter &operator=(const WithLimiter &) = default;
+  WithLimiter(WithLimiter &&) noexcept = default;
+  WithLimiter &operator=(WithLimiter &&) noexcept = default;
+  ~WithLimiter() noexcept = default;
 
   Limiter *limiter_ptr() const {
     return limiter_ptr_;
@@ -59,4 +58,4 @@ class Limited : public ConcreteFiniteElement {
 }  // namespace spatial
 }  // namespace mini
 
-#endif  // MINI_SPATIAL_LIMITED_HPP_
+#endif  // MINI_SPATIAL_WITH_LIMITER_HPP_
