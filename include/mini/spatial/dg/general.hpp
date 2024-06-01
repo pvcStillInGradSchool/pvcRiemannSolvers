@@ -215,11 +215,10 @@ class General : public spatial::FiniteElement<P, R> {
   }
 };
 
-template <typename P, typename R, typename Limiter,
-    typename Source = DummySource<P>>
-class WithLimiterAndSource : public General<P, R> {
-
+template <typename P, typename R, typename S>
+class WithSource : public General<P, R> {
  public:
+  using Source = S;
   using Base = General<P, R>;
   using Part = typename Base::Part;
   using Riemann = typename Base::Riemann;
@@ -234,30 +233,20 @@ class WithLimiterAndSource : public General<P, R> {
   using Column = typename Base::Column;
 
  protected:
-  Limiter limiter_;
-  Source source_;
+  Source *source_ptr_;
 
  public:
-  WithLimiterAndSource(Part *part_ptr,
-          const Limiter &limiter, const Source &source = Source())
-      : Base(part_ptr), limiter_(limiter), source_(source) {
+  template <class... Args>
+  WithSource(Source *source_ptr, Args&&... args)
+      : Base(std::forward<Args>(args)...), source_ptr_(source_ptr) {
   }
-  WithLimiterAndSource(const WithLimiterAndSource &) = default;
-  WithLimiterAndSource &operator=(const WithLimiterAndSource &) = default;
-  WithLimiterAndSource(WithLimiterAndSource &&) noexcept = default;
-  WithLimiterAndSource &operator=(WithLimiterAndSource &&) noexcept = default;
-  ~WithLimiterAndSource() noexcept = default;
+  WithSource(const WithSource &) = default;
+  WithSource &operator=(const WithSource &) = default;
+  WithSource(WithSource &&) noexcept = default;
+  WithSource &operator=(WithSource &&) noexcept = default;
+  ~WithSource() noexcept = default;
 
  public:  // implement pure virtual methods declared in Temporal
-  Limiter *limiter_ptr() {
-    return &limiter_;
-  }
-
-  void SetSolutionColumn(Column const &column) override {
-    this->Base::SetSolutionColumn(column);
-    mini::limiter::Reconstruct(this->part_ptr(), limiter_ptr());
-  }
-
   Column GetResidualColumn() const override {
     auto residual = this->Base::GetResidualColumn();
     this->AddSourceIntegral(&residual);
@@ -267,12 +256,9 @@ class WithLimiterAndSource : public General<P, R> {
  protected:
   virtual void AddSourceIntegral(Column *residual) const {
     // Integrate the source term, if there is any.
-    if (!std::is_same_v<Source, DummySource<Part>>) {
-      for (const Cell &cell : this->part().GetLocalCells()) {
-        Scalar *data = this->AddCellDataOffset(residual, cell.id());
-        const_cast<WithLimiterAndSource *>(this)->source_.UpdateCoeff(
-            cell, this->t_curr_, data);
-      }
+    for (const Cell &cell : this->part().GetLocalCells()) {
+      Scalar *data = this->AddCellDataOffset(residual, cell.id());
+      source_ptr_->UpdateCoeff(cell, this->t_curr_, data);
     }
   }
 };

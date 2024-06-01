@@ -123,7 +123,7 @@ int Main(int argc, char* argv[], IC ic, BC bc, Source source) {
           i_frame, n_core, MPI_Wtime() - time_begin);
     }
   }
-  auto spatial = Spatial(&part, limiter);
+  auto spatial = Spatial(&limiter, &source, &part);
   auto face_to_riemanns = [&spatial](Face const &face) -> auto const & {
     return spatial.GetRiemannSolvers(face);
   };

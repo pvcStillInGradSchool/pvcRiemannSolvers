@@ -25,17 +25,6 @@ static bool Near(auto const &x, auto const &y) {
   return (x - y).norm() < 1e-12;
 }
 
-template <typename P>
-class DummySource {
- public:
-  using Part = P;
-  using Cell = typename Part::Cell;
-  using Scalar = typename Cell::Scalar;
-
-  void UpdateCoeff(const Cell &cell, double t_curr, Scalar *coeff) {
-  }
-};
-
 template <typename P, mini::riemann::Convective R>
 class FiniteElement : public temporal::System<typename P::Scalar> {
  public:
