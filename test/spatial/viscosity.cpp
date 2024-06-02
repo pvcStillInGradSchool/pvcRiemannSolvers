@@ -39,25 +39,28 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   auto part = Part(case_name, i_core, n_core);
   InstallIntegratorPrototypes(&part);
   part.SetFieldNames({"U1", "U2"});
-  using Spatial = mini::spatial::fr::Lobatto<Part, test::spatial::Riemann>;
+  using RiemannWithViscosity = mini::spatial::EnergyBasedViscosity<
+      Part, test::spatial::Riemann>;
+  using Spatial = mini::spatial::fr::Lobatto<Part, RiemannWithViscosity>;
   auto spatial = Spatial(&part);
-  using Viscosity = mini::spatial::EnergyBasedViscosity<Part, test::spatial::Riemann>;
-  auto viscosity = Viscosity(&spatial);
-  auto damping_matrices = viscosity.BuildDampingMatrices();
+  RiemannWithViscosity::InstallSpatial(&spatial);
+  auto damping_matrices = RiemannWithViscosity::BuildDampingMatrices();
   std::cout << "[Done] BuildDampingMatrices" << std::endl;
+  // BuildDampingMatrices() modifies Part, so Approximate() is called after it.
   for (auto *cell_ptr : part.GetLocalCellPointers()) {
     cell_ptr->Approximate(func);
   }
   part.ShareGhostCellCoeffs();
   part.UpdateGhostCellCoeffs();
-  auto value_jumps = viscosity.BuildValueJumps();
+  auto value_jumps = RiemannWithViscosity::BuildValueJumps();
   std::cout << "[Done] BuildValueJumps" << std::endl;
-  auto jump_integrals = viscosity.IntegrateJumps(value_jumps);
+  auto jump_integrals = RiemannWithViscosity::IntegrateJumps(value_jumps);
   std::cout << "[Done] IntegrateJumps" << std::endl;
-  viscosity.TimeScale() = 1e-3;
-  auto viscosity_values = viscosity.GetViscosityValues(
+  RiemannWithViscosity::TimeScale() = 1e-3;
+  auto viscosity_values = RiemannWithViscosity::GetViscosityValues(
         jump_integrals, damping_matrices);
   std::cout << "[Done] GetViscosityValues" << std::endl;
+  // Check values by VTK plotting:
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
   using Cell = typename Part::Cell;
   VtkWriter::AddExtraField("CellEnergy1", [&](Cell const &cell, Global const &global, Value const &value){
@@ -73,6 +76,7 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
     return viscosity_values.at(cell.id())[1];
   });
   VtkWriter::WriteSolutions(part, "Viscosity");
+  // Check values by GoogleTest:
   for (auto &curr_cell : part.GetLocalCells()) {
     auto &value_jumps_on_curr_cell = value_jumps.at(curr_cell.id());
     for (int i_node = 0; i_node < curr_cell.N; ++i_node) {

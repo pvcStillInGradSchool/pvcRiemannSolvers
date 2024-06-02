@@ -18,8 +18,6 @@
 #include <iomanip>
 
 #include "mini/algebra/eigen.hpp"
-#include "mini/riemann/concept.hpp"
-#include "mini/temporal/ode.hpp"
 #include "mini/spatial/fem.hpp"
 #include "mini/riemann/concept.hpp"
 #include "mini/riemann/diffusive/linear.hpp"
@@ -28,31 +26,51 @@
 namespace mini {
 namespace spatial {
 
-template <typename P, typename R>
-class EnergyBasedViscosity : public FiniteElement<P, R> {
+template <typename P, mini::riemann::Convective R>
+class EnergyBasedViscosity : public R {
  public:
-  using Base = FiniteElement<P, R>;
-  using Part = typename Base::Part;
-  using Riemann = typename Base::Riemann;
-  using Scalar = typename Base::Scalar;
-  using Face = typename Base::Face;
-  using Cell = typename Base::Cell;
-  using Global = typename Base::Global;
-  using Polynomial = typename Base::Polynomial;
+  using Spatial = FiniteElement<P, EnergyBasedViscosity>;
+  using Part = typename Spatial::Part;
+  using Riemann = typename Spatial::Riemann;
+  using Scalar = typename Spatial::Scalar;
+  using Face = typename Spatial::Face;
+  using Cell = typename Spatial::Cell;
+  using Global = typename Spatial::Global;
+  using Polynomial = typename Spatial::Polynomial;
   using Integrator = typename Polynomial::Integrator;
   using Local = typename Integrator::Local;
-  using Coeff = typename Base::Coeff;
-  using Value = typename Base::Value;
-  using Temporal = typename Base::Temporal;
-  using Column = typename Base::Column;
-  using FluxMatrix = typename Base::FluxMatrix;
-  using CellToFlux = typename Base::CellToFlux;
-  using DampingMatrix = algebra::Matrix<Scalar, Cell::N, Cell::N>;
+  using Coeff = typename Spatial::Coeff;
+  using Value = typename Spatial::Value;
+  using Temporal = typename Spatial::Temporal;
+  using Column = typename Spatial::Column;
+  using FluxMatrix = typename Spatial::FluxMatrix;
+  using CellToFlux = typename Spatial::CellToFlux;
 
  private:
-  Base *base_ptr_;
+  static Spatial *spatial_ptr_;
+  static Scalar time_scale_;
 
-  // TODO(PVC): avoid overriding Base::Riemann
+ public:
+  static void InstallSpatial(Spatial *spatial_ptr)
+    spatial_ptr_ = spatial_ptr {
+  }
+
+  static Part *part_ptr() {
+    return spatial_ptr_->part_ptr();
+  }
+  static Part const &part() {
+    return spatial_ptr_->part();
+  }
+
+  static Scalar TimeScale() const {
+    return time_scale_;
+  }
+  static Scalar &TimeScale() {
+    return time_scale_;
+  }
+
+ private:
+  // TODO(PVC): avoid overriding Spatial::Riemann
   using Diffusion = mini::riemann::diffusive::Isotropic<Scalar, Cell::K>;
   using DiffusionRiemann = mini::riemann::diffusive::DirectDG<Diffusion>;
 
@@ -66,34 +84,19 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
   }
 
  public:
-  explicit EnergyBasedViscosity(Base *base_ptr)
-      : Base(base_ptr->part_ptr()), base_ptr_(base_ptr) {
-  }
   EnergyBasedViscosity(const EnergyBasedViscosity &) = default;
   EnergyBasedViscosity &operator=(const EnergyBasedViscosity &) = default;
   EnergyBasedViscosity(EnergyBasedViscosity &&) noexcept = default;
   EnergyBasedViscosity &operator=(EnergyBasedViscosity &&) noexcept = default;
   ~EnergyBasedViscosity() noexcept = default;
 
-  Base const &base() const {
-    return *base_ptr_;
-  }
-  Part const &part() const {
-    return base().part();
-  }
-
-  std::string name() const override {
-    return base().name() + "EnergyBasedViscosity";
-  }
-
- protected:  // data for generating artificial viscosity
-  std::vector<DampingMatrix> damping_matrices_;
-
  public:  // methods for generating artificial viscosity
-  std::vector<DampingMatrix> BuildDampingMatrices() const {
+  using DampingMatrix = algebra::Matrix<Scalar, Cell::N, Cell::N>;
+
+  static std::vector<DampingMatrix> BuildDampingMatrices() {
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
     Diffusion::SetDiffusionCoefficient(1.0);
-    for (Cell *cell_ptr: base_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *cell_ptr: spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
       // Nullify all its neighbors' coeffs:
       for (Cell *neighbor : cell_ptr->adj_cells_) {
         neighbor->polynomial().coeff().setZero();
@@ -109,7 +112,7 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
         }
         // Build the element-wise residual column:
         Coeff residual; residual.setZero();
-        base().AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
+        spatial_ptr_->AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
             residual.data());
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
@@ -120,7 +123,7 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
 #ifndef NDEBUG
       Coeff residual; residual.setZero();
       solution.setOnes();
-      base().AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
+      spatial_ptr_->AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
           residual.data());
       for (int k = 0; k < Cell::K; ++k) {
         auto const &residual_col = residual.row(k).transpose();
@@ -140,10 +143,10 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
     return matrices;
   }
 
-  std::vector<std::array<Value, Cell::N>> BuildValueJumps() const {
+  static std::vector<std::array<Value, Cell::N>> BuildValueJumps() {
     std::vector<std::array<Value, Cell::N>> value_jumps;
     value_jumps.reserve(part().CountLocalCells());
-    for (Cell *curr_cell : base_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *curr_cell : spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
       auto &value_jumps_on_curr_cell = value_jumps.emplace_back();
       for (int i_node = 0; i_node < Cell::N; ++i_node) {
         auto &value_jump_on_curr_node = value_jumps_on_curr_cell[i_node];
@@ -162,11 +165,11 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
     return value_jumps;
   }
 
-  std::vector<Value>
-  IntegrateJumps(std::vector<std::array<Value, Cell::N>> const jumps) const {
+  static std::vector<Value>
+  IntegrateJumps(std::vector<std::array<Value, Cell::N>> const jumps) {
     std::vector<Value> jump_integrals;
     jump_integrals.reserve(part().CountLocalCells());
-    for (Cell *curr_cell : base_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *curr_cell : spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
       auto &integral_on_curr_cell = jump_integrals.emplace_back(Value::Zero());
       auto &jump_on_curr_cell = jumps.at(curr_cell->id());
       auto const &integrator = curr_cell->integrator();
@@ -180,12 +183,12 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
     return jump_integrals;
   }
 
-  std::vector<Value> GetViscosityValues(
+  static std::vector<Value> GetViscosityValues(
       std::vector<Value> const &jump_integrals,
-      std::vector<DampingMatrix> const &damping_matrices) const {
+      std::vector<DampingMatrix> const &damping_matrices) {
     std::vector<Value> viscosity_values;
     viscosity_values.reserve(part().CountLocalCells());
-    for (Cell *curr_cell : base_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *curr_cell : spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
       auto &viscosity_on_curr_cell = viscosity_values.emplace_back();
       auto &jump_integral_on_curr_cell = jump_integrals.at(curr_cell->id());
       auto &damping_matrix_on_curr_cell = damping_matrices.at(curr_cell->id());
@@ -197,7 +200,7 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
         auto const &u_col = u_row.transpose();
         Scalar damping_rate = u_row.dot(damping_matrix_on_curr_cell * u_col);
         viscosity_on_curr_cell[k] = jump_integral_on_curr_cell[k]
-            / (damping_rate * this->TimeScale());
+            / (damping_rate * TimeScale());
       }
       if (curr_cell->id() == 0) {
         std::fstream log{ "damping" + std::to_string(part().mpi_rank()) + ".txt", log.out };
@@ -207,60 +210,15 @@ class EnergyBasedViscosity : public FiniteElement<P, R> {
     assert(viscosity_values.size() == part().CountLocalCells());
     return viscosity_values;
   }
-
- public:  // override virtual methods defined in Base
-  Column GetResidualColumn() const override {
-    return base().GetResidualColumn();
-  }
-  Column GetSolutionColumn() const override {
-    return base().GetSolutionColumn();
-  }
-  void SetSolutionColumn(Column const &column) override {
-    base_ptr_->SetSolutionColumn(column);
-  }
-  void SetTime(double t_curr) override {
-    base_ptr_->SetTime(t_curr);
-  }
-  Scalar TimeScale() const {
-    return time_scale_;
-  }
-  Scalar &TimeScale() {
-    return time_scale_;
-  }
-
- private:
-  Scalar time_scale_;
-
- protected:  // override virtual methods defined in Base
-  void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
-      Scalar *data) const override {
-    base().AddFluxDivergence(cell_to_flux, cell, data);
-  }
-  void AddFluxOnGhostFaces(Column *residual) const override {
-    base().AddFluxOnGhostFaces(residual);
-  }
-  void AddFluxOnLocalFaces(Column *residual) const override {
-    base().AddFluxOnLocalFaces(residual);
-  }
-  void AddFluxOnSmartBoundaries(Column *residual) const override {
-    base().AddFluxOnSmartBoundaries(residual);
-  }
-  void AddFluxOnInviscidWalls(Column *residual) const override {
-    base().AddFluxOnInviscidWalls(residual);
-  }
-  void AddFluxOnSubsonicInlets(Column *residual) const override {
-    base().AddFluxOnSubsonicInlets(residual);
-  }
-  void AddFluxOnSubsonicOutlets(Column *residual) const override {
-    base().AddFluxOnSubsonicOutlets(residual);
-  }
-  void AddFluxOnSupersonicInlets(Column *residual) const override {
-    base().AddFluxOnSupersonicInlets(residual);
-  }
-  void AddFluxOnSupersonicOutlets(Column *residual) const override {
-    base().AddFluxOnSupersonicOutlets(residual);
-  }
 };
+
+template <typename P, typename R>
+typename EnergyBasedViscosity<P, R>::Spatial *
+EnergyBasedViscosity<P, R>::spatial_ptr_;
+
+template <typename P, typename R>
+typename EnergyBasedViscosity<P, R>::Scalar
+EnergyBasedViscosity<P, R>::time_scale_;
 
 }  // namespace spatial
 }  // namespace mini
