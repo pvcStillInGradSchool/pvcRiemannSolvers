@@ -20,10 +20,11 @@
 #include "mini/input/path.hpp"  // defines PROJECT_BINARY_DIR
 
 #include "test/mesh/part.hpp"
+#include "test/spatial/riemann.hpp"
 
 using Polynomial = mini::polynomial::Extrapolation<
     mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true> >;
-using Part = mini::mesh::part::Part<cgsize_t, Riemann, Polynomial>;
+using Part = mini::mesh::part::Part<cgsize_t, Polynomial>;
 using Global = typename Part::Global;
 
 auto case_name = PROJECT_BINARY_DIR + std::string("/test/mesh/double_mach");
@@ -31,16 +32,16 @@ auto case_name = PROJECT_BINARY_DIR + std::string("/test/mesh/double_mach");
 class TestSpatialViscosity : public ::testing::Test {
  protected:
   void SetUp() override {
-    ResetRiemann();
+    test::spatial::ResetRiemann();
   }
 };
 TEST_F(TestSpatialViscosity, LobattoFR) {
   auto part = Part(case_name, i_core, n_core);
   InstallIntegratorPrototypes(&part);
   part.SetFieldNames({"U1", "U2"});
-  using Spatial = mini::spatial::fr::Lobatto<Part>;
+  using Spatial = mini::spatial::fr::Lobatto<Part, test::spatial::Riemann>;
   auto spatial = Spatial(&part);
-  using Viscosity = mini::spatial::EnergyBasedViscosity<Part>;
+  using Viscosity = mini::spatial::EnergyBasedViscosity<Part, test::spatial::Riemann>;
   auto viscosity = Viscosity(&spatial);
   auto damping_matrices = viscosity.BuildDampingMatrices();
   std::cout << "[Done] BuildDampingMatrices" << std::endl;

@@ -28,10 +28,11 @@
 namespace mini {
 namespace spatial {
 
-template <typename Part>
-class EnergyBasedViscosity : public FiniteElement<Part> {
+template <typename P, typename R>
+class EnergyBasedViscosity : public FiniteElement<P, R> {
  public:
-  using Base = FiniteElement<Part>;
+  using Base = FiniteElement<P, R>;
+  using Part = typename Base::Part;
   using Riemann = typename Base::Riemann;
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
