@@ -27,6 +27,9 @@ class Anisotropic {
   using Gradient = algebra::Matrix<Scalar, kDimensions, kComponents>;
   using FluxMatrix = algebra::Matrix<Scalar, kComponents, kDimensions>;
   using Flux = Conservative;
+  struct Coefficient {
+    Scalar nu_x, nu_y, nu_z;
+  };
 
  private:
   static Scalar nu_x_;
@@ -85,6 +88,7 @@ class Isotropic : public Anisotropic<S, K> {
   using Gradient = typename Base::Gradient;
   using FluxMatrix = typename Base::FluxMatrix;
   using Flux = typename Base::Flux;
+  using Coefficient = Scalar;
 
  public:
   static void SetDiffusionCoefficient(Scalar nu) {

@@ -41,15 +41,16 @@ concept HasDiffusiveData = requires {
   requires HasConvectiveData<R>;
   // more than convective
   typename R::Gradient;
+  typename R::Coefficient;
 };
 
-template <typename R, typename C, typename G, typename F, typename M,
-    typename S, typename V>
-concept HasDiffusiveMethods = requires(R riemann, C const &value,
-    G const &gradient, F *flux, M *flux_matrix, S distance, V const &normal) {
+template <typename R, typename V, typename G, typename F, typename M,
+    typename S, typename N>
+concept HasDiffusiveMethods = requires(R riemann, V const &value,
+    G const &gradient, F *flux, M *flux_matrix, S distance, N const &normal) {
   requires std::same_as<G, typename R::Gradient>;
   requires std::same_as<S, typename R::Scalar>;
-  requires std::same_as<V, typename R::Vector>;
+  requires std::same_as<N, typename R::Vector>;
   requires std::same_as<F, typename R::Flux>;
   requires std::same_as<M, typename R::FluxMatrix>;
   { R::MinusViscousFlux(value, gradient, flux_matrix) } -> std::same_as<void>;

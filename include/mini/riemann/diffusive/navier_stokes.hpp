@@ -30,6 +30,9 @@ class NavierStokes {
   using Primitive = euler::Primitives<Scalar, kDimensions>;
   using Vector = typename Primitive::Vector;
   using Tensor = algebra::Vector<Scalar, 6>;
+  struct Coefficient {
+    Scalar nu, kappa;
+  };
 
   static void SetProperty(Scalar nu, Scalar prandtl) {
     nu_ = nu;
