@@ -366,18 +366,16 @@ class General : public spatial::FiniteElement<P, R> {
       }
     }
   }
-  template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
-      Scalar distance, Value const &wall_value,
-      const Polynomial &holder_polynomial, Cache const &holder_cache)
+      Value const &wall_value,
+      Polynomial const &holder_polynomial, FluxPointCache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value value;
     return value;
   }
-  template <typename Cache>
   static Value GetFluxOnNoSlipWall(Riemann const &riemann,
-      Scalar distance, Value const &wall_value,
-      const Polynomial &holder_polynomial, Cache const &holder_cache)
+      Value const &wall_value,
+      Polynomial const &holder_polynomial, FluxPointCache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
@@ -395,9 +393,8 @@ class General : public spatial::FiniteElement<P, R> {
     f_holder -= f_mat_holder * holder_cache.normal;
     return f_holder;
   }
-  template <typename Cache>
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
-      const Polynomial &holder_polynomial, Cache const &holder_cache)
+      Polynomial const &holder_polynomial, FluxPointCache const &holder_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
@@ -406,9 +403,8 @@ class General : public spatial::FiniteElement<P, R> {
     f_holder -= f_mat_holder * holder_cache.normal;
     return f_holder;
   }
-  template <typename Cache>
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
-      const Polynomial &holder_polynomial, Cache const &holder_cache)
+      Polynomial const &holder_polynomial, FluxPointCache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);

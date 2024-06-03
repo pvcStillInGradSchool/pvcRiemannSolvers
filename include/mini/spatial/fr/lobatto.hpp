@@ -286,13 +286,11 @@ class Lobatto : public General<P, R> {
         auto *holder_data = this->AddCellDataOffset(residual, holder.id());
         auto const &holder_cache = holder_cache_[face.id()];
         auto const &integrator = face.integrator();
-        auto const &direction = face.HolderToSharer();
         assert(kFaceQ == integrator.CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
           Value wall_value = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_holder = Base::GetFluxOnNoSlipWall(riemanns[f],
-              direction.dot(riemanns[f].normal()),
               wall_value, holder.polynomial(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
