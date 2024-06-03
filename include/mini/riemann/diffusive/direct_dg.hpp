@@ -27,8 +27,14 @@ class DirectDG : public DiffusionModel {
  protected:
   static Scalar beta_0_;
   static Scalar beta_1_;
+  Scalar distance_;  // this->normal().dot(face().HolderToSharer())
 
  public:
+  void SetDistance(Scalar distance) {
+    assert(distance > 0);
+    distance_ = distance;
+  }
+
   static Gradient GetCommonGradient(Scalar distance, Vector normal,
       Conservative const &left_value, Conservative const &right_value,
       Gradient const &left_gradient, Gradient const &right_gradient) {

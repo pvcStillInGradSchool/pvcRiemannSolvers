@@ -56,6 +56,14 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   // [i_face][i_gauss]
   std::vector<std::vector<Riemann>> riemann_;
 
+  void SetDistance(Riemann *riemann_ptr, Face const &face)
+      requires(!mini::riemann::Diffusive<R>) {
+  }
+  void SetDistance(Riemann *riemann_ptr, Face const &face)
+      requires(mini::riemann::Diffusive<R>) {
+    riemann_ptr->SetDistance(riemann_ptr->normal().dot(face.HolderToSharer()));
+  }
+
   Part *part_ptr_;
   double t_curr_;
   size_t cell_data_size_;
@@ -74,6 +82,7 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
       auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
       for (int i = 0, n = riemanns.size(); i < n; ++i) {
         riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+        SetDistance(&riemanns.at(i), face);
       }
     }
     for (Face const &face : part_ptr->GetGhostFaces()) {
@@ -82,6 +91,7 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
       auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
       for (int i = 0, n = riemanns.size(); i < n; ++i) {
         riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+        SetDistance(&riemanns.at(i), face);
       }
     }
     for (Face const &face : part_ptr->GetBoundaryFaces()) {
@@ -90,6 +100,7 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
       auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
       for (int i = 0, n = riemanns.size(); i < n; ++i) {
         riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+        SetDistance(&riemanns.at(i), face);
       }
     }
 #ifdef ENABLE_LOGGING
