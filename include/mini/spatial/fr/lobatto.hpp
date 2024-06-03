@@ -279,29 +279,6 @@ class Lobatto : public General<P, R> {
     }
   }
 
- protected:
-  void _SetValueOnNoSlipWalls()
-      requires(!mini::riemann::Diffusive<Riemann>) {
-  }
-  void _SetValueOnNoSlipWalls()
-      requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    for (const auto &[name, func] : this->no_slip_wall_) {
-      for (Face *face_ptr : this->part_ptr()->GetBoundaryFacePointers(name)) {
-        auto &holder_polynomial = face_ptr->holder_ptr()->polynomial();
-        auto const &holder_cache = holder_cache_[face_ptr->id()];
-        auto const &integrator = face_ptr->integrator();
-        assert(kFaceQ == integrator.CountPoints());
-        for (int f = 0; f < kFaceQ; ++f) {
-          auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder_polynomial.GetValue(holder_flux_point.ijk);
-          Value wall_value = func(integrator.GetGlobal(f), this->t_curr_);
-          Riemann::SetValueOnNoSlipWall(wall_value, &u_holder);
-          holder_polynomial.SetValue(holder_flux_point.ijk, u_holder);
-        }
-      }
-    }
-  }
-
  public:
   void AddFluxOnNoSlipWalls(Column *residual) const override {
     for (const auto &[name, func] : this->no_slip_wall_) {

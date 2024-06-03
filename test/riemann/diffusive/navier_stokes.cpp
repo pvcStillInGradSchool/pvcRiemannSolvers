@@ -74,28 +74,6 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestGradientConversions) {
     EXPECT_NEAR((grad_got - conservative_grad_given.col(E)).norm(), 0.0, 1e-9);
   }
 }
-
-TEST_F(TestRiemannDiffusiveNavierStokes, TestSetValueOnNoSlipWall) {
-  NS::SetProperty(nu, prandtl);
-  std::srand(31415926);
-  for (int i = 1 << 10; i >= 0; --i) {
-    Scalar rho = disturb(1.29);
-    Scalar u = disturb(10.0);
-    Scalar v = disturb(20.0);
-    Scalar w = disturb(30.0);
-    Scalar p = disturb(101325);
-    auto primitive = Primitive(rho, u, v, w, p);
-    auto conservative = Gas::PrimitiveToConservative(primitive);
-    Value wall_value = Value::Random();
-    NS::SetValueOnNoSlipWall(wall_value, &conservative);
-    EXPECT_EQ(rho, conservative.mass());
-    EXPECT_EQ(rho * wall_value[U], conservative.momentumX());
-    EXPECT_EQ(rho * wall_value[V], conservative.momentumY());
-    EXPECT_EQ(rho * wall_value[W], conservative.momentumZ());
-    primitive = Gas::ConservativeToPrimitive(conservative);
-    EXPECT_NEAR(p, primitive.energy(), 1e-10);
-  }
-}
 TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
   NS::SetProperty(nu, prandtl);
   std::srand(31415926);
