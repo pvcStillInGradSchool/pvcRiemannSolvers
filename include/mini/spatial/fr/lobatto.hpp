@@ -225,7 +225,6 @@ class Lobatto : public General<P, R> {
         auto &holder_flux_point = holder_cache[f];
         auto &sharer_flux_point = sharer_cache[f];
         auto [f_holder, f_sharer] = Base::GetFluxOnLocalFace(riemanns[f],
-            riemanns[f].normal().dot(face.HolderToSharer()),
             holder.polynomial(), holder_flux_point,
             sharer.polynomial(), sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;
@@ -248,7 +247,6 @@ class Lobatto : public General<P, R> {
         auto &holder_flux_point = holder_cache[f];
         auto &sharer_flux_point = sharer_cache[f];
         auto [f_holder, _] = Base::GetFluxOnLocalFace(riemanns[f],
-            riemanns[f].normal().dot(face.HolderToSharer()),
             holder.polynomial(), holder_flux_point,
             sharer.polynomial(), sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;

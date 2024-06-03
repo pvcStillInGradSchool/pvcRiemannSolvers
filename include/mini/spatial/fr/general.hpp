@@ -246,8 +246,7 @@ class General : public spatial::FiniteElement<P, R> {
       Polynomial::MinusValue(value, data, q);
     }
   }
-  static std::pair<Value, Value> GetFluxOnLocalFace(
-      const Riemann &riemann, Scalar distance/* only used in viscous */,
+  static std::pair<Value, Value> GetFluxOnLocalFace(const Riemann &riemann,
       const Polynomial &holder_polynomial, FluxPointCache const &holder_cache,
       const Polynomial &sharer_polynomial, FluxPointCache const &sharer_cache)
       requires(!mini::riemann::Diffusive<Riemann>) {
@@ -261,8 +260,7 @@ class General : public spatial::FiniteElement<P, R> {
     f_sharer -= Riemann::GetFluxMatrix(u_sharer) * sharer_cache.normal;
     return { f_holder, f_sharer };
   }
-  static std::pair<Value, Value> GetFluxOnLocalFace(
-      const Riemann &riemann, Scalar distance/* only used in viscous */,
+  static std::pair<Value, Value> GetFluxOnLocalFace(const Riemann &riemann,
       const Polynomial &holder_polynomial, FluxPointCache const &holder_cache,
       const Polynomial &sharer_polynomial, FluxPointCache const &sharer_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
@@ -281,8 +279,7 @@ class General : public spatial::FiniteElement<P, R> {
         du_local_sharer, sharer_cache.ijk);
     assert(Collinear(holder_cache.normal, sharer_cache.normal));
     const auto &normal = riemann.normal();
-    assert(distance > 0);
-    auto du_common = riemann.GetCommonGradient(distance, normal,
+    auto du_common = riemann.GetCommonGradient(normal,
         u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
     Value u_common = (u_holder + u_sharer) / 2;
     Riemann::MinusViscousFlux(u_common, du_common, normal, &f_upwind);
@@ -310,7 +307,6 @@ class General : public spatial::FiniteElement<P, R> {
         auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
         auto [f_holder, f_sharer] = GetFluxOnLocalFace(riemanns[f],
-            riemanns[f].normal().dot(face.HolderToSharer()),
             holder.polynomial(), holder_flux_point,
             sharer.polynomial(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
@@ -337,7 +333,6 @@ class General : public spatial::FiniteElement<P, R> {
         auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
         auto [f_holder, _] = GetFluxOnLocalFace(riemanns[f],
-            riemanns[f].normal().dot(face.HolderToSharer()),
             holder.polynomial(), holder_flux_point,
             sharer.polynomial(), sharer_flux_point);
         for (auto [g_prime, ijk] : holder_solution_points) {
@@ -393,8 +388,7 @@ class General : public spatial::FiniteElement<P, R> {
     Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
-    assert(distance > 0);
-    Scalar value_penalty = Riemann::GetValuePenalty(distance);
+    Scalar value_penalty = riemann.GetValuePenalty();
     Riemann::MinusViscousFluxOnNoSlipWall(wall_value,
         u_holder, du_holder, normal, value_penalty, &f_upwind);
     Value f_holder = f_upwind * holder_cache.scale;

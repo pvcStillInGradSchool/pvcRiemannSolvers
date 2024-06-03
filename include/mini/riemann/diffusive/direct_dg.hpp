@@ -35,13 +35,13 @@ class DirectDG : public DiffusionModel {
     distance_ = distance;
   }
 
-  static Gradient GetCommonGradient(Scalar distance, Vector normal,
+  Gradient GetCommonGradient(Vector normal,
       Conservative const &left_value, Conservative const &right_value,
-      Gradient const &left_gradient, Gradient const &right_gradient) {
+      Gradient const &left_gradient, Gradient const &right_gradient) const {
     // add the average of Gradient
     Gradient common_gradient = (left_gradient + right_gradient) / 2;
     // add the penalty of Value jump
-    normal *= GetValuePenalty(distance);
+    normal *= GetValuePenalty();
     Conservative value_jump = right_value - left_value;
     common_gradient.row(X) += normal[X] * value_jump;
     common_gradient.row(Y) += normal[Y] * value_jump;
@@ -49,14 +49,14 @@ class DirectDG : public DiffusionModel {
     return common_gradient;
   }
 
-  static Gradient GetCommonGradient(Scalar distance, Vector normal,
+  Gradient GetCommonGradient(Vector normal,
       Conservative const &left_value, Conservative const &right_value,
       Gradient const &left_gradient, Gradient const &right_gradient,
-      Hessian const &left_hessian, Hessian const &right_hessian) {
-    Gradient common_gradient = GetCommonGradient(distance, normal,
+      Hessian const &left_hessian, Hessian const &right_hessian) const {
+    Gradient common_gradient = GetCommonGradient(normal,
         left_value, right_value, left_gradient, right_gradient);
     // add the penalty of Hessian jump
-    normal *= beta_1_ * distance;
+    normal *= GetHessianPenalty();
     Hessian hessian_jump = right_hessian - left_hessian;
     common_gradient.row(X) += normal[X] * hessian_jump.row(XX);
     common_gradient.row(X) += normal[Y] * hessian_jump.row(XY);
@@ -75,8 +75,11 @@ class DirectDG : public DiffusionModel {
     beta_1_ = beta_1;
   }
 
-  static Scalar GetValuePenalty(Scalar distance) {
-    return beta_0_ / distance;
+  Scalar GetValuePenalty() const {
+    return beta_0_ / distance_;
+  }
+  Scalar GetHessianPenalty() const {
+    return beta_1_ * distance_;
   }
 };
 template <typename DiffusionModel>
