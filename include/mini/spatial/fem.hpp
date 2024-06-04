@@ -75,34 +75,20 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   explicit FiniteElement(Part *part_ptr)
       : part_ptr_(part_ptr), cell_data_size_(part_ptr->GetCellDataSize()) {
     assert(cell_data_size_ == Cell::kFields * part_ptr->CountLocalCells());
-    // TODO(PVC): use a single range concatenating the three
-    for (Face const &face : part_ptr->GetLocalFaces()) {
-      assert(face.id() == riemann_.size());
-      auto const &integrator = face.integrator();
-      auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
-      for (int i = 0, n = riemanns.size(); i < n; ++i) {
-        riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
-        SetDistance(&riemanns.at(i), face);
+    auto build_riemanns = [this](std::ranges::input_range auto faces) {
+      for (Face const &face : faces) {
+        assert(face.id() == this->riemann_.size());
+        auto const &integrator = face.integrator();
+        auto &riemanns = this->riemann_.emplace_back(integrator.CountPoints());
+        for (int i = 0, n = riemanns.size(); i < n; ++i) {
+          riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
+          SetDistance(&riemanns.at(i), face);
+        }
       }
-    }
-    for (Face const &face : part_ptr->GetGhostFaces()) {
-      assert(face.id() == riemann_.size());
-      auto const &integrator = face.integrator();
-      auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
-      for (int i = 0, n = riemanns.size(); i < n; ++i) {
-        riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
-        SetDistance(&riemanns.at(i), face);
-      }
-    }
-    for (Face const &face : part_ptr->GetBoundaryFaces()) {
-      assert(face.id() == riemann_.size());
-      auto const &integrator = face.integrator();
-      auto &riemanns = riemann_.emplace_back(integrator.CountPoints());
-      for (int i = 0, n = riemanns.size(); i < n; ++i) {
-        riemanns.at(i).Rotate(integrator.GetNormalFrame(i));
-        SetDistance(&riemanns.at(i), face);
-      }
-    }
+    };
+    build_riemanns(part_ptr->GetLocalFaces());
+    build_riemanns(part_ptr->GetGhostFaces());
+    build_riemanns(part_ptr->GetBoundaryFaces());
 #ifdef ENABLE_LOGGING
     log_ = std::make_unique<std::ofstream>();
 #endif
