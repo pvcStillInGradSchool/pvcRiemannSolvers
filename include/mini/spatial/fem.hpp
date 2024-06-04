@@ -133,6 +133,8 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
 #endif
   }
 
+  
+
 #ifdef ENABLE_LOGGING
   std::ofstream &log() const {
     if (!log_->is_open()) {

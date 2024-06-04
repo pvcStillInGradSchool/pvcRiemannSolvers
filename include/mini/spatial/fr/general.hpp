@@ -203,6 +203,10 @@ class General : public spatial::FiniteElement<P, R> {
     }
   }
 
+  // cache of the flux matrices computed in AddFluxDivergence(),
+  // reused in GetFluxOnLocalFace() etc.
+  std::vector<std::array<FluxMatrix, kCellQ>> flux_matrices_;
+
  public:
   General(Part *part_ptr, Scalar c_next)
       : Base(part_ptr), vincent_(Part::kDegrees, c_next) {
@@ -216,6 +220,7 @@ class General : public spatial::FiniteElement<P, R> {
     CacheCorrectionGradients(ghost_faces, face_to_sharer, &sharer_cache_);
     auto boundary_faces = this->part().GetBoundaryFaces();
     CacheCorrectionGradients(boundary_faces, face_to_holder, &holder_cache_);
+    flux_matrices_.resize(this->part().CountLocalCells());
   }
   General(const General &) = default;
   General &operator=(const General &) = default;
@@ -232,13 +237,14 @@ class General : public spatial::FiniteElement<P, R> {
   void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
       Scalar *data) const override {
     const auto &integrator = cell.integrator();
-    std::array<FluxMatrix, kCellQ> flux;
+    const auto &polynomial = cell.polynomial();
+    auto &flux = const_cast<General *>(this)->flux_matrices_.at(cell.id());
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
       FluxMatrix global_flux = cell_to_flux(cell, q);
-      flux[q] = cell.polynomial().GlobalFluxToLocalFlux(global_flux, q);
+      flux[q] = polynomial.GlobalFluxToLocalFlux(global_flux, q);
     }
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-      auto const &grad = cell.polynomial().GetBasisGradients(q);
+      auto const &grad = polynomial.GetBasisGradients(q);
       Value value = flux[0] * grad.col(0);
       for (int k = 1; k < n; ++k) {
         value += flux[k] * grad.col(k);
