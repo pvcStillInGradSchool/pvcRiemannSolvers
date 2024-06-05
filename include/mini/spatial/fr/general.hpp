@@ -270,19 +270,11 @@ class General : public spatial::FiniteElement<P, R> {
       const Cell &holder, FluxPointCache const &holder_cache,
       const Cell &sharer, FluxPointCache const &sharer_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    Value u_holder = holder.polynomial().GetValue(holder_cache.ijk);
-    Value u_sharer = sharer.polynomial().GetValue(sharer_cache.ijk);
+    auto [u_holder, du_holder, ddu_holder] =
+        holder.polynomial().GetGlobalValueGradientHessian(holder_cache.ijk);
+    auto [u_sharer, du_sharer, ddu_sharer] =
+        sharer.polynomial().GetGlobalValueGradientHessian(sharer_cache.ijk);
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
-    auto du_local_holder = holder.polynomial().GetLocalGradient(holder_cache.ijk);
-    auto du_local_sharer = sharer.polynomial().GetLocalGradient(sharer_cache.ijk);
-    auto du_holder = holder.polynomial().GetGlobalGradient(
-        u_holder, du_local_holder, holder_cache.ijk);
-    auto du_sharer = sharer.polynomial().GetGlobalGradient(
-        u_sharer, du_local_sharer, sharer_cache.ijk);
-    auto ddu_holder = holder.polynomial().GetGlobalHessian(
-        du_local_holder, holder_cache.ijk);
-    auto ddu_sharer = sharer.polynomial().GetGlobalHessian(
-        du_local_sharer, sharer_cache.ijk);
     assert(Collinear(holder_cache.normal, sharer_cache.normal));
     const auto &normal = riemann.normal();
     auto du_common = riemann.GetCommonGradient(normal,
@@ -383,11 +375,10 @@ class General : public spatial::FiniteElement<P, R> {
       Value const &wall_value,
       Polynomial const &holder_polynomial, FluxPointCache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
+    auto [u_holder, du_holder] =
+        holder_polynomial.GetGlobalValueGradient(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
     auto du_local_holder = holder_polynomial.GetLocalGradient(holder_cache.ijk);
-    auto du_holder = holder_polynomial.GetGlobalGradient(
-        u_holder, du_local_holder, holder_cache.ijk);
     auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
     Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
     const auto &normal = riemann.normal();
@@ -412,11 +403,9 @@ class General : public spatial::FiniteElement<P, R> {
   static Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
       Polynomial const &holder_polynomial, FluxPointCache const &holder_cache)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
+    auto [u_holder, du_holder] =
+        holder_polynomial.GetGlobalValueGradient(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
-    auto du_local_holder = holder_polynomial.GetLocalGradient(holder_cache.ijk);
-    auto du_holder = holder_polynomial.GetGlobalGradient(
-        u_holder, du_local_holder, holder_cache.ijk);
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
     Riemann::MinusViscousFlux(u_holder, du_holder, normal, &f_upwind);

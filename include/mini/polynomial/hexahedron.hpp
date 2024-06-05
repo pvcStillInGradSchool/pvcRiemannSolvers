@@ -408,11 +408,9 @@ class Hexahedron {
     return basis_grad * coeff().transpose();
   }
   Gradient _GetGlobalGradient(int ijk) const requires(kLocal) {
-    return GetGlobalGradient(GetValue(ijk), GetLocalGradient(ijk), ijk);
+    return _GetGlobalGradient(GetValue(ijk), GetLocalGradient(ijk), ijk);
   }
-
- public:
-  Gradient GetGlobalGradient(Value const &value_ijk, Gradient local_grad_ijk,
+  Gradient _GetGlobalGradient(Value const &value_ijk, Gradient local_grad_ijk,
       int ijk) const requires(kLocal) {
     auto &value_grad = local_grad_ijk;
     value_grad -= jacobian_det_grad_[ijk] * value_ijk.transpose();
@@ -420,6 +418,8 @@ class Hexahedron {
     value_grad /= (jacobian_det * jacobian_det);
     return GetJacobianAssociated(ijk) * value_grad;
   }
+
+ public:
   /**
    * @brief Get \f$ \begin{bmatrix}\partial_{x}\\ \partial_{y}\\ \cdots \end{bmatrix} u \f$ at a given integratorian point.
    * 
@@ -456,9 +456,11 @@ class Hexahedron {
    * 
    */
   Hessian GetGlobalHessian(int ijk) const requires(kLocal) {
-    return GetGlobalHessian(GetLocalGradient(ijk), ijk);
+    return _GetGlobalHessian(GetLocalGradient(ijk), ijk);
   }
-  Hessian GetGlobalHessian(Gradient const &local_grad_ijk, int ijk) const
+
+ private:
+  Hessian _GetGlobalHessian(Gradient const &local_grad_ijk, int ijk) const
       requires(kLocal) {
     Hessian local_hess = GetLocalHessian(ijk);
     auto &global_hess = local_hess;
@@ -493,6 +495,32 @@ class Hexahedron {
       global_hess(ZZ, k) = scalar_hess(Z, Z);
     }
     return global_hess;
+  }
+
+ public:
+  /**
+   * @brief A wrapper of GetValue and GetGlobalGradient for reusing intermediate results.
+   * 
+   */
+  std::pair<Value, Gradient> GetGlobalValueGradient(int ijk) const
+      requires(kLocal) {
+    auto value_ijk = GetValue(ijk);
+    auto local_grad_ijk = GetLocalGradient(ijk);
+    return { value_ijk,
+        _GetGlobalGradient(value_ijk, local_grad_ijk, ijk) };
+  }
+
+  /**
+   * @brief A wrapper of GetValue, GetGlobalGradient and GetGlobalHessian for reusing intermediate results.
+   * 
+   */
+  std::tuple<Value, Gradient, Hessian> GetGlobalValueGradientHessian(int ijk) const
+      requires(kLocal) {
+    auto value_ijk = GetValue(ijk);
+    auto local_grad_ijk = GetLocalGradient(ijk);
+    return { value_ijk,
+        _GetGlobalGradient(value_ijk, local_grad_ijk, ijk),
+        _GetGlobalHessian(local_grad_ijk, ijk) };
   }
 
   /**

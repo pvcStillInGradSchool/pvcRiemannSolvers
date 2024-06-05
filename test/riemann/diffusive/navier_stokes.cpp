@@ -168,10 +168,8 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   interp.Approximate(func);
   // test values on nodes
   for (int ijk = 0; ijk < Basis::N; ++ijk) {
-    auto conservative_value = interp.GetValue(ijk);
-    auto conservative_grad_local = interp.GetLocalGradient(ijk);
-    auto conservative_grad = interp.GetGlobalGradient(
-        conservative_value, conservative_grad_local, ijk);
+    auto [conservative_value, conservative_grad] =
+        interp.GetGlobalValueGradient(ijk);
     auto [pimitive_value, primitive_grad] = NS::ConservativeToPrimitive(
         conservative_value, conservative_grad);
     Tensor tau = NS::GetViscousStressTensor(primitive_grad, rho);
