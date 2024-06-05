@@ -224,9 +224,9 @@ class Lobatto : public General<P, R> {
       for (int f = 0; f < kFaceQ; ++f) {
         auto &holder_flux_point = holder_cache[f];
         auto &sharer_flux_point = sharer_cache[f];
-        auto [f_holder, f_sharer] = Base::GetFluxOnLocalFace(riemanns[f],
-            holder.polynomial(), holder_flux_point,
-            sharer.polynomial(), sharer_flux_point);
+        auto [f_holder, f_sharer] = Base::CellPairToFluxPair(riemanns[f],
+            holder, holder_flux_point,
+            sharer, sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;
         Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         f_sharer *= sharer_flux_point.g_prime;
@@ -246,9 +246,9 @@ class Lobatto : public General<P, R> {
       for (int f = 0; f < kFaceQ; ++f) {
         auto &holder_flux_point = holder_cache[f];
         auto &sharer_flux_point = sharer_cache[f];
-        auto [f_holder, _] = Base::GetFluxOnLocalFace(riemanns[f],
-            holder.polynomial(), holder_flux_point,
-            sharer.polynomial(), sharer_flux_point);
+        auto [f_holder, _] = Base::CellPairToFluxPair(riemanns[f],
+            holder, holder_flux_point,
+            sharer, sharer_flux_point);
         f_holder *= holder_flux_point.g_prime;
         Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
       }
