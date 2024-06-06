@@ -64,6 +64,7 @@ class General : public spatial::FiniteElement<P, R> {
     Global normal;  // normal_flux = flux_matrix * normal
     Scalar scale;  // riemann_flux_local = scale * riemann_flux_global
     int ijk;
+    int xyz;
   };
   using LineCache = std::pair<
       std::array<SolutionPointCache, kLineQ>,
@@ -107,6 +108,7 @@ class General : public spatial::FiniteElement<P, R> {
           flux_point.normal =
               cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = -flux_point.normal.norm();
+          flux_point.xyz = Z;
           assert(Collinear(face_normal, flux_point.normal));
           for (k = 0; k < kLineQ; ++k) {
             auto ijk = cell_basis.index(i, j, k);
@@ -123,6 +125,7 @@ class General : public spatial::FiniteElement<P, R> {
           flux_point.normal =
               cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = -flux_point.normal.norm();
+          flux_point.xyz = Y;
           assert(Collinear(face_normal, flux_point.normal));
           for (j = 0; j < kLineQ; ++j) {
             auto ijk = cell_basis.index(i, j, k);
@@ -139,6 +142,7 @@ class General : public spatial::FiniteElement<P, R> {
           flux_point.normal =
               cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = +flux_point.normal.norm();
+          flux_point.xyz = X;
           assert(Collinear(face_normal, flux_point.normal));
           for (i = 0; i < kLineQ; ++i) {
             auto ijk = cell_basis.index(i, j, k);
@@ -155,6 +159,7 @@ class General : public spatial::FiniteElement<P, R> {
           flux_point.normal =
               cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Y);
           flux_point.scale = +flux_point.normal.norm();
+          flux_point.xyz = Y;
           assert(Collinear(face_normal, flux_point.normal));
           for (j = 0; j < kLineQ; ++j) {
             auto ijk = cell_basis.index(i, j, k);
@@ -171,6 +176,7 @@ class General : public spatial::FiniteElement<P, R> {
           flux_point.normal =
               cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(X);
           flux_point.scale = -flux_point.normal.norm();
+          flux_point.xyz = X;
           assert(Collinear(face_normal, flux_point.normal));
           for (i = 0; i < kLineQ; ++i) {
             auto ijk = cell_basis.index(i, j, k);
@@ -187,6 +193,7 @@ class General : public spatial::FiniteElement<P, R> {
           flux_point.normal =
               cell_polynomial.GetJacobianAssociated(flux_point.ijk).col(Z);
           flux_point.scale = +flux_point.normal.norm();
+          flux_point.xyz = Z;
           assert(Collinear(face_normal, flux_point.normal));
           for (k = 0; k < kLineQ; ++k) {
             auto ijk = cell_basis.index(i, j, k);
@@ -252,23 +259,36 @@ class General : public spatial::FiniteElement<P, R> {
       Polynomial::MinusValue(value, data, q);
     }
   }
-  static std::pair<Value, Value> CellPairToFluxPair(const Riemann &riemann,
+
+  void MinusCachedFlux(Value *flux, typename Part::Index cell_id,
+      FluxPointCache const &cache) const {
+    (*flux) -= flux_matrices_.at(cell_id).at(cache.ijk).col(cache.xyz);
+  }
+
+  std::pair<Value, Value> CellPairToFluxPair(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache,
-      const Cell &sharer, FluxPointCache const &sharer_cache)
+      const Cell &sharer, FluxPointCache const &sharer_cache,
+      bool use_cache) const
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value u_holder = holder.polynomial().GetValue(holder_cache.ijk);
     Value u_sharer = sharer.polynomial().GetValue(sharer_cache.ijk);
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
     assert(Collinear(holder_cache.normal, sharer_cache.normal));
     Value f_holder = f_upwind * holder_cache.scale;
-    f_holder -= Riemann::GetFluxMatrix(u_holder) * holder_cache.normal;
+    MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     Value f_sharer = f_upwind * (-sharer_cache.scale);
-    f_sharer -= Riemann::GetFluxMatrix(u_sharer) * sharer_cache.normal;
+    if (use_cache) {
+      MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
+    } else {
+      auto f_mat_sharer = Riemann::GetFluxMatrix(u_sharer);
+      f_sharer -= f_mat_sharer * sharer_cache.normal;
+    }
     return { f_holder, f_sharer };
   }
-  static std::pair<Value, Value> CellPairToFluxPair(const Riemann &riemann,
+  std::pair<Value, Value> CellPairToFluxPair(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache,
-      const Cell &sharer, FluxPointCache const &sharer_cache)
+      const Cell &sharer, FluxPointCache const &sharer_cache,
+      bool use_cache) const
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     auto [u_holder, du_holder, ddu_holder] =
         holder.polynomial().GetGlobalValueGradientHessian(holder_cache.ijk);
@@ -281,14 +301,16 @@ class General : public spatial::FiniteElement<P, R> {
         u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
     Value u_common = (u_holder + u_sharer) / 2;
     Riemann::MinusViscousFlux(u_common, du_common, normal, &f_upwind);
-    auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
-    Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
     Value f_holder = f_upwind * holder_cache.scale;
-    f_holder -= f_mat_holder * holder_cache.normal;
-    auto f_mat_sharer = Riemann::GetFluxMatrix(u_sharer);
-    Riemann::MinusViscousFlux(u_sharer, du_sharer, &f_mat_sharer);
+    MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     Value f_sharer = f_upwind * (-sharer_cache.scale);
-    f_sharer -= f_mat_sharer * sharer_cache.normal;
+    if (use_cache) {
+      MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
+    } else {
+      auto f_mat_sharer = Riemann::GetFluxMatrix(u_sharer);
+      Riemann::MinusViscousFlux(u_sharer, du_sharer, &f_mat_sharer);
+      f_sharer -= f_mat_sharer * sharer_cache.normal;
+    }
     return { f_holder, f_sharer };
   }
   void AddFluxOnLocalFaces(Column *residual) const override {
@@ -306,7 +328,7 @@ class General : public spatial::FiniteElement<P, R> {
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
         auto [f_holder, f_sharer] = CellPairToFluxPair(riemanns[f],
             holder, holder_flux_point,
-            sharer, sharer_flux_point);
+            sharer, sharer_flux_point, true);
         for (auto [g_prime, ijk] : holder_solution_points) {
           Value f_correction = f_holder * g_prime;
           Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -332,7 +354,7 @@ class General : public spatial::FiniteElement<P, R> {
         auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
         auto [f_holder, _] = CellPairToFluxPair(riemanns[f],
             holder, holder_flux_point,
-            sharer, sharer_flux_point);
+            sharer, sharer_flux_point, false);
         for (auto [g_prime, ijk] : holder_solution_points) {
           Value f_correction = f_holder * g_prime;
           Polynomial::MinusValue(f_correction, holder_data, ijk);
