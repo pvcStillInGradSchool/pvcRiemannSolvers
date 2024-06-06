@@ -11,6 +11,11 @@
 #include "mini/mesh/shuffler.hpp"
 #include "mini/mesh/vtk.hpp"
 
+#include "mini/coordinate/quadrangle.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/coordinate/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
+
 #include "shockless.hpp"
 
 template class mini::riemann::euler::IdealGas<Scalar, 1.4>;
@@ -22,6 +27,19 @@ template class mini::riemann::diffusive::NavierStokes<Gas>;
 template class mini::riemann::diffusive::DirectDG<NavierStokes>;
 template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 
+static void InstallIntegratorPrototypes(Part *part_ptr) {
+  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
+  using QuadrangleIntegrator
+    = mini::integrator::Quadrangle<kDimensions, Gx, Gx>;
+  part_ptr->InstallPrototype(4,
+      std::make_unique<QuadrangleIntegrator>(quadrangle));
+  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
+  using HexahedronIntegrator
+      = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  part_ptr->InstallPrototype(8,
+      std::make_unique<HexahedronIntegrator>(hexahedron));
+  part_ptr->BuildGeometry();
+}
 
 int Main(int argc, char* argv[], IC ic, BC bc) {
   MPI_Init(NULL, NULL);
@@ -79,6 +97,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
         n_core, MPI_Wtime() - time_begin);
   }
   auto part = Part(case_name, i_core, n_core);
+  InstallIntegratorPrototypes(&part);
   part.SetFieldNames({"Density", "MomentumX", "MomentumY", "MomentumZ",
       "EnergyStagnationDensity"});
 
