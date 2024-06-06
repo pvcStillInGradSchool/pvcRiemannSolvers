@@ -315,21 +315,22 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   virtual void AddFluxOnSubsonicOutlets(Column *residual) const = 0;
   virtual void AddFluxOnSmartBoundaries(Column *residual) const = 0;
 
- public:
-  static FluxMatrix GetFluxMatrix(const Polynomial &polynomial, int q)
+ private:
+  static FluxMatrix _GetFluxMatrix(const Cell &cell, int q)
       requires(!mini::riemann::Diffusive<Riemann>) {
-    return Riemann::GetFluxMatrix(polynomial.GetValue(q));
+    return Riemann::GetFluxMatrix(cell.polynomial().GetValue(q));
   }
-  static FluxMatrix GetFluxMatrix(const Polynomial &polynomial, int q)
+  static FluxMatrix _GetFluxMatrix(const Cell &cell, int q)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    const auto &value = polynomial.GetValue(q);
+    auto [value, gradient] = cell.polynomial().GetGlobalValueGradient(q);
     FluxMatrix flux_matrix = Riemann::GetFluxMatrix(value);
-    const auto &gradient = polynomial.GetGlobalGradient(q);
     Riemann::MinusViscousFlux(value, gradient, &flux_matrix);
     return flux_matrix;
   }
+
+ public:
   static FluxMatrix GetFluxMatrix(const Cell &cell, int q) {
-    return GetFluxMatrix(cell.polynomial(), q);
+    return _GetFluxMatrix(cell, q);
   }
 };
 
