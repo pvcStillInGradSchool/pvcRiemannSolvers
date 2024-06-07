@@ -163,6 +163,16 @@ class Projection {
     return basis_grad * coeff().transpose();
   }
 
+  /**
+   * @brief A wrapper of Projection::GetValue and Projection::GetGlobalGradient for reusing intermediate results.
+   * 
+   */
+  std::pair<Value, Gradient> GetGlobalValueGradient(int i) const {
+    auto &global = integrator().GetGlobal(i);
+    Mat3xN basis_grad = GlobalToBasisGradients(global);
+    return { GlobalToValue(global), basis_grad * coeff().transpose() };
+  }
+
   template <typename Callable>
   void Approximate(Callable &&func) {
     Project(this, std::forward<Callable>(func));

@@ -407,6 +407,11 @@ class Hexahedron {
     Mat3xN const &basis_grad = GetBasisGradients(ijk);
     return basis_grad * coeff().transpose();
   }
+  std::pair<Value, Gradient> _GetGlobalValueGradient(int ijk) const
+      requires(!kLocal) {
+    return { GetValue(ijk), _GetGlobalGradient(ijk) };
+  }
+
   Gradient _GetGlobalGradient(int ijk) const requires(kLocal) {
     return _GetGlobalGradient(GetValue(ijk), GetLocalGradient(ijk), ijk);
   }
@@ -417,6 +422,12 @@ class Hexahedron {
     auto jacobian_det = jacobian_det_[ijk];
     value_grad /= (jacobian_det * jacobian_det);
     return GetJacobianAssociated(ijk) * value_grad;
+  }
+  std::pair<Value, Gradient> _GetGlobalValueGradient(int ijk) const
+      requires(kLocal) {
+    auto value_ijk = GetValue(ijk);
+    auto local_grad_ijk = GetLocalGradient(ijk);
+    return { value_ijk, _GetGlobalGradient(value_ijk, local_grad_ijk, ijk) };
   }
 
  public:
@@ -499,19 +510,15 @@ class Hexahedron {
 
  public:
   /**
-   * @brief A wrapper of GetValue and GetGlobalGradient for reusing intermediate results.
+   * @brief A wrapper of Hexahedron::GetValue and Hexahedron::GetGlobalGradient for reusing intermediate results.
    * 
    */
-  std::pair<Value, Gradient> GetGlobalValueGradient(int ijk) const
-      requires(kLocal) {
-    auto value_ijk = GetValue(ijk);
-    auto local_grad_ijk = GetLocalGradient(ijk);
-    return { value_ijk,
-        _GetGlobalGradient(value_ijk, local_grad_ijk, ijk) };
+  std::pair<Value, Gradient> GetGlobalValueGradient(int ijk) const {
+    return _GetGlobalValueGradient(ijk);
   }
 
   /**
-   * @brief A wrapper of GetValue, GetGlobalGradient and GetGlobalHessian for reusing intermediate results.
+   * @brief A wrapper of Hexahedron::GetValue, Hexahedron::GetGlobalGradient and Hexahedron::GetGlobalHessian for reusing intermediate results.
    * 
    */
   std::tuple<Value, Gradient, Hessian> GetGlobalValueGradientHessian(int ijk) const
