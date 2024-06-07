@@ -28,33 +28,51 @@ class Anisotropic {
   using FluxMatrix = algebra::Matrix<Scalar, kComponents, kDimensions>;
   using Flux = Conservative;
   struct Coefficient {
-    Scalar nu_x, nu_y, nu_z;
+    Scalar x, y, z;
   };
 
- private:
-  static Scalar nu_x_;
-  static Scalar nu_y_;
-  static Scalar nu_z_;
+ protected:
+  static Coefficient nu_;
 
  public:
   static void SetDiffusionCoefficient(Scalar nu_x, Scalar nu_y, Scalar nu_z) {
-    nu_x_ = nu_x; nu_y_ = nu_y; nu_z_ = nu_z;
+    nu_.x = nu_x; nu_.y = nu_y; nu_.z = nu_z;
+  }
+
+  static Coefficient const &GetDiffusionCoefficient() {
+    return nu_;
+  }
+
+  template <class Int>
+  static Coefficient const &GetCoefficientOnCell(Int i_cell, int i_node) {
+    return GetDiffusionCoefficient();
+  }
+
+  static void MinusViscousFlux(FluxMatrix *flux, Coefficient const &nu,
+      Conservative const &value, Gradient const &gradient) {
+    using namespace mini::constant::index;
+    flux->col(X) -= nu.x * gradient.row(X);
+    flux->col(Y) -= nu.y * gradient.row(Y);
+    flux->col(Z) -= nu.z * gradient.row(Z);
+  }
+
+  static void MinusViscousFlux(Flux *flux, Coefficient const &nu,
+      Conservative const &value, Gradient const &gradient,
+      Vector const &normal) {
+    using namespace mini::constant::index;
+    *flux -= (normal[X] * nu.x) * gradient.row(X);
+    *flux -= (normal[Y] * nu.y) * gradient.row(Y);
+    *flux -= (normal[Z] * nu.z) * gradient.row(Z);
   }
 
   static void MinusViscousFlux(Conservative const &value, Gradient const &gradient,
       FluxMatrix *flux) {
-    using namespace mini::constant::index;
-    flux->col(X) -= nu_x_ * gradient.row(X);
-    flux->col(Y) -= nu_y_ * gradient.row(Y);
-    flux->col(Z) -= nu_z_ * gradient.row(Z);
+    MinusViscousFlux(flux, nu_, value, gradient);
   }
 
   static void MinusViscousFlux(Conservative const &value, Gradient const &gradient,
       Vector const &normal, Flux *flux) {
-    using namespace mini::constant::index;
-    *flux -= (normal[X] * nu_x_) * gradient.row(X);
-    *flux -= (normal[Y] * nu_y_) * gradient.row(Y);
-    *flux -= (normal[Z] * nu_z_) * gradient.row(Z);
+    MinusViscousFlux(flux, nu_, value, gradient, normal);
   }
 
   static void MinusViscousFluxOnNoSlipWall(Value const &wall_value,
@@ -63,12 +81,9 @@ class Anisotropic {
     MinusViscousFlux(c_val, c_grad, normal, flux);
   }
 };
+
 template <typename S, int K>
-typename Anisotropic<S, K>::Scalar Anisotropic<S, K>::nu_x_;
-template <typename S, int K>
-typename Anisotropic<S, K>::Scalar Anisotropic<S, K>::nu_y_;
-template <typename S, int K>
-typename Anisotropic<S, K>::Scalar Anisotropic<S, K>::nu_z_;
+typename Anisotropic<S, K>::Coefficient Anisotropic<S, K>::nu_;
 
 /**
  * @brief A constant linear diffusion model, whose diffusive flux is \f$ \nu \begin{bmatrix} \partial_x\,u & \partial_y\,u & \partial_z\,u \end{bmatrix} \f$.
@@ -94,6 +109,16 @@ class Isotropic : public Anisotropic<S, K> {
   static void SetDiffusionCoefficient(Scalar nu) {
     Base::SetDiffusionCoefficient(nu, nu, nu);
   }
+
+  static Coefficient const &GetDiffusionCoefficient() {
+    return Base::GetDiffusionCoefficient().x;
+  }
+
+  template <class Int>
+  static Coefficient const &GetCoefficientOnCell(Int i_cell, int i_node) {
+    return GetDiffusionCoefficient();
+  }
+
 };
 
 }  // namespace diffusive

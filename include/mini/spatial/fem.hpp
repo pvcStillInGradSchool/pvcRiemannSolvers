@@ -320,11 +320,13 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
       requires(!mini::riemann::Diffusive<Riemann>) {
     return Riemann::GetFluxMatrix(cell.polynomial().GetValue(q));
   }
+
   static FluxMatrix _GetFluxMatrix(const Cell &cell, int q)
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     auto [value, gradient] = cell.polynomial().GetGlobalValueGradient(q);
     FluxMatrix flux_matrix = Riemann::GetFluxMatrix(value);
-    Riemann::MinusViscousFlux(value, gradient, &flux_matrix);
+    const auto &coeff = Riemann::GetCoefficientOnCell(cell.id(), q);
+    Riemann::MinusViscousFlux(&flux_matrix, coeff, value, gradient);
     return flux_matrix;
   }
 

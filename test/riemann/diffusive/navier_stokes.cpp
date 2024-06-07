@@ -141,7 +141,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   // build a vector function and its interpolation
   Scalar rho = 1.29, p = 101325;
   NS::SetProperty(nu, prandtl);
-  auto [mu, zeta] = NS::GetViscosity(rho);
+  auto [mu, zeta] = NS::GetViscosity(rho, nu);
   std::srand(31415926);
   Scalar u_0 = rand_f(), du_dx = rand_f(), du_dy = rand_f(), du_dz = rand_f();
   Scalar v_0 = rand_f(), dv_dx = rand_f(), dv_dy = rand_f(), dv_dz = rand_f();
@@ -172,7 +172,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
         interp.GetGlobalValueGradient(ijk);
     auto [pimitive_value, primitive_grad] = NS::ConservativeToPrimitive(
         conservative_value, conservative_grad);
-    Tensor tau = NS::GetViscousStressTensor(primitive_grad, rho);
+    Tensor tau = NS::GetViscousStressTensor(primitive_grad, rho, nu);
     EXPECT_NEAR(tau[XY], mu * (du_dy + dv_dx), 1e-16);
     EXPECT_NEAR(tau[YZ], mu * (dv_dz + dw_dy), 1e-16);
     EXPECT_NEAR(tau[ZX], mu * (dw_dx + du_dz), 1e-16);
