@@ -62,8 +62,8 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
 }
 
 int main(int argc, char* argv[]) {
-  Riemann::SetBetaValues(2.0, 1.0 / 12);
-  Riemann::SetProperty(nu, prandtl);
+  Riemann::Diffusion::SetBetaValues(2.0, 1.0 / 12);
+  Riemann::Diffusion::SetProperty(nu, prandtl);
   static_assert(std::abs(nu * Gas::Gamma() / prandtl - 0.0175576) < 1e-6);
   static_assert(std::abs(temperature_given - 273.634) < 1e-3);
   static_assert(Gas::R() == 287.05);

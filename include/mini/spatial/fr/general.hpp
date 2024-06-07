@@ -280,7 +280,7 @@ class General : public spatial::FiniteElement<P, R> {
     if (use_cache) {
       MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
     } else {
-      auto f_mat_sharer = Riemann::GetFluxMatrix(u_sharer);
+      auto f_mat_sharer = Riemann::Convection::GetFluxMatrix(u_sharer);
       f_sharer -= f_mat_sharer * sharer_cache.normal;
     }
     return { f_holder, f_sharer };
@@ -308,7 +308,7 @@ class General : public spatial::FiniteElement<P, R> {
     if (use_cache) {
       MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
     } else {
-      auto f_mat_sharer = Riemann::GetFluxMatrix(u_sharer);
+      auto f_mat_sharer = Riemann::Convection::GetFluxMatrix(u_sharer);
       // get viscous coeff on cell
       Riemann::MinusViscousFlux(u_sharer, du_sharer, &f_mat_sharer);
       f_sharer -= f_mat_sharer * sharer_cache.normal;
@@ -379,7 +379,7 @@ class General : public spatial::FiniteElement<P, R> {
           Value f_upwind = riemanns[f].GetFluxOnInviscidWall(u_holder);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
-              Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
             Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -403,7 +403,7 @@ class General : public spatial::FiniteElement<P, R> {
         holder_polynomial.GetGlobalValueGradient(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
     auto du_local_holder = holder_polynomial.GetLocalGradient(holder_cache.ijk);
-    auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
+    auto f_mat_holder = Riemann::Convection::GetFluxMatrix(u_holder);
     Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
@@ -419,7 +419,7 @@ class General : public spatial::FiniteElement<P, R> {
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value u_holder = holder_polynomial.GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
-    auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
+    auto f_mat_holder = Riemann::Convection::GetFluxMatrix(u_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     f_holder -= f_mat_holder * holder_cache.normal;
     return f_holder;
@@ -433,7 +433,7 @@ class General : public spatial::FiniteElement<P, R> {
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
     Riemann::MinusViscousFlux(u_holder, du_holder, normal, &f_upwind);
-    auto f_mat_holder = Riemann::GetFluxMatrix(u_holder);
+    auto f_mat_holder = Riemann::Convection::GetFluxMatrix(u_holder);
     Riemann::MinusViscousFlux(u_holder, du_holder, &f_mat_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     f_holder -= f_mat_holder * holder_cache.normal;
@@ -479,7 +479,7 @@ class General : public spatial::FiniteElement<P, R> {
           Value f_upwind = riemanns[f].GetFluxOnSupersonicInlet(u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
-              Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
             Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -505,7 +505,7 @@ class General : public spatial::FiniteElement<P, R> {
           Value f_upwind = riemanns[f].GetFluxOnSubsonicInlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
-              Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
             Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -531,7 +531,7 @@ class General : public spatial::FiniteElement<P, R> {
           Value f_upwind = riemanns[f].GetFluxOnSubsonicOutlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
-              Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
             Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -557,7 +557,7 @@ class General : public spatial::FiniteElement<P, R> {
           Value f_upwind = riemanns[f].GetFluxOnSmartBoundary(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
           f_holder -=
-              Riemann::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
             Polynomial::MinusValue(f_correction, holder_data, ijk);

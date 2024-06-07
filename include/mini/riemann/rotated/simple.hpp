@@ -92,7 +92,7 @@ class Simple {
     flux_mat.col(Z) = convection_coefficient_[Z] * state;
     return flux_mat;
   }
-  static void SetConvectionCoefficient(Jacobian const &a_x, Jacobian const &a_y,
+  static void SetJacobians(Jacobian const &a_x, Jacobian const &a_y,
       Jacobian const &a_z) {
     convection_coefficient_[X] = a_x;
     convection_coefficient_[Y] = a_y;

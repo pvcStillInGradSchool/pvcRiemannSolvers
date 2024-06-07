@@ -16,6 +16,8 @@ class DirectDG : public DiffusionModel {
   using Base = DiffusionModel;
 
  public:
+  using Diffusion = DirectDG;
+
   using Scalar = typename Base::Scalar;
   using Vector = typename Base::Vector;
   using Conservative = typename Base::Conservative;

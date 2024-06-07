@@ -14,6 +14,8 @@ class Double : public Simple<simple::Double<S, D>> {
   using Base = Simple<simple::Double<S, D>>;
 
  public:
+  using Convection = Double;
+
   constexpr static int kComponents = 2;
   constexpr static int kDimensions = D;
   using Scalar = S;

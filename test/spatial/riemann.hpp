@@ -20,13 +20,13 @@ using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 
 void ResetRiemann() {
   using Jacobian = typename Riemann::Jacobian;
-  Riemann::SetConvectionCoefficient(
+  Riemann::Convection::SetJacobians(
     Jacobian{ {3., 0.}, {0., 4.} },
     Jacobian{ {5., 0.}, {0., 6.} },
     Jacobian{ {7., 0.}, {0., 8.} }
   );
   Riemann::Diffusion::SetProperty(1.0);
-  Riemann::SetBetaValues(2.0, 1.0 / 12);
+  Riemann::Diffusion::SetBetaValues(2.0, 1.0 / 12);
 }
 
 }  // namespace spatial

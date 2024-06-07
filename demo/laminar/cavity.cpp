@@ -47,7 +47,7 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
 }
 
 int main(int argc, char* argv[]) {
-  Riemann::SetBetaValues(2.0, 1.0 / 12);
-  Riemann::SetProperty(/* nu = */0.01, /* prandtl = */0.708);
+  Riemann::Diffusion::SetBetaValues(2.0, 1.0 / 12);
+  Riemann::Diffusion::SetProperty(/* nu = */0.01, /* prandtl = */0.708);
   return Main(argc, argv, MyIC, MyBC);
 }

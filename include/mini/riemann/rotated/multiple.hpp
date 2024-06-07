@@ -14,6 +14,8 @@ class Multiple : public Simple<simple::Multiple<S, K, D>> {
   using Base = Simple<simple::Multiple<S, K, D>>;
 
  public:
+  using Convection = Multiple;
+
   constexpr static int kComponents = K;
   constexpr static int kDimensions = D;
   using Scalar = S;

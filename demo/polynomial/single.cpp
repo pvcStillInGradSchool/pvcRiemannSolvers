@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
   constexpr int kDimensions = 3;
   using Riemann = mini::riemann::rotated::Single<Scalar, kDimensions>;
   auto a_x = -10.0;
-  Riemann::SetConvectionCoefficient(a_x, 0, 0);
+  Riemann::Convection::SetJacobians(a_x, 0, 0);
 
   /* Partition the mesh. */
   if (i_core == 0) {

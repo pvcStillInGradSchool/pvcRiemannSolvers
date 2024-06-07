@@ -23,6 +23,8 @@ class Euler {
   using Base = UnrotatedEuler;
 
  public:
+  using Convection = Euler;
+
   constexpr static int kComponents = Base::kComponents;
   constexpr static int kDimensions = Base::kDimensions;
   using Gas = typename Base::Gas;
@@ -301,6 +303,8 @@ class Euler {
 
  public:
   using Matrix = typename EigenMatrices::Mat5x5;
+  using Jacobian = Matrix;
+
   void UpdateEigenMatrices(Conservative const &big_u) {
     eigen_matrices_ = EigenMatrices(big_u, a(), b(), c());
   }

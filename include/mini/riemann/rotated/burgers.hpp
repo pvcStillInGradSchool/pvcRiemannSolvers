@@ -14,6 +14,8 @@ class Burgers : public Simple<simple::Burgers<S, D>> {
   using Base = Simple<simple::Burgers<S, D>>;
 
  public:
+  using Convection = Burgers;
+
   constexpr static int kComponents = 1;
   constexpr static int kDimensions = D;
   using Scalar = typename Base::Scalar;

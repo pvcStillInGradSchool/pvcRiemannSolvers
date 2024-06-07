@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
       riemann::rotated::Multiple<Scalar, kComponents, kDimensions>;
   using Jacobian = typename Riemann::Jacobian;
   auto a_x = Jacobian{ {6., -2.}, {-2., 6.} };
-  Riemann::SetConvectionCoefficient(
+  Riemann::Convection::SetJacobians(
     a_x, Jacobian{ {0., 0.}, {0., 0.} }, Jacobian{ {0., 0.}, {0., 0.} }
   );
 

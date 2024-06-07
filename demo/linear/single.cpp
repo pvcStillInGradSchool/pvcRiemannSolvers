@@ -81,9 +81,9 @@ int main(int argc, char* argv[]) {
       mini::riemann::diffusive::Isotropic<Scalar, 1>
   >;
   using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
-  Riemann::SetConvectionCoefficient(a_x, 0, 0);
-  Riemann::SetProperty(0.05);
-  Riemann::SetBetaValues(2.0, 1.0 / 12);
+  Riemann::Convection::SetJacobians(a_x, 0, 0);
+  Riemann::Diffusion::SetProperty(0.05);
+  Riemann::Diffusion::SetBetaValues(2.0, 1.0 / 12);
 
   /* Partition the mesh. */
   if (i_core == 0 && (argc == 7 || n_parts_prev != n_core)) {

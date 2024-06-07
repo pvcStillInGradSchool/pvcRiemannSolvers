@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
   constexpr int kDimensions = 3;
   using Riemann = mini::riemann::rotated::Double<Scalar, kDimensions>;
   using Jacobian = typename Riemann::Jacobian;
-  Riemann::SetConvectionCoefficient(
+  Riemann::Convection::SetJacobians(
     Jacobian{ {10., 0.}, {0., 5.} },
     Jacobian{ {0., 0.}, {0., 0.} }, Jacobian{ {0., 0.}, {0., 0.} }
   );

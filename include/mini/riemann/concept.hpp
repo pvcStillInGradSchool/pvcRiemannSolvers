@@ -11,6 +11,8 @@ namespace riemann {
 
 template <typename R>
 concept HasConvectiveData = requires {
+  typename R::Convection;
+
   requires std::integral<decltype(R::kComponents)>;
   requires std::integral<decltype(R::kDimensions)>;
 
@@ -21,6 +23,8 @@ concept HasConvectiveData = requires {
   typename R::Conservative;
   typename R::Flux;
   typename R::FluxMatrix;
+
+  typename R::Jacobian;
 };
 
 template <typename R, typename C>
@@ -38,8 +42,19 @@ concept Convective =
 
 template <typename R>
 concept HasDiffusiveData = requires {
-  requires HasConvectiveData<R>;
-  // more than convective
+  typename R::Diffusion;
+
+  requires std::integral<decltype(R::kComponents)>;
+  requires std::integral<decltype(R::kDimensions)>;
+
+  typename R::Scalar;
+  requires std::floating_point<typename R::Scalar>;
+
+  typename R::Vector;
+  typename R::Conservative;
+  typename R::Flux;
+  typename R::FluxMatrix;
+
   typename R::Gradient;
   typename R::Property;
 };

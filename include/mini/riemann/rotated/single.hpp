@@ -12,6 +12,8 @@ namespace rotated {
 template <typename S, int D>
 class Single : public Simple<simple::Single<S, D>> {
  public:
+  using Convection = Single;
+
   constexpr static int kComponents = 1;
   constexpr static int kDimensions = D;
   using Scalar = S;
