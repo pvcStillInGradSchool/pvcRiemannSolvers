@@ -41,7 +41,7 @@ concept HasDiffusiveData = requires {
   requires HasConvectiveData<R>;
   // more than convective
   typename R::Gradient;
-  typename R::Coefficient;
+  typename R::Property;
 };
 
 template <typename R, typename V, typename G, typename F, typename M,
@@ -76,6 +76,9 @@ class ConvectionDiffusion : public C, public D {
 
   static constexpr int kComponents = C::kComponents;
   static_assert(kComponents == D::kComponents);
+
+  using Convection = C;
+  using Diffusion = D;
 
   using Scalar = typename C::Scalar;
   static_assert(std::is_same_v<Scalar, typename D::Scalar>);

@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
   >;
   using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
   Riemann::SetConvectionCoefficient(a_x, 0, 0);
-  Riemann::SetDiffusionCoefficient(0.05);
+  Riemann::SetProperty(0.05);
   Riemann::SetBetaValues(2.0, 1.0 / 12);
 
   /* Partition the mesh. */

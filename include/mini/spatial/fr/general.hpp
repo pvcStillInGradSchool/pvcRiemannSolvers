@@ -300,6 +300,7 @@ class General : public spatial::FiniteElement<P, R> {
     auto du_common = riemann.GetCommonGradient(normal,
         u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
     Value u_common = (u_holder + u_sharer) / 2;
+    // get viscous coeff on face
     Riemann::MinusViscousFlux(u_common, du_common, normal, &f_upwind);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
@@ -308,6 +309,7 @@ class General : public spatial::FiniteElement<P, R> {
       MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
     } else {
       auto f_mat_sharer = Riemann::GetFluxMatrix(u_sharer);
+      // get viscous coeff on cell
       Riemann::MinusViscousFlux(u_sharer, du_sharer, &f_mat_sharer);
       f_sharer -= f_mat_sharer * sharer_cache.normal;
     }

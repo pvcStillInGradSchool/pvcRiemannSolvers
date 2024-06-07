@@ -53,7 +53,7 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
 
 int main(int argc, char* argv[]) {
   Riemann::SetBetaValues(2.0, 1.0 / 12);
-  Riemann::SetDiffusionCoefficient(b_x, b_y, b_z);
+  Riemann::SetProperty(b_x, b_y, b_z);
   Jacobian a; a.setZero();
   Riemann::SetConvectionCoefficient(a, a, a);
   return Main(argc, argv, MyIC, MyBC);

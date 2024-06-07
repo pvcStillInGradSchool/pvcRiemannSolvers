@@ -30,25 +30,25 @@ class NavierStokes {
   using Primitive = euler::Primitives<Scalar, kDimensions>;
   using Vector = typename Primitive::Vector;
   using Tensor = algebra::Vector<Scalar, 6>;
-  struct Coefficient {
+  struct Property {
     Scalar nu, prandtl;
   };
 
  protected:
-  static Coefficient coeff_;
+  static Property property_;
 
  public:
   static void SetProperty(Scalar nu, Scalar prandtl) {
-    coeff_.nu = nu;
-    coeff_.prandtl = prandtl;
+    property_.nu = nu;
+    property_.prandtl = prandtl;
   }
-  static Coefficient const &GetDiffusionCoefficient() {
-    return coeff_;
+  static Property const &GetProperty() {
+    return property_;
   }
 
   template <class Int>
-  static Coefficient const &GetCoefficientOnCell(Int i_cell, int i_node) {
-    return GetDiffusionCoefficient();
+  static Property const &GetPropertyOnCell(Int i_cell, int i_node) {
+    return GetProperty();
   }
 
   static std::pair<Scalar, Scalar> GetViscosity(Scalar rho, Scalar nu) {
@@ -57,9 +57,9 @@ class NavierStokes {
     return {mu, zeta};
   }
 
-  static Scalar GetThermalConductivity(Scalar rho, Coefficient const &coeff) {
-    Scalar mu = coeff.nu * rho;
-    return mu * Gas::Cp() / coeff.prandtl;
+  static Scalar GetThermalConductivity(Scalar rho, Property const &property) {
+    Scalar mu = property.nu * rho;
+    return mu * Gas::Cp() / property.prandtl;
   }
 
  protected:
@@ -133,16 +133,16 @@ class NavierStokes {
  public:
   static void MinusViscousFlux(Conservative const &conservative,
       Gradient const &grad_conservative, FluxMatrix *flux) {
-    MinusViscousFlux(flux, coeff_, conservative, grad_conservative);
+    MinusViscousFlux(flux, property_, conservative, grad_conservative);
   }
 
-  static void MinusViscousFlux(FluxMatrix *flux, Coefficient const &coeff,
+  static void MinusViscousFlux(FluxMatrix *flux, Property const &property,
       Conservative const &conservative, Gradient const &grad_conservative) {
     auto [primitive, grad_primitive]
         = ConservativeToPrimitive(conservative, grad_conservative);
     Tensor tau = GetViscousStressTensor(grad_primitive, conservative.mass(),
-        coeff.nu);
-    Scalar kappa = GetThermalConductivity(conservative.mass(), coeff);
+        property.nu);
+    Scalar kappa = GetThermalConductivity(conservative.mass(), property);
     auto const &uvw = primitive.velocity();
     auto const &grad_T = grad_primitive.col(kTemperature);
     flux->row(kEnergy) -= kappa * grad_T;
@@ -164,14 +164,14 @@ class NavierStokes {
   }
 
  protected:
-  static void _MinusViscousFlux(Flux *flux, Coefficient const &coeff,
+  static void _MinusViscousFlux(Flux *flux, Property const &property,
       Scalar rho, Gradient const &grad_primitive,
       Vector const &normal, Vector const &uvw, Scalar normal_dot_grad_T) {
-    Tensor tau = GetViscousStressTensor(grad_primitive, rho, coeff.nu);
+    Tensor tau = GetViscousStressTensor(grad_primitive, rho, property.nu);
     flux->momentumX() -= Dot(tau[XX], tau[XY], tau[XZ], normal);
     flux->momentumY() -= Dot(tau[YX], tau[YY], tau[YZ], normal);
     flux->momentumZ() -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
-    Scalar kappa = GetThermalConductivity(rho, coeff);
+    Scalar kappa = GetThermalConductivity(rho, property);
     Scalar work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw);
     Scalar work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw);
     Scalar work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw);
@@ -183,16 +183,16 @@ class NavierStokes {
   static void MinusViscousFlux(Conservative const &conservative,
       Gradient const &grad_conservative, Vector const &normal,
       FluxVector *flux_vector) {
-    MinusViscousFlux(flux_vector, coeff_, conservative, grad_conservative, normal);
+    MinusViscousFlux(flux_vector, property_, conservative, grad_conservative, normal);
   }
-  static void MinusViscousFlux(FluxVector *flux_vector, Coefficient const &coeff,
+  static void MinusViscousFlux(FluxVector *flux_vector, Property const &property,
       Conservative const &conservative, Gradient const &grad_conservative, Vector const &normal) {
     auto [primitive, grad_primitive]
         = ConservativeToPrimitive(conservative, grad_conservative);
     auto *flux = static_cast<Flux *>(flux_vector);
     auto const &uvw = primitive.velocity();
     auto const &grad_T = grad_primitive.col(kTemperature);
-    _MinusViscousFlux(flux, coeff, conservative.mass(), grad_primitive, normal, uvw,
+    _MinusViscousFlux(flux, property, conservative.mass(), grad_primitive, normal, uvw,
         normal.dot(grad_T));
   }
 
@@ -216,13 +216,13 @@ class NavierStokes {
     grad_primitive(Z, U) += normal[Z] * penalty[X];
     grad_primitive(Z, V) += normal[Z] * penalty[Y];
     grad_primitive(Z, W) += normal[Z] * penalty[Z];
-    _MinusViscousFlux(flux, coeff_, conservative.mass(), grad_primitive, normal, uvw,
+    _MinusViscousFlux(flux, property_, conservative.mass(), grad_primitive, normal, uvw,
         wall_value_ref.energy());
   }
 };
 
 template <typename G>
-typename NavierStokes<G>::Coefficient NavierStokes<G>::coeff_;
+typename NavierStokes<G>::Property NavierStokes<G>::property_;
 
 }  // namespace diffusive
 }  // namespace riemann

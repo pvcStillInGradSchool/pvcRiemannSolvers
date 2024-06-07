@@ -95,7 +95,7 @@ class EnergyBasedViscosity : public R {
 
   static std::vector<DampingMatrix> BuildDampingMatrices() {
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
-    Diffusion::SetDiffusionCoefficient(1.0);
+    Diffusion::SetProperty(1.0);
     for (Cell *cell_ptr: spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
       // Nullify all its neighbors' coeffs:
       for (Cell *neighbor : cell_ptr->adj_cells_) {

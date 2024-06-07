@@ -25,7 +25,7 @@ void ResetRiemann() {
     Jacobian{ {5., 0.}, {0., 6.} },
     Jacobian{ {7., 0.}, {0., 8.} }
   );
-  Riemann::SetDiffusionCoefficient(1.0);
+  Riemann::Diffusion::SetProperty(1.0);
   Riemann::SetBetaValues(2.0, 1.0 / 12);
 }
 

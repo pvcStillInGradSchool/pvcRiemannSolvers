@@ -27,28 +27,28 @@ class Anisotropic {
   using Gradient = algebra::Matrix<Scalar, kDimensions, kComponents>;
   using FluxMatrix = algebra::Matrix<Scalar, kComponents, kDimensions>;
   using Flux = Conservative;
-  struct Coefficient {
+  struct Property {
     Scalar x, y, z;
   };
 
  protected:
-  static Coefficient nu_;
+  static Property nu_;
 
  public:
-  static void SetDiffusionCoefficient(Scalar nu_x, Scalar nu_y, Scalar nu_z) {
+  static void SetProperty(Scalar nu_x, Scalar nu_y, Scalar nu_z) {
     nu_.x = nu_x; nu_.y = nu_y; nu_.z = nu_z;
   }
 
-  static Coefficient const &GetDiffusionCoefficient() {
+  static Property const &GetProperty() {
     return nu_;
   }
 
   template <class Int>
-  static Coefficient const &GetCoefficientOnCell(Int i_cell, int i_node) {
-    return GetDiffusionCoefficient();
+  static Property const &GetPropertyOnCell(Int i_cell, int i_node) {
+    return GetProperty();
   }
 
-  static void MinusViscousFlux(FluxMatrix *flux, Coefficient const &nu,
+  static void MinusViscousFlux(FluxMatrix *flux, Property const &nu,
       Conservative const &value, Gradient const &gradient) {
     using namespace mini::constant::index;
     flux->col(X) -= nu.x * gradient.row(X);
@@ -56,7 +56,7 @@ class Anisotropic {
     flux->col(Z) -= nu.z * gradient.row(Z);
   }
 
-  static void MinusViscousFlux(Flux *flux, Coefficient const &nu,
+  static void MinusViscousFlux(Flux *flux, Property const &nu,
       Conservative const &value, Gradient const &gradient,
       Vector const &normal) {
     using namespace mini::constant::index;
@@ -83,7 +83,7 @@ class Anisotropic {
 };
 
 template <typename S, int K>
-typename Anisotropic<S, K>::Coefficient Anisotropic<S, K>::nu_;
+typename Anisotropic<S, K>::Property Anisotropic<S, K>::nu_;
 
 /**
  * @brief A constant linear diffusion model, whose diffusive flux is \f$ \nu \begin{bmatrix} \partial_x\,u & \partial_y\,u & \partial_z\,u \end{bmatrix} \f$.
@@ -103,22 +103,12 @@ class Isotropic : public Anisotropic<S, K> {
   using Gradient = typename Base::Gradient;
   using FluxMatrix = typename Base::FluxMatrix;
   using Flux = typename Base::Flux;
-  using Coefficient = Scalar;
+  using Property = typename Base::Property;
 
  public:
-  static void SetDiffusionCoefficient(Scalar nu) {
-    Base::SetDiffusionCoefficient(nu, nu, nu);
+  static void SetProperty(Scalar nu) {
+    Base::SetProperty(nu, nu, nu);
   }
-
-  static Coefficient const &GetDiffusionCoefficient() {
-    return Base::GetDiffusionCoefficient().x;
-  }
-
-  template <class Int>
-  static Coefficient const &GetCoefficientOnCell(Int i_cell, int i_node) {
-    return GetDiffusionCoefficient();
-  }
-
 };
 
 }  // namespace diffusive
