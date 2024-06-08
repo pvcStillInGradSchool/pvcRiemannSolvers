@@ -92,8 +92,9 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
     // flux_matrix * vector == flux_vector
     FluxMatrix flux_matrix; flux_matrix.setZero();
     FluxVector flux_vector; flux_vector.setZero();
-    NS::MinusViscousFlux(conservative_given, conservative_grad_given,
-        &flux_matrix);
+    auto property = NS::GetProperty();
+    NS::MinusViscousFlux(&flux_matrix, property,
+        conservative_given, conservative_grad_given);
     Vector normal = Vector::Random().normalized();
     EXPECT_NEAR(normal.norm(), 1.0, 1e-15);
     NS::MinusViscousFlux(conservative_given, conservative_grad_given, normal,

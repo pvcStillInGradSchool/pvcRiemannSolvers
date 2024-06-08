@@ -131,11 +131,6 @@ class NavierStokes {
   }
 
  public:
-  static void MinusViscousFlux(Conservative const &conservative,
-      Gradient const &grad_conservative, FluxMatrix *flux) {
-    MinusViscousFlux(flux, property_, conservative, grad_conservative);
-  }
-
   static void MinusViscousFlux(FluxMatrix *flux, Property const &property,
       Conservative const &conservative, Gradient const &grad_conservative) {
     auto [primitive, grad_primitive]

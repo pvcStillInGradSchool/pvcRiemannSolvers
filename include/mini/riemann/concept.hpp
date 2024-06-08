@@ -59,16 +59,18 @@ concept HasDiffusiveData = requires {
   typename R::Property;
 };
 
-template <typename R, typename V, typename G, typename F, typename M,
-    typename S, typename N>
-concept HasDiffusiveMethods = requires(R riemann, V const &value,
+template <typename R, typename P, typename V, typename G, typename F,
+    typename M, typename S, typename N>
+concept HasDiffusiveMethods = requires(R riemann, P property, V const &value,
     G const &gradient, F *flux, M *flux_matrix, S distance, N const &normal) {
+  requires std::same_as<P, typename R::Property>;
   requires std::same_as<G, typename R::Gradient>;
   requires std::same_as<S, typename R::Scalar>;
   requires std::same_as<N, typename R::Vector>;
   requires std::same_as<F, typename R::Flux>;
   requires std::same_as<M, typename R::FluxMatrix>;
-  { R::MinusViscousFlux(value, gradient, flux_matrix) } -> std::same_as<void>;
+  { R::MinusViscousFlux(flux_matrix, property, value, gradient) }
+      -> std::same_as<void>;
   { R::MinusViscousFlux(value, gradient, normal, flux) } -> std::same_as<void>;
   { riemann.GetCommonGradient(normal, value, value, gradient, gradient) } -> std::same_as<G>;
 };
@@ -76,7 +78,8 @@ concept HasDiffusiveMethods = requires(R riemann, V const &value,
 template <typename R>
 concept Diffusive =
     HasDiffusiveData<R> &&
-    HasDiffusiveMethods<R, typename R::Conservative, typename R::Gradient,
+    HasDiffusiveMethods<R, typename R::Property,
+        typename R::Conservative, typename R::Gradient,
         typename R::Flux, typename R::FluxMatrix,
         typename R::Scalar, typename R::Vector>;
 

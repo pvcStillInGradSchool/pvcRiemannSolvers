@@ -297,8 +297,8 @@ class Lobatto : public General<P, R> {
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
           Value wall_value = func(integrator.GetGlobal(f), this->t_curr_);
-          Value f_holder = Base::GetFluxOnNoSlipWall(riemanns[f],
-              wall_value, holder.polynomial(), holder_flux_point);
+          Value f_holder = this->Base::GetFluxOnNoSlipWall(riemanns[f],
+              wall_value, holder, holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
@@ -315,8 +315,8 @@ class Lobatto : public General<P, R> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          auto f_holder = Base::GetFluxOnSupersonicOutlet(riemanns[f],
-              holder.polynomial(), holder_flux_point);
+          auto f_holder = this->Base::GetFluxOnSupersonicOutlet(riemanns[f],
+              holder, holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           assert(f_holder.norm() < 1e-6);
           assert(0 <= holder_flux_point.ijk && holder_flux_point.ijk < kCellQ);

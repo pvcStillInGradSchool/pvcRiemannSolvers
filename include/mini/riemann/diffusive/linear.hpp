@@ -66,11 +66,6 @@ class Anisotropic {
   }
 
   static void MinusViscousFlux(Conservative const &value, Gradient const &gradient,
-      FluxMatrix *flux) {
-    MinusViscousFlux(flux, nu_, value, gradient);
-  }
-
-  static void MinusViscousFlux(Conservative const &value, Gradient const &gradient,
       Vector const &normal, Flux *flux) {
     MinusViscousFlux(flux, nu_, value, gradient, normal);
   }
