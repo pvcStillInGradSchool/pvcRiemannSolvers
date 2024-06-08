@@ -85,17 +85,16 @@ class Lobatto : public General<P, R> {
     return integrator.GetGlobalWeight(q);
   }
   using FluxMatrix = typename Riemann::FluxMatrix;
-  using CellToFlux = typename Base::CellToFlux;
-  static FluxMatrix GetWeightedFluxMatrix(CellToFlux cell_to_flux,
+  static FluxMatrix GetWeightedFluxMatrix(
       const Cell &cell, int q) requires(kLocal) {
-    auto flux = cell_to_flux(cell, q);
+    auto flux = Base::GetFluxMatrix(cell, q);
     flux = cell.polynomial().GlobalFluxToLocalFlux(flux, q);
     flux *= GetWeight(cell.integrator(), q);
     return flux;
   }
-  static FluxMatrix GetWeightedFluxMatrix(CellToFlux cell_to_flux,
+  static FluxMatrix GetWeightedFluxMatrix(
       const Cell &cell, int q) requires(!kLocal) {
-    auto flux = cell_to_flux(cell, q);
+    auto flux = Base::GetFluxMatrix(cell, q);
     flux *= GetWeight(cell.integrator(), q);
     return flux;
   }
@@ -142,11 +141,10 @@ class Lobatto : public General<P, R> {
   }
 
  protected:  // override virtual methods defined in Base
-  void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
-      Scalar *data) const override {
+  void AddFluxDivergence(Cell const &cell, Scalar *data) const override {
     const auto &integrator = cell.integrator();
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-      auto flux = GetWeightedFluxMatrix(cell_to_flux, cell, q);
+      auto flux = GetWeightedFluxMatrix(cell, q);
       auto const &grad = cell.polynomial().GetBasisGradients(q);
       Coeff prod = flux * grad;
       cell.polynomial().AddCoeffTo(prod, data);

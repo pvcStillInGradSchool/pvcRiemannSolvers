@@ -215,7 +215,7 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
     this->part_ptr_->ShareGhostCellCoeffs();
     auto residual = Column(cell_data_size_);
     residual.setZero();
-    this->AddFluxDivergenceOnLocalCells(&GetFluxMatrix, &residual);
+    this->AddFluxDivergenceOnLocalCells(&residual);
     this->AddFluxOnLocalFaces(&residual);
     this->AddFluxOnBoundaries(&residual);
     this->part_ptr_->UpdateGhostCellCoeffs();
@@ -274,38 +274,34 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
 
  public:  // declare pure virtual methods to be implemented in subclasses
   using FluxMatrix = typename Riemann::FluxMatrix;
-  using CellToFlux = FluxMatrix (*)(const Cell &cell, int q);
 
   /**
    * @brief Add the flux divergence to the residual column of the given Cell.
    * 
-   * @param cell_to_flux the pointer to a function that gets the FluxMatrix on a given integratorian point of a Cell
    * @param cell the Cell to be processed
    * @param data the residual column of the given Cell
    */
-  virtual void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
-      Scalar *data) const = 0;
+  virtual void AddFluxDivergence(Cell const &cell, Scalar *data) const = 0;
 
   /**
    * @brief Add the flux divergence to the residual column of the given Part.
    * 
    * It delegates the work to the pure virtual method FiniteElement::AddFluxDivergence, which must be implemented in a concrete class.
    * 
-   * @param cell_to_flux the pointer to a function that gets the FluxMatrix on a given integratorian point of a Cell
    * @param residual the residual column of the given Part
    */
-  void AddFluxDivergenceOnLocalCells(CellToFlux cell_to_flux,
-      Column *residual) const {
+  void AddFluxDivergenceOnLocalCells(Column *residual) const {
     if (Part::kDegrees == 0) {
       return;
     }
     for (const Cell &cell : part().GetLocalCells()) {
       auto *data = this->AddCellDataOffset(residual, cell.id());
-      this->AddFluxDivergence(cell_to_flux, cell, data);
+      this->AddFluxDivergence(cell, data);
     }
   }
   virtual void AddFluxOnLocalFaces(Column *residual) const = 0;
   virtual void AddFluxOnGhostFaces(Column *residual) const = 0;
+
   virtual void AddFluxOnNoSlipWalls(Column *residual) const {
   }
   virtual void AddFluxOnInviscidWalls(Column *residual) const = 0;

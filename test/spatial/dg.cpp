@@ -203,7 +203,6 @@ int main(int argc, char* argv[]) {
   class Test : public Spatial {
     using SEM = Spatial;
     using FEM = typename Spatial::Base;
-    using CellToFlux = typename FEM::CellToFlux;
 
    public:
     explicit Test(Part *part_ptr)
@@ -212,12 +211,9 @@ int main(int argc, char* argv[]) {
 
     void AddFluxDivergenceOnLocalCells(Column *residual) const {
       residual->setZero();
-      CellToFlux cell_to_flux = &FEM::Base::GetFluxMatrix;
-      dynamic_cast<SEM const *>(this)->AddFluxDivergenceOnLocalCells(
-          cell_to_flux, residual);
+      dynamic_cast<SEM const *>(this)->AddFluxDivergenceOnLocalCells(residual);
       *residual *= -1.0;
-      dynamic_cast<FEM const *>(this)->AddFluxDivergenceOnLocalCells(
-          cell_to_flux, residual);
+      dynamic_cast<FEM const *>(this)->AddFluxDivergenceOnLocalCells(residual);
     }
     void AddFluxOnLocalFaces(Column *residual) const override {
       residual->setZero();

@@ -48,13 +48,11 @@ class General : public spatial::FiniteElement<P, R> {
   }
 
  protected:  // implement pure virtual methods declared in Base
-  using CellToFlux = typename Base::CellToFlux;
-  void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
-      Scalar *data) const override {
+  void AddFluxDivergence(Cell const &cell, Scalar *data) const override {
     const auto &integrator = cell.integrator();
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
       const auto &xyz = integrator.GetGlobal(q);
-      auto flux = cell_to_flux(cell, q);
+      auto flux = Base::GetFluxMatrix(cell, q);
       flux *= integrator.GetGlobalWeight(q);
       auto grad = cell.polynomial().GlobalToBasisGradients(xyz);
       Coeff prod = flux * grad;

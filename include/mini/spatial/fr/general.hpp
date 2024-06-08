@@ -240,14 +240,12 @@ class General : public spatial::FiniteElement<P, R> {
   }
 
  protected:  // override virtual methods defined in Base
-  using CellToFlux = typename Base::CellToFlux;
-  void AddFluxDivergence(CellToFlux cell_to_flux, Cell const &cell,
-      Scalar *data) const override {
+  void AddFluxDivergence(Cell const &cell, Scalar *data) const override {
     const auto &integrator = cell.integrator();
     const auto &polynomial = cell.polynomial();
     auto &flux = const_cast<General *>(this)->flux_matrices_.at(cell.id());
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-      FluxMatrix global_flux = cell_to_flux(cell, q);
+      FluxMatrix global_flux = Base::GetFluxMatrix(cell, q);
       flux[q] = polynomial.GlobalFluxToLocalFlux(global_flux, q);
     }
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
