@@ -97,8 +97,8 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
         conservative_given, conservative_grad_given);
     Vector normal = Vector::Random().normalized();
     EXPECT_NEAR(normal.norm(), 1.0, 1e-15);
-    NS::MinusViscousFlux(conservative_given, conservative_grad_given, normal,
-        &flux_vector);
+    NS::MinusViscousFlux(&flux_vector, property,
+        conservative_given, conservative_grad_given, normal);
     EXPECT_EQ(flux_vector[0], 0.0);
     EXPECT_NE(flux_vector[U], 0.0);
     EXPECT_NE(flux_vector[V], 0.0);
@@ -112,9 +112,9 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
     wall_value.energy() = normal.dot(grad_T);
     flux_vector = -flux_vector;
     Scalar value_penalty = 0.0;
-    NS::MinusViscousFluxOnNoSlipWall(wall_value,
+    NS::MinusViscousFluxOnNoSlipWall(&flux_vector, property, wall_value,
         conservative_given, conservative_grad_given, normal,
-        value_penalty, &flux_vector);
+        value_penalty);
     EXPECT_NEAR(flux_vector.norm(), 0.0, 1e-11);
   }
 }

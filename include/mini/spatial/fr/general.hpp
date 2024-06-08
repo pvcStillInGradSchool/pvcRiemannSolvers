@@ -300,8 +300,9 @@ class General : public spatial::FiniteElement<P, R> {
     auto du_common = riemann.GetCommonGradient(normal,
         u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
     Value u_common = (u_holder + u_sharer) / 2;
-    // get viscous coeff on face
-    Riemann::MinusViscousFlux(u_common, du_common, normal, &f_upwind);
+    auto const &property = Riemann::Diffusion::GetPropertyOnCell(
+        holder.id(), holder_cache.ijk);
+    Riemann::MinusViscousFlux(&f_upwind, property, u_common, du_common, normal);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     Value f_sharer = f_upwind * (-sharer_cache.scale);
@@ -404,8 +405,10 @@ class General : public spatial::FiniteElement<P, R> {
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
     Scalar value_penalty = riemann.GetValuePenalty();
-    Riemann::MinusViscousFluxOnNoSlipWall(wall_value,
-        u_holder, du_holder, normal, value_penalty, &f_upwind);
+    auto const &property = Riemann::Diffusion::GetPropertyOnCell(
+        holder.id(), holder_cache.ijk);
+    Riemann::MinusViscousFluxOnNoSlipWall(&f_upwind, property, wall_value,
+        u_holder, du_holder, normal, value_penalty);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     return f_holder;
@@ -428,7 +431,9 @@ class General : public spatial::FiniteElement<P, R> {
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
     const auto &normal = riemann.normal();
     assert(Collinear(normal, holder_cache.normal));
-    Riemann::MinusViscousFlux(u_holder, du_holder, normal, &f_upwind);
+    auto const &property = Riemann::Diffusion::GetPropertyOnCell(
+        holder.id(), holder_cache.ijk);
+    Riemann::MinusViscousFlux(&f_upwind, property, u_holder, du_holder, normal);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     assert(f_holder.norm() < 1e-6);

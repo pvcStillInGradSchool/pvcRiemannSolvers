@@ -175,11 +175,6 @@ class NavierStokes {
   }
 
  public:
-  static void MinusViscousFlux(Conservative const &conservative,
-      Gradient const &grad_conservative, Vector const &normal,
-      FluxVector *flux_vector) {
-    MinusViscousFlux(flux_vector, property_, conservative, grad_conservative, normal);
-  }
   static void MinusViscousFlux(FluxVector *flux_vector, Property const &property,
       Conservative const &conservative, Gradient const &grad_conservative, Vector const &normal) {
     auto [primitive, grad_primitive]
@@ -191,11 +186,10 @@ class NavierStokes {
         normal.dot(grad_T));
   }
 
-  static void MinusViscousFluxOnNoSlipWall(Value const &wall_value,
-      Conservative const &conservative,
-      Gradient const &grad_conservative,
-      Vector const &normal, Scalar value_penalty,
-      FluxVector *flux_vector) {
+  static void MinusViscousFluxOnNoSlipWall(FluxVector *flux_vector,
+      Property const &property, Value const &wall_value,
+      Conservative const &conservative, Gradient const &grad_conservative,
+      Vector const &normal, Scalar value_penalty) {
     auto [primitive, grad_primitive]
         = ConservativeToPrimitive(conservative, grad_conservative);
     auto *flux = static_cast<Flux *>(flux_vector);
@@ -211,7 +205,7 @@ class NavierStokes {
     grad_primitive(Z, U) += normal[Z] * penalty[X];
     grad_primitive(Z, V) += normal[Z] * penalty[Y];
     grad_primitive(Z, W) += normal[Z] * penalty[Z];
-    _MinusViscousFlux(flux, property_, conservative.mass(), grad_primitive, normal, uvw,
+    _MinusViscousFlux(flux, property, conservative.mass(), grad_primitive, normal, uvw,
         wall_value_ref.energy());
   }
 };

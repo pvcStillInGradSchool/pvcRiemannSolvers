@@ -71,7 +71,8 @@ concept HasDiffusiveMethods = requires(R riemann, P property, V const &value,
   requires std::same_as<M, typename R::FluxMatrix>;
   { R::MinusViscousFlux(flux_matrix, property, value, gradient) }
       -> std::same_as<void>;
-  { R::MinusViscousFlux(value, gradient, normal, flux) } -> std::same_as<void>;
+  { R::MinusViscousFlux(flux, property, value, gradient, normal) }
+      -> std::same_as<void>;
   { riemann.GetCommonGradient(normal, value, value, gradient, gradient) } -> std::same_as<G>;
 };
 
