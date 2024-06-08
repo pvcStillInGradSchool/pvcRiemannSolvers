@@ -150,46 +150,23 @@ class Lobatto : public General<P, R> {
       cell.polynomial().AddCoeffTo(prod, data);
     }
   }
-  void AddFluxOnLocalFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetLocalFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &integrator = face.integrator();
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
-      Scalar *sharer_data = this->AddCellDataOffset(residual, sharer.id());
-      auto &i_node_on_holder = i_node_on_holder_[face.id()];
-      auto &i_node_on_sharer = i_node_on_sharer_[face.id()];
-      for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
-        auto c_holder = i_node_on_holder[f];
-        auto c_sharer = i_node_on_sharer[f];
-        Value u_holder = holder.polynomial().GetValue(c_holder);
-        Value u_sharer = sharer.polynomial().GetValue(c_sharer);
-        Value flux = riemanns[f].GetFluxUpwind(u_holder, u_sharer);
-        flux *= integrator.GetGlobalWeight(f);
-        holder.polynomial().MinusValue(flux, holder_data, c_holder);
-        sharer.polynomial().AddValueTo(flux, sharer_data, c_sharer);
-      }
-    }
-  }
-  void AddFluxOnGhostFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetGhostFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &integrator = face.integrator();
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
-      auto &i_node_on_holder = i_node_on_holder_[face.id()];
-      auto &i_node_on_sharer = i_node_on_sharer_[face.id()];
-      for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
-        auto c_holder = i_node_on_holder[f];
-        auto c_sharer = i_node_on_sharer[f];
-        Value u_holder = holder.polynomial().GetValue(c_holder);
-        Value u_sharer = sharer.polynomial().GetValue(c_sharer);
-        Value flux = riemanns[f].GetFluxUpwind(u_holder, u_sharer);
-        flux *= integrator.GetGlobalWeight(f);
-        holder.polynomial().MinusValue(flux, holder_data, c_holder);
-      }
+  void AddFluxOnFace(Face const &face,
+      Scalar *holder_data, Scalar *sharer_data) const override {
+    const auto &riemanns = this->GetRiemannSolvers(face);
+    const auto &integrator = face.integrator();
+    const auto &holder = face.holder();
+    const auto &sharer = face.sharer();
+    auto &i_node_on_holder = i_node_on_holder_[face.id()];
+    auto &i_node_on_sharer = i_node_on_sharer_[face.id()];
+    for (int f = 0, n = integrator.CountPoints(); f < n; ++f) {
+      auto c_holder = i_node_on_holder[f];
+      auto c_sharer = i_node_on_sharer[f];
+      Value u_holder = holder.polynomial().GetValue(c_holder);
+      Value u_sharer = sharer.polynomial().GetValue(c_sharer);
+      Value flux = riemanns[f].GetFluxUpwind(u_holder, u_sharer);
+      flux *= integrator.GetGlobalWeight(f);
+      holder.polynomial().MinusValue(flux, holder_data, c_holder);
+      sharer.polynomial().AddValueTo(flux, sharer_data, c_sharer);
     }
   }
   void AddFluxOnInviscidWalls(Column *residual) const override {

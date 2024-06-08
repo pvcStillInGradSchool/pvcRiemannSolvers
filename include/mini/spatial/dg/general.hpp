@@ -59,43 +59,22 @@ class General : public spatial::FiniteElement<P, R> {
       cell.polynomial().AddCoeffTo(prod, data);
     }
   }
-  void AddFluxOnLocalFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetLocalFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &integrator = face.integrator();
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
-      Scalar *sharer_data = this->AddCellDataOffset(residual, sharer.id());
-      for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-        const auto &coord = integrator.GetGlobal(q);
-        Value u_holder = holder.GlobalToValue(coord);
-        Value u_sharer = sharer.GlobalToValue(coord);
-        Value flux = riemanns[q].GetFluxUpwind(u_holder, u_sharer);
-        flux *= integrator.GetGlobalWeight(q);
-        Coeff prod = flux * holder.GlobalToBasisValues(coord);
-        holder.polynomial().MinusCoeff(prod, holder_data);
-        prod = flux * sharer.GlobalToBasisValues(coord);
-        sharer.polynomial().AddCoeffTo(prod, sharer_data);
-      }
-    }
-  }
-  void AddFluxOnGhostFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetGhostFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &integrator = face.integrator();
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      Scalar *holder_data = this->AddCellDataOffset(residual, holder.id());
-      for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-        const auto &coord = integrator.GetGlobal(q);
-        Value u_holder = holder.GlobalToValue(coord);
-        Value u_sharer = sharer.GlobalToValue(coord);
-        Value flux = riemanns[q].GetFluxUpwind(u_holder, u_sharer);
-        flux *= integrator.GetGlobalWeight(q);
-        Coeff prod = flux * holder.GlobalToBasisValues(coord);
-        holder.polynomial().MinusCoeff(prod, holder_data);
-      }
+  void AddFluxOnFace(Face const &face,
+      Scalar *holder_data, Scalar *sharer_data) const override {
+    const auto &riemanns = this->GetRiemannSolvers(face);
+    const auto &integrator = face.integrator();
+    const auto &holder = face.holder();
+    const auto &sharer = face.sharer();
+    for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
+      const auto &coord = integrator.GetGlobal(q);
+      Value u_holder = holder.GlobalToValue(coord);
+      Value u_sharer = sharer.GlobalToValue(coord);
+      Value flux = riemanns[q].GetFluxUpwind(u_holder, u_sharer);
+      flux *= integrator.GetGlobalWeight(q);
+      Coeff prod = flux * holder.GlobalToBasisValues(coord);
+      holder.polynomial().MinusCoeff(prod, holder_data);
+      prod = flux * sharer.GlobalToBasisValues(coord);
+      sharer.polynomial().AddCoeffTo(prod, sharer_data);
     }
   }
 

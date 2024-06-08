@@ -218,47 +218,24 @@ class Lobatto : public General<P, R> {
   }
 
  protected:  // override virtual methods defined in Base
-  void AddFluxOnLocalFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetLocalFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      auto *holder_data = this->AddCellDataOffset(residual, holder.id());
-      auto *sharer_data = this->AddCellDataOffset(residual, sharer.id());
-      auto const &holder_cache = holder_cache_[face.id()];
-      auto &sharer_cache = sharer_cache_[face.id()];
-      assert(kFaceQ == face.integrator().CountPoints());
-      for (int f = 0; f < kFaceQ; ++f) {
-        auto &holder_flux_point = holder_cache[f];
-        auto &sharer_flux_point = sharer_cache[f];
-        auto [f_holder, f_sharer] = Base::CellPairToFluxPair(riemanns[f],
-            holder, holder_flux_point,
-            sharer, sharer_flux_point, true);
-        f_holder *= holder_flux_point.g_prime;
-        Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
-        f_sharer *= sharer_flux_point.g_prime;
-        Polynomial::MinusValue(f_sharer, sharer_data, sharer_flux_point.ijk);
-      }
-    }
-  }
-  void AddFluxOnGhostFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetGhostFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      auto *holder_data = this->AddCellDataOffset(residual, holder.id());
-      auto const &holder_cache = holder_cache_[face.id()];
-      auto &sharer_cache = sharer_cache_[face.id()];
-      assert(kFaceQ == face.integrator().CountPoints());
-      for (int f = 0; f < kFaceQ; ++f) {
-        auto &holder_flux_point = holder_cache[f];
-        auto &sharer_flux_point = sharer_cache[f];
-        auto [f_holder, _] = Base::CellPairToFluxPair(riemanns[f],
-            holder, holder_flux_point,
-            sharer, sharer_flux_point, false);
-        f_holder *= holder_flux_point.g_prime;
-        Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
-      }
+  void AddFluxOnFace(Face const &face,
+      Scalar *holder_data, Scalar *sharer_data) const override {
+    const auto &riemanns = this->GetRiemannSolvers(face);
+    auto const &holder_cache = holder_cache_[face.id()];
+    auto &sharer_cache = sharer_cache_[face.id()];
+    assert(kFaceQ == face.integrator().CountPoints());
+    for (int f = 0; f < kFaceQ; ++f) {
+      auto &holder_flux_point = holder_cache[f];
+      auto &sharer_flux_point = sharer_cache[f];
+      auto [f_holder, f_sharer] = Base::CellPairToFluxPair(riemanns[f],
+          face.holder(), holder_flux_point,
+          face.sharer(), sharer_flux_point, true);
+      f_holder *= holder_flux_point.g_prime;
+      assert(holder_data);
+      Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+      if (nullptr == sharer_data) { continue; }
+      f_sharer *= sharer_flux_point.g_prime;
+      Polynomial::MinusValue(f_sharer, sharer_data, sharer_flux_point.ijk);
     }
   }
   void AddFluxOnInviscidWalls(Column *residual) const override {

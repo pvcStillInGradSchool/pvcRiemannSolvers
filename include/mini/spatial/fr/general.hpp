@@ -315,52 +315,27 @@ class General : public spatial::FiniteElement<P, R> {
     }
     return { f_holder, f_sharer };
   }
-  void AddFluxOnLocalFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetLocalFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      auto *holder_data = this->AddCellDataOffset(residual, holder.id());
-      auto *sharer_data = this->AddCellDataOffset(residual, sharer.id());
-      auto const &holder_cache = holder_cache_[face.id()];
-      auto &sharer_cache = sharer_cache_[face.id()];
-      assert(kFaceQ == face.integrator().CountPoints());
-      for (int f = 0; f < kFaceQ; ++f) {
-        auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-        auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
-        auto [f_holder, f_sharer] = CellPairToFluxPair(riemanns[f],
-            holder, holder_flux_point,
-            sharer, sharer_flux_point, true);
-        for (auto [g_prime, ijk] : holder_solution_points) {
-          Value f_correction = f_holder * g_prime;
-          Polynomial::MinusValue(f_correction, holder_data, ijk);
-        }
-        for (auto [g_prime, ijk] : sharer_solution_points) {
-          Value f_correction = f_sharer * g_prime;
-          Polynomial::MinusValue(f_correction, sharer_data, ijk);
-        }
+  void AddFluxOnFace(Face const &face,
+      Scalar *holder_data, Scalar *sharer_data) const override {
+    const auto &riemanns = this->GetRiemannSolvers(face);
+    const auto &holder = face.holder();
+    const auto &sharer = face.sharer();
+    auto const &holder_cache = holder_cache_[face.id()];
+    auto &sharer_cache = sharer_cache_[face.id()];
+    assert(kFaceQ == face.integrator().CountPoints());
+    for (int f = 0; f < kFaceQ; ++f) {
+      auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
+      auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
+      auto [f_holder, f_sharer] = CellPairToFluxPair(riemanns[f],
+          holder, holder_flux_point,
+          sharer, sharer_flux_point, true);
+      for (auto [g_prime, ijk] : holder_solution_points) {
+        Value f_correction = f_holder * g_prime;
+        Polynomial::MinusValue(f_correction, holder_data, ijk);
       }
-    }
-  }
-  void AddFluxOnGhostFaces(Column *residual) const override {
-    for (const Face &face : this->part().GetGhostFaces()) {
-      const auto &riemanns = this->GetRiemannSolvers(face);
-      const auto &holder = face.holder();
-      const auto &sharer = face.sharer();
-      auto *holder_data = this->AddCellDataOffset(residual, holder.id());
-      auto const &holder_cache = holder_cache_[face.id()];
-      auto &sharer_cache = sharer_cache_[face.id()];
-      assert(kFaceQ == face.integrator().CountPoints());
-      for (int f = 0; f < kFaceQ; ++f) {
-        auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-        auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
-        auto [f_holder, _] = CellPairToFluxPair(riemanns[f],
-            holder, holder_flux_point,
-            sharer, sharer_flux_point, false);
-        for (auto [g_prime, ijk] : holder_solution_points) {
-          Value f_correction = f_holder * g_prime;
-          Polynomial::MinusValue(f_correction, holder_data, ijk);
-        }
+      for (auto [g_prime, ijk] : sharer_solution_points) {
+        Value f_correction = f_sharer * g_prime;
+        Polynomial::MinusValue(f_correction, sharer_data, ijk);
       }
     }
   }

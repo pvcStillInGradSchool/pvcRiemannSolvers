@@ -299,8 +299,25 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
       this->AddFluxDivergence(cell, data);
     }
   }
-  virtual void AddFluxOnLocalFaces(Column *residual) const = 0;
-  virtual void AddFluxOnGhostFaces(Column *residual) const = 0;
+
+  virtual void AddFluxOnFace(Face const &face,
+      Scalar *holder_data, Scalar *sharer_data) const = 0;
+
+  void AddFluxOnLocalFaces(Column *residual) const {
+    for (const Face &face : this->part().GetLocalFaces()) {
+      this->AddFluxOnFace(face,
+          this->AddCellDataOffset(residual, face.holder().id()),
+          this->AddCellDataOffset(residual, face.sharer().id()));
+    }
+  }
+
+  void AddFluxOnGhostFaces(Column *residual) const {
+    for (const Face &face : this->part().GetGhostFaces()) {
+      this->AddFluxOnFace(face,
+          this->AddCellDataOffset(residual, face.holder().id()),
+          nullptr);
+    }
+  }
 
   virtual void AddFluxOnNoSlipWalls(Column *residual) const {
   }

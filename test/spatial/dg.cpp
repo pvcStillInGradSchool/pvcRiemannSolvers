@@ -215,17 +215,17 @@ int main(int argc, char* argv[]) {
       *residual *= -1.0;
       dynamic_cast<FEM const *>(this)->AddFluxDivergenceOnLocalCells(residual);
     }
-    void AddFluxOnLocalFaces(Column *residual) const override {
+    void AddFluxOnLocalFaces(Column *residual) const {
       residual->setZero();
-      this->SEM::AddFluxOnLocalFaces(residual);
+      dynamic_cast<SEM const *>(this)->AddFluxOnLocalFaces(residual);
       *residual *= -1.0;
-      this->FEM::AddFluxOnLocalFaces(residual);
+      dynamic_cast<FEM const *>(this)->AddFluxOnLocalFaces(residual);
     }
-    void AddFluxOnGhostFaces(Column *residual) const override {
+    void AddFluxOnGhostFaces(Column *residual) const {
       residual->setZero();
-      this->SEM::AddFluxOnGhostFaces(residual);
+      dynamic_cast<SEM const *>(this)->AddFluxOnGhostFaces(residual);
       *residual *= -1.0;
-      this->FEM::AddFluxOnGhostFaces(residual);
+      dynamic_cast<FEM const *>(this)->AddFluxOnGhostFaces(residual);
     }
     void AddFluxOnInviscidWalls(Column *residual) const override {
       residual->setZero();
