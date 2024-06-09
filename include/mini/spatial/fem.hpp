@@ -120,10 +120,10 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   }
 
   /**
-   * @brief Get the Riemann solvers on a given Face.
+   * @brief Get the FiniteElement::Riemann solvers on a given FiniteElement::Face.
    * 
-   * @param face the given Face
-   * @return a vector of Riemann solvers indexed by quadrature points.
+   * @param face the given FiniteElement::Face
+   * @return a vector of FiniteElement::Riemann solvers indexed by quadrature points.
    */
   std::vector<Riemann> const &GetRiemannSolvers(Face const &face) const {
 #ifdef NDEBUG
@@ -276,19 +276,19 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   using FluxMatrix = typename Riemann::FluxMatrix;
 
   /**
-   * @brief Add the flux divergence to the residual column of the given Cell.
+   * @brief Add the flux divergence to the residual column of the given FiniteElement::Cell.
    * 
-   * @param cell the Cell to be processed
-   * @param data the residual column of the given Cell
+   * @param cell the FiniteElement::Cell to be processed
+   * @param data the residual column of the given FiniteElement::Cell
    */
   virtual void AddFluxDivergence(Cell const &cell, Scalar *data) const = 0;
 
   /**
-   * @brief Add the flux divergence to the residual column of the given Part.
+   * @brief Add the flux divergence to the residual FiniteElement::Column of the given FiniteElement::Part.
    * 
    * It delegates the work to the pure virtual method FiniteElement::AddFluxDivergence, which must be implemented in a concrete class.
    * 
-   * @param residual the residual column of the given Part
+   * @param residual the residual FiniteElement::Column of the given FiniteElement::Part
    */
   void AddFluxDivergenceOnLocalCells(Column *residual) const {
     if (Part::kDegrees == 0) {
@@ -301,21 +301,21 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   }
 
   /**
-   * @brief Solve the Riemann problem on the given Face, then add the Flux to the residual of the given Cell(s).
+   * @brief Solve the FiniteElement::Riemann problem on the given FiniteElement::Face, then add the flux to the residual of the given FiniteElement::Cell(s).
    * 
-   * @param face the Face to be processed
-   * @param holder_data the residual column of the holder Cell of the given Face
-   * @param sharer_data the residual column of the sharer Cell of the given Face
+   * @param face the FiniteElement::Face to be processed
+   * @param holder_data the residual column of the holder FiniteElement::Cell of the given FiniteElement::Face
+   * @param sharer_data the residual column of the sharer FiniteElement::Cell of the given FiniteElement::Face
    */
   virtual void AddFluxOnFace(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const = 0;
 
   /**
-   * @brief Add the fluxes on local (requiring no MPI communication) Faces to the residual column of the given Part.
+   * @brief Add the fluxes on local (requiring no MPI communication) FiniteElement::Face's to the residual FiniteElement::Column of the given FiniteElement::Part.
    * 
    * It delegates the work to the pure virtual method FiniteElement::AddFluxOnFace, which must be implemented in a concrete class.
    * 
-   * @param residual the residual column of the given Part
+   * @param residual the residual FiniteElement::Column of the given FiniteElement::Part
    */
   void AddFluxOnLocalFaces(Column *residual) const {
     for (const Face &face : this->part().GetLocalFaces()) {
@@ -326,11 +326,11 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   }
 
   /**
-   * @brief Add the fluxes on ghost (requiring MPI communications) Faces to the residual column of the given Part.
+   * @brief Add the fluxes on ghost (requiring MPI communications) FiniteElement::Face's to the residual FiniteElement::Column of the given FiniteElement::Part.
    * 
    * It delegates the work to the pure virtual method FiniteElement::AddFluxOnFace, which must be implemented in a concrete class.
    * 
-   * @param residual the residual column of the given Part
+   * @param residual the residual FiniteElement::Column of the given FiniteElement::Part
    */
   void AddFluxOnGhostFaces(Column *residual) const {
     for (const Face &face : this->part().GetGhostFaces()) {
