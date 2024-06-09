@@ -300,9 +300,23 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
     }
   }
 
+  /**
+   * @brief Solve the Riemann problem on the given Face, then add the Flux to the residual of the given Cell(s).
+   * 
+   * @param face the Face to be processed
+   * @param holder_data the residual column of the holder Cell of the given Face
+   * @param sharer_data the residual column of the sharer Cell of the given Face
+   */
   virtual void AddFluxOnFace(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const = 0;
 
+  /**
+   * @brief Add the fluxes on local (requiring no MPI communication) Faces to the residual column of the given Part.
+   * 
+   * It delegates the work to the pure virtual method FiniteElement::AddFluxOnFace, which must be implemented in a concrete class.
+   * 
+   * @param residual the residual column of the given Part
+   */
   void AddFluxOnLocalFaces(Column *residual) const {
     for (const Face &face : this->part().GetLocalFaces()) {
       this->AddFluxOnFace(face,
@@ -311,6 +325,13 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
     }
   }
 
+  /**
+   * @brief Add the fluxes on ghost (requiring MPI communications) Faces to the residual column of the given Part.
+   * 
+   * It delegates the work to the pure virtual method FiniteElement::AddFluxOnFace, which must be implemented in a concrete class.
+   * 
+   * @param residual the residual column of the given Part
+   */
   void AddFluxOnGhostFaces(Column *residual) const {
     for (const Face &face : this->part().GetGhostFaces()) {
       this->AddFluxOnFace(face,
