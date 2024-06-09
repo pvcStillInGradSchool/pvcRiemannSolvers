@@ -25,7 +25,7 @@ static bool Near(auto const &x, auto const &y) {
   return (x - y).norm() < 1e-12;
 }
 
-template <typename P, mini::riemann::Convective R>
+template <typename P, typename R>
 class FiniteElement : public temporal::System<typename P::Scalar> {
  public:
   using Part = P;
@@ -42,6 +42,7 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   using Temporal = temporal::System<typename Part::Scalar>;
   using Column = typename Temporal::Column;
 
+  static_assert(mini::riemann::Convective<Riemann>);
   static_assert(std::is_same_v<Scalar, typename Riemann::Scalar>);
   static_assert(std::is_same_v<Scalar, typename Riemann::Scalar>);
   static_assert(Riemann::kComponents == Polynomial::K);
