@@ -2,6 +2,7 @@
 #ifndef TEST_MESH_SPATIAL_HPP_
 #define TEST_MESH_SPATIAL_HPP_
 
+#include "mini/riemann/concept.hpp"
 #include "mini/riemann/rotated/multiple.hpp"
 #include "mini/riemann/diffusive/linear.hpp"
 #include "mini/riemann/diffusive/direct_dg.hpp"
@@ -17,6 +18,7 @@ using Diffusion = mini::riemann::diffusive::DirectDG<
     mini::riemann::diffusive::Isotropic<Scalar, kComponents>
 >;
 using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
+static_assert(mini::riemann::ConvectiveDiffusive<Riemann>);
 
 void ResetRiemann() {
   using Jacobian = typename Riemann::Jacobian;

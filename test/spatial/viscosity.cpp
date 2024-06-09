@@ -41,6 +41,7 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   part.SetFieldNames({"U1", "U2"});
   using RiemannWithViscosity = mini::spatial::EnergyBasedViscosity<
       Part, test::spatial::Riemann>;
+  static_assert(mini::riemann::ConvectiveDiffusive<RiemannWithViscosity>);
   using Spatial = mini::spatial::fr::Lobatto<Part, RiemannWithViscosity>;
   auto spatial = Spatial(&part);
   RiemannWithViscosity::InstallSpatial(&spatial);
