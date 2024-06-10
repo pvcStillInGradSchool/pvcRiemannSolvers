@@ -29,30 +29,78 @@ namespace spatial {
 template <typename P, mini::riemann::Convective R>
 class EnergyBasedViscosity : public R {
  public:
-  using Spatial = FiniteElement<P, EnergyBasedViscosity>;
-  using Part = typename Spatial::Part;
-  using Riemann = typename Spatial::Riemann;
-  using Scalar = typename Spatial::Scalar;
-  using Face = typename Spatial::Face;
-  using Cell = typename Spatial::Cell;
-  using Global = typename Spatial::Global;
-  using Polynomial = typename Spatial::Polynomial;
-  using Integrator = typename Polynomial::Integrator;
-  using Local = typename Integrator::Local;
-  using Coeff = typename Spatial::Coeff;
-  using Value = typename Spatial::Value;
-  using Temporal = typename Spatial::Temporal;
-  using Column = typename Spatial::Column;
-  using FluxMatrix = typename Spatial::FluxMatrix;
-  using CellToFlux = typename Spatial::CellToFlux;
+  using Base = R;
+
+  // members required by mini::riemann::Convective
+  static constexpr int kComponents = Base::kComponents;
+  static constexpr int kDimensions = Base::kDimensions;
+  using Convection = typename Base::Convection;
+  using Scalar = typename Base::Scalar;
+  using Vector = typename Base::Vector;
+  using Conservative = typename Base::Conservative;
+  using Flux = typename Base::Flux;
+  using FluxMatrix = typename Base::FluxMatrix;
+  using Jacobian = typename Base::Jacobian;
+
+  // members required by mini::riemann::Diffusion
+  using Diffusion = EnergyBasedViscosity;
+  using Gradient = mini::algebra::Matrix<Scalar, kDimensions, kComponents>;
+  using Property = Scalar;
+
+  // members derived from Part
+  using Part = P;
+  using Face = typename Part::Face;
+  using Cell = typename Part::Cell;
+  using Global = typename Cell::Global;
+  using Local = typename Cell::Local;
+  using Polynomial = typename Cell::Polynomial;
+  using Coeff = typename Polynomial::Coeff;
+  using Value = typename Polynomial::Value;
+
+  // override methods in Base::Diffusion
+  template <typename Int>
+  static Property const &GetPropertyOnCell(Int i_cell, int i_node) {
+    return 1.0;
+  }
+
+  static void MinusViscousFlux(FluxMatrix *flux, Property const &nu,
+      Conservative const &value, Gradient const &gradient) {
+    using namespace mini::constant::index;
+    flux->col(X) -= nu * gradient.row(X);
+    flux->col(Y) -= nu * gradient.row(Y);
+    flux->col(Z) -= nu * gradient.row(Z);
+  }
+
+  static void MinusViscousFlux(Flux *flux, Property const &nu,
+      Conservative const &value, Gradient const &gradient,
+      Vector const &normal) {
+    using namespace mini::constant::index;
+    *flux -= (normal[X] * nu) * gradient.row(X);
+    *flux -= (normal[Y] * nu) * gradient.row(Y);
+    *flux -= (normal[Z] * nu) * gradient.row(Z);
+  }
+
+  static void MinusViscousFluxOnNoSlipWall(Flux *flux,
+      Property const &nu, Value const &wall_value,
+      Conservative const &c_val, Gradient const &c_grad,
+      Vector const &normal, Scalar value_penalty) {
+    MinusViscousFlux(flux, nu, c_val, c_grad, normal);
+  }
+
+  /**
+   * @brief non-constant condition for static assertion 
+   * 
+   */
+  // static_assert(mini::riemann::Convective<EnergyBasedViscosity>);
+  using Spatial = FiniteElement<Part, EnergyBasedViscosity>;
 
  private:
   static Spatial *spatial_ptr_;
   static Scalar time_scale_;
 
  public:
-  static void InstallSpatial(Spatial *spatial_ptr)
-    spatial_ptr_ = spatial_ptr {
+  static void InstallSpatial(Spatial *spatial_ptr) {
+    spatial_ptr_ = spatial_ptr;
   }
 
   static Part *part_ptr() {
@@ -69,21 +117,8 @@ class EnergyBasedViscosity : public R {
     time_scale_ = time_scale;
   }
 
- private:
-  // TODO(PVC): avoid overriding Spatial::Riemann
-  using Diffusion = mini::riemann::diffusive::Isotropic<Scalar, Cell::K>;
-  using DiffusionRiemann = mini::riemann::diffusive::DirectDG<Diffusion>;
-
-  static FluxMatrix GetDiffusiveFluxMatrix(const Cell &cell, int q) {
-    const auto &polynomial = cell.polynomial();
-    const auto &value = polynomial.GetValue(q);
-    FluxMatrix flux_matrix; flux_matrix.setZero();
-    const auto &gradient = polynomial.GetGlobalGradient(q);
-    DiffusionRiemann::MinusViscousFlux(value, gradient, &flux_matrix);
-    return flux_matrix;
-  }
-
  public:
+  using Base::Base;
   EnergyBasedViscosity(const EnergyBasedViscosity &) = default;
   EnergyBasedViscosity &operator=(const EnergyBasedViscosity &) = default;
   EnergyBasedViscosity(EnergyBasedViscosity &&) noexcept = default;
@@ -95,7 +130,7 @@ class EnergyBasedViscosity : public R {
 
   static std::vector<DampingMatrix> BuildDampingMatrices() {
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
-    Diffusion::SetProperty(1.0);
+    // Diffusion::SetProperty(1.0);
     for (Cell *cell_ptr: spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
       // Nullify all its neighbors' coeffs:
       for (Cell *neighbor : cell_ptr->adj_cells_) {
@@ -112,8 +147,7 @@ class EnergyBasedViscosity : public R {
         }
         // Build the element-wise residual column:
         Coeff residual; residual.setZero();
-        spatial_ptr_->AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
-            residual.data());
+        spatial_ptr_->AddFluxDivergence(*cell_ptr, residual.data());
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
         for (int r = 1; r < Cell::K; ++r) {
