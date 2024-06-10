@@ -62,11 +62,11 @@ class EnergyBasedViscosity : public R {
     return spatial_ptr_->part();
   }
 
-  static Scalar TimeScale() const {
+  static Scalar GetTimeScale() {
     return time_scale_;
   }
-  static Scalar &TimeScale() {
-    return time_scale_;
+  static void SetTimeScale(Scalar time_scale) {
+    time_scale_ = time_scale;
   }
 
  private:
@@ -200,7 +200,7 @@ class EnergyBasedViscosity : public R {
         auto const &u_col = u_row.transpose();
         Scalar damping_rate = u_row.dot(damping_matrix_on_curr_cell * u_col);
         viscosity_on_curr_cell[k] = jump_integral_on_curr_cell[k]
-            / (damping_rate * TimeScale());
+            / (damping_rate * GetTimeScale());
       }
       if (curr_cell->id() == 0) {
         std::fstream log{ "damping" + std::to_string(part().mpi_rank()) + ".txt", log.out };
