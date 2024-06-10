@@ -46,6 +46,7 @@ class EnergyBasedViscosity : public R {
   using Diffusion = EnergyBasedViscosity;
   using Gradient = mini::algebra::Matrix<Scalar, kDimensions, kComponents>;
   using Property = Scalar;
+  static std::vector<std::vector<Property>> properties_;  // [i_cell][i_node]
 
   // members derived from Part
   using Part = P;
@@ -60,7 +61,7 @@ class EnergyBasedViscosity : public R {
   // override methods in Base::Diffusion
   template <typename Int>
   static Property const &GetPropertyOnCell(Int i_cell, int i_node) {
-    return 1.0;
+    return properties_.at(i_cell).at(i_node);
   }
 
   static void MinusViscousFlux(FluxMatrix *flux, Property const &nu,
@@ -101,6 +102,15 @@ class EnergyBasedViscosity : public R {
  public:
   static void InstallSpatial(Spatial *spatial_ptr) {
     spatial_ptr_ = spatial_ptr;
+    properties_.resize(part().CountLocalCells() + part().CountGhostCells());
+    for (Cell *cell_ptr: part_ptr()->GetLocalCellPointers()) {
+      auto n_point = cell_ptr->integrator().CountPoints();
+      properties_.at(cell_ptr->id()).resize(n_point);
+    }
+    for (Cell const &cell: part().GetGhostCells()) {
+      auto n_point = cell.integrator().CountPoints();
+      properties_.at(cell.id()).resize(n_point);
+    }
   }
 
   static Part *part_ptr() {
@@ -253,6 +263,10 @@ EnergyBasedViscosity<P, R>::spatial_ptr_;
 template <typename P, typename R>
 typename EnergyBasedViscosity<P, R>::Scalar
 EnergyBasedViscosity<P, R>::time_scale_;
+
+template <typename P, typename R>
+std::vector<std::vector<typename EnergyBasedViscosity<P, R>::Property>>
+EnergyBasedViscosity<P, R>::properties_;
 
 }  // namespace spatial
 }  // namespace mini

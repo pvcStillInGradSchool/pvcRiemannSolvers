@@ -438,6 +438,7 @@ class Part {
     auto m_to_recv_cells = BuildGhostCells(ghost_adj, recv_cells);
     FillCellPtrs(ghost_adj);
     AddLocalCellId();
+    AddGhostCellId();
     BuildLocalFaces();
     BuildGhostFaces(ghost_adj, recv_cells, m_to_recv_cells);
     BuildBoundaryFaces(istrm, i_file);
@@ -731,6 +732,18 @@ class Part {
     assert(id == CountLocalCells());
     assert(id + 1 == cell_data_.size());
     assert(cell_data_.back() == CountLocalCells() * Cell::kFields);
+    assert(CountLocalCells() == std::ranges::distance(GetLocalCells()));
+    assert(CountLocalCells() == std::ranges::distance(GetLocalCellPointers()));
+    assert(CountLocalCells() == std::ranges::distance(GetInnerCellPointers())
+                              + std::ranges::distance(GetInterCellPointers()));
+  }
+  void AddGhostCellId() {
+    Int id = CountLocalCells();
+    for (auto &[_, cell] : ghost_cells_) {
+      cell.id_ = id++;
+    }
+    assert(CountGhostCells() + CountLocalCells() == id);
+    assert(CountGhostCells() == std::ranges::distance(GetGhostCells()));
   }
 
  public:
@@ -997,6 +1010,10 @@ class Part {
   Int CountLocalCells() const {
     return cell_data_.size() - 1;
   }
+  Int CountGhostCells() const {
+    return ghost_cells_.size();
+  }
+
   void GatherSolutions() {
     int n_zones = local_nodes_.size();
     for (int i_zone = 1; i_zone <= n_zones; ++i_zone) {
@@ -1202,7 +1219,15 @@ class Part {
 
   // Viewers of `Cell`s and `Face`s:
   /**
-   * @brief Get a range of `(Cell const &)`.
+   * @brief Get a range of `(Cell const &)`, which contains all ghost `Cell`s.
+   * 
+   * @return std::ranges::input_range 
+   */
+  std::ranges::input_range auto GetGhostCells() const {
+    return ghost_cells_ | std::views::values;
+  }
+  /**
+   * @brief Get a range of `(Cell const &)`, which contains all local `Cell`s.
    * 
    * @return std::ranges::input_range 
    */
