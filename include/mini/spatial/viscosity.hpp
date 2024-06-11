@@ -140,15 +140,20 @@ class EnergyBasedViscosity : public R {
 
   static std::vector<DampingMatrix> BuildDampingMatrices() {
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
-    // Diffusion::SetProperty(1.0);
-    for (Cell *cell_ptr: spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
-      // Nullify all its neighbors' coeffs:
-      for (Cell *neighbor : cell_ptr->adj_cells_) {
+    auto set_property = [](Cell *cell_ptr, Property nu) {
+      for (auto &nu : properties_.at(cell_ptr->id())) {
+        nu = 0.0;
+      }
+    };
+    for (Cell *curr_cell: spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
+      // Nullify coeffs and properties on all its neighbors:
+      for (Cell *neighbor : curr_cell->adj_cells_) {
         neighbor->polynomial().coeff().setZero();
+        set_property(neighbor, 0.0);
       }
       // Build the damping matrix column by column:
-      auto &matrix = matrices.at(cell_ptr->id());
-      auto &solution = cell_ptr->polynomial().coeff();
+      auto &matrix = matrices.at(curr_cell->id());
+      auto &solution = curr_cell->polynomial().coeff();
       solution.setZero();
       for (int c = 0; c < Cell::N; ++c) {
         solution.col(c).setOnes();
@@ -157,7 +162,11 @@ class EnergyBasedViscosity : public R {
         }
         // Build the element-wise residual column:
         Coeff residual; residual.setZero();
-        spatial_ptr_->AddFluxDivergence(*cell_ptr, residual.data());
+        set_property(curr_cell, 0.0);
+        spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
+        residual = -residual;
+        set_property(curr_cell, 1.0);
+        spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
         for (int r = 1; r < Cell::K; ++r) {
@@ -165,10 +174,13 @@ class EnergyBasedViscosity : public R {
         }
       }
 #ifndef NDEBUG
-      Coeff residual; residual.setZero();
       solution.setOnes();
-      spatial_ptr_->AddFluxDivergence(GetDiffusiveFluxMatrix, *cell_ptr,
-          residual.data());
+      Coeff residual; residual.setZero();
+      set_property(curr_cell, 0.0);
+      spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
+      residual = -residual;
+      set_property(curr_cell, 1.0);
+      spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
       for (int k = 0; k < Cell::K; ++k) {
         auto const &residual_col = residual.row(k).transpose();
         auto const &solution_col = solution.row(k).transpose();
@@ -176,11 +188,11 @@ class EnergyBasedViscosity : public R {
       }
 #endif
       // Scale the damping matrix by local weight over Jacobian:
-      assert(cell_ptr->polynomial().kLocal);
+      assert(curr_cell->polynomial().kLocal);
       for (int r = 0; r < Cell::N; ++r) {
         Scalar scale
-            = cell_ptr->integrator().GetLocalWeight(r)
-            / cell_ptr->integrator().GetJacobianDeterminant(r);
+            = curr_cell->integrator().GetLocalWeight(r)
+            / curr_cell->integrator().GetJacobianDeterminant(r);
         matrix.row(r) *= scale;
       }
     }
