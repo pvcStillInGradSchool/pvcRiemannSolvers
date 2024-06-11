@@ -155,6 +155,17 @@ class EnergyBasedViscosity : public R {
       auto &matrix = matrices.at(curr_cell->id());
       auto &solution = curr_cell->polynomial().coeff();
       solution.setZero();
+      auto update = [curr_cell](Scalar *residual_data){
+        spatial_ptr_->AddFluxDivergence(*curr_cell, residual_data);
+        Coeff dummy;
+        for (Face *face : curr_cell->adj_faces_) {
+          if (face->holder_ptr() == curr_cell) {
+            spatial_ptr_->AddFluxOnFace(*face, residual_data, nullptr);
+          } else {
+            spatial_ptr_->AddFluxOnFace(*face, dummy.data(), residual_data);
+          }
+        }
+      };
       for (int c = 0; c < Cell::N; ++c) {
         solution.col(c).setOnes();
         if (c > 0) {
@@ -163,24 +174,24 @@ class EnergyBasedViscosity : public R {
         // Build the element-wise residual column:
         Coeff residual; residual.setZero();
         set_property(curr_cell, 0.0);
-        spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
+        update(residual.data());
         residual = -residual;
         set_property(curr_cell, 1.0);
-        spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
+        update(residual.data());
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
         for (int r = 1; r < Cell::K; ++r) {
-          assert(residual.row(r) == residual.row(0));
+          assert((residual.row(r) - residual.row(0)).squaredNorm() < 1e-10);
         }
       }
 #ifndef NDEBUG
       solution.setOnes();
       Coeff residual; residual.setZero();
       set_property(curr_cell, 0.0);
-      spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
+      update(residual.data());
       residual = -residual;
       set_property(curr_cell, 1.0);
-      spatial_ptr_->AddFluxDivergence(*curr_cell, residual.data());
+      update(residual.data());
       for (int k = 0; k < Cell::K; ++k) {
         auto const &residual_col = residual.row(k).transpose();
         auto const &solution_col = solution.row(k).transpose();
