@@ -140,9 +140,9 @@ class EnergyBasedViscosity : public R {
 
   static std::vector<DampingMatrix> BuildDampingMatrices() {
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
-    auto set_property = [](Cell *cell_ptr, Property nu) {
+    auto set_property = [](Cell *cell_ptr, Property const &nu_given) {
       for (auto &nu : properties_.at(cell_ptr->id())) {
-        nu = 0.0;
+        nu = nu_given;
       }
     };
     for (Cell *curr_cell: spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
@@ -265,7 +265,7 @@ class EnergyBasedViscosity : public R {
       for (int k = 0; k < Cell::K; ++k) {
         auto const &u_row = coeff.row(k);
         auto const &u_col = u_row.transpose();
-        Scalar damping_rate = u_row.dot(damping_matrix_on_curr_cell * u_col);
+        Scalar damping_rate = -u_row.dot(damping_matrix_on_curr_cell * u_col);
         viscosity_on_curr_cell[k] = jump_integral_on_curr_cell[k]
             / (damping_rate * GetTimeScale());
       }
