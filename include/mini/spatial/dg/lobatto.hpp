@@ -165,7 +165,9 @@ class Lobatto : public General<P, R> {
       Value u_sharer = sharer.polynomial().GetValue(c_sharer);
       Value flux = riemanns[f].GetFluxUpwind(u_holder, u_sharer);
       flux *= integrator.GetGlobalWeight(f);
+      assert(holder_data);
       holder.polynomial().MinusValue(flux, holder_data, c_holder);
+      if (nullptr == sharer_data) { continue; }
       sharer.polynomial().AddValueTo(flux, sharer_data, c_sharer);
     }
   }

@@ -72,7 +72,9 @@ class General : public spatial::FiniteElement<P, R> {
       Value flux = riemanns[q].GetFluxUpwind(u_holder, u_sharer);
       flux *= integrator.GetGlobalWeight(q);
       Coeff prod = flux * holder.GlobalToBasisValues(coord);
+      assert(holder_data);
       holder.polynomial().MinusCoeff(prod, holder_data);
+      if (nullptr == sharer_data) { continue; }
       prod = flux * sharer.GlobalToBasisValues(coord);
       sharer.polynomial().AddCoeffTo(prod, sharer_data);
     }

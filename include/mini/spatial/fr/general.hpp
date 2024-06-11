@@ -328,11 +328,13 @@ class General : public spatial::FiniteElement<P, R> {
       auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
       auto [f_holder, f_sharer] = CellPairToFluxPair(riemanns[f],
           holder, holder_flux_point,
-          sharer, sharer_flux_point, true);
+          sharer, sharer_flux_point, sharer_data);
+      assert(holder_data);
       for (auto [g_prime, ijk] : holder_solution_points) {
         Value f_correction = f_holder * g_prime;
         Polynomial::MinusValue(f_correction, holder_data, ijk);
       }
+      if (nullptr == sharer_data) { continue; }
       for (auto [g_prime, ijk] : sharer_solution_points) {
         Value f_correction = f_sharer * g_prime;
         Polynomial::MinusValue(f_correction, sharer_data, ijk);

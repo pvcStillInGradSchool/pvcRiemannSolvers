@@ -229,7 +229,7 @@ class Lobatto : public General<P, R> {
       auto &sharer_flux_point = sharer_cache[f];
       auto [f_holder, f_sharer] = Base::CellPairToFluxPair(riemanns[f],
           face.holder(), holder_flux_point,
-          face.sharer(), sharer_flux_point, true);
+          face.sharer(), sharer_flux_point, sharer_data);
       f_holder *= holder_flux_point.g_prime;
       assert(holder_data);
       Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
