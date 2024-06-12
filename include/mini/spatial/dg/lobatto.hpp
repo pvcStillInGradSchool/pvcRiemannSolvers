@@ -141,13 +141,14 @@ class Lobatto : public General<P, R> {
   }
 
  protected:  // override virtual methods defined in Base
-  void AddFluxDivergence(Cell const &cell, Scalar *data) const override {
+  void AddFluxDivergence(Cell const &cell, Scalar *residual) const override {
+    assert(residual);
     const auto &integrator = cell.integrator();
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
       auto flux = GetWeightedFluxMatrix(cell, q);
       auto const &grad = cell.polynomial().GetBasisGradients(q);
       Coeff prod = flux * grad;
-      cell.polynomial().AddCoeffTo(prod, data);
+      cell.polynomial().AddCoeffTo(prod, residual);
     }
   }
   void AddFluxOnFace(Face const &face,

@@ -240,7 +240,8 @@ class General : public spatial::FiniteElement<P, R> {
   }
 
  protected:  // override virtual methods defined in Base
-  void AddFluxDivergence(Cell const &cell, Scalar *data) const override {
+  void AddFluxDivergence(Cell const &cell, Scalar *residual) const override {
+    assert(residual);
     const auto &integrator = cell.integrator();
     const auto &polynomial = cell.polynomial();
     auto &flux = const_cast<General *>(this)->flux_matrices_.at(cell.id());
@@ -254,7 +255,7 @@ class General : public spatial::FiniteElement<P, R> {
       for (int k = 1; k < n; ++k) {
         value += flux[k] * grad.col(k);
       }
-      Polynomial::MinusValue(value, data, q);
+      Polynomial::MinusValue(value, residual, q);
     }
   }
 

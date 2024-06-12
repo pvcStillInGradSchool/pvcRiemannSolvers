@@ -280,9 +280,9 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
    * @brief Add the flux divergence to the residual column of the given FiniteElement::Cell.
    * 
    * @param cell the FiniteElement::Cell to be processed
-   * @param data the residual column of the given FiniteElement::Cell
+   * @param residual the residual column of the given FiniteElement::Cell
    */
-  virtual void AddFluxDivergence(Cell const &cell, Scalar *data) const = 0;
+  virtual void AddFluxDivergence(Cell const &cell, Scalar *residual) const = 0;
 
   /**
    * @brief Add the flux divergence to the residual FiniteElement::Column of the given FiniteElement::Part.
