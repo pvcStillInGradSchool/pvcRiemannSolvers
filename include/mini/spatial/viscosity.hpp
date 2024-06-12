@@ -145,7 +145,7 @@ class EnergyBasedViscosity : public R {
         nu = nu_given;
       }
     };
-    for (Cell *curr_cell: spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *curr_cell: part_ptr()->GetLocalCellPointers()) {
       // Nullify coeffs and properties on all its neighbors:
       for (Cell *neighbor : curr_cell->adj_cells_) {
         neighbor->polynomial().coeff().setZero();
@@ -213,7 +213,7 @@ class EnergyBasedViscosity : public R {
   static std::vector<std::array<Value, Cell::N>> BuildValueJumps() {
     std::vector<std::array<Value, Cell::N>> value_jumps;
     value_jumps.reserve(part().CountLocalCells());
-    for (Cell *curr_cell : spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *curr_cell : part_ptr()->GetLocalCellPointers()) {
       auto &value_jumps_on_curr_cell = value_jumps.emplace_back();
       for (int i_node = 0; i_node < Cell::N; ++i_node) {
         auto &value_jump_on_curr_node = value_jumps_on_curr_cell[i_node];
@@ -236,7 +236,7 @@ class EnergyBasedViscosity : public R {
   IntegrateJumps(std::vector<std::array<Value, Cell::N>> const jumps) {
     std::vector<Value> jump_integrals;
     jump_integrals.reserve(part().CountLocalCells());
-    for (Cell *curr_cell : spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *curr_cell : part_ptr()->GetLocalCellPointers()) {
       auto &integral_on_curr_cell = jump_integrals.emplace_back(Value::Zero());
       auto &jump_on_curr_cell = jumps.at(curr_cell->id());
       auto const &integrator = curr_cell->integrator();
@@ -255,7 +255,7 @@ class EnergyBasedViscosity : public R {
       std::vector<DampingMatrix> const &damping_matrices) {
     std::vector<Value> viscosity_values;
     viscosity_values.reserve(part().CountLocalCells());
-    for (Cell *curr_cell : spatial_ptr_->part_ptr()->GetLocalCellPointers()) {
+    for (Cell *curr_cell : part_ptr()->GetLocalCellPointers()) {
       auto &viscosity_on_curr_cell = viscosity_values.emplace_back();
       auto &jump_integral_on_curr_cell = jump_integrals.at(curr_cell->id());
       auto &damping_matrix_on_curr_cell = damping_matrices.at(curr_cell->id());
