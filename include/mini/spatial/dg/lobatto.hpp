@@ -151,7 +151,7 @@ class Lobatto : public General<P, R> {
       cell.polynomial().AddCoeffTo(prod, residual);
     }
   }
-  void AddFluxOnFace(Face const &face,
+  void AddFluxOnTwoSideFace(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     const auto &integrator = face.integrator();

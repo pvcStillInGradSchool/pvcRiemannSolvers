@@ -163,9 +163,9 @@ class EnergyBasedViscosity : public R {
         Coeff dummy;
         for (Face *face : curr_cell->adj_faces_) {
           if (face->holder_ptr() == curr_cell) {
-            spatial_ptr_->AddFluxOnFace(*face, residual_data, nullptr);
+            spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
           } else {
-            spatial_ptr_->AddFluxOnFace(*face, dummy.data(), residual_data);
+            spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
           }
         }
         for (Face *face : curr_cell->boundary_faces_) {

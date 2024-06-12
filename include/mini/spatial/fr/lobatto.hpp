@@ -218,7 +218,7 @@ class Lobatto : public General<P, R> {
   }
 
  protected:  // override virtual methods defined in Base
-  void AddFluxOnFace(Face const &face,
+  void AddFluxOnTwoSideFace(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     auto const &holder_cache = holder_cache_[face.id()];
@@ -227,7 +227,7 @@ class Lobatto : public General<P, R> {
     for (int f = 0; f < kFaceQ; ++f) {
       auto &holder_flux_point = holder_cache[f];
       auto &sharer_flux_point = sharer_cache[f];
-      auto [f_holder, f_sharer] = Base::CellPairToFluxPair(riemanns[f],
+      auto [f_holder, f_sharer] = Base::GetFluxOnTwoSideFace(riemanns[f],
           face.holder(), holder_flux_point,
           face.sharer(), sharer_flux_point, sharer_data);
       f_holder *= holder_flux_point.g_prime;
