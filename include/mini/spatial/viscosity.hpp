@@ -139,6 +139,9 @@ class EnergyBasedViscosity : public R {
   using DampingMatrix = algebra::Matrix<Scalar, Cell::N, Cell::N>;
 
   static std::vector<DampingMatrix> BuildDampingMatrices() {
+#ifndef NDEBUG
+    std::srand(31415926);
+#endif
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
     auto set_property = [](Cell *cell_ptr, Property const &nu_given) {
       for (auto &nu : properties_.at(cell_ptr->id())) {
@@ -185,7 +188,7 @@ class EnergyBasedViscosity : public R {
         }
       }
 #ifndef NDEBUG
-      solution.setOnes();
+      solution = Coeff::Random();
       Coeff residual; residual.setZero();
       set_property(curr_cell, 0.0);
       update(residual.data());
