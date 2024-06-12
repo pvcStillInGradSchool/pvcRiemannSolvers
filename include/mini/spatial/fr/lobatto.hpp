@@ -222,7 +222,7 @@ class Lobatto : public General<P, R> {
       Scalar *holder_data, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     auto const &holder_cache = holder_cache_[face.id()];
-    auto &sharer_cache = sharer_cache_[face.id()];
+    auto const &sharer_cache = sharer_cache_[face.id()];
     assert(kFaceQ == face.integrator().CountPoints());
     for (int f = 0; f < kFaceQ; ++f) {
       auto &holder_flux_point = holder_cache[f];

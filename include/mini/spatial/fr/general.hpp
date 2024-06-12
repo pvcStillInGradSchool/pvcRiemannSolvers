@@ -309,9 +309,9 @@ class General : public spatial::FiniteElement<P, R> {
       MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
     } else {
       auto f_mat_sharer = Riemann::Convection::GetFluxMatrix(u_sharer);
-      const auto &coeff = Riemann::Diffusion::GetPropertyOnCell(
+      const auto &property = Riemann::Diffusion::GetPropertyOnCell(
           sharer.id(), sharer_cache.ijk);
-      Riemann::MinusViscousFlux(&f_mat_sharer, coeff, u_sharer, du_sharer);
+      Riemann::MinusViscousFlux(&f_mat_sharer, property, u_sharer, du_sharer);
       f_sharer -= f_mat_sharer * sharer_cache.normal;
     }
     return { f_holder, f_sharer };
@@ -341,7 +341,7 @@ class General : public spatial::FiniteElement<P, R> {
     const auto &holder = face.holder();
     const auto &sharer = face.sharer();
     auto const &holder_cache = holder_cache_[face.id()];
-    auto &sharer_cache = sharer_cache_[face.id()];
+    auto const &sharer_cache = sharer_cache_[face.id()];
     assert(kFaceQ == face.integrator().CountPoints());
     for (int f = 0; f < kFaceQ; ++f) {
       auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
