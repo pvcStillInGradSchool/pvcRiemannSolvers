@@ -168,6 +168,10 @@ class EnergyBasedViscosity : public R {
             spatial_ptr_->AddFluxOnFace(*face, dummy.data(), residual_data);
           }
         }
+        for (Face *face : curr_cell->boundary_faces_) {
+          spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
+        }
+        assert(curr_cell->boundary_faces_.size() + curr_cell->adj_faces_.size() == 6);
       };
       for (int c = 0; c < Cell::N; ++c) {
         solution.col(c).setOnes();

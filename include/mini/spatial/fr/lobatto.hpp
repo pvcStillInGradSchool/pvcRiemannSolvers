@@ -238,6 +238,20 @@ class Lobatto : public General<P, R> {
       Polynomial::MinusValue(f_sharer, sharer_data, sharer_flux_point.ijk);
     }
   }
+  void AddFluxOnOneSideFace(Face const &face,
+      Scalar *holder_data) const override {
+    const auto &riemanns = this->GetRiemannSolvers(face);
+    auto const &holder_cache = holder_cache_[face.id()];
+    assert(kFaceQ == face.integrator().CountPoints());
+    for (int f = 0; f < kFaceQ; ++f) {
+      auto &holder_flux_point = holder_cache[f];
+      auto f_holder = Base::GetFluxOnOneSideFace(riemanns[f],
+          face.holder(), holder_flux_point);
+      f_holder *= holder_flux_point.g_prime;
+      assert(holder_data);
+      Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
+    }
+  }
   void AddFluxOnInviscidWalls(Column *residual) const override {
     for (const auto &name : this->inviscid_wall_) {
       for (const Face &face : this->part().GetBoundaryFaces(name)) {

@@ -185,6 +185,7 @@ struct Cell {
 
   std::vector<Cell *> adj_cells_;
   std::vector<Face *> adj_faces_;
+  std::vector<Face *> boundary_faces_;
 
  private:
   CoordinateUptr coordinate_ptr_;
@@ -1440,7 +1441,7 @@ class Part {
         // the face's normal vector always point from holder to the exterior
         assert((face_uptr->center() - holder_ptr->center()).dot(
             face_uptr->integrator().GetNormalFrame(0)[0]) > 0);
-        // holder_ptr->adj_faces_.emplace_back(face_uptr.get());
+        holder_ptr->boundary_faces_.emplace_back(face_uptr.get());
         faces.emplace_back(std::move(face_uptr));
       }
     }
