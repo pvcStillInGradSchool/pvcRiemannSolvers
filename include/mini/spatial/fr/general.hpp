@@ -323,13 +323,14 @@ class General : public spatial::FiniteElement<P, R> {
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     auto [u_holder, du_holder, ddu_holder] =
         holder.polynomial().GetGlobalValueGradientHessian(holder_cache.ijk);
-    Value f_upwind = riemann.GetFluxUpwind(u_holder, u_holder);
+    auto u_sharer = Value::Zero();
+    auto du_sharer = Riemann::Gradient::Zero();
+    auto ddu_sharer = Riemann::Hessian::Zero();
+    Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
     const auto &normal = riemann.normal();
-    using Gradient = typename Riemann::Gradient;
-    using Hessian = typename Riemann::Hessian;
     auto du_common = riemann.GetCommonGradient(normal,
-        u_holder, Value::Zero(), du_holder, Gradient::Zero(), ddu_holder, Hessian::Zero());
-    Value u_common = (u_holder + Value::Zero()) / 2;
+        u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
+    Value u_common = (u_holder + u_sharer) / 2;
     auto const &property = Riemann::Diffusion::GetPropertyOnCell(
         holder.id(), holder_cache.ijk);
     Riemann::MinusViscousFlux(&f_upwind, property, u_common, du_common, normal);

@@ -116,7 +116,12 @@ struct Face {
         holder_(holder), sharer_(sharer),
         holder_to_sharer_(-holder->center()),
         id_(id) {
-    holder_to_sharer_ += sharer ? sharer->center() : center();
+    if (sharer) {
+      holder_to_sharer_ += sharer->center();
+    } else {
+      holder_to_sharer_ += center();
+      holder_to_sharer_ *= 2;
+    }
   }
   Face(const Face &) = delete;
   Face &operator=(const Face &) = delete;
