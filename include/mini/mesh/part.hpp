@@ -89,6 +89,9 @@ struct Coordinates {
 };
 
 template <std::integral Int, mini::polynomial::General Polynomial>
+struct Part;
+
+template <std::integral Int, mini::polynomial::General Polynomial>
 struct Cell;
 
 template <std::integral Int, mini::polynomial::General Polynomial>
@@ -103,12 +106,14 @@ struct Face {
   using Cell = part::Cell<Int, Polynomial>;
   using Global = typename Cell::Global;
 
+ private:
   CoordinateUptr coordinate_ptr_;
   IntegratorUptr integrator_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
   Int id_;  // 0-based, local first, then ghost, then boundary
 
+ public:
   Face(CoordinateUptr &&coordinate_ptr, IntegratorUptr &&integrator_ptr,
       Cell *holder, Cell *sharer, Int id)
       : coordinate_ptr_(std::move(coordinate_ptr)),
@@ -198,7 +203,11 @@ struct Cell {
   PolynomialUptr polynomial_ptr_;
 
  public:
-  Int metis_id{-1}, id_{-1};
+  Int metis_id{-1};
+
+ private:
+  friend Part<Int, Poly>;
+  Int id_{-1};
   bool inner_ = true;
 
  public:
