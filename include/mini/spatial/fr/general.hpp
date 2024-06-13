@@ -41,6 +41,7 @@ class General : public spatial::FiniteElement<P, R> {
   using Scalar = typename Base::Scalar;
   using Face = typename Base::Face;
   using Cell = typename Base::Cell;
+  using Index = typename Base::Index;
   using Global = typename Base::Global;
   using Polynomial = typename Base::Polynomial;
   static_assert(Polynomial::kLocal);
@@ -259,15 +260,16 @@ class General : public spatial::FiniteElement<P, R> {
     }
   }
 
-  void MinusCachedFlux(Value *flux, typename Part::Index cell_id,
+  void MinusCachedFlux(Value *flux, Index cell_id,
       FluxPointCache const &cache) const {
+    assert(this->part().IsLocal(cell_id));
     (*flux) -= flux_matrices_.at(cell_id).at(cache.ijk).col(cache.xyz);
   }
 
   std::pair<Value, Value> GetFluxOnTwoSideFace(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache,
       const Cell &sharer, FluxPointCache const &sharer_cache,
-      bool use_cache) const
+      bool use_cached_flux_on_sharer) const
       requires(!mini::riemann::Diffusive<Riemann>) {
     Value u_holder = holder.polynomial().GetValue(holder_cache.ijk);
     Value u_sharer = sharer.polynomial().GetValue(sharer_cache.ijk);
@@ -276,7 +278,7 @@ class General : public spatial::FiniteElement<P, R> {
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     Value f_sharer = f_upwind * (-sharer_cache.scale);
-    if (use_cache) {
+    if (use_cached_flux_on_sharer) {
       MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
     } else {
       auto f_mat_sharer = Riemann::Convection::GetFluxMatrix(u_sharer);
@@ -287,7 +289,7 @@ class General : public spatial::FiniteElement<P, R> {
   std::pair<Value, Value> GetFluxOnTwoSideFace(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache,
       const Cell &sharer, FluxPointCache const &sharer_cache,
-      bool use_cache) const
+      bool use_cached_flux_on_sharer) const
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     auto [u_holder, du_holder, ddu_holder] =
         holder.polynomial().GetGlobalValueGradientHessian(holder_cache.ijk);
@@ -305,7 +307,7 @@ class General : public spatial::FiniteElement<P, R> {
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     Value f_sharer = f_upwind * (-sharer_cache.scale);
-    if (use_cache) {
+    if (use_cached_flux_on_sharer) {
       MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
     } else {
       auto f_mat_sharer = Riemann::Convection::GetFluxMatrix(u_sharer);

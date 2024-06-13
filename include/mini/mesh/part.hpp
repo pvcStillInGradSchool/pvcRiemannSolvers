@@ -1015,6 +1015,13 @@ class Part {
     return ghost_cells_.size();
   }
 
+  bool IsLocal(Int i_cell) const {
+    return i_cell < CountLocalCells();
+  }
+  bool IsGhost(Int i_cell) const {
+    return !IsLocal(i_cell);
+  }
+
   void GatherSolutions() {
     int n_zones = local_nodes_.size();
     for (int i_zone = 1; i_zone <= n_zones; ++i_zone) {
