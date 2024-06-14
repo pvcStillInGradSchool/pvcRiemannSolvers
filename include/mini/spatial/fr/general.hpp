@@ -338,6 +338,26 @@ class General : public spatial::FiniteElement<P, R> {
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     return f_holder;
   }
+  Value GetFluxOnSharerFace(const Riemann &riemann,
+      const Cell &sharer, FluxPointCache const &sharer_cache) const
+      requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
+    auto u_holder = Value::Zero();
+    auto du_holder = Riemann::Gradient::Zero();
+    auto ddu_holder = Riemann::Hessian::Zero();
+    auto [u_sharer, du_sharer, ddu_sharer] =
+        sharer.polynomial().GetGlobalValueGradientHessian(sharer_cache.ijk);
+    Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
+    const auto &normal = riemann.normal();
+    auto du_common = riemann.GetCommonGradient(normal,
+        u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
+    Value u_common = (u_holder + u_sharer) / 2;
+    auto const &property = Riemann::Diffusion::GetPropertyOnCell(
+        sharer.id(), sharer_cache.ijk);
+    Riemann::MinusViscousFlux(&f_upwind, property, u_common, du_common, normal);
+    Value f_sharer = f_upwind * (-sharer_cache.scale);
+    MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
+    return f_sharer;
+  }
   void AddFluxOnTwoSideFace(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);

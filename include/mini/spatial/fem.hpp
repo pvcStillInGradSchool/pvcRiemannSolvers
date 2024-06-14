@@ -314,6 +314,9 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   virtual void AddFluxOnOneSideFace(Face const &face,
       Scalar *holder_data) const {
   }
+  virtual void AddFluxOnSharerFace(Face const &face,
+      Scalar *sharer_data) const {
+  }
 
   /**
    * @brief Add the fluxes on local (requiring no MPI communication) FiniteElement::Face's to the residual FiniteElement::Column of the given FiniteElement::Part.

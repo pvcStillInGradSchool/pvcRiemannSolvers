@@ -147,10 +147,12 @@ class EnergyBasedViscosity : public R {
     for (Face *face : curr_cell->adj_faces_) {
       assert(face->other(curr_cell)->polynomial().coeff().norm() == 0);
       if (face->holder_ptr() == curr_cell) {
-        spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
+        spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
+        // spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
       } else {
         assert(face->holder_ptr() == face->other(curr_cell));
-        spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
+        spatial_ptr_->AddFluxOnSharerFace(*face, residual_data);
+        // spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
       }
     }
     assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
