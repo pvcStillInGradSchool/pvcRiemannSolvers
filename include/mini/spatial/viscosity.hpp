@@ -135,6 +135,35 @@ class EnergyBasedViscosity : public R {
   EnergyBasedViscosity &operator=(EnergyBasedViscosity &&) noexcept = default;
   ~EnergyBasedViscosity() noexcept = default;
 
+ private:  // methods used in BuildDampingMatrices()
+  static void SetViscousProperty(Cell *cell_ptr, Property const &nu_given) {
+    for (auto &nu : properties_.at(cell_ptr->id())) {
+      nu = nu_given;
+    }
+  }
+  static void UpdateCellResidual(Cell *curr_cell, Scalar *residual_data) {
+    spatial_ptr_->AddFluxDivergence(*curr_cell, residual_data);
+    Coeff dummy;
+    for (Face *face : curr_cell->adj_faces_) {
+      assert(face->other(curr_cell)->polynomial().coeff().norm() == 0);
+      if (face->holder_ptr() == curr_cell) {
+        spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
+      } else {
+        assert(face->holder_ptr() == face->other(curr_cell));
+        spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
+      }
+    }
+    assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
+    for (Face *face : curr_cell->boundary_faces_) {
+      assert(face->holder_ptr() == curr_cell);
+      assert(nullptr == face->other(curr_cell));
+      assert(face->HolderToSharer().dot(
+          face->center() - curr_cell->center()) > 0);
+      spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
+    }
+    assert(curr_cell->boundary_faces_.size() + curr_cell->adj_faces_.size() == 6);
+  }
+
  public:  // methods for generating artificial viscosity
   using DampingMatrix = algebra::Matrix<Scalar, Cell::N, Cell::N>;
 
@@ -143,55 +172,31 @@ class EnergyBasedViscosity : public R {
     std::srand(31415926);
 #endif
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
-    auto set_property = [](Cell *cell_ptr, Property const &nu_given) {
-      for (auto &nu : properties_.at(cell_ptr->id())) {
-        nu = nu_given;
-      }
-    };
     for (Cell *curr_cell: part_ptr()->GetLocalCellPointers()) {
       // Nullify coeffs and properties on all its neighbors:
       for (Cell *neighbor : curr_cell->adj_cells_) {
         neighbor->polynomial().coeff().setZero();
-        set_property(neighbor, 0.0);
+        SetViscousProperty(neighbor, 0.0);
       }
       // Build the damping matrix column by column:
       auto &matrix = matrices.at(curr_cell->id());
+      auto GetCellResidual = [](Cell *cell_ptr) -> Coeff {
+        Coeff residual; residual.setZero();
+        SetViscousProperty(cell_ptr, 0.0);
+        UpdateCellResidual(cell_ptr, residual.data());
+        residual = -residual;
+        SetViscousProperty(cell_ptr, 1.0);
+        UpdateCellResidual(cell_ptr, residual.data());
+        return residual;
+      };
       auto &solution = curr_cell->polynomial().coeff();
       solution.setZero();
-      auto update = [curr_cell](Scalar *residual_data){
-        spatial_ptr_->AddFluxDivergence(*curr_cell, residual_data);
-        Coeff dummy;
-        for (Face *face : curr_cell->adj_faces_) {
-          assert(face->other(curr_cell)->polynomial().coeff().norm() == 0);
-          if (face->holder_ptr() == curr_cell) {
-            spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
-          } else {
-            assert(face->holder_ptr() == face->other(curr_cell));
-            spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
-          }
-        }
-        assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
-        for (Face *face : curr_cell->boundary_faces_) {
-          assert(face->holder_ptr() == curr_cell);
-          assert(nullptr == face->other(curr_cell));
-          assert(face->HolderToSharer().dot(
-              face->center() - curr_cell->center()) > 0);
-          spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
-        }
-        assert(curr_cell->boundary_faces_.size() + curr_cell->adj_faces_.size() == 6);
-      };
       for (int c = 0; c < Cell::N; ++c) {
         solution.col(c).setOnes();
         if (c > 0) {
           solution.col(c - 1).setZero();
         }
-        // Build the element-wise residual column:
-        Coeff residual; residual.setZero();
-        set_property(curr_cell, 0.0);
-        update(residual.data());
-        residual = -residual;
-        set_property(curr_cell, 1.0);
-        update(residual.data());
+        Coeff residual = GetCellResidual(curr_cell);
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
         for (int r = 1; r < Cell::K; ++r) {
@@ -200,12 +205,7 @@ class EnergyBasedViscosity : public R {
       }
 #ifndef NDEBUG
       solution = Coeff::Random();
-      Coeff residual; residual.setZero();
-      set_property(curr_cell, 0.0);
-      update(residual.data());
-      residual = -residual;
-      set_property(curr_cell, 1.0);
-      update(residual.data());
+      Coeff residual = GetCellResidual(curr_cell);
       for (int k = 0; k < Cell::K; ++k) {
         auto const &residual_col = residual.row(k).transpose();
         auto const &solution_col = solution.row(k).transpose();
