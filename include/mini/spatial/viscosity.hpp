@@ -162,13 +162,20 @@ class EnergyBasedViscosity : public R {
         spatial_ptr_->AddFluxDivergence(*curr_cell, residual_data);
         Coeff dummy;
         for (Face *face : curr_cell->adj_faces_) {
+          assert(face->other(curr_cell)->polynomial().coeff().norm() == 0);
           if (face->holder_ptr() == curr_cell) {
             spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
           } else {
+            assert(face->holder_ptr() == face->other(curr_cell));
             spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
           }
         }
+        assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
         for (Face *face : curr_cell->boundary_faces_) {
+          assert(face->holder_ptr() == curr_cell);
+          assert(nullptr == face->other(curr_cell));
+          assert(face->HolderToSharer().dot(
+              face->center() - curr_cell->center()) > 0);
           spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
         }
         assert(curr_cell->boundary_faces_.size() + curr_cell->adj_faces_.size() == 6);
@@ -211,6 +218,7 @@ class EnergyBasedViscosity : public R {
         Scalar scale
             = curr_cell->integrator().GetLocalWeight(r)
             / curr_cell->integrator().GetJacobianDeterminant(r);
+        assert(scale > 0);
         matrix.row(r) *= scale;
       }
     }
