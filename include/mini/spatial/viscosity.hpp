@@ -145,14 +145,40 @@ class EnergyBasedViscosity : public R {
     spatial_ptr_->AddFluxDivergence(*curr_cell, residual_data);
     Coeff dummy;
     for (Face *face : curr_cell->adj_faces_) {
-      assert(face->other(curr_cell)->polynomial().coeff().norm() == 0);
+#ifndef NDEBUG
+      Cell const *other = face->other(curr_cell);
+      assert(other->polynomial().coeff() == Coeff::Zero());
+      Coeff res1, res2;
+#endif
       if (face->holder_ptr() == curr_cell) {
         spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
         // spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
+#ifndef NDEBUG
+        res1.setZero();
+        res2.setZero();
+        spatial_ptr_->AddFluxOnOneSideFace(*face, res1.data());
+        spatial_ptr_->AddFluxOnTwoSideFace(*face, res2.data(), nullptr);
+        auto norm2 = (res1 - res2).squaredNorm();
+        if (norm2 > 1e-5) {
+          std::cout << "holder " << face->id() << " " << curr_cell->id() << " " << other->id() << " " << norm2 << "\n";
+          assert(false);
+        }
+#endif
       } else {
-        assert(face->holder_ptr() == face->other(curr_cell));
-        spatial_ptr_->AddFluxOnSharerFace(*face, residual_data);
-        // spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
+#ifndef NDEBUG
+        assert(face->holder_ptr() == other);
+        res1.setZero();
+        res2.setZero();
+        spatial_ptr_->AddFluxOnSharerFace(*face, res1.data());
+        spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), res2.data());
+        auto norm2 = (res1 - res2).squaredNorm();
+        if (norm2 > 1e-5) {
+          std::cout << "sharer " << face->id() << " " << curr_cell->id() << " " << other->id() << " " << norm2 << "\n";
+          assert(false);
+        }
+#endif
+        // spatial_ptr_->AddFluxOnSharerFace(*face, residual_data);
+        spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
       }
     }
     assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
