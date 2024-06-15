@@ -136,9 +136,19 @@ class EnergyBasedViscosity : public R {
   ~EnergyBasedViscosity() noexcept = default;
 
  private:  // methods used in BuildDampingMatrices()
-  static void SetViscousProperty(Cell *cell_ptr, Property const &nu_given) {
-    for (auto &nu : properties_.at(cell_ptr->id())) {
-      nu = nu_given;
+  /**
+   * @brief Set the viscous Property of a given Cell and all it's neighbors to a given value.
+   * 
+   */
+  static void SetViscousProperty(Cell *curr_cell, Property const &property_given) {
+    auto SetProperty = [&property_given](Cell *cell_ptr) {
+      for (auto &property : properties_.at(cell_ptr->id())) {
+        property = property_given;
+      }
+    };
+    SetProperty(curr_cell);
+    for (Cell *neighobor : curr_cell->adj_cells_) {
+      SetProperty(neighobor);
     }
   }
   static void UpdateCellResidual(Cell *curr_cell, Scalar *residual_data) {
@@ -204,7 +214,6 @@ class EnergyBasedViscosity : public R {
       // Nullify coeffs and properties on all its neighbors:
       for (Cell *neighbor : curr_cell->adj_cells_) {
         neighbor->polynomial().coeff().setZero();
-        SetViscousProperty(neighbor, 0.0);
       }
       // Build the damping matrix column by column:
       auto &matrix = matrices.at(curr_cell->id());

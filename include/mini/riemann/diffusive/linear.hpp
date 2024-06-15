@@ -29,6 +29,9 @@ class Anisotropic {
   using Flux = Conservative;
   struct Property {
     Scalar x, y, z;
+    bool operator==(Property const &that) const {
+      return x == that.x && y == that.y && z == that.z;
+    }
   };
 
  protected:

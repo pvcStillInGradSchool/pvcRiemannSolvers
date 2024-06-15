@@ -303,6 +303,8 @@ class General : public spatial::FiniteElement<P, R> {
     Value u_common = (u_holder + u_sharer) / 2;
     auto const &property = Riemann::Diffusion::GetPropertyOnCell(
         holder.id(), holder_cache.ijk);
+    assert(property == Riemann::Diffusion::GetPropertyOnCell(
+        sharer.id(), sharer_cache.ijk));
     Riemann::MinusViscousFlux(&f_upwind, property, u_common, du_common, normal);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
