@@ -60,7 +60,7 @@ class General : public spatial::FiniteElement<P, R> {
       cell.polynomial().AddCoeffTo(prod, residual);
     }
   }
-  void AddFluxOnTwoSideFace(Face const &face,
+  void AddFluxToHolderAndSharer(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     const auto &integrator = face.integrator();

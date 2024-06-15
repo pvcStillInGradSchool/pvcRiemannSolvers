@@ -308,26 +308,24 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
    * @param holder_data the residual column of the holder FiniteElement::Cell of the given FiniteElement::Face
    * @param sharer_data the residual column of the sharer FiniteElement::Cell of the given FiniteElement::Face
    */
-  virtual void AddFluxOnTwoSideFace(Face const &face,
+  virtual void AddFluxToHolderAndSharer(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const = 0;
 
-  virtual void AddFluxOnOneSideFace(Face const &face,
-      Scalar *holder_data) const {
+  virtual void AddFluxToHolder(Face const &face, Scalar *holder_data) const {
   }
-  virtual void AddFluxOnSharerFace(Face const &face,
-      Scalar *sharer_data) const {
+  virtual void AddFluxToSharer(Face const &face, Scalar *sharer_data) const {
   }
 
   /**
    * @brief Add the fluxes on local (requiring no MPI communication) FiniteElement::Face's to the residual FiniteElement::Column of the given FiniteElement::Part.
    * 
-   * It delegates the work to the pure virtual method FiniteElement::AddFluxOnTwoSideFace, which must be implemented in a concrete class.
+   * It delegates the work to the pure virtual method FiniteElement::AddFluxToHolderAndSharer, which must be implemented in a concrete class.
    * 
    * @param residual the residual FiniteElement::Column of the given FiniteElement::Part
    */
   void AddFluxOnLocalFaces(Column *residual) const {
     for (const Face &face : this->part().GetLocalFaces()) {
-      this->AddFluxOnTwoSideFace(face,
+      this->AddFluxToHolderAndSharer(face,
           this->AddCellDataOffset(residual, face.holder().id()),
           this->AddCellDataOffset(residual, face.sharer().id()));
     }
@@ -336,13 +334,13 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   /**
    * @brief Add the fluxes on ghost (requiring MPI communications) FiniteElement::Face's to the residual FiniteElement::Column of the given FiniteElement::Part.
    * 
-   * It delegates the work to the pure virtual method FiniteElement::AddFluxOnTwoSideFace, which must be implemented in a concrete class.
+   * It delegates the work to the pure virtual method FiniteElement::AddFluxToHolderAndSharer, which must be implemented in a concrete class.
    * 
    * @param residual the residual FiniteElement::Column of the given FiniteElement::Part
    */
   void AddFluxOnGhostFaces(Column *residual) const {
     for (const Face &face : this->part().GetGhostFaces()) {
-      this->AddFluxOnTwoSideFace(face,
+      this->AddFluxToHolderAndSharer(face,
           this->AddCellDataOffset(residual, face.holder().id()),
           nullptr);
     }

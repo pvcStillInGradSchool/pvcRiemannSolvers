@@ -218,7 +218,7 @@ class Lobatto : public General<P, R> {
   }
 
  protected:  // override virtual methods defined in Base
-  void AddFluxOnTwoSideFace(Face const &face,
+  void AddFluxToHolderAndSharer(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     auto const &holder_cache = holder_cache_[face.id()];
@@ -227,7 +227,7 @@ class Lobatto : public General<P, R> {
     for (int f = 0; f < kFaceQ; ++f) {
       auto &holder_flux_point = holder_cache[f];
       auto &sharer_flux_point = sharer_cache[f];
-      auto [f_holder, f_sharer] = Base::GetFluxOnTwoSideFace(riemanns[f],
+      auto [f_holder, f_sharer] = Base::GetFluxForHolderAndSharer(riemanns[f],
           face.holder(), holder_flux_point,
           face.sharer(), sharer_flux_point, sharer_data);
       f_holder *= holder_flux_point.g_prime;
@@ -238,28 +238,26 @@ class Lobatto : public General<P, R> {
       Polynomial::MinusValue(f_sharer, sharer_data, sharer_flux_point.ijk);
     }
   }
-  void AddFluxOnOneSideFace(Face const &face,
-      Scalar *holder_data) const override {
+  void AddFluxToHolder(Face const &face, Scalar *holder_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     auto const &holder_cache = holder_cache_[face.id()];
     assert(kFaceQ == face.integrator().CountPoints());
     for (int f = 0; f < kFaceQ; ++f) {
       auto &holder_flux_point = holder_cache[f];
-      auto f_holder = Base::GetFluxOnOneSideFace(riemanns[f],
+      auto f_holder = Base::GetFluxForHolder(riemanns[f],
           face.holder(), holder_flux_point);
       f_holder *= holder_flux_point.g_prime;
       assert(holder_data);
       Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
     }
   }
-  void AddFluxOnSharerFace(Face const &face,
-      Scalar *sharer_data) const override {
+  void AddFluxToSharer(Face const &face, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     auto const &sharer_cache = sharer_cache_[face.id()];
     assert(kFaceQ == face.integrator().CountPoints());
     for (int f = 0; f < kFaceQ; ++f) {
       auto &sharer_flux_point = sharer_cache[f];
-      auto f_sharer = Base::GetFluxOnSharerFace(riemanns[f],
+      auto f_sharer = Base::GetFluxForSharer(riemanns[f],
           face.sharer(), sharer_flux_point);
       f_sharer *= sharer_flux_point.g_prime;
       assert(sharer_data);

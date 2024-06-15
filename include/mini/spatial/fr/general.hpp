@@ -212,7 +212,7 @@ class General : public spatial::FiniteElement<P, R> {
   }
 
   // cache of the flux matrices computed in AddFluxDivergence(),
-  // reused in GetFluxOnTwoSideFace() etc.
+  // reused in GetFluxForHolderAndSharer() etc.
   std::vector<std::array<FluxMatrix, kCellQ>> flux_matrices_;
 
  public:
@@ -266,7 +266,7 @@ class General : public spatial::FiniteElement<P, R> {
     (*flux) -= flux_matrices_.at(cell_id).at(cache.ijk).col(cache.xyz);
   }
 
-  std::pair<Value, Value> GetFluxOnTwoSideFace(const Riemann &riemann,
+  std::pair<Value, Value> GetFluxForHolderAndSharer(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache,
       const Cell &sharer, FluxPointCache const &sharer_cache,
       bool use_cached_flux_on_sharer) const
@@ -286,7 +286,7 @@ class General : public spatial::FiniteElement<P, R> {
     }
     return { f_holder, f_sharer };
   }
-  std::pair<Value, Value> GetFluxOnTwoSideFace(const Riemann &riemann,
+  std::pair<Value, Value> GetFluxForHolderAndSharer(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache,
       const Cell &sharer, FluxPointCache const &sharer_cache,
       bool use_cached_flux_on_sharer) const
@@ -320,7 +320,7 @@ class General : public spatial::FiniteElement<P, R> {
     }
     return { f_holder, f_sharer };
   }
-  Value GetFluxOnOneSideFace(const Riemann &riemann,
+  Value GetFluxForHolder(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache) const
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     auto [u_holder, du_holder, ddu_holder] =
@@ -340,7 +340,7 @@ class General : public spatial::FiniteElement<P, R> {
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     return f_holder;
   }
-  Value GetFluxOnSharerFace(const Riemann &riemann,
+  Value GetFluxForSharer(const Riemann &riemann,
       const Cell &sharer, FluxPointCache const &sharer_cache) const
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     auto u_holder = Value::Zero();
@@ -360,7 +360,7 @@ class General : public spatial::FiniteElement<P, R> {
     MinusCachedFlux(&f_sharer, sharer.id(), sharer_cache);
     return f_sharer;
   }
-  void AddFluxOnTwoSideFace(Face const &face,
+  void AddFluxToHolderAndSharer(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const override {
     const auto &riemanns = this->GetRiemannSolvers(face);
     const auto &holder = face.holder();
@@ -371,7 +371,7 @@ class General : public spatial::FiniteElement<P, R> {
     for (int f = 0; f < kFaceQ; ++f) {
       auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
       auto &[sharer_solution_points, sharer_flux_point] = sharer_cache[f];
-      auto [f_holder, f_sharer] = GetFluxOnTwoSideFace(riemanns[f],
+      auto [f_holder, f_sharer] = GetFluxForHolderAndSharer(riemanns[f],
           holder, holder_flux_point,
           sharer, sharer_flux_point, sharer_data);
       assert(holder_data);

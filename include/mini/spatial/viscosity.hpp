@@ -161,13 +161,13 @@ class EnergyBasedViscosity : public R {
       Coeff res1, res2;
 #endif
       if (face->holder_ptr() == curr_cell) {
-        spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
-        // spatial_ptr_->AddFluxOnTwoSideFace(*face, residual_data, nullptr);
+        spatial_ptr_->AddFluxToHolder(*face, residual_data);
+        // spatial_ptr_->AddFluxToHolderAndSharer(*face, residual_data, nullptr);
 #ifndef NDEBUG
         res1.setZero();
         res2.setZero();
-        spatial_ptr_->AddFluxOnOneSideFace(*face, res1.data());
-        spatial_ptr_->AddFluxOnTwoSideFace(*face, res2.data(), nullptr);
+        spatial_ptr_->AddFluxToHolder(*face, res1.data());
+        spatial_ptr_->AddFluxToHolderAndSharer(*face, res2.data(), nullptr);
         auto norm2 = (res1 - res2).squaredNorm();
         if (norm2 > 1e-5) {
           std::cout << "holder " << face->id() << " " << curr_cell->id() << " " << other->id() << " " << norm2 << "\n";
@@ -179,16 +179,16 @@ class EnergyBasedViscosity : public R {
         assert(face->holder_ptr() == other);
         res1.setZero();
         res2.setZero();
-        spatial_ptr_->AddFluxOnSharerFace(*face, res1.data());
-        spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), res2.data());
+        spatial_ptr_->AddFluxToSharer(*face, res1.data());
+        spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), res2.data());
         auto norm2 = (res1 - res2).squaredNorm();
         if (norm2 > 1e-5) {
           std::cout << "sharer " << face->id() << " " << curr_cell->id() << " " << other->id() << " " << norm2 << "\n";
           assert(false);
         }
 #endif
-        // spatial_ptr_->AddFluxOnSharerFace(*face, residual_data);
-        spatial_ptr_->AddFluxOnTwoSideFace(*face, dummy.data(), residual_data);
+        // spatial_ptr_->AddFluxToSharer(*face, residual_data);
+        spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), residual_data);
       }
     }
     assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
@@ -197,7 +197,7 @@ class EnergyBasedViscosity : public R {
       assert(nullptr == face->other(curr_cell));
       assert(face->HolderToSharer().dot(
           face->center() - curr_cell->center()) > 0);
-      spatial_ptr_->AddFluxOnOneSideFace(*face, residual_data);
+      spatial_ptr_->AddFluxToHolder(*face, residual_data);
     }
     assert(curr_cell->boundary_faces_.size() + curr_cell->adj_faces_.size() == 6);
   }
