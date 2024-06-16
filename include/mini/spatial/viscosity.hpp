@@ -155,41 +155,32 @@ class EnergyBasedViscosity : public R {
     spatial_ptr_->AddFluxDivergence(*curr_cell, residual_data);
     Coeff dummy;
     for (Face *face : curr_cell->adj_faces_) {
+      if (face->holder_ptr() == curr_cell) {
+        spatial_ptr_->AddFluxToHolder(*face, residual_data);
+        // spatial_ptr_->AddFluxToHolderAndSharer(*face, residual_data, nullptr);
+      } else {
+        spatial_ptr_->AddFluxToSharer(*face, residual_data);
+        // spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), residual_data);
+      }
 #ifndef NDEBUG
       Cell const *other = face->other(curr_cell);
       assert(other->polynomial().coeff() == Coeff::Zero());
       Coeff res1, res2;
-#endif
       if (face->holder_ptr() == curr_cell) {
-        spatial_ptr_->AddFluxToHolder(*face, residual_data);
-        // spatial_ptr_->AddFluxToHolderAndSharer(*face, residual_data, nullptr);
-#ifndef NDEBUG
         res1.setZero();
         res2.setZero();
         spatial_ptr_->AddFluxToHolder(*face, res1.data());
         spatial_ptr_->AddFluxToHolderAndSharer(*face, res2.data(), nullptr);
-        auto norm2 = (res1 - res2).squaredNorm();
-        if (norm2 > 1e-5) {
-          std::cout << "holder " << face->id() << " " << curr_cell->id() << " " << other->id() << " " << norm2 << "\n";
-          assert(false);
-        }
-#endif
+        assert(res1 == res2);
       } else {
-#ifndef NDEBUG
         assert(face->holder_ptr() == other);
         res1.setZero();
         res2.setZero();
         spatial_ptr_->AddFluxToSharer(*face, res1.data());
         spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), res2.data());
-        auto norm2 = (res1 - res2).squaredNorm();
-        if (norm2 > 1e-5) {
-          std::cout << "sharer " << face->id() << " " << curr_cell->id() << " " << other->id() << " " << norm2 << "\n";
-          assert(false);
-        }
-#endif
-        // spatial_ptr_->AddFluxToSharer(*face, residual_data);
-        spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), residual_data);
+        assert(res1 == res2);
       }
+#endif
     }
     assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
     for (Face *face : curr_cell->boundary_faces_) {
