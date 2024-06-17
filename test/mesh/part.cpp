@@ -11,7 +11,6 @@
 
 #include "mini/mesh/cgns.hpp"
 #include "mini/mesh/part.hpp"
-#include "mini/mesh/vtk.hpp"
 #include "mini/limiter/weno.hpp"
 #include "mini/limiter/reconstruct.hpp"
 #include "mini/polynomial/projection.hpp"
@@ -58,16 +57,6 @@ void Process(Part *part_ptr, const std::string &solution_name) {
       i_core, n_core, MPI_Wtime() - time_begin);
   part_ptr->GatherSolutions();
   part_ptr->WriteSolutions(solution_name);
-  using VtkWriter = mini::mesh::vtk::Writer<Part>;
-  auto plus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
-    return value[0] + value[1];
-  };
-  VtkWriter::AddExtraField("U1+U2", plus);
-  auto minus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
-    return value[0] - value[1];
-  };
-  VtkWriter::AddExtraField("U1-U2", minus);
-  VtkWriter::WriteSolutions(*part_ptr, solution_name);
 }
 
 // mpirun -n 4 ./part [<case_name> [<input_dir>]]]

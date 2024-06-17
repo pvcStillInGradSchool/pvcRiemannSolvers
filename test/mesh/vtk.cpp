@@ -5,6 +5,11 @@
 #include "gtest/gtest.h"
 
 #include "mini/mesh/vtk.hpp"
+#include "mini/mesh/part.hpp"
+#include "mini/polynomial/projection.hpp"
+#include "mini/polynomial/hexahedron.hpp"
+#include "mini/polynomial/extrapolation.hpp"
+#include "test/mesh/part.hpp"
 
 class TestMeshVtk : public ::testing::Test {
  protected:
@@ -50,7 +55,51 @@ TEST_F(TestMeshVtk, EncodeBase64) {
   EXPECT_EQ(encoded, "MTIzNDU2");
 }
 
+template <class Part>
+void Write(std::string const &case_name, std::string const &solution_name) {
+  auto part = Part(case_name, i_core, n_core);
+  InstallIntegratorPrototypes(&part);
+  part.SetFieldNames({"U1", "U2"});
+  part.ReadSolutions(solution_name);
+  part.ScatterSolutions();
+  using VtkWriter = mini::mesh::vtk::Writer<Part>;
+  using Cell = typename Part::Cell;
+  auto plus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
+    return value[0] + value[1];
+  };
+  VtkWriter::AddExtraField("U1+U2", plus);
+  auto minus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
+    return value[0] - value[1];
+  };
+  VtkWriter::AddExtraField("U1-U2", minus);
+  VtkWriter::WriteSolutions(part, solution_name);
+}
+
+TEST_F(TestMeshVtk, Writer) {
+  /* aproximated by Projection on OrthoNormal basis */
+{
+  auto solution_name = "Projection";
+  std::printf("Run Write<%s>() on proc[%d/%d] at %f sec\n",
+      solution_name, i_core, n_core, MPI_Wtime() - time_begin);
+  using Projection = mini::polynomial::Projection<
+      Scalar, kDimensions, kDegrees, kComponents>;
+  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
+  Write<Part>("double_mach", solution_name);
+}
+  /* aproximated by Interpolation on Lagrange basis */
+{
+  auto solution_name = "Interpolation";
+  std::printf("Run Write<%s>() on proc[%d/%d] at %f sec\n",
+      solution_name, i_core, n_core, MPI_Wtime() - time_begin);
+  using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+  using Extrapolation = mini::polynomial::Extrapolation<Interpolation>;
+  using Part = mini::mesh::part::Part<cgsize_t, Extrapolation>;
+  Write<Part>("double_mach", solution_name);
+}
+}
+
+// mpirun -n 4 ./part must be run in ./
+// mpirun -n 4 ./vtk
 int main(int argc, char* argv[]) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return Main(argc, argv);
 }
