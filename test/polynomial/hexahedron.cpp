@@ -92,7 +92,7 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
       - Mat1x10(0, 0, 0, 1, 0, 1, 0, 0, 0, 0);
   EXPECT_NEAR(diff.norm(), 0.0, 1e-14);
   Mat1x10 scalar_coeff = Mat1x10::Random();
-  scalar_pf.coeff().setZero();
+  scalar_pf.SetZero();
   scalar_pf.AddCoeffTo(scalar_coeff, scalar_pf.coeff().data());
   EXPECT_EQ(scalar_pf.coeff(), scalar_coeff);
   scalar_pf.AddCoeffTo(scalar_coeff, scalar_pf.coeff().data());
@@ -111,7 +111,7 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
   Mat11x10 abs_diff = vector_pf.GetCoeffOnTaylorBasis() - exact_vector;
   EXPECT_NEAR(abs_diff.norm(), 0.0, 1e-14);
   Mat11x10 vector_coeff = Mat11x10::Random();
-  vector_pf.coeff().setZero();
+  vector_pf.SetZero();
   vector_pf.AddCoeffTo(vector_coeff, vector_pf.coeff().data());
   EXPECT_EQ(vector_pf.coeff(), vector_coeff);
   vector_pf.AddCoeffTo(vector_coeff, vector_pf.coeff().data());

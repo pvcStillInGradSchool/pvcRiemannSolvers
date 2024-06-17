@@ -363,7 +363,7 @@ class Eigen {
   void Reconstruct() {
     auto const &my_basis = my_cell_->polynomial().projection().basis();
     new_projection_ = ProjectionWrapper(my_basis);
-    new_projection_.coeff().setZero();
+    new_projection_.SetZero();
     total_volume_ = 0.0;
     for (auto *adj_face : my_cell_->adj_faces_) {
       ReconstructOnFace(*adj_face);

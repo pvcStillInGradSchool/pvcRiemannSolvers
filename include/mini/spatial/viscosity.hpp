@@ -204,7 +204,7 @@ class EnergyBasedViscosity : public R {
     for (Cell *curr_cell: part_ptr()->GetLocalCellPointers()) {
       // Nullify coeffs and properties on all its neighbors:
       for (Cell *neighbor : curr_cell->adj_cells_) {
-        neighbor->polynomial().coeff().setZero();
+        neighbor->polynomial().SetZero();
       }
       // Build the damping matrix column by column:
       auto &matrix = matrices.at(curr_cell->id());

@@ -119,6 +119,11 @@ class Extrapolation : public Interpolation {
     UpdateNodalCoeff();
   }
 
+  void SetZero() {
+    this->Interpolation::SetZero();
+    projection_.SetZero();
+  }
+
   Value average() const {
     return projection_.average();
   }

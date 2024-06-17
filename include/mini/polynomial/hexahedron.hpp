@@ -319,6 +319,10 @@ class Hexahedron {
   }
 
  public:
+  void SetZero() {
+    coeff_.setZero();
+  }
+
   /**
    * @brief Set the value of \f$ u(x,y,z) \f$ at a given integratorian point.
    * 

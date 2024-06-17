@@ -147,6 +147,9 @@ class Projection {
   void SetCoeff(Coeff const &coeff) {
     coeff_ = coeff;
   }
+  void SetZero() {
+    coeff_.setZero();
+  }
   Value average() const {
     return GetAverage(*this);
   }
@@ -271,6 +274,9 @@ class ProjectionWrapper {
   }
   Coeff &coeff() {
     return coeff_;
+  }
+  void SetZero() {
+    coeff_.setZero();
   }
   Global const &center() const {
     return basis().center();
