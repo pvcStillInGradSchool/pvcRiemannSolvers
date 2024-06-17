@@ -204,6 +204,9 @@ class Coupled(Solver):
 
 class Euler(Solver):
 
+    def name(self):
+        return 'EulerExact'
+
     def __init__(self, gamma=1.4):
         self._gas = gas.Ideal(gamma)
         Solver.__init__(self, equation.Euler(gamma))
@@ -401,6 +404,9 @@ class ApproximateEuler(Euler):
 
 class Roe(ApproximateEuler):
 
+    def name(self):
+        return 'EulerRoe'
+
     def __init__(self, gamma=1.4):
         Euler.__init__(self, gamma)
         self._roe_average = np.ndarray(3)
@@ -449,6 +455,9 @@ class Roe(ApproximateEuler):
 
 
 class LaxFriedrichs(ApproximateEuler):
+
+    def name(self):
+        return 'EulerLaxFriedrichs'
 
     def __init__(self, gamma=1.4):
         Euler.__init__(self, gamma)
@@ -501,6 +510,7 @@ if __name__ == '__main__':
     x_vec = np.linspace(start=-0.5, stop=0.5, num=1001)
 
     for name, problem in problems.items():
+        case_name = f'{solver.name()}{name}'
         u_left = problem[1]
         u_right = problem[2]
         try:
@@ -514,13 +524,13 @@ if __name__ == '__main__':
                 rho, u, p = euler.conservative_to_primitive(U)
                 rho_vec[i], u_vec[i], p_vec[i] = rho, u, p
         except AssertionError:
-            raise
+            print('!!!', case_name, 'failed.')
         finally:
             pass
         plt.figure(figsize=(4,5))
         # subplots = (311, 312, 313)
         l = 5.0
-        np.savetxt(name+".csv", (x_vec*l+l/2, rho_vec), delimiter=',')
+        np.savetxt(f'{case_name}.csv', (x_vec*l+l/2, rho_vec), delimiter=',')
         titles = (r'$\rho(x)$', r'$p(x)$', r'$u(x)$')
         y_data = (rho_vec, p_vec, u_vec)
         for i in range(3):
@@ -530,4 +540,4 @@ if __name__ == '__main__':
             plt.plot(x_vec*l+l/2, y_data[i], '.', markersize='3')
         plt.tight_layout()
         # plt.show()
-        plt.savefig(name+'.svg')
+        plt.savefig(f'{case_name}.svg')
