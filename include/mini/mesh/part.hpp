@@ -900,7 +900,6 @@ class Part {
         cell.inner_ = false;
         curr_part.emplace_back(&cell);
       }
-      send_coeffs_.emplace_back(npes.size() * kFields);
     }
     // fill `recv_cell_ptrs_`
     for (auto &[i_part, npes] : ghost_adj.recv_npes) {
@@ -910,11 +909,12 @@ class Part {
         auto &cell = ghost_cells_.at(m_cell);
         curr_part.emplace_back(&cell);
       }
-      recv_coeffs_.emplace_back(npes.size() * kFields);
     }
+    InitializeRequestsAndBuffers(kFields,
+        &requests_, &send_coeffs_, &recv_coeffs_);
     assert(send_cell_ptrs_.size() == send_coeffs_.size());
     assert(recv_cell_ptrs_.size() == recv_coeffs_.size());
-    requests_.resize(send_coeffs_.size() + recv_coeffs_.size());
+    assert(requests_.size() == send_coeffs_.size() + recv_coeffs_.size());
   }
   void BuildLocalFaces() {
     // build local faces
@@ -1192,6 +1192,29 @@ class Part {
     if (cgp_close(i_file)) {
       cgp_error_exit();
     }
+  }
+  /**
+   * @brief Initialize data structures used in ShareGhostCellData and UpdateGhostCellData.
+   * 
+   * @param n_scalar_per_cell 
+   * @param requests_ptr 
+   * @param send_data_ptr 
+   * @param recv_data_ptr 
+   */
+  void InitializeRequestsAndBuffers(Int n_scalar_per_cell,
+      std::vector<MPI_Request> *requests_ptr,
+      std::vector<std::vector<Scalar>> *send_data_ptr,
+      std::vector<std::vector<Scalar>> *recv_data_ptr) const {
+    assert(requests_ptr->empty());
+    assert(send_data_ptr->empty());
+    assert(recv_data_ptr->empty());
+    for (auto &[i_part, cell_ptrs] : send_cell_ptrs_) {
+      send_data_ptr->emplace_back(cell_ptrs.size() * n_scalar_per_cell);
+    }
+    for (auto &[i_part, cell_ptrs] : recv_cell_ptrs_) {
+      recv_data_ptr->emplace_back(cell_ptrs.size() * n_scalar_per_cell);
+    }
+    requests_ptr->resize(send_data_ptr->size() + recv_data_ptr->size());
   }
 
   /**
