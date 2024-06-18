@@ -45,7 +45,7 @@ class EnergyBasedViscosity : public R {
   // members required by mini::riemann::Diffusion
   using Diffusion = EnergyBasedViscosity;
   using Gradient = mini::algebra::Matrix<Scalar, kDimensions, kComponents>;
-  using Property = Scalar;
+  using Property = mini::algebra::Vector<Scalar, kComponents>;
   static std::vector<std::vector<Property>> properties_;  // [i_cell][i_node]
 
   // members derived from Part
@@ -57,6 +57,7 @@ class EnergyBasedViscosity : public R {
   using Polynomial = typename Cell::Polynomial;
   using Coeff = typename Polynomial::Coeff;
   using Value = typename Polynomial::Value;
+  static_assert(std::is_same_v<Value, Property>);
 
   // override methods in Base::Diffusion
   template <typename Int>
@@ -66,19 +67,17 @@ class EnergyBasedViscosity : public R {
 
   static void MinusViscousFlux(FluxMatrix *flux, Property const &nu,
       Conservative const &value, Gradient const &gradient) {
-    using namespace mini::constant::index;
-    flux->col(X) -= nu * gradient.row(X);
-    flux->col(Y) -= nu * gradient.row(Y);
-    flux->col(Z) -= nu * gradient.row(Z);
+    for (int k = 0; k < kComponents; ++k) {
+      flux->row(k) -= nu[k] * gradient.col(k);
+    }
   }
 
   static void MinusViscousFlux(Flux *flux, Property const &nu,
       Conservative const &value, Gradient const &gradient,
       Vector const &normal) {
-    using namespace mini::constant::index;
-    *flux -= (normal[X] * nu) * gradient.row(X);
-    *flux -= (normal[Y] * nu) * gradient.row(Y);
-    *flux -= (normal[Z] * nu) * gradient.row(Z);
+    for (int k = 0; k < kComponents; ++k) {
+      (*flux)[k] -= nu[k] * normal.dot(gradient.col(k));
+    }
   }
 
   static void MinusViscousFluxOnNoSlipWall(Flux *flux,
@@ -210,10 +209,10 @@ class EnergyBasedViscosity : public R {
       auto &matrix = matrices.at(curr_cell->id());
       auto GetCellResidual = [](Cell *cell_ptr) -> Coeff {
         Coeff residual; residual.setZero();
-        SetViscousProperty(cell_ptr, 0.0);
+        SetViscousProperty(cell_ptr, Value::Zero());
         UpdateCellResidual(cell_ptr, residual.data());
         residual = -residual;
-        SetViscousProperty(cell_ptr, 1.0);
+        SetViscousProperty(cell_ptr, Value::Ones());
         UpdateCellResidual(cell_ptr, residual.data());
         return residual;
       };
