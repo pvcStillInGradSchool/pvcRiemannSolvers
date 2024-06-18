@@ -505,6 +505,10 @@ if __name__ == '__main__':
     problems['Vacuumed'] = (0.1,
         euler.primitive_to_conservative(rho=1, u=-4, p=0.4),
         euler.primitive_to_conservative(rho=1, u=+4, p=0.4))
+    problems['Symmtric'] = (0.4,
+        # TODO(PVC): fix the bug on the strictly symmtric case
+        euler.primitive_to_conservative(rho=1, u=+1, p=1.000001),
+        euler.primitive_to_conservative(rho=1, u=-1, p=1.0))
 
     # range for plot
     x_vec = np.linspace(start=-0.5, stop=0.5, num=1001)
