@@ -1193,50 +1193,88 @@ class Part {
       cgp_error_exit();
     }
   }
-  void ShareGhostCellCoeffs() {
+
+  /**
+   * @brief Register the sharing of data on `Cell`s between neighboring `Part`s.
+   * 
+   * @tparam M 
+   * @param requests_ptr 
+   * @param send_data_ptr 
+   * @param recv_data_ptr 
+   * @param move_data_from_cell_to_buffer 
+   */
+  template <class M>
+  void ShareGhostCellData(std::vector<MPI_Request> *requests_ptr,
+      std::vector<std::vector<Scalar>> *send_data_ptr,
+      std::vector<std::vector<Scalar>> *recv_data_ptr,
+      M &&move_data_from_cell_to_buffer) {
     int i_req = 0;
-    // send cell.polynomial().coeff_
+    // send Data on ghost Cells of each neighboring Part
     int i_buf = 0;
     for (auto &[i_part, cell_ptrs] : send_cell_ptrs_) {
-      auto &send_buf = send_coeffs_[i_buf++];
+      auto &send_buf = send_data_ptr->at(i_buf++);
       Scalar *data = send_buf.data();
       for (auto *cell_ptr : cell_ptrs) {
-        data = cell_ptr->polynomial().WriteCoeffTo(data);
+        data = move_data_from_cell_to_buffer(cell_ptr, data);
       }
       assert(data == send_buf.data() + send_buf.size());
       int tag = i_part;
-      auto &request = requests_[i_req++];
+      auto &request = requests_ptr->at(i_req++);
       MPI_Isend(send_buf.data(), send_buf.size(), kMpiRealType, i_part, tag,
           MPI_COMM_WORLD, &request);
     }
-    // recv cell.polynomial().coeff_
+    // recv Data on ghost Cells from each neighboring Part
     i_buf = 0;
     for (auto &[i_part, cell_ptrs] : recv_cell_ptrs_) {
-      auto &recv_buf = recv_coeffs_[i_buf++];
+      auto &recv_buf = recv_data_ptr->at(i_buf++);
       int tag = rank_;
-      auto &request = requests_[i_req++];
+      auto &request = requests_ptr->at(i_req++);
       MPI_Irecv(recv_buf.data(), recv_buf.size(), kMpiRealType, i_part, tag,
           MPI_COMM_WORLD, &request);
     }
-    assert(i_req == send_coeffs_.size() + recv_coeffs_.size());
+    assert(i_req == send_data_ptr->size() + recv_data_ptr->size());
   }
-  void UpdateGhostCellCoeffs() {
+  void ShareGhostCellCoeffs() {
+    auto operation = [](Cell const *cell_ptr, Scalar *data) -> Scalar * {
+      return cell_ptr->polynomial().WriteCoeffTo(data);
+    };
+    ShareGhostCellData(&requests_, &send_coeffs_, &recv_coeffs_, operation);
+  }
+
+  /**
+   * @brief Finish the sharing of data on `Cell`s between neighboring `Part`s.
+   * 
+   * @tparam M 
+   * @param requests_ptr 
+   * @param recv_data_ptr 
+   * @param move_data_from_buffer_to_cell 
+   */
+  template <class M>
+  void UpdateGhostCellData(std::vector<MPI_Request> *requests_ptr,
+      std::vector<std::vector<Scalar>> *recv_data_ptr,
+      M &&move_data_from_buffer_to_cell) {
     // wait until all send/recv finish
-    std::vector<MPI_Status> statuses(requests_.size());
-    MPI_Waitall(requests_.size(), requests_.data(), statuses.data());
-    int req_size = requests_.size();
-    requests_.clear();
-    requests_.resize(req_size);
+    std::vector<MPI_Status> statuses(requests_ptr->size());
+    MPI_Waitall(requests_ptr->size(), requests_ptr->data(), statuses.data());
+    int req_size = requests_ptr->size();
+    requests_ptr->clear();
+    requests_ptr->resize(req_size);
     // update coeffs
     int i_buf = 0;
     for (auto &[i_part, cell_ptrs] : recv_cell_ptrs_) {
-      auto &recv_buf = recv_coeffs_[i_buf++];
+      auto &recv_buf = recv_data_ptr->at(i_buf++);
       Scalar const *data = recv_buf.data();
       for (auto *cell_ptr : cell_ptrs) {
-        data = cell_ptr->polynomial().GetCoeffFrom(data);
+        data = move_data_from_buffer_to_cell(cell_ptr, data);
       }
       assert(data == recv_buf.data() + recv_buf.size());
     }
+  }
+  void UpdateGhostCellCoeffs() {
+    auto operation = [](Cell *cell_ptr, Scalar const *data) -> Scalar const * {
+      return cell_ptr->polynomial().GetCoeffFrom(data);
+    };
+    UpdateGhostCellData(&requests_, &recv_coeffs_, operation);
   }
 
   // Viewers of `Cell`s and `Face`s:
