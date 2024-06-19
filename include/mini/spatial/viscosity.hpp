@@ -109,6 +109,31 @@ class EnergyBasedViscosity : public R {
         &requests_, &send_bufs_, &recv_bufs_);
   }
 
+  static void ShareGhostCellProperties() {
+    auto operation = [](Cell const *cell_ptr, Scalar *buf) -> Scalar * {
+      std::vector<Property> const &properties = properties_.at(cell_ptr->id());
+      assert(Cell::N == properties.size());
+      assert(Cell::K * sizeof(Scalar) == sizeof(Property));
+      constexpr auto n_byte = sizeof(Scalar) * Cell::kFields;
+      std::memcpy(buf, properties.data(), n_byte);
+      return buf + Cell::kFields;
+    };
+    part_ptr()->ShareGhostCellData(&requests_, &send_bufs_, &recv_bufs_,
+        operation);
+  }
+
+  static void UpdateGhostCellProperties() {
+    auto operation = [](Cell *cell_ptr, Scalar const *buf) -> Scalar const * {
+      std::vector<Property> &properties = properties_.at(cell_ptr->id());
+      assert(Cell::N == properties.size());
+      assert(Cell::K * sizeof(Scalar) == sizeof(Property));
+      constexpr auto n_byte = sizeof(Scalar) * Cell::kFields;
+      std::memcpy(properties.data(), buf, n_byte);
+      return buf + Cell::kFields;
+    };
+    part_ptr()->UpdateGhostCellData(&requests_, &recv_bufs_, operation);
+  }
+
  private:
   static Spatial *spatial_ptr_;
   static Scalar time_scale_;

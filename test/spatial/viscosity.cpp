@@ -63,6 +63,10 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   std::cout << "[Done] GetViscosityValues" << std::endl;
   RiemannWithViscosity::InitializeRequestsAndBuffers();
   std::cout << "[Done] InitializeRequestsAndBuffers" << std::endl;
+  RiemannWithViscosity::ShareGhostCellProperties();
+  std::cout << "[Done] ShareGhostCellProperties" << std::endl;
+  RiemannWithViscosity::UpdateGhostCellProperties();
+  std::cout << "[Done] UpdateGhostCellProperties" << std::endl;
   // Check values by VTK plotting:
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
   using Cell = typename Part::Cell;
