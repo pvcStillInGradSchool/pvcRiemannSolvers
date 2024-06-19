@@ -328,7 +328,11 @@ class General : public spatial::FiniteElement<P, R> {
     auto u_sharer = Value::Zero();
     auto du_sharer = Riemann::Gradient::Zero();
     auto ddu_sharer = Riemann::Hessian::Zero();
+#if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
+#else
+    Value f_upwind = Value::Zero();
+#endif
     const auto &normal = riemann.normal();
     auto du_common = riemann.GetCommonGradient(normal,
         u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);
@@ -348,7 +352,11 @@ class General : public spatial::FiniteElement<P, R> {
     auto ddu_holder = Riemann::Hessian::Zero();
     auto [u_sharer, du_sharer, ddu_sharer] =
         sharer.polynomial().GetGlobalValueGradientHessian(sharer_cache.ijk);
+#if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
     Value f_upwind = riemann.GetFluxUpwind(u_holder, u_sharer);
+#else
+    Value f_upwind = Value::Zero();
+#endif
     const auto &normal = riemann.normal();
     auto du_common = riemann.GetCommonGradient(normal,
         u_holder, u_sharer, du_holder, du_sharer, ddu_holder, ddu_sharer);

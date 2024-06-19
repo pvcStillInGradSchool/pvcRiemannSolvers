@@ -161,7 +161,7 @@ class EnergyBasedViscosity : public R {
         spatial_ptr_->AddFluxToSharer(*face, residual_data);
         // spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), residual_data);
       }
-#ifndef NDEBUG
+#if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
       Cell const *other = face->other(curr_cell);
       assert(other->polynomial().coeff() == Coeff::Zero());
       Coeff res1, res2;
@@ -196,7 +196,7 @@ class EnergyBasedViscosity : public R {
   using DampingMatrix = algebra::Matrix<Scalar, Cell::N, Cell::N>;
 
   static std::vector<DampingMatrix> BuildDampingMatrices() {
-#ifndef NDEBUG
+#if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
     std::srand(31415926);
 #endif
     auto matrices = std::vector<DampingMatrix>(part().CountLocalCells());
@@ -230,7 +230,7 @@ class EnergyBasedViscosity : public R {
           assert((residual.row(r) - residual.row(0)).squaredNorm() < 1e-10);
         }
       }
-#ifndef NDEBUG
+#if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
       solution = Coeff::Random();
       Coeff residual = GetCellResidual(curr_cell);
       for (int k = 0; k < Cell::K; ++k) {
