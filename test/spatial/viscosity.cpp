@@ -61,6 +61,8 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   auto viscosity_values = RiemannWithViscosity::GetViscosityValues(
         jump_integrals, damping_matrices);
   std::cout << "[Done] GetViscosityValues" << std::endl;
+  RiemannWithViscosity::InitializeRequestsAndBuffers();
+  std::cout << "[Done] InitializeRequestsAndBuffers" << std::endl;
   // Check values by VTK plotting:
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
   using Cell = typename Part::Cell;

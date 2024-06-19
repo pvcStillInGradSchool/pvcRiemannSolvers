@@ -95,6 +95,21 @@ class EnergyBasedViscosity : public R {
   using Spatial = FiniteElement<Part, EnergyBasedViscosity>;
 
  private:
+  static std::vector<std::vector<Scalar>> send_bufs_, recv_bufs_;
+  static std::vector<MPI_Request> requests_;
+
+ public:
+  /**
+   * @brief Initialize data structures for sharing viscosity properties across `Part`s.
+   * 
+   * It should be called once and only once before the main loop.
+   */
+  static void InitializeRequestsAndBuffers() {
+    part().InitializeRequestsAndBuffers(Cell::kFields,
+        &requests_, &send_bufs_, &recv_bufs_);
+  }
+
+ private:
   static Spatial *spatial_ptr_;
   static Scalar time_scale_;
 
@@ -322,16 +337,28 @@ class EnergyBasedViscosity : public R {
 };
 
 template <typename P, typename R>
+std::vector<std::vector<typename EnergyBasedViscosity<P, R>::Property>>
+EnergyBasedViscosity<P, R>::properties_;
+
+template <typename P, typename R>
+std::vector<std::vector<typename EnergyBasedViscosity<P, R>::Scalar>>
+EnergyBasedViscosity<P, R>::send_bufs_;
+
+template <typename P, typename R>
+std::vector<std::vector<typename EnergyBasedViscosity<P, R>::Scalar>>
+EnergyBasedViscosity<P, R>::recv_bufs_;
+
+template <typename P, typename R>
+std::vector<MPI_Request>
+EnergyBasedViscosity<P, R>::requests_;
+
+template <typename P, typename R>
 typename EnergyBasedViscosity<P, R>::Spatial *
 EnergyBasedViscosity<P, R>::spatial_ptr_;
 
 template <typename P, typename R>
 typename EnergyBasedViscosity<P, R>::Scalar
 EnergyBasedViscosity<P, R>::time_scale_;
-
-template <typename P, typename R>
-std::vector<std::vector<typename EnergyBasedViscosity<P, R>::Property>>
-EnergyBasedViscosity<P, R>::properties_;
 
 }  // namespace spatial
 }  // namespace mini
