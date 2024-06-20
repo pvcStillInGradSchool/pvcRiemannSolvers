@@ -263,15 +263,13 @@ std::vector<Int> PartGraph(
  * @tparam Real real number type
  * 
  * @param[in] mesh the mesh to be partitioned
+ * @param[in] n_parts the number of parts to be partitioned
+ * @param[in] n_common_nodes the minimum number of nodes shared by two neighboring cells
  * @param[in] cost_of_each_cell the computational cost of each cell
  * @param[in] size_of_each_cell the communication size of each cell
- * @param[in] n_common_nodes the minimum number of nodes shared by two neighboring cells
- * @param[in] n_parts the number of parts to be partitioned
  * @param[in] weight_of_each_part the weight of each part (sum must be 1.0)
  * @param[in] options the array of METIS options
- * @param[out] objective_value the edge cut or the communication volume of the partitioning
- * @param[out] cell_parts the part id of each cell
- * @param[out] node_parts the part id of each node
+ * @return `{ cell_parts, node_parts }` the part id of each cell and each node
  */
 template <std::integral Int>
 std::pair<std::vector<Int>, std::vector<Int>> PartMesh(

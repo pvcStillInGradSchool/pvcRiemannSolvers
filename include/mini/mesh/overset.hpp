@@ -117,10 +117,6 @@ class Mapping {
   /**
    * @brief Find a given number of donor cells in background for each fringe cell in foreground.
    * 
-   * @param mesh the mesh to be searched
-   * @param graph the dual graph of the foreground mesh
-   * @param mapper the mapper between the two representations
-   * 
    * @param mesh_fg the foreground mesh
    * @param graph_fg the dual graph of the foreground mesh
    * @param mapper_fg the mapper between the two representations

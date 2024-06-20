@@ -90,7 +90,7 @@ class Shifted(concept.Expansion):
 class Taylor(concept.Expansion):
     """The Taylor expansion of a general function.
 
-    u^h(x) = \sum_{k=0}^{p} u^{(k)} / (k!) * (x-c)^{k}
+    \f$ u^h(x) = \sum_{k=0}^{p} \frac{ u^{(k)}(c) }{ k! } (x-c)^{k} \f$
     """
 
     _factorials = np.ones(100)
