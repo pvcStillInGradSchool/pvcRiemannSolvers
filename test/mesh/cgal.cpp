@@ -34,6 +34,7 @@ TEST_F(TestMeshCgal, NeighborSearchOnRandomCoordinates) {
            < std::hypot(x[j] - a, y[j] - b, z[j] - c);
     };
     auto all_indices = std::vector<int>(n_source);
+    // TODO(PVC): use std::ranges::view in C++23
     std::iota(all_indices.begin(), all_indices.end(), 0);
     std::sort(all_indices.begin(), all_indices.end(), cmp);
     auto neighbor_indices = searching.Search(a, b, c, n_neighbor);

@@ -4,6 +4,7 @@
 
 #include <concepts>
 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <functional>
@@ -181,9 +182,7 @@ class EnergyBasedViscosity : public R {
    */
   static void SetViscousProperty(Cell *curr_cell, Property const &property_given) {
     auto SetProperty = [&property_given](Cell *cell_ptr) {
-      for (auto &property : properties_.at(cell_ptr->id())) {
-        property = property_given;
-      }
+      std::ranges::fill(properties_.at(cell_ptr->id()), property_given);
     };
     SetProperty(curr_cell);
     for (Cell *neighobor : curr_cell->adj_cells_) {
@@ -379,14 +378,18 @@ class EnergyBasedViscosity : public R {
     auto jump_integrals = IntegrateJumps(value_jumps);
     auto viscosity_values = GetViscosityValues(
         jump_integrals, damping_matrices_);
-    // TODO(PVC): replace by range iterations
     assert(properties_.size() == viscosity_values.size());
     assert(properties_.size() == part().CountLocalCells());
     for (typename Part::Index i_cell; i_cell < part().CountLocalCells(); ++i_cell) {
       for (auto &properties : properties_.at(i_cell)) {
-        std::fill(properties.begin(), properties.end(), viscosity_values.at(i_cell));
+        std::ranges::fill(properties, viscosity_values.at(i_cell));
       }
     }
+    /* TODO(PVC): replace by std::views::zip in C++23
+    for (auto &[properties, viscosity_value]
+        : std::views::zip(properties_, viscosity_values)) {
+      std::ranges::fill(properties, viscosity_value);
+     */
   }
 };
 

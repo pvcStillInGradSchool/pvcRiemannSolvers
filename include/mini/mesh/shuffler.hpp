@@ -37,6 +37,7 @@ std::pair<std::vector<int>, std::vector<int>>
 GetNewOrder(T const *parts, int n) {
   auto new_to_old = std::vector<int>(n);
   auto old_to_new = std::vector<int>(n);
+    // TODO(PVC): use std::ranges::view in C++23
   std::iota(new_to_old.begin(), new_to_old.end(), 0);
   auto cmp = [parts](int lid, int rid) {
     return parts[lid] < parts[rid] || (parts[lid] == parts[rid] && lid < rid);

@@ -1022,6 +1022,7 @@ class Zone {
       dim_then_oldid.emplace_back(sect->dim(), sect->id());
     }
     auto order = std::vector<int>(n);
+    // TODO(PVC): use std::ranges::view in C++23
     std::iota(order.begin(), order.end(), 0);
     sort(order.begin(), order.end(), [&dim_then_oldid](int lid, int rid) {
       return dim_then_oldid[lid].first > dim_then_oldid[rid].first || (
