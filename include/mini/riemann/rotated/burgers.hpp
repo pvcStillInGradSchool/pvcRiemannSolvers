@@ -32,7 +32,28 @@ class Burgers : public Simple<simple::Burgers<S, D>> {
     }
     return flux_mat;
   }
+
+ private:
+  static Scalar k_max_;
+
+ public:
+  using Jacobian = typename Base::Jacobian;
+
+  static void SetJacobians(Jacobian const &k_x, Jacobian const &k_y,
+      Jacobian const &k_z) {
+    Base::SetJacobians(k_x, k_y, k_z);
+    static_assert(std::is_same_v<Scalar, Jacobian>);
+    k_max_ = std::hypot(k_x, k_y, k_z);
+  }
+
+  static Scalar GetMaximumSpeed(Conservative const &conservative) {
+    return k_max_ * std::abs(conservative[0]);
+  }
 };
+
+template <typename S, int D>
+typename Burgers<S, D>::Scalar
+Burgers<S, D>::k_max_;
 
 }  // namespace rotated
 }  // namespace riemann
