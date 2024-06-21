@@ -34,8 +34,7 @@ class WithViscosity : public ConcreteFiniteElement {
   template <class... Args>
   WithLimiter(Args&&... args)
       : Base(std::forward<Args>(args)...) {
-    Riemann::InstallSpatial(this);
-    Riemann::InitializeRequestsAndBuffers();
+    Riemann::Viscosity::Initialize(this);
   }
   WithViscosity(const WithViscosity &) = default;
   WithViscosity &operator=(const WithViscosity &) = default;
@@ -45,8 +44,10 @@ class WithViscosity : public ConcreteFiniteElement {
 
  public:  // override virtual methods declared in ConcreteFiniteElement
   Column GetResidualColumn() const override {
-    ShareGhostCellProperties();
-    UpdateGhostCellProperties();
+    Riemann::Viscosity::UpdateProperties();
+    // TODO(PVC): overlap communication with computation
+    Riemann::Viscosity::ShareGhostCellProperties();
+    Riemann::Viscosity::UpdateGhostCellProperties();
     return this->Base::GetResidualColumn();
   }
 };

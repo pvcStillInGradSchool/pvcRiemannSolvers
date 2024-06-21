@@ -235,6 +235,10 @@ class EnergyBasedViscosity : public R {
  public:  // methods for generating artificial viscosity
   using DampingMatrix = algebra::Matrix<Scalar, Cell::N, Cell::N>;
 
+ private:
+  static std::vector<DampingMatrix> damping_matrices_;
+
+ public:
   static std::vector<DampingMatrix> BuildDampingMatrices() {
 #if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
     std::srand(31415926);
@@ -359,7 +363,36 @@ class EnergyBasedViscosity : public R {
     assert(viscosity_values.size() == part().CountLocalCells());
     return viscosity_values;
   }
+
+ public:  // wrappers to be used in Spatial
+  using Viscosity = EnergyBasedViscosity;
+
+  static void Initialize(Spatial *spatial_ptr) {
+    InstallSpatial(spatial_ptr);
+    InitializeRequestsAndBuffers();
+    damping_matrices_ = BuildDampingMatrices();
+    SetTimeScale(1e-3);
+  }
+
+  static void UpdateProperties() {
+    auto value_jumps = BuildValueJumps();
+    auto jump_integrals = IntegrateJumps(value_jumps);
+    auto viscosity_values = GetViscosityValues(
+        jump_integrals, damping_matrices_);
+    // TODO(PVC): replace by range iterations
+    assert(properties_.size() == viscosity_values.size());
+    assert(properties_.size() == part().CountLocalCells());
+    for (typename Part::Index i_cell; i_cell < part().CountLocalCells(); ++i_cell) {
+      for (auto &properties : properties_.at(i_cell)) {
+        std::fill(properties.begin(), properties.end(), viscosity_values.at(i_cell));
+      }
+    }
+  }
 };
+
+template <typename P, typename R>
+std::vector<typename EnergyBasedViscosity<P, R>::DampingMatrix>
+EnergyBasedViscosity<P, R>::damping_matrices_;
 
 template <typename P, typename R>
 std::vector<std::vector<typename EnergyBasedViscosity<P, R>::Property>>
