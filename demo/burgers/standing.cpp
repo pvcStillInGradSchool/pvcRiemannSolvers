@@ -16,7 +16,35 @@
 #include "mini/temporal/rk.hpp"
 #include "mini/spatial/dg/general.hpp"
 #include "mini/spatial/with_limiter.hpp"
+#include "mini/coordinate/quadrangle.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/coordinate/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
+#include "mini/integrator/legendre.hpp"
 #include "mini/polynomial/projection.hpp"
+
+using Scalar = double;
+/* Define the Burgers equation. */
+constexpr int kComponents = 1;
+constexpr int kDimensions = 3;
+constexpr int kDegrees = 2;
+
+using Gx = mini::integrator::Legendre<Scalar, kDegrees + 1>;
+
+template <class Part>
+static void InstallIntegratorPrototypes(Part *part_ptr) {
+  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
+  using QuadrangleIntegrator
+    = mini::integrator::Quadrangle<kDimensions, Gx, Gx>;
+  part_ptr->InstallPrototype(4,
+      std::make_unique<QuadrangleIntegrator>(quadrangle));
+  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
+  using HexahedronIntegrator
+      = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  part_ptr->InstallPrototype(8,
+      std::make_unique<HexahedronIntegrator>(hexahedron));
+  part_ptr->BuildGeometry();
+}
 
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
@@ -56,14 +84,6 @@ int main(int argc, char* argv[]) {
 
   auto time_begin = MPI_Wtime();
 
-
-  using Scalar = double;
-  /* Define the Burgers equation. */
-  constexpr int kComponents = 1;
-  constexpr int kDimensions = 3;
-  using Riemann = mini::riemann::rotated::Burgers<Scalar, kDimensions>;
-  Riemann::Convection::SetJacobians(1, 0, 0);
-
   /* Partition the mesh. */
   if (i_core == 0 && (argc == 7 || n_parts_prev != n_core)) {
     using Shuffler = mini::mesh::Shuffler<idx_t, Scalar>;
@@ -71,7 +91,6 @@ int main(int argc, char* argv[]) {
   }
   MPI_Barrier(MPI_COMM_WORLD);
 
-  constexpr int kDegrees = 2;
   using Projection = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, kComponents>;
   using Part = mini::mesh::part::Part<cgsize_t, Projection>;
   using Cell = typename Part::Cell;
@@ -85,6 +104,7 @@ int main(int argc, char* argv[]) {
         n_core, MPI_Wtime() - time_begin);
   }
   auto part = Part(case_name, i_core, n_core);
+  InstallIntegratorPrototypes(&part);
   part.SetFieldNames({"U"});
 
   /* Build a `Limiter` object. */
@@ -136,6 +156,9 @@ int main(int argc, char* argv[]) {
     part.ReadSolutions(soln_name);
     part.ScatterSolutions();
   }
+
+  using Riemann = mini::riemann::rotated::Burgers<Scalar, kDimensions>;
+  Riemann::Convection::SetJacobians(1, 0, 0);
 
   using General = mini::spatial::dg::General<Part, Riemann>;
   using Spatial = mini::spatial::WithLimiter<General, Limiter>;
