@@ -57,7 +57,7 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   std::cout << "[Done] BuildValueJumps" << std::endl;
   auto jump_integrals = RiemannWithViscosity::IntegrateJumps(value_jumps);
   std::cout << "[Done] IntegrateJumps" << std::endl;
-  RiemannWithViscosity::SetTimeScale(1e-3);
+  RiemannWithViscosity::SetTimeScale(1.0);
   auto viscosity_values = RiemannWithViscosity::GetViscosityValues(
         jump_integrals, damping_matrices);
   std::cout << "[Done] GetViscosityValues" << std::endl;

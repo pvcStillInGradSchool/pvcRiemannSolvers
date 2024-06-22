@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -347,12 +348,18 @@ class EnergyBasedViscosity : public R {
       auto const &coeff = curr_cell->polynomial().coeff();
       assert(coeff.rows() == Cell::K);
       assert(coeff.cols() == Cell::N);
+      Scalar max_speed = Convection::GetMaximumSpeed(
+          curr_cell->polynomial().average());
+      Scalar cell_length = std::cbrt(curr_cell->volume());
+      Scalar max_viscosity = max_speed * cell_length / Cell::P;
+      Scalar time_base = cell_length / max_speed;
       for (int k = 0; k < Cell::K; ++k) {
         auto const &u_row = coeff.row(k);
         auto const &u_col = u_row.transpose();
         Scalar damping_rate = -u_row.dot(damping_matrix_on_curr_cell * u_col);
-        viscosity_on_curr_cell[k] = jump_integral_on_curr_cell[k]
-            / (damping_rate * GetTimeScale());
+        Scalar damping_time = time_base * GetTimeScale();
+        viscosity_on_curr_cell[k] = std::min(max_viscosity,
+            jump_integral_on_curr_cell[k] / (damping_rate * damping_time));
       }
       if (curr_cell->id() == 0) {
         std::fstream log{ "damping" + std::to_string(part().mpi_rank()) + ".txt", log.out };
