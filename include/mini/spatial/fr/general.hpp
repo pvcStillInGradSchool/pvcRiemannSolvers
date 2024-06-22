@@ -322,6 +322,12 @@ class General : public spatial::FiniteElement<P, R> {
   }
   Value GetFluxForHolder(const Riemann &riemann,
       const Cell &holder, FluxPointCache const &holder_cache) const
+      requires(mini::riemann::Diffusive<Riemann> == false) {
+    Value value;
+    return value;
+  }
+  Value GetFluxForHolder(const Riemann &riemann,
+      const Cell &holder, FluxPointCache const &holder_cache) const
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
     auto [u_holder, du_holder, ddu_holder] =
         holder.polynomial().GetGlobalValueGradientHessian(holder_cache.ijk);
@@ -343,6 +349,12 @@ class General : public spatial::FiniteElement<P, R> {
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     return f_holder;
+  }
+  Value GetFluxForSharer(const Riemann &riemann,
+      const Cell &sharer, FluxPointCache const &sharer_cache) const
+      requires(mini::riemann::Diffusive<Riemann> == false) {
+    Value value;
+    return value;
   }
   Value GetFluxForSharer(const Riemann &riemann,
       const Cell &sharer, FluxPointCache const &sharer_cache) const

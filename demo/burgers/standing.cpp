@@ -24,7 +24,7 @@ constexpr int kDegrees = 2;
 #include "mini/riemann/rotated/burgers.hpp"
 using Riemann = mini::riemann::rotated::Burgers<Scalar, kDimensions>;
 
-#define DGSEM // exactly one of (DGFEM, DGSEM) must be defined
+#define FR // exactly one of (DGFEM, DGSEM, FR) must be defined
 
 #ifdef DGFEM
 #include "mini/integrator/legendre.hpp"
@@ -32,7 +32,7 @@ using Gx = mini::integrator::Legendre<Scalar, kDegrees + 1>;
 #include "mini/polynomial/projection.hpp"
 using Polynomial = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, kComponents>;
 
-#else
+#else  // common for DGSEM and FR
 #include "mini/integrator/lobatto.hpp"
 using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 
@@ -71,6 +71,10 @@ using General = mini::spatial::dg::General<Part, Riemann>;
 #elif defined(DGSEM)
 #include "mini/spatial/dg/lobatto.hpp"
 using General = mini::spatial::dg::Lobatto<Part, Riemann>;
+
+#elif defined(FR)
+#include "mini/spatial/fr/lobatto.hpp"
+using General = mini::spatial::fr::Lobatto<Part, Riemann>;
 #endif
 
 #include "mini/limiter/weno.hpp"
