@@ -9,19 +9,11 @@
 
 #include "mini/mesh/shuffler.hpp"
 #include "mini/mesh/vtk.hpp"
-#include "mini/riemann/rotated/burgers.hpp"
-#include "mini/mesh/part.hpp"
-#include "mini/limiter/weno.hpp"
-#include "mini/limiter/reconstruct.hpp"
 #include "mini/temporal/rk.hpp"
-#include "mini/spatial/dg/general.hpp"
-#include "mini/spatial/with_limiter.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 #include "mini/integrator/quadrangle.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/integrator/hexahedron.hpp"
-#include "mini/integrator/legendre.hpp"
-#include "mini/polynomial/projection.hpp"
 
 using Scalar = double;
 /* Define the Burgers equation. */
@@ -29,9 +21,35 @@ constexpr int kComponents = 1;
 constexpr int kDimensions = 3;
 constexpr int kDegrees = 2;
 
-using Gx = mini::integrator::Legendre<Scalar, kDegrees + 1>;
+#include "mini/riemann/rotated/burgers.hpp"
+using Riemann = mini::riemann::rotated::Burgers<Scalar, kDimensions>;
 
-template <class Part>
+#define DGSEM // exactly one of (DGFEM, DGSEM) must be defined
+
+#ifdef DGFEM
+#include "mini/integrator/legendre.hpp"
+using Gx = mini::integrator::Legendre<Scalar, kDegrees + 1>;
+#include "mini/polynomial/projection.hpp"
+using Polynomial = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, kComponents>;
+
+#else
+#include "mini/integrator/lobatto.hpp"
+using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
+
+#include "mini/polynomial/hexahedron.hpp"
+#include "mini/polynomial/extrapolation.hpp"
+using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+using Polynomial = mini::polynomial::Extrapolation<Interpolation>;
+#endif
+
+#include "mini/mesh/part.hpp"
+using Part = mini::mesh::part::Part<cgsize_t, Polynomial>;
+using Cell = typename Part::Cell;
+using Face = typename Part::Face;
+using Global = typename Cell::Global;
+using Value = typename Cell::Value;
+using Coeff = typename Cell::Coeff;
+
 static void InstallIntegratorPrototypes(Part *part_ptr) {
   auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
   using QuadrangleIntegrator
@@ -46,12 +64,29 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
   part_ptr->BuildGeometry();
 }
 
+#ifdef DGFEM
+#include "mini/spatial/dg/general.hpp"
+using General = mini::spatial::dg::General<Part, Riemann>;
+
+#elif defined(DGSEM)
+#include "mini/spatial/dg/lobatto.hpp"
+using General = mini::spatial::dg::Lobatto<Part, Riemann>;
+#endif
+
+#include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
+#include "mini/spatial/with_limiter.hpp"
+using Limiter = mini::limiter::weno::Lazy<Cell>;
+using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
   int n_core, i_core;
   MPI_Comm_size(MPI_COMM_WORLD, &n_core);
   MPI_Comm_rank(MPI_COMM_WORLD, &i_core);
   cgp_mpi_comm(MPI_COMM_WORLD);
+
+  Riemann::Convection::SetJacobians(1, 0, 0);
 
   if (argc < 7) {
     if (i_core == 0) {
@@ -91,14 +126,6 @@ int main(int argc, char* argv[]) {
   }
   MPI_Barrier(MPI_COMM_WORLD);
 
-  using Projection = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, kComponents>;
-  using Part = mini::mesh::part::Part<cgsize_t, Projection>;
-  using Cell = typename Part::Cell;
-  using Face = typename Part::Face;
-  using Global = typename Cell::Global;
-  using Value = typename Cell::Value;
-  using Coeff = typename Cell::Coeff;
-
   if (i_core == 0) {
     std::printf("Create %d `Part`s at %f sec\n",
         n_core, MPI_Wtime() - time_begin);
@@ -107,9 +134,9 @@ int main(int argc, char* argv[]) {
   InstallIntegratorPrototypes(&part);
   part.SetFieldNames({"U"});
 
-  /* Build a `Limiter` object. */
-  using Limiter = mini::limiter::weno::Lazy<Cell>;
+  /* Build a `Spatial` object. */
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
+  auto spatial = Spatial(&limiter, &part);
 
   /* Set initial conditions. */
   auto initial_condition = [&](const Global& xyz){
@@ -127,18 +154,6 @@ int main(int argc, char* argv[]) {
     for (Cell *cell_ptr : part.GetLocalCellPointers()) {
       cell_ptr->Approximate(initial_condition);
     }
-
-    if (i_core == 0) {
-      std::printf("[Start] Reconstruct() on %d cores at %f sec\n",
-          n_core, MPI_Wtime() - time_begin);
-    }
-    if (kDegrees > 0) {
-      mini::limiter::Reconstruct(&part, &limiter);
-      if (suffix == "tetra") {
-        mini::limiter::Reconstruct(&part, &limiter);
-      }
-    }
-
     part.GatherSolutions();
     if (i_core == 0) {
       std::printf("[Start] WriteSolutions(Frame0) on %d cores at %f sec\n",
@@ -156,13 +171,6 @@ int main(int argc, char* argv[]) {
     part.ReadSolutions(soln_name);
     part.ScatterSolutions();
   }
-
-  using Riemann = mini::riemann::rotated::Burgers<Scalar, kDimensions>;
-  Riemann::Convection::SetJacobians(1, 0, 0);
-
-  using General = mini::spatial::dg::General<Part, Riemann>;
-  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
-  auto spatial = Spatial(&limiter, &part);
 
   /* Define the temporal solver. */
   constexpr int kOrders = std::min(3, kDegrees + 1);
