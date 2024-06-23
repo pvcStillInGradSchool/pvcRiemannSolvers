@@ -92,11 +92,17 @@ using Spatial = mini::spatial::WithLimiter<General, Limiter>;
 
 #ifdef VISCOSITY
 
+#include "mini/riemann/concept.hpp"
+#include "mini/riemann/diffusive/linear.hpp"
+#include "mini/riemann/diffusive/direct_dg.hpp"
 #include "mini/spatial/viscosity.hpp"
 #include "mini/spatial/with_viscosity.hpp"
 
-using RiemannWithViscosity
-    = mini::spatial::EnergyBasedViscosity<Part, Riemann>;
+using Diffusion = mini::riemann::diffusive::DirectDG<
+    mini::riemann::diffusive::Isotropic<Scalar, kComponents>>;
+using RiemannWithViscosity = mini::spatial::EnergyBasedViscosity<Part,
+    mini::riemann::ConvectionDiffusion<Riemann, Diffusion>>;
+static_assert(mini::riemann::ConvectiveDiffusive<RiemannWithViscosity>);
 
 #if defined(FR)
 #include "mini/spatial/fr/lobatto.hpp"
@@ -115,7 +121,9 @@ int main(int argc, char* argv[]) {
   cgp_mpi_comm(MPI_COMM_WORLD);
 
   Riemann::Convection::SetJacobians(1, 0, 0);
-
+#ifdef VISCOSITY
+  Diffusion::SetProperty(0.0);
+#endif
   if (argc < 7) {
     if (i_core == 0) {
       std::cout << "usage:\n"

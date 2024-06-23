@@ -361,10 +361,12 @@ class EnergyBasedViscosity : public R {
         viscosity_on_curr_cell[k] = std::min(max_viscosity,
             jump_integral_on_curr_cell[k] / (damping_rate * damping_time));
       }
+#ifndef NDEBUG
       if (curr_cell->id() == 0) {
         std::fstream log{ "damping" + std::to_string(part().mpi_rank()) + ".txt", log.out };
         log << std::scientific << std::setprecision(2) << damping_matrix_on_curr_cell << "\n";
       }
+#endif
     }
     assert(viscosity_values.size() == part().CountLocalCells());
     return viscosity_values;
@@ -377,7 +379,7 @@ class EnergyBasedViscosity : public R {
     InstallSpatial(spatial_ptr);
     InitializeRequestsAndBuffers();
     damping_matrices_ = BuildDampingMatrices();
-    SetTimeScale(1e-3);
+    SetTimeScale(1.0);
   }
 
   static void UpdateProperties() {
