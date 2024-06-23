@@ -32,7 +32,7 @@ class WithViscosity : public ConcreteFiniteElement {
 
  public:
   template <class... Args>
-  WithLimiter(Args&&... args)
+  WithViscosity(Args&&... args)
       : Base(std::forward<Args>(args)...) {
     Riemann::Viscosity::Initialize(this);
   }

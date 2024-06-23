@@ -64,6 +64,10 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
   part_ptr->BuildGeometry();
 }
 
+#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
+
+#ifdef LIMITER
+
 #ifdef DGFEM
 #include "mini/spatial/dg/general.hpp"
 using General = mini::spatial::dg::General<Part, Riemann>;
@@ -78,10 +82,28 @@ using General = mini::spatial::fr::Lobatto<Part, Riemann>;
 #endif
 
 #include "mini/limiter/weno.hpp"
-#include "mini/limiter/reconstruct.hpp"
 #include "mini/spatial/with_limiter.hpp"
 using Limiter = mini::limiter::weno::Lazy<Cell>;
 using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+
+#endif
+
+#ifdef VISCOSITY
+
+#include "mini/spatial/viscosity.hpp"
+#include "mini/spatial/with_viscosity.hpp"
+
+using RiemannWithViscosity
+    = mini::spatial::EnergyBasedViscosity<Part, Riemann>;
+
+#if defined(FR)
+#include "mini/spatial/fr/lobatto.hpp"
+using General = mini::spatial::fr::Lobatto<Part, RiemannWithViscosity>;
+#endif
+
+using Spatial = mini::spatial::WithViscosity<General>;
+
+#endif
 
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
@@ -139,8 +161,12 @@ int main(int argc, char* argv[]) {
   part.SetFieldNames({"U"});
 
   /* Build a `Spatial` object. */
+#ifdef LIMITER
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
   auto spatial = Spatial(&limiter, &part);
+#else
+  auto spatial = Spatial(&part);
+#endif
 
   /* Set initial conditions. */
   auto initial_condition = [&](const Global& xyz){
