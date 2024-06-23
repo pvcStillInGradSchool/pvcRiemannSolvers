@@ -64,6 +64,8 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
   part_ptr->BuildGeometry();
 }
 
+using VtkWriter = mini::mesh::vtk::Writer<Part>;
+
 #define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
 
 #ifdef LIMITER
@@ -166,6 +168,10 @@ int main(int argc, char* argv[]) {
   auto spatial = Spatial(&limiter, &part);
 #else
   auto spatial = Spatial(&part);
+  RiemannWithViscosity::SetTimeScale(1.0);
+  VtkWriter::AddExtraField("CellViscosity", [&](Cell const &cell, Global const &global, Value const &value){
+    return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[0];
+  });
 #endif
 
   /* Set initial conditions. */
@@ -185,12 +191,15 @@ int main(int argc, char* argv[]) {
       cell_ptr->Approximate(initial_condition);
     }
     part.GatherSolutions();
+#ifdef VISCOSITY
+    RiemannWithViscosity::Viscosity::UpdateProperties();
+#endif
     if (i_core == 0) {
       std::printf("[Start] WriteSolutions(Frame0) on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
     part.WriteSolutions("Frame0");
-    mini::mesh::vtk::Writer<Part>::WriteSolutions(part, "Frame0");
+    VtkWriter::WriteSolutions(part, "Frame0");
   } else {
     if (i_core == 0) {
       std::printf("[Start] ReadSolutions(Frame%d) on %d cores at %f sec\n",
@@ -249,7 +258,7 @@ int main(int argc, char* argv[]) {
       }
       auto frame_name = "Frame" + std::to_string(i_frame);
       part.WriteSolutions(frame_name);
-      mini::mesh::vtk::Writer<Part>::WriteSolutions(part, frame_name);
+      VtkWriter::WriteSolutions(part, frame_name);
     }
   }
 
