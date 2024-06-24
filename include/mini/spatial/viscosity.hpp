@@ -388,7 +388,7 @@ class EnergyBasedViscosity : public R {
     assert(properties_.size()
         == part().CountGhostCells() + part().CountLocalCells());
     assert(viscosity_values.size() == part().CountLocalCells());
-    for (typename Part::Index i_cell; i_cell < part().CountLocalCells(); ++i_cell) {
+    for (ssize_t i_cell = 0; i_cell < part().CountLocalCells(); ++i_cell) {
       std::ranges::fill(properties_.at(i_cell), viscosity_values.at(i_cell));
     }
     /* TODO(PVC): replace by std::views::zip in C++23

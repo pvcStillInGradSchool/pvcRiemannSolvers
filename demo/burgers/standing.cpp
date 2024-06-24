@@ -199,6 +199,8 @@ int main(int argc, char* argv[]) {
     for (Cell *cell_ptr : part.GetLocalCellPointers()) {
       cell_ptr->Approximate(initial_condition);
     }
+    part.ShareGhostCellCoeffs();
+    part.UpdateGhostCellCoeffs();
     part.GatherSolutions();
 #ifdef VISCOSITY
     RiemannWithViscosity::Viscosity::UpdateProperties();
