@@ -362,10 +362,8 @@ class EnergyBasedViscosity : public R {
             jump_integral_on_curr_cell[k] / (damping_rate * damping_time));
       }
 #ifndef NDEBUG
-      if (curr_cell->id() == 0) {
-        std::fstream log{ "damping" + std::to_string(part().mpi_rank()) + ".txt", log.out };
-        log << std::scientific << std::setprecision(2) << damping_matrix_on_curr_cell << "\n";
-      }
+      std::fstream log{ "damping" + std::to_string(curr_cell->metis_id) + ".txt", log.out };
+      log << std::scientific << std::setprecision(2) << damping_matrix_on_curr_cell << "\n";
 #endif
     }
     assert(viscosity_values.size() == part().CountLocalCells());
@@ -387,8 +385,9 @@ class EnergyBasedViscosity : public R {
     auto jump_integrals = IntegrateJumps(value_jumps);
     auto viscosity_values = GetViscosityValues(
         jump_integrals, damping_matrices_);
-    assert(properties_.size() == viscosity_values.size());
-    assert(properties_.size() == part().CountLocalCells());
+    assert(properties_.size()
+        == part().CountGhostCells() + part().CountLocalCells());
+    assert(viscosity_values.size() == part().CountLocalCells());
     for (typename Part::Index i_cell; i_cell < part().CountLocalCells(); ++i_cell) {
       std::ranges::fill(properties_.at(i_cell), viscosity_values.at(i_cell));
     }
