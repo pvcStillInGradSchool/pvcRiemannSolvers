@@ -123,6 +123,7 @@ int main(int argc, char* argv[]) {
   Riemann::Convection::SetJacobians(1, 0, 0);
 #ifdef VISCOSITY
   Diffusion::SetProperty(0.0);
+  Diffusion::SetBetaValues(2.0, 1.0 / 12);
 #endif
   if (argc < 7) {
     if (i_core == 0) {
