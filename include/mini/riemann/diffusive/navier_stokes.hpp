@@ -32,8 +32,21 @@ class NavierStokes {
   using Tensor = algebra::Vector<Scalar, 6>;
   struct Property {
     Scalar nu, prandtl;
+
     bool operator==(Property const &that) const {
       return nu == that.nu && prandtl == that.prandtl;
+    }
+
+    Property &operator+=(Property const &that) {
+      this->nu += that.nu;
+      this->prandtl += that.prandtl;
+      return *this;
+    }
+
+    Property &operator*=(Scalar scalar) {
+      this->nu *= scalar;
+      this->prandtl *= scalar;
+      return *this;
     }
   };
 
