@@ -107,7 +107,7 @@ class EnergyBasedViscosity : public R {
    * It should be called once and only once before the main loop.
    */
   static void InitializeRequestsAndBuffers() {
-    part().InitializeRequestsAndBuffers(Cell::kFields,
+    part().InitializeRequestsAndBuffers(kComponents,
         &requests_, &send_bufs_, &recv_bufs_);
   }
 
@@ -116,9 +116,9 @@ class EnergyBasedViscosity : public R {
       std::vector<Property> const &properties = properties_.at(cell_ptr->id());
       assert(Cell::N == properties.size());
       assert(Cell::K * sizeof(Scalar) == sizeof(Property));
-      constexpr auto n_byte = sizeof(Scalar) * Cell::kFields;
-      std::memcpy(buf, properties.data(), n_byte);
-      return buf + Cell::kFields;
+      // Since properties[0] == ... == properties[N-1], only one has to be sent.
+      std::memcpy(buf, properties.data(), sizeof(Property));
+      return buf + Cell::K;
     };
     part_ptr()->ShareGhostCellData(&requests_, &send_bufs_, &recv_bufs_,
         operation);
@@ -129,9 +129,8 @@ class EnergyBasedViscosity : public R {
       std::vector<Property> &properties = properties_.at(cell_ptr->id());
       assert(Cell::N == properties.size());
       assert(Cell::K * sizeof(Scalar) == sizeof(Property));
-      constexpr auto n_byte = sizeof(Scalar) * Cell::kFields;
-      std::memcpy(properties.data(), buf, n_byte);
-      return buf + Cell::kFields;
+      std::ranges::fill(properties, *reinterpret_cast<Property const *>(buf));
+      return buf + Cell::K;
     };
     part_ptr()->UpdateGhostCellData(&requests_, &recv_bufs_, operation);
   }
