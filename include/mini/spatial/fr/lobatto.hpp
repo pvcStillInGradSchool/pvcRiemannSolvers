@@ -278,8 +278,7 @@ class Lobatto : public General<P, R> {
               holder_flux_point.ijk);
           Value f_upwind = riemanns[f].GetFluxOnInviscidWall(u_holder);
           Value f_holder = f_upwind * holder_flux_point.scale;
-          f_holder -=
-              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+          Base::MinusCachedFlux(&f_holder, holder.id(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
@@ -344,8 +343,7 @@ class Lobatto : public General<P, R> {
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = riemanns[f].GetFluxOnSupersonicInlet(u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
-          f_holder -=
-              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+          Base::MinusCachedFlux(&f_holder, holder.id(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
@@ -368,8 +366,7 @@ class Lobatto : public General<P, R> {
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = riemanns[f].GetFluxOnSubsonicInlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
-          f_holder -=
-              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+          Base::MinusCachedFlux(&f_holder, holder.id(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
@@ -392,8 +389,7 @@ class Lobatto : public General<P, R> {
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = riemanns[f].GetFluxOnSubsonicOutlet(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
-          f_holder -=
-              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+          Base::MinusCachedFlux(&f_holder, holder.id(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
@@ -416,8 +412,7 @@ class Lobatto : public General<P, R> {
           Value u_given = func(integrator.GetGlobal(f), this->t_curr_);
           Value f_upwind = riemanns[f].GetFluxOnSmartBoundary(u_holder, u_given);
           Value f_holder = f_upwind * holder_flux_point.scale;
-          f_holder -=
-              Riemann::Convection::GetFluxMatrix(u_holder) * holder_flux_point.normal;
+          Base::MinusCachedFlux(&f_holder, holder.id(), holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }
