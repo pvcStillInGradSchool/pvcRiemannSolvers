@@ -354,8 +354,16 @@ class EnergyBasedViscosity : public R {
       auto const &coeff = curr_cell->polynomial().coeff();
       assert(coeff.rows() == Cell::K);
       assert(coeff.cols() == Cell::N);
-      Scalar max_speed = Convection::GetMaximumSpeed(
-          curr_cell->polynomial().average());
+      auto GetMaximumSpeed = [](Cell const &cell) -> Scalar {
+        Scalar max_speed = 1e-5;  // avoid 0 in divisor
+        auto const &polynomial = cell.polynomial();
+        for (int i = 0; i < Cell::N; ++i) {
+          max_speed = std::max(max_speed,
+              Convection::GetMaximumSpeed(polynomial.GetValue(i)));
+        }
+        return max_speed;
+      };
+      Scalar max_speed = GetMaximumSpeed(*curr_cell);
       Scalar cell_length = std::cbrt(curr_cell->volume());
       Scalar max_viscosity = max_speed * cell_length / Cell::P;
       Scalar time_base = cell_length / max_speed;
