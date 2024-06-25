@@ -9,6 +9,7 @@
 #include <cmath>
 #include <fstream>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <vector>
 #include <stdexcept>
@@ -16,8 +17,10 @@
 #include <type_traits>
 #include <unordered_map>
 
+#ifndef NDEBUG
 #include <fstream>
 #include <iomanip>
+#endif
 
 #include "mini/algebra/eigen.hpp"
 #include "mini/spatial/fem.hpp"
@@ -303,14 +306,18 @@ class EnergyBasedViscosity : public R {
       for (int i_node = 0; i_node < Cell::N; ++i_node) {
         auto &value_jump_on_curr_node = value_jumps_on_curr_cell[i_node];
         // Initialize value jumps to 0's:
+        // value_jump_on_curr_node.fill(std::numeric_imits<Scalar>::max());
         value_jump_on_curr_node.fill(0);
         // Update value jumps by each neighbor:
         Global const &global_i = curr_cell->integrator().GetGlobal(i_node);
         Value value_i = curr_cell->polynomial().GetValue(i_node);
         for (Cell *neighbor_i : curr_cell->adj_cells_) {
           Value jump_i = value_i - neighbor_i->polynomial().Extrapolate(global_i);
-          mini::algebra::Maximize(&value_jump_on_curr_node, std::pow(jump_i, 2));
+          // mini::algebra::Maximize(&value_jump_on_curr_node, std::pow(jump_i, 2));
+          // mini::algebra::Minimize(&value_jump_on_curr_node, std::pow(jump_i, 2));
+          value_jump_on_curr_node += std::pow(jump_i, 2);
         }
+        value_jump_on_curr_node /= curr_cell->adj_cells_.size();
       }
     }
     assert(value_jumps.size() == part().CountLocalCells());
