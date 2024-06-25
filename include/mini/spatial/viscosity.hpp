@@ -357,6 +357,38 @@ class EnergyBasedViscosity : public R {
     return jump_integrals;
   }
 
+  static std::vector<Value> IntegrateJumpsOnFaces() {
+    std::vector<Value> jump_integrals;
+    jump_integrals.resize(part().CountLocalCells(), Value::Zero());
+    for (Face const &face : part_ptr()->GetLocalFaces()) {
+      const auto &holder = face.holder();
+      const auto &sharer = face.sharer();
+      const auto &integrator = face.integrator();
+      for (int i = 0; i < integrator.CountPoints(); ++i) {
+        const auto &global = integrator.GetGlobal(i);
+        Value jump = holder.polynomial().GlobalToValue(global)
+                   - sharer.polynomial().GlobalToValue(global);
+        jump = std::pow(jump, 2) * integrator.GetGlobalWeight(i);
+        jump_integrals.at(holder.id()) += jump;
+        jump_integrals.at(sharer.id()) += jump;
+      }
+    }
+    for (Face const &face : part_ptr()->GetGhostFaces()) {
+      const auto &holder = face.holder();
+      const auto &sharer = face.sharer();
+      const auto &integrator = face.integrator();
+      for (int i = 0; i < integrator.CountPoints(); ++i) {
+        auto const &global = integrator.GetGlobal(i);
+        Value jump = holder.polynomial().GlobalToValue(global)
+                   - sharer.polynomial().GlobalToValue(global);
+        jump = std::pow(jump, 2) * integrator.GetGlobalWeight(i);
+        jump_integrals.at(holder.id()) += jump;
+      }
+    }
+    assert(jump_integrals.size() == part().CountLocalCells());
+    return jump_integrals;
+  }
+
   static std::vector<Value> GetViscosityValues(
       std::vector<Value> const &jump_integrals,
       std::vector<DampingMatrix> const &damping_matrices) {
@@ -410,8 +442,8 @@ class EnergyBasedViscosity : public R {
   }
 
   static void UpdateProperties() {
-    auto value_jumps = BuildValueJumps();
-    auto jump_integrals = IntegrateJumps(value_jumps);
+    // auto jump_integrals = IntegrateJumps(BuildValueJumps());
+    auto jump_integrals = IntegrateJumpsOnFaces();
     auto viscosity_values = GetViscosityValues(
         jump_integrals, damping_matrices_);
     assert(properties_.size()

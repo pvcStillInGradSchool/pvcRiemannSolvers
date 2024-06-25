@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
   auto spatial = Spatial(&limiter, &part);
 #else
   auto spatial = Spatial(&part);
-  RiemannWithViscosity::SetTimeScale(1.0);
+  RiemannWithViscosity::SetTimeScale(1.0e-2);
   VtkWriter::AddExtraField("CellViscosity", [&](Cell const &cell, Global const &global, Value const &value){
     return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[0];
   });
