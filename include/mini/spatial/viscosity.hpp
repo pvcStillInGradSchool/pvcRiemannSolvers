@@ -298,26 +298,41 @@ class EnergyBasedViscosity : public R {
     return matrices;
   }
 
+ private:  // methods for getting the square of jump on a given quadrature point
+  static Value Maximize(Cell const &cell, int i_node) {
+    Value jump_on_curr_node = Value::Zero();
+    Global const &global = cell.integrator().GetGlobal(i_node);
+    Value const &value = cell.polynomial().GetValue(i_node);
+    for (Cell *neighbor : cell.adj_cells_) {
+      Value jump = value - neighbor->polynomial().Extrapolate(global);
+      mini::algebra::Maximize(&jump_on_curr_node, std::pow(jump, 2));
+    }
+    return jump_on_curr_node;
+  }
+
+  static Value WeightedAverage(Cell const &cell, int i_node) {
+    Value jump_on_curr_node = Value::Zero();
+    Global const &global = cell.integrator().GetGlobal(i_node);
+    Value const &value = cell.polynomial().GetValue(i_node);
+    Scalar weight_sum = 0;
+    for (Cell *neighbor : cell.adj_cells_) {
+      Value jump = value - neighbor->polynomial().Extrapolate(global);
+      // the closer neighbor, the larger weight:
+      Scalar weight = std::exp(-(neighbor->center() - global).squaredNorm());
+      jump_on_curr_node += std::pow(jump, 2) * weight;
+      weight_sum += weight;
+    }
+    return jump_on_curr_node /= weight_sum;
+  }
+
+ public:
   static std::vector<std::array<Value, Cell::N>> BuildValueJumps() {
     std::vector<std::array<Value, Cell::N>> value_jumps;
     value_jumps.reserve(part().CountLocalCells());
     for (Cell *curr_cell : part_ptr()->GetLocalCellPointers()) {
       auto &value_jumps_on_curr_cell = value_jumps.emplace_back();
       for (int i_node = 0; i_node < Cell::N; ++i_node) {
-        auto &value_jump_on_curr_node = value_jumps_on_curr_cell[i_node];
-        // Initialize value jumps to 0's:
-        // value_jump_on_curr_node.fill(std::numeric_imits<Scalar>::max());
-        value_jump_on_curr_node.fill(0);
-        // Update value jumps by each neighbor:
-        Global const &global_i = curr_cell->integrator().GetGlobal(i_node);
-        Value value_i = curr_cell->polynomial().GetValue(i_node);
-        for (Cell *neighbor_i : curr_cell->adj_cells_) {
-          Value jump_i = value_i - neighbor_i->polynomial().Extrapolate(global_i);
-          // mini::algebra::Maximize(&value_jump_on_curr_node, std::pow(jump_i, 2));
-          // mini::algebra::Minimize(&value_jump_on_curr_node, std::pow(jump_i, 2));
-          value_jump_on_curr_node += std::pow(jump_i, 2);
-        }
-        value_jump_on_curr_node /= curr_cell->adj_cells_.size();
+        value_jumps_on_curr_cell[i_node] = WeightedAverage(*curr_cell, i_node);
       }
     }
     assert(value_jumps.size() == part().CountLocalCells());
