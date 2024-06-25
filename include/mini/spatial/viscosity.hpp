@@ -309,7 +309,7 @@ class EnergyBasedViscosity : public R {
         Value value_i = curr_cell->polynomial().GetValue(i_node);
         for (Cell *neighbor_i : curr_cell->adj_cells_) {
           Value jump_i = value_i - neighbor_i->polynomial().Extrapolate(global_i);
-          mini::algebra::Maximize(&value_jump_on_curr_node, std::abs(jump_i));
+          mini::algebra::Maximize(&value_jump_on_curr_node, std::pow(jump_i, 2));
         }
       }
     }
@@ -328,7 +328,7 @@ class EnergyBasedViscosity : public R {
       assert(integrator.CountPoints() == Cell::N);
       for (int i_node = 0; i_node < Cell::N; ++i_node) {
         integral_on_curr_cell += integrator.GetGlobalWeight(i_node)
-            * std::pow(jump_on_curr_cell[i_node], 2);
+            * jump_on_curr_cell[i_node];
       }
     }
     assert(jump_integrals.size() == part().CountLocalCells());
