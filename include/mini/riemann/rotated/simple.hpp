@@ -60,9 +60,7 @@ class Simple {
     return ConvertToFlux(raw_flux);
   }
   Flux GetFluxOnInviscidWall(const Conservative& state) const {
-    Flux flux;
-    flux.setZero();
-    return flux;
+    return Flux::Zero();
   }
   Flux GetFluxOnSupersonicOutlet(const Conservative& state) const {
     auto raw_flux = unrotated_simple_.GetFlux(state);
@@ -74,16 +72,15 @@ class Simple {
   }
   Flux GetFluxOnSubsonicInlet(Conservative const& conservative_i,
       Conservative const& conservative_o) const {
-    return {};
+    return GetFluxUpwind(conservative_i, conservative_o);
   }
   Flux GetFluxOnSubsonicOutlet(Conservative const& conservative_i,
       Conservative const& conservative_o) const {
-    return {};
+    return GetFluxUpwind(conservative_i, conservative_o);
   }
   Flux GetFluxOnSmartBoundary(Conservative const& conservative_i,
       Conservative const& conservative_o) const {
-    // TODO(PVC): provide physical implementation
-    return {};
+    return GetFluxUpwind(conservative_i, conservative_o);
   }
   static FluxMatrix GetFluxMatrix(const Conservative& state) {
     FluxMatrix flux_mat;

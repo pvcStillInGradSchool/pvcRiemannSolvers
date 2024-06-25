@@ -228,23 +228,26 @@ int main(int argc, char* argv[]) {
   auto temporal = Temporal();
 
   /* Set boundary conditions. */
+  auto given_state = [](const Global& xyz, double t) -> Value {
+    return Value::Zero();
+  };
   if (suffix == "tetra") {
     spatial.SetInviscidWall("3_S_27");  // Top
-    spatial.SetInviscidWall("3_S_31");  // Left
     spatial.SetInviscidWall("3_S_1");   // Back
     spatial.SetInviscidWall("3_S_32");  // Front
     spatial.SetInviscidWall("3_S_19");  // Bottom
-    spatial.SetInviscidWall("3_S_23");  // Right
     spatial.SetInviscidWall("3_S_15");  // Gap
+    spatial.SetSmartBoundary("3_S_31", given_state);  // Left
+    spatial.SetSmartBoundary("3_S_23", given_state);  // Right
   } else {
     assert(suffix == "hexa");
     spatial.SetInviscidWall("4_S_27");  // Top
-    spatial.SetInviscidWall("4_S_31");  // Left
     spatial.SetInviscidWall("4_S_1");   // Back
     spatial.SetInviscidWall("4_S_32");  // Front
     spatial.SetInviscidWall("4_S_19");  // Bottom
-    spatial.SetInviscidWall("4_S_23");  // Right
     spatial.SetInviscidWall("4_S_15");  // Gap
+    spatial.SetSmartBoundary("4_S_31", given_state);  // Left
+    spatial.SetSmartBoundary("4_S_23", given_state);  // Right
   }
 
   /* Main Loop */
