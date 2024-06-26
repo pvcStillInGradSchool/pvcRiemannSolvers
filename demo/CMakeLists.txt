@@ -1,5 +1,4 @@
 add_subdirectory(cgns)
-add_subdirectory(polynomial)
 add_subdirectory(linear)
 add_subdirectory(burgers)
 add_subdirectory(euler)
