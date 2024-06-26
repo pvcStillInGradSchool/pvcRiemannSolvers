@@ -64,14 +64,15 @@ void Write(std::string const &case_name, std::string const &solution_name) {
   part.ScatterSolutions();
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
   using Cell = typename Part::Cell;
-  auto plus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
+  auto plus = [](Cell const &cell) -> Scalar {
+    Value value = cell.polynomial().average();
     return value[0] + value[1];
   };
-  VtkWriter::AddExtraField("U1+U2", plus);
+  VtkWriter::AddCellData("U1+U2", plus);
   auto minus = [](Cell const &, Coord const &, Value const &value) -> Scalar {
     return value[0] - value[1];
   };
-  VtkWriter::AddExtraField("U1-U2", minus);
+  VtkWriter::AddPointData("U1-U2", minus);
   VtkWriter::WriteSolutions(part, solution_name);
 }
 

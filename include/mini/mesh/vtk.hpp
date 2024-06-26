@@ -277,8 +277,14 @@ class Writer {
   using Local = typename Cell::Local;
   using Coord = typename Cell::Global;
   using Scalar = typename Cell::Scalar;
-  using Function = std::function<Scalar(Cell const &, Coord const &, Value const &)>;
-  using ExtraField = std::pair<std::string, Function>;
+
+  using PointData = std::pair<std::string,
+      std::function<Scalar(Cell const &, Coord const &, Value const &)>>;
+  static std::vector<PointData> point_data_name_and_func_;
+
+  using CellData = std::pair<std::string,
+      std::function<Scalar(Cell const &)>>;
+  static std::vector<CellData> cell_data_name_and_func_;
 
   static CellType GetCellType(int n_corners) {
     CellType cell_type;
@@ -342,7 +348,8 @@ class Writer {
    */
   static void Prepare(const Cell &cell, std::vector<CellType> *types,
       std::vector<Coord> *coords, std::vector<Value> *values,
-      std::vector<std::vector<Scalar>> *extra_values) {
+      std::vector<std::vector<Scalar>> *point_data,
+      std::vector<std::vector<Scalar>> *cell_data) {
     auto type = GetCellType(cell.CountCorners());
     types->push_back(type);
     // TODO(PVC): dispatch by virtual functions?
@@ -389,15 +396,18 @@ class Writer {
       auto &global = coords->emplace_back();
       auto &value = values->emplace_back();
       cell.polynomial().LocalToGlobalAndValue(locals[i], &global, &value);
-      // append values of extra fields, if there is any
-      for (int k = 0, K = extra_fields_.size(); k < K; ++k) {
-        auto &func = extra_fields_[k].second;
-        (*extra_values)[k].emplace_back(func(cell, global, value));
+      // append extra point data, if there is any
+      for (int k = 0, K = point_data_name_and_func_.size(); k < K; ++k) {
+        auto &func = point_data_name_and_func_[k].second;
+        (*point_data)[k].emplace_back(func(cell, global, value));
       }
     }
+    // append extra cell data, if there is any
+    for (int k = 0, K = cell_data_name_and_func_.size(); k < K; ++k) {
+      auto &func = cell_data_name_and_func_[k].second;
+      (*cell_data)[k].emplace_back(func(cell));
+    }
   }
-
-  static std::vector<ExtraField> extra_fields_;
 
  public:
   static bool LittleEndian() {
@@ -405,15 +415,27 @@ class Writer {
   }
 
   /**
-   * @brief Add an extra field other than the conservative variables carried by Part.
+   * @brief Add an extra field other than the conservative variables carried by points.
    * 
    * @tparam F 
    * @param name 
    * @param f 
    */
   template <class F>
-  static void AddExtraField(std::string const &name, F &&f) {
-    extra_fields_.emplace_back(name, std::forward<F>(f));
+  static void AddPointData(std::string const &name, F &&f) {
+    point_data_name_and_func_.emplace_back(name, std::forward<F>(f));
+  }
+
+  /**
+   * @brief Add an extra field other than the conservative variables carried by cells.
+   * 
+   * @tparam F 
+   * @param name 
+   * @param f 
+   */
+  template <class F>
+  static void AddCellData(std::string const &name, F &&f) {
+    cell_data_name_and_func_.emplace_back(name, std::forward<F>(f));
   }
 
   /**
@@ -429,10 +451,12 @@ class Writer {
     auto types = std::vector<CellType>();
     auto coords = std::vector<Coord>();
     auto values = std::vector<Value>();
-    auto extra_values = std::vector<std::vector<Scalar>>();
-    extra_values.resize(extra_fields_.size());
+    auto point_data = std::vector<std::vector<Scalar>>();
+    point_data.resize(point_data_name_and_func_.size());
+    auto cell_data = std::vector<std::vector<Scalar>>();
+    cell_data.resize(cell_data_name_and_func_.size());
     for (const Cell &cell : part.GetLocalCells()) {
-      Prepare(cell, &types, &coords, &values, &extra_values);
+      Prepare(cell, &types, &coords, &values, &point_data, &cell_data);
     }
     // create the pvtu file (which refers to vtu files created by rank[0] and other ranks) by rank[0]
     if (part.mpi_rank() == 0) {
@@ -448,11 +472,17 @@ class Writer {
         pvtu << "      <PDataArray type=\"Float64\" Name=\""
             << part.GetFieldName(k) << "\"/>\n";
       }
-      for (auto &[name, func] : extra_fields_) {
+      for (auto &[name, _] : point_data_name_and_func_) {
         pvtu << "      <PDataArray type=\"Float64\" Name=\""
             << name << "\"/>\n";
       }
       pvtu << "    </PPointData>\n";
+      pvtu << "    <PCellData>\n";
+      for (auto &[name, _] : cell_data_name_and_func_) {
+        pvtu << "      <PDataArray type=\"Float64\" Name=\""
+            << name << "\"/>\n";
+      }
+      pvtu << "    </PCellData>\n";
       pvtu << "    <PPoints>\n";
       pvtu << "      <PDataArray type=\"Float64\" Name=\"Points\" "
           << "NumberOfComponents=\"3\"/>\n";
@@ -483,19 +513,29 @@ class Writer {
       }
       vtu << "\n        </DataArray>\n";
     }
-    // Write the value of extra fields:
-    for (int k = 0; k < extra_fields_.size(); ++k) {
-      auto &[name, _] = extra_fields_.at(k);
+    // Write the value of extra fields on points:
+    for (int k = 0; k < point_data_name_and_func_.size(); ++k) {
+      auto &[name, _] = point_data_name_and_func_.at(k);
       vtu << "        <DataArray type=\"Float64\" Name=\""
           << name << "\" format=" << format << ">\n";
-      for (Scalar value : extra_values.at(k)) {
+      for (Scalar value : point_data.at(k)) {
         vtu << value << ' ';
       }
       vtu << "\n        </DataArray>\n";
     }
     vtu << "      </PointData>\n";
-    vtu << "      <DataOnCells>\n";
-    vtu << "      </DataOnCells>\n";
+    vtu << "      <CellData>\n";
+    // Write the value of extra fields on cells:
+    for (int k = 0; k < cell_data_name_and_func_.size(); ++k) {
+      auto &[name, _] = cell_data_name_and_func_.at(k);
+      vtu << "        <DataArray type=\"Float64\" Name=\""
+          << name << "\" format=" << format << ">\n";
+      for (Scalar value : cell_data.at(k)) {
+        vtu << value << ' ';
+      }
+      vtu << "\n        </DataArray>\n";
+    }
+    vtu << "      </CellData>\n";
     vtu << "      <Points>\n";
     vtu << "        <DataArray type=\"Float64\" Name=\"Points\" "
         << "NumberOfComponents=\"3\" format=" << "\"binary\"" << ">\n";
@@ -545,8 +585,12 @@ class Writer {
 };
 
 template <typename Part>
-std::vector<typename Writer<Part>::ExtraField>
-Writer<Part>::extra_fields_;
+std::vector<typename Writer<Part>::PointData>
+Writer<Part>::point_data_name_and_func_;
+
+template <typename Part>
+std::vector<typename Writer<Part>::CellData>
+Writer<Part>::cell_data_name_and_func_;
 
 }  // namespace vtk
 }  // namespace mesh

@@ -70,16 +70,16 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   // Check values by VTK plotting:
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
   using Cell = typename Part::Cell;
-  VtkWriter::AddExtraField("CellEnergy1", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddCellData("CellEnergy1", [&](Cell const &cell) {
     return jump_integrals.at(cell.id())[0];
   });
-  VtkWriter::AddExtraField("CellEnergy2", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddCellData("CellEnergy2", [&](Cell const &cell) {
     return jump_integrals.at(cell.id())[1];
   });
-  VtkWriter::AddExtraField("CellViscosity1", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddCellData("CellViscosity1", [&](Cell const &cell) {
     return viscosity_values.at(cell.id())[0];
   });
-  VtkWriter::AddExtraField("CellViscosity2", [&](Cell const &cell, Global const &global, Value const &value){
+  VtkWriter::AddCellData("CellViscosity2", [&](Cell const &cell) {
     return viscosity_values.at(cell.id())[1];
   });
   VtkWriter::WriteSolutions(part, "Viscosity");

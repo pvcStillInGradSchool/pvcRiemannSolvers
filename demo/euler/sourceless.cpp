@@ -104,8 +104,8 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   auto spatial = Spatial(&part);
   RiemannWithViscosity::SetTimeScale(1.0e-2);
   for (int k = 0; k < kComponents; ++k) {
-    VtkWriter::AddExtraField("CellViscosity" + std::to_string(k + 1),
-        [k](Cell const &cell, Global const &global, Value const &value){
+    VtkWriter::AddCellData("CellViscosity" + std::to_string(k + 1),
+        [k](Cell const &cell) {
             return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[k]; });
   }
 #endif
