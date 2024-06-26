@@ -112,11 +112,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
 
   /* Initialization. */
   if (argc == 7) {
-    for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-      cell_ptr->Approximate(ic);
-    }
-    part.ShareGhostCellCoeffs();
-    part.UpdateGhostCellCoeffs();
+    spatial.Approximate(ic);
 #ifdef VISCOSITY
     RiemannWithViscosity::Viscosity::UpdateProperties();
 #endif

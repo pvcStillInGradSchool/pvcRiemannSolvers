@@ -39,9 +39,7 @@ auto GetResidualColumn(Spatial *spatial_ptr, Part *part_ptr) {
   spatial_ptr->SetSupersonicInlet("4_S_27", moving);  // Top
   spatial_ptr->SetSupersonicOutlet("4_S_15");  // Gap
   spatial_ptr->SetSupersonicOutlet("4_S_19");  // Bottom
-  for (auto *cell_ptr : part_ptr->GetLocalCellPointers()) {
-    cell_ptr->Approximate(func);
-  }
+  spatial_ptr->Approximate(func);
   spatial_ptr->SetTime(1.5);
   std::printf("%s() proc[%d/%d] cost %f sec\n",
       spatial_ptr->name().c_str(), i_core, n_core, MPI_Wtime() - time_begin);

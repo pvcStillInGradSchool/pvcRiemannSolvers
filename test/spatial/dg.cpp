@@ -75,10 +75,7 @@ int main(int argc, char* argv[]) {
   spatial.SetSupersonicInlet("4_S_19", moving);  // Bottom
   spatial.SetSubsonicOutlet("4_S_23", moving);  // Right
   spatial.SetSupersonicOutlet("4_S_15");  // Gap
-  for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-    cell_ptr->Approximate(func);
-  }
-  mini::limiter::Reconstruct(&part, &limiter);
+  spatial.Approximate(func);
   spatial.SetTime(1.5);
   std::printf("Part on basis::OrthoNormal proc[%d/%d] cost %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);
@@ -117,9 +114,7 @@ int main(int argc, char* argv[]) {
   spatial.SetSupersonicInlet("4_S_19", moving);  // Bottom
   spatial.SetSubsonicOutlet("4_S_23", moving);  // Right
   spatial.SetSupersonicOutlet("4_S_15");  // Gap
-  for (auto *cell_ptr : part.GetLocalCellPointers()) {
-    cell_ptr->Approximate(func);
-  }
+  spatial.Approximate(func);
   spatial.SetTime(1.5);
   std::printf("Part on basis::lagrange::Hexahedron<Local> proc[%d/%d] cost %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);
@@ -164,9 +159,7 @@ int main(int argc, char* argv[]) {
   spatial.SetSupersonicInlet("4_S_19", moving);  // Bottom
   spatial.SetSubsonicOutlet("4_S_23", moving);  // Right
   spatial.SetSupersonicOutlet("4_S_15");  // Gap
-  for (auto *cell_ptr : part.GetLocalCellPointers()) {
-    cell_ptr->Approximate(func);
-  }
+  spatial.Approximate(func);
   spatial.SetTime(1.5);
   std::printf("Part on basis::lagrange::Hexahedron<Global> proc[%d/%d] cost %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);

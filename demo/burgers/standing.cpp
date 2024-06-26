@@ -200,11 +200,7 @@ int main(int argc, char* argv[]) {
       std::printf("[Start] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
-    for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-      cell_ptr->Approximate(initial_condition);
-    }
-    part.ShareGhostCellCoeffs();
-    part.UpdateGhostCellCoeffs();
+    spatial.Approximate(initial_condition);
 #ifdef VISCOSITY
     RiemannWithViscosity::Viscosity::UpdateProperties();
 #endif

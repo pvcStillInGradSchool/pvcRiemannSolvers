@@ -55,6 +55,12 @@ class WithLimiter : public ConcreteFiniteElement {
     this->Base::SetSolutionColumn(column);
     mini::limiter::Reconstruct(this->part_ptr(), limiter_ptr());
   }
+
+  template <class Callable>
+  void Approximate(Callable &&func) {
+    Base::Approximate(std::forward<Callable>(func));
+    mini::limiter::Reconstruct(this->part_ptr(), limiter_ptr());
+  }
 };
 
 }  // namespace spatial

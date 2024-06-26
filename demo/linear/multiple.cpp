@@ -135,20 +135,7 @@ int main(int argc, char* argv[]) {
       std::printf("[Start] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
-    for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-      cell_ptr->Approximate(initial_condition);
-    }
-
-    if (i_core == 0) {
-      std::printf("[Start] Reconstruct() on %d cores at %f sec\n",
-          n_core, MPI_Wtime() - time_begin);
-    }
-    if (kDegrees > 0) {
-      mini::limiter::Reconstruct(spatial.part_ptr(), spatial.limiter_ptr());
-      if (suffix == "tetra") {
-        mini::limiter::Reconstruct(spatial.part_ptr(), spatial.limiter_ptr());
-      }
-    }
+    spatial.Approximate(initial_condition);
 
     part.GatherSolutions();
     if (i_core == 0) {

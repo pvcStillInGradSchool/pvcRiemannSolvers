@@ -111,9 +111,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
       std::printf("[Start] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
-    for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-      cell_ptr->Approximate(ic);
-    }
+    spatial.Approximate(ic);
     if (i_core == 0) {
       std::printf("[Done] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);

@@ -88,12 +88,15 @@ int Main(int argc, char* argv[], IC ic, BC bc, Source source) {
 
   /* Build a `Limiter` object. */
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
+  auto spatial = Spatial(&limiter, &source, &part);
+  auto face_to_riemanns = [&spatial](Face const &face) -> auto const & {
+    return spatial.GetRiemannSolvers(face);
+  };
+  spatial.limiter_ptr()->InstallRiemannSolvers(face_to_riemanns);
 
   /* Initialization. */
   if (argc == 7) {
-    for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-      cell_ptr->Approximate(ic);
-    }
+    spatial.Approximate(ic);
     if (i_core == 0) {
       std::printf("[Done] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
@@ -123,11 +126,6 @@ int Main(int argc, char* argv[], IC ic, BC bc, Source source) {
           i_frame, n_core, MPI_Wtime() - time_begin);
     }
   }
-  auto spatial = Spatial(&limiter, &source, &part);
-  auto face_to_riemanns = [&spatial](Face const &face) -> auto const & {
-    return spatial.GetRiemannSolvers(face);
-  };
-  spatial.limiter_ptr()->InstallRiemannSolvers(face_to_riemanns);
 
   /* Define the temporal solver. */
   auto temporal = Temporal();

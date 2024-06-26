@@ -125,6 +125,15 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
     return *part_ptr();
   }
 
+  template <class Callable>
+  void Approximate(Callable &&func) {
+    for (Cell *cell_ptr : part_ptr()->GetLocalCellPointers()) {
+      cell_ptr->Approximate(std::forward<Callable>(func));
+    }
+    part_ptr()->ShareGhostCellCoeffs();
+    part_ptr()->UpdateGhostCellCoeffs();
+  }
+
   /**
    * @brief Get the FiniteElement::Riemann solvers on a given FiniteElement::Face.
    * 

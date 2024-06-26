@@ -100,6 +100,10 @@ int main(int argc, char* argv[]) {
   using Limiter = mini::limiter::weno::Lazy<Cell>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
 
+  using General = mini::spatial::dg::General<Part, Riemann>;
+  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+  auto spatial = Spatial(&limiter, &part);
+
   /* Set initial conditions. */
   Value value_right{ 10, 5 }, value_left{ -10, -5 };
   double x_0 = 0.0;
@@ -112,20 +116,7 @@ int main(int argc, char* argv[]) {
       std::printf("[Start] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
-    for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-      cell_ptr->Approximate(initial_condition);
-    }
-
-    if (i_core == 0) {
-      std::printf("[Start] Reconstruct() on %d cores at %f sec\n",
-          n_core, MPI_Wtime() - time_begin);
-    }
-    if (kDegrees > 0) {
-      mini::limiter::Reconstruct(&part, &limiter);
-      if (suffix == "tetra") {
-        mini::limiter::Reconstruct(&part, &limiter);
-      }
-    }
+    spatial.Approximate(initial_condition);
 
     part.GatherSolutions();
     if (i_core == 0) {
@@ -144,10 +135,6 @@ int main(int argc, char* argv[]) {
     part.ReadSolutions(soln_name);
     part.ScatterSolutions();
   }
-
-  using General = mini::spatial::dg::General<Part, Riemann>;
-  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
-  auto spatial = Spatial(&limiter, &part);
 
   /* Define the temporal solver. */
   constexpr int kOrders = std::min(3, kDegrees + 1);

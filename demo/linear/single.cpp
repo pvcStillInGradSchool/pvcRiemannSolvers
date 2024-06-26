@@ -118,11 +118,21 @@ int main(int argc, char* argv[]) {
   auto part = Part(case_name, i_core, n_core);
   part.SetFieldNames({"U"});
 
-#ifdef DGFEM
   /* Build a `Limiter` object. */
   using Limiter = mini::limiter::weno::Dummy<Cell>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
+
+#ifdef DGFEM
+  using General = mini::spatial::dg::General<Part, Riemann>;
 #endif
+#ifdef DGSEM
+  using General = mini::spatial::dg::Lobatto<Part, Riemann>;
+#endif
+#ifdef FR
+  using General = mini::spatial::fr::Lobatto<Part, Riemann>;
+#endif
+  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+  auto spatial = Spatial(&limiter, &part);
 
   /* Set initial conditions. */
   Value value_right{ 1 }, value_left{ -1 };
@@ -147,22 +157,7 @@ int main(int argc, char* argv[]) {
       std::printf("[Start] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
-    for (Cell *cell_ptr : part.GetLocalCellPointers()) {
-      cell_ptr->Approximate(initial_condition);
-    }
-
-    if (i_core == 0) {
-      std::printf("[Start] Reconstruct() on %d cores at %f sec\n",
-          n_core, MPI_Wtime() - time_begin);
-    }
-#ifdef DGFEM
-    if (kDegrees > 0) {
-      mini::limiter::Reconstruct(&part, &limiter);
-      if (suffix == "tetra") {
-        mini::limiter::Reconstruct(&part, &limiter);
-      }
-    }
-#endif
+    spatial.Approximate(initial_condition);
 
     part.GatherSolutions();
     if (i_core == 0) {
@@ -181,20 +176,6 @@ int main(int argc, char* argv[]) {
     part.ReadSolutions(soln_name);
     part.ScatterSolutions();
   }
-
-#ifdef DGFEM
-  using General = mini::spatial::dg::General<Part, Riemann>;
-  using Spatial = mini::spatial::WithLimiter<General, Limiter>;
-  auto spatial = Spatial(&limiter, &part);
-#endif
-#ifdef DGSEM
-  using Spatial = mini::spatial::dg::Lobatto<Part, Riemann>;
-  auto spatial = Spatial(&part);
-#endif
-#ifdef FR
-  using Spatial = mini::spatial::fr::Lobatto<Part, Riemann>;
-  auto spatial = Spatial(&part);
-#endif
 
   /* Define the temporal solver. */
   constexpr int kOrders = std::min(3, kDegrees + 1);

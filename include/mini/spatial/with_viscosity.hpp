@@ -50,6 +50,12 @@ class WithViscosity : public ConcreteFiniteElement {
     Riemann::Viscosity::UpdateGhostCellProperties();
     return this->Base::GetResidualColumn();
   }
+
+  template <class Callable>
+  void Approximate(Callable &&func) {
+    Base::Approximate(std::forward<Callable>(func));
+    Riemann::Viscosity::UpdateProperties();
+  }
 };
 
 }  // namespace spatial
