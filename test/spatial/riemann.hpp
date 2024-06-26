@@ -1,9 +1,11 @@
 // Copyright 2024 PEI Weicheng
-#ifndef TEST_MESH_SPATIAL_HPP_
-#define TEST_MESH_SPATIAL_HPP_
+#ifndef TEST_SPATIAL_RIEMANN_HPP_
+#define TEST_SPATIAL_RIEMANN_HPP_
 
 #include <cassert>
 #include <cmath>
+
+#include <algorithm>
 
 #include "mini/riemann/concept.hpp"
 #include "mini/riemann/rotated/multiple.hpp"
@@ -28,8 +30,7 @@ void ResetRiemann() {
   Riemann::Convection::SetJacobians(
     Jacobian{ {3., 0.}, {0., 4.} },
     Jacobian{ {5., 0.}, {0., 6.} },
-    Jacobian{ {7., 0.}, {0., 8.} }
-  );
+    Jacobian{ {7., 0.}, {0., 8.} });
   assert(std::max(std::hypot(3., 5., 7.), std::hypot(4., 6., 8.))
       == Riemann::Convection::GetMaximumSpeed(Value::Random()));
   Riemann::Diffusion::SetProperty(1.0);
@@ -39,4 +40,4 @@ void ResetRiemann() {
 }  // namespace spatial
 }  // namespace test
 
-#endif  // TEST_MESH_SPATIAL_HPP_
+#endif  // TEST_SPATIAL_RIEMANN_HPP_

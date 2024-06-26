@@ -29,7 +29,7 @@ mini::temporal::Euler<Scalar> temporal;
 double t_curr = 1.5, dt = 1e-3;
 
 template <class Part>
-Scalar Norm1(Part const &part){
+Scalar Norm1(Part const &part) {
   auto norm_1 = 0.0;
   for (auto &cell : part.GetLocalCells()) {
     for (int i = 0, n = cell.integrator().CountPoints(); i < n; ++i) {
@@ -296,13 +296,13 @@ int main(int argc, char* argv[]) {
   std::printf("AddFluxOnInviscidWalls.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
-  
+
   time_begin = MPI_Wtime();
   test.AddFluxOnSupersonicInlets(&column);
   std::printf("AddFluxOnSupersonicInlets.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",
       column.squaredNorm(), i_core, n_core, MPI_Wtime() - time_begin);
   MPI_Barrier(MPI_COMM_WORLD);
-  
+
   time_begin = MPI_Wtime();
   test.AddFluxOnSupersonicOutlets(&column);
   std::printf("AddFluxOnSupersonicOutlets.squaredNorm() == %6.2e on proc[%d/%d] cost %f sec\n",

@@ -2,6 +2,8 @@
 #ifndef TEST_MESH_PART_HPP_
 #define TEST_MESH_PART_HPP_
 
+#include <memory>
+
 #include "mini/algebra/eigen.hpp"
 #include "mini/integrator/lobatto.hpp"
 #include "mini/coordinate/quadrangle.hpp"

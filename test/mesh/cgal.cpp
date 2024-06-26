@@ -20,7 +20,7 @@ TEST_F(TestMeshCgal, NeighborSearchOnRandomCoordinates) {
   int n_source = 1<<10;
   std::vector<double> x(n_source), y(n_source), z(n_source);
   for (int i = 0; i < n_source; ++i) {
-    x[i] = rand(); 
+    x[i] = rand();
     y[i] = rand();
     z[i] = rand();
   }
