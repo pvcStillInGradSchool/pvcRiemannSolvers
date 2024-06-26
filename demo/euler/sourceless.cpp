@@ -33,6 +33,9 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
   part_ptr->BuildGeometry();
 }
 
+#include "mini/mesh/vtk.hpp"
+using VtkWriter = mini::mesh::vtk::Writer<Part>;
+
 int Main(int argc, char* argv[], IC ic, BC bc) {
   MPI_Init(NULL, NULL);
   int n_core, i_core;
@@ -96,6 +99,15 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
 #ifdef LIMITER
   /* Build a `Limiter` object. */
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
+  auto spatial = Spatial(&limiter, &part);
+#else
+  auto spatial = Spatial(&part);
+  RiemannWithViscosity::SetTimeScale(1.0e-2);
+  for (int k = 0; k < kComponents; ++k) {
+    VtkWriter::AddExtraField("CellViscosity" + std::to_string(k + 1),
+        [k](Cell const &cell, Global const &global, Value const &value){
+            return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[k]; });
+  }
 #endif
 
   /* Initialization. */
@@ -118,11 +130,11 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     if (suffix == "tetra") {
       mini::limiter::Reconstruct(&part, &limiter);
     }
-#endif
     if (i_core == 0) {
       std::printf("[Done] Reconstruct() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
+#endif
 
     part.GatherSolutions();
     part.WriteSolutions("Frame0");
@@ -141,18 +153,6 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
           i_frame, n_core, MPI_Wtime() - time_begin);
     }
   }
-
-#ifdef LIMITER
-  auto spatial = Spatial(&limiter, &part);
-#else
-  auto spatial = Spatial(&part);
-  RiemannWithViscosity::SetTimeScale(1.0e-2);
-  for (int k = 0; k < kComponents; ++k) {
-    VtkWriter::AddExtraField("CellViscosity" + std::to_string(k + 1),
-        [&](Cell const &cell, Global const &global, Value const &value){
-            return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[k]; });
-  }
-#endif
 
   /* Define the temporal solver. */
   auto temporal = Temporal();
@@ -178,7 +178,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
       auto frame_name = "Frame" + std::to_string(i_frame);
       part.GatherSolutions();
       part.WriteSolutions(frame_name);
-      mini::mesh::vtk::Writer<Part>::WriteSolutions(part, frame_name);
+      VtkWriter::WriteSolutions(part, frame_name);
       if (i_core == 0) {
         std::printf("[Done] WriteSolutions(Frame%d) on %d cores at %f sec\n",
             i_frame, n_core, MPI_Wtime() - wtime_start);

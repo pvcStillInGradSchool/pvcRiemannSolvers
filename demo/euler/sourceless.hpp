@@ -50,9 +50,6 @@ using Coeff = typename Cell::Coeff;
 
 static void InstallIntegratorPrototypes(Part *part_ptr);
 
-#include "mini/mesh/vtk.hpp"
-using VtkWriter = mini::mesh::vtk::Writer<Part>;
-
 /* Chose the spatial scheme and the method for shock capturing. */
 #define LIMITER  // one of (LIMITER, VISCOSITY) must be defined
 
