@@ -48,32 +48,13 @@ using Global = typename Cell::Global;
 using Value = typename Cell::Value;
 using Coeff = typename Cell::Coeff;
 
-#include "mini/coordinate/quadrangle.hpp"
-#include "mini/integrator/quadrangle.hpp"
-#include "mini/coordinate/hexahedron.hpp"
-#include "mini/integrator/hexahedron.hpp"
-
-static void InstallIntegratorPrototypes(Part *part_ptr) {
-  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
-  using QuadrangleIntegrator
-    = mini::integrator::Quadrangle<kDimensions, Gx, Gx>;
-  part_ptr->InstallPrototype(4,
-      std::make_unique<QuadrangleIntegrator>(quadrangle));
-  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
-  using HexahedronIntegrator
-      = mini::integrator::Hexahedron<Gx, Gx, Gx>;
-  part_ptr->InstallPrototype(8,
-      std::make_unique<HexahedronIntegrator>(hexahedron));
-#ifdef DGFEM  // TODO(PVC): install prototypes for Triangle, Tetrahedron, etc.
-#endif
-  part_ptr->BuildGeometry();
-}
+static void InstallIntegratorPrototypes(Part *part_ptr);
 
 #include "mini/mesh/vtk.hpp"
 using VtkWriter = mini::mesh::vtk::Writer<Part>;
 
 /* Chose the spatial scheme and the method for shock capturing. */
-#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
+#define LIMITER  // one of (LIMITER, VISCOSITY) must be defined
 
 #ifdef LIMITER
 

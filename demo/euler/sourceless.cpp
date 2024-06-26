@@ -12,6 +12,27 @@
 
 #include "sourceless.hpp"
 
+#include "mini/coordinate/quadrangle.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/coordinate/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
+
+static void InstallIntegratorPrototypes(Part *part_ptr) {
+  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
+  using QuadrangleIntegrator
+    = mini::integrator::Quadrangle<kDimensions, Gx, Gx>;
+  part_ptr->InstallPrototype(4,
+      std::make_unique<QuadrangleIntegrator>(quadrangle));
+  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
+  using HexahedronIntegrator
+      = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  part_ptr->InstallPrototype(8,
+      std::make_unique<HexahedronIntegrator>(hexahedron));
+#ifdef DGFEM  // TODO(PVC): install prototypes for Triangle, Tetrahedron, etc.
+#endif
+  part_ptr->BuildGeometry();
+}
+
 int Main(int argc, char* argv[], IC ic, BC bc) {
   MPI_Init(NULL, NULL);
   int n_core, i_core;
@@ -68,6 +89,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
         n_core, MPI_Wtime() - time_begin);
   }
   auto part = Part(case_name, i_core, n_core);
+  InstallIntegratorPrototypes(&part);
   part.SetFieldNames({"Density", "MomentumX", "MomentumY", "MomentumZ",
       "EnergyStagnationDensity"});
 
@@ -124,6 +146,12 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   auto spatial = Spatial(&limiter, &part);
 #else
   auto spatial = Spatial(&part);
+  RiemannWithViscosity::SetTimeScale(1.0e-2);
+  for (int k = 0; k < kComponents; ++k) {
+    VtkWriter::AddExtraField("CellViscosity" + std::to_string(k + 1),
+        [&](Cell const &cell, Global const &global, Value const &value){
+            return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[k]; });
+  }
 #endif
 
   /* Define the temporal solver. */
