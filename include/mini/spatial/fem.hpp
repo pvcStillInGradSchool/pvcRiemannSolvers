@@ -114,10 +114,15 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   }
 
   Part *part_ptr() {
+    assert(part_ptr_);
+    return part_ptr_;
+  }
+  Part *part_ptr() const {
+    assert(part_ptr_);
     return part_ptr_;
   }
   Part const &part() const {
-    return *part_ptr_;
+    return *part_ptr();
   }
 
   /**
@@ -193,7 +198,7 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
     t_curr_ = t_curr;
   }
   void SetSolutionColumn(Column const &column) override {
-    for (Cell *cell_ptr: this->part_ptr_->GetLocalCellPointers()) {
+    for (Cell *cell_ptr: part_ptr()->GetLocalCellPointers()) {
       auto i_cell = cell_ptr->id();
       Scalar const *data = AddCellDataOffset(column, i_cell);
       data = cell_ptr->polynomial().GetCoeffFrom(data);
@@ -213,13 +218,13 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
     return column;
   }
   Column GetResidualColumn() const override {
-    this->part_ptr_->ShareGhostCellCoeffs();
+    part_ptr()->ShareGhostCellCoeffs();
     auto residual = Column(cell_data_size_);
     residual.setZero();
     this->AddFluxDivergenceOnLocalCells(&residual);
     this->AddFluxOnLocalFaces(&residual);
     this->AddFluxOnBoundaries(&residual);
-    this->part_ptr_->UpdateGhostCellCoeffs();
+    part_ptr()->UpdateGhostCellCoeffs();
     this->AddFluxOnGhostFaces(&residual);
     return residual;
   }

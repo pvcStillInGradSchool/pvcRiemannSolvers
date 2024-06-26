@@ -46,13 +46,14 @@ class WithLimiter : public ConcreteFiniteElement {
   ~WithLimiter() noexcept = default;
 
   Limiter *limiter_ptr() const {
+    assert(limiter_ptr_);
     return limiter_ptr_;
   }
 
  public:  // implement pure virtual methods declared in Temporal
   void SetSolutionColumn(Column const &column) override {
     this->Base::SetSolutionColumn(column);
-    mini::limiter::Reconstruct(this->part_ptr_, limiter_ptr_);
+    mini::limiter::Reconstruct(this->part_ptr(), limiter_ptr());
   }
 };
 

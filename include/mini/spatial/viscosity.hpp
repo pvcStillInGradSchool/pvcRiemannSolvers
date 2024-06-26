@@ -118,7 +118,7 @@ class EnergyBasedViscosity : public R {
     auto operation = [](Cell const *cell_ptr, Scalar *buf) -> Scalar * {
       std::vector<Property> const &properties = properties_.at(cell_ptr->id());
       assert(Cell::N == properties.size());
-      assert(Cell::K * sizeof(Scalar) == sizeof(Property));
+      static_assert(Cell::K * sizeof(Scalar) == sizeof(Property));
       // Since properties[0] == ... == properties[N-1], only one has to be sent.
       std::memcpy(buf, properties.data(), sizeof(Property));
       return buf + Cell::K;
@@ -131,7 +131,7 @@ class EnergyBasedViscosity : public R {
     auto operation = [](Cell *cell_ptr, Scalar const *buf) -> Scalar const * {
       std::vector<Property> &properties = properties_.at(cell_ptr->id());
       assert(Cell::N == properties.size());
-      assert(Cell::K * sizeof(Scalar) == sizeof(Property));
+      static_assert(Cell::K * sizeof(Scalar) == sizeof(Property));
       std::ranges::fill(properties, *reinterpret_cast<Property const *>(buf));
       return buf + Cell::K;
     };
@@ -157,10 +157,11 @@ class EnergyBasedViscosity : public R {
   }
 
   static Part *part_ptr() {
+    assert(spatial_ptr_);
     return spatial_ptr_->part_ptr();
   }
   static Part const &part() {
-    return spatial_ptr_->part();
+    return *part_ptr();
   }
 
   static Scalar GetTimeScale() {
