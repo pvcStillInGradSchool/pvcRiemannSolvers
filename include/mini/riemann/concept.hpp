@@ -32,7 +32,9 @@ concept HasConvectiveMethods = requires(R riemann, C const &value) {
   requires HasConvectiveData<R>;
   requires std::same_as<C, typename R::Conservative>;
   { R::GetFluxMatrix(value) } -> std::same_as<typename R::FluxMatrix>;
-  { riemann.GetFluxUpwind(value, value) } -> std::same_as<typename R::Flux>;
+  { riemann.GetFluxUpwind(value, value) }
+      // e.g. riemann::euler::Flux is derived from algebra::eigen::Vector
+      -> std::derived_from<typename R::Flux>;
 };
 
 template <typename R>
@@ -105,14 +107,14 @@ class ConvectionDiffusion : public C, public D {
   using Vector = typename C::Vector;
   static_assert(std::is_same_v<Vector, typename D::Vector>);
 
-  using Conservative = typename C::Conservative;
-  static_assert(std::is_same_v<Conservative, typename D::Conservative>);
+  using Conservative = typename D::Conservative;
+  static_assert(std::derived_from<typename C::Conservative, Conservative>);
 
   using FluxMatrix = typename C::FluxMatrix;
   static_assert(std::is_same_v<FluxMatrix, typename D::FluxMatrix>);
 
-  using Flux = typename C::Flux;
-  static_assert(std::is_same_v<Flux, typename D::Flux>);
+  using Flux = typename D::Flux;
+  static_assert(std::derived_from<typename C::Flux, Flux>);
 
   using Gradient = typename D::Gradient;
 };

@@ -10,10 +10,6 @@
 #include "mini/mesh/shuffler.hpp"
 #include "mini/mesh/vtk.hpp"
 #include "mini/temporal/rk.hpp"
-#include "mini/coordinate/quadrangle.hpp"
-#include "mini/integrator/quadrangle.hpp"
-#include "mini/coordinate/hexahedron.hpp"
-#include "mini/integrator/hexahedron.hpp"
 
 using Scalar = double;
 /* Define the Burgers equation. */
@@ -50,6 +46,11 @@ using Global = typename Cell::Global;
 using Value = typename Cell::Value;
 using Coeff = typename Cell::Coeff;
 
+#include "mini/coordinate/quadrangle.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/coordinate/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
+
 static void InstallIntegratorPrototypes(Part *part_ptr) {
   auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
   using QuadrangleIntegrator
@@ -61,6 +62,8 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
       = mini::integrator::Hexahedron<Gx, Gx, Gx>;
   part_ptr->InstallPrototype(8,
       std::make_unique<HexahedronIntegrator>(hexahedron));
+#ifdef DGFEM  // TODO(PVC): install prototypes for Triangle, Tetrahedron, etc.
+#endif
   part_ptr->BuildGeometry();
 }
 
@@ -84,11 +87,12 @@ using General = mini::spatial::fr::Lobatto<Part, Riemann>;
 #endif
 
 #include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
 #include "mini/spatial/with_limiter.hpp"
 using Limiter = mini::limiter::weno::Lazy<Cell>;
 using Spatial = mini::spatial::WithLimiter<General, Limiter>;
 
-#endif
+#endif  // LIMITER
 
 #ifdef VISCOSITY
 
@@ -111,7 +115,7 @@ using General = mini::spatial::fr::Lobatto<Part, RiemannWithViscosity>;
 
 using Spatial = mini::spatial::WithViscosity<General>;
 
-#endif
+#endif  // VISCOSITY
 
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
@@ -201,7 +205,6 @@ int main(int argc, char* argv[]) {
     }
     part.ShareGhostCellCoeffs();
     part.UpdateGhostCellCoeffs();
-    part.GatherSolutions();
 #ifdef VISCOSITY
     RiemannWithViscosity::Viscosity::UpdateProperties();
 #endif
@@ -209,6 +212,14 @@ int main(int argc, char* argv[]) {
       std::printf("[Start] WriteSolutions(Frame0) on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
+
+#ifdef LIMITER
+    mini::limiter::Reconstruct(&part, &limiter);
+    if (suffix == "tetra") {
+      mini::limiter::Reconstruct(&part, &limiter);
+    }
+#endif
+    part.GatherSolutions();
     part.WriteSolutions("Frame0");
     VtkWriter::WriteSolutions(part, "Frame0");
   } else {

@@ -9,7 +9,6 @@
 #include "pcgnslib.h"
 
 #include "mini/mesh/shuffler.hpp"
-#include "mini/mesh/vtk.hpp"
 
 #include "sourceless.hpp"
 
@@ -72,7 +71,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   part.SetFieldNames({"Density", "MomentumX", "MomentumY", "MomentumZ",
       "EnergyStagnationDensity"});
 
-#ifdef DGFEM
+#ifdef LIMITER
   /* Build a `Limiter` object. */
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
 #endif
@@ -82,12 +81,17 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     for (Cell *cell_ptr : part.GetLocalCellPointers()) {
       cell_ptr->Approximate(ic);
     }
+    part.ShareGhostCellCoeffs();
+    part.UpdateGhostCellCoeffs();
+#ifdef VISCOSITY
+    RiemannWithViscosity::Viscosity::UpdateProperties();
+#endif
     if (i_core == 0) {
       std::printf("[Done] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
 
-#ifdef DGFEM
+#ifdef LIMITER
     mini::limiter::Reconstruct(&part, &limiter);
     if (suffix == "tetra") {
       mini::limiter::Reconstruct(&part, &limiter);
@@ -100,7 +104,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
 
     part.GatherSolutions();
     part.WriteSolutions("Frame0");
-    mini::mesh::vtk::Writer<Part>::WriteSolutions(part, "Frame0");
+    VtkWriter::WriteSolutions(part, "Frame0");
     if (i_core == 0) {
       std::printf("[Done] WriteSolutions(Frame0) on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
@@ -116,7 +120,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     }
   }
 
-#ifdef DGFEM
+#ifdef LIMITER
   auto spatial = Spatial(&limiter, &part);
 #else
   auto spatial = Spatial(&part);

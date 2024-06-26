@@ -314,6 +314,13 @@ class Euler {
   const Matrix& R() const {
     return eigen_matrices_.R;
   }
+
+  static Scalar GetMaximumSpeed(Conservative const &conservative) {
+    auto primitive = Gas::ConservativeToPrimitive(conservative);
+    auto c = Gas::GetSpeedOfSound(primitive);
+    auto u = primitive.velocity().norm();
+    return std::max(c + u, c - u);
+  }
 };
 
 }  // namespace rotated

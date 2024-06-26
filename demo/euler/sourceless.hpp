@@ -5,47 +5,42 @@
 #include <algorithm>
 #include <string>
 
-#include "mini/riemann/euler/types.hpp"
-#include "mini/riemann/euler/eigen.hpp"
-#include "mini/riemann/euler/exact.hpp"
-#include "mini/riemann/rotated/euler.hpp"
-#include "mini/polynomial/projection.hpp"
-#include "mini/polynomial/hexahedron.hpp"
-#include "mini/mesh/part.hpp"
-#include "mini/limiter/weno.hpp"
-#include "mini/limiter/reconstruct.hpp"
-#include "mini/temporal/rk.hpp"
-#include "mini/spatial/dg/general.hpp"
-#include "mini/spatial/dg/lobatto.hpp"
-#include "mini/spatial/fr/lobatto.hpp"
-#include "mini/spatial/with_limiter.hpp"
-
-#define DGFEM
+#define FR // exactly one of (DGFEM, DGSEM, FR) must be defined
 
 using Scalar = double;
 
 /* Define the Euler system. */
 constexpr int kDimensions = 3;
+#include "mini/riemann/euler/types.hpp"
+#include "mini/riemann/euler/eigen.hpp"
+#include "mini/riemann/euler/exact.hpp"
+#include "mini/riemann/rotated/euler.hpp"
 using Primitive = mini::riemann::euler::Primitives<Scalar, kDimensions>;
 using Conservative = mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 using Gas = mini::riemann::euler::IdealGas<Scalar, 1.4>;
 using Unrotated = mini::riemann::euler::Exact<Gas, kDimensions>;
 using Riemann = mini::riemann::rotated::Euler<Unrotated>;
 
-/* Define spatial discretization. */
+/* Define polynomial approximation. */
+constexpr int kComponents = 5;
 constexpr int kDegrees = 2;
 #ifdef DGFEM
-  using Polynomial = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, 5>;
-#else
-  using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
-#endif
-#ifdef DGSEM
-  using Polynomial = mini::polynomial::Hexahedron<Gx, Gx, Gx, 5, false>;
-#endif
-#ifdef FR
-  using Polynomial = mini::polynomial::Hexahedron<Gx, Gx, Gx, 5, true>;
+#include "mini/integrator/legendre.hpp"
+using Gx = mini::integrator::Legendre<Scalar, kDegrees + 1>;
+#include "mini/polynomial/projection.hpp"
+using Polynomial = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, kComponents>;
+
+#else  // common for DGSEM and FR
+#include "mini/integrator/lobatto.hpp"
+using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
+
+#include "mini/polynomial/hexahedron.hpp"
+#include "mini/polynomial/extrapolation.hpp"
+using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+using Polynomial = mini::polynomial::Extrapolation<Interpolation>;
 #endif
 
+#include "mini/mesh/part.hpp"
 using Part = mini::mesh::part::Part<cgsize_t, Polynomial>;
 using Cell = typename Part::Cell;
 using Face = typename Part::Face;
@@ -53,22 +48,81 @@ using Global = typename Cell::Global;
 using Value = typename Cell::Value;
 using Coeff = typename Cell::Coeff;
 
-#ifdef DGFEM
-using Limiter = mini::limiter::weno::Dummy<Cell>;
+#include "mini/coordinate/quadrangle.hpp"
+#include "mini/integrator/quadrangle.hpp"
+#include "mini/coordinate/hexahedron.hpp"
+#include "mini/integrator/hexahedron.hpp"
+
+static void InstallIntegratorPrototypes(Part *part_ptr) {
+  auto quadrangle = mini::coordinate::Quadrangle4<Scalar, kDimensions>();
+  using QuadrangleIntegrator
+    = mini::integrator::Quadrangle<kDimensions, Gx, Gx>;
+  part_ptr->InstallPrototype(4,
+      std::make_unique<QuadrangleIntegrator>(quadrangle));
+  auto hexahedron = mini::coordinate::Hexahedron8<Scalar>();
+  using HexahedronIntegrator
+      = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+  part_ptr->InstallPrototype(8,
+      std::make_unique<HexahedronIntegrator>(hexahedron));
+#ifdef DGFEM  // TODO(PVC): install prototypes for Triangle, Tetrahedron, etc.
 #endif
+  part_ptr->BuildGeometry();
+}
+
+#include "mini/mesh/vtk.hpp"
+using VtkWriter = mini::mesh::vtk::Writer<Part>;
+
+/* Chose the spatial scheme and the method for shock capturing. */
+#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
+
+#ifdef LIMITER
 
 #ifdef DGFEM
+#include "mini/spatial/dg/general.hpp"
 using General = mini::spatial::dg::General<Part, Riemann>;
+
+#elif defined(DGSEM)
+#include "mini/spatial/dg/lobatto.hpp"
+using General = mini::spatial::dg::Lobatto<Part, Riemann>;
+
+#elif defined(FR)
+#include "mini/spatial/fr/lobatto.hpp"
+using General = mini::spatial::fr::Lobatto<Part, Riemann>;
+#endif
+
+#include "mini/limiter/weno.hpp"
+#include "mini/limiter/reconstruct.hpp"
+#include "mini/spatial/with_limiter.hpp"
+using Limiter = mini::limiter::weno::Lazy<Cell>;
 using Spatial = mini::spatial::WithLimiter<General, Limiter>;
+
+#endif  // LIMITER
+
+#ifdef VISCOSITY
+
+#include "mini/riemann/concept.hpp"
+#include "mini/riemann/diffusive/linear.hpp"
+#include "mini/riemann/diffusive/direct_dg.hpp"
+#include "mini/spatial/viscosity.hpp"
+#include "mini/spatial/with_viscosity.hpp"
+
+using Diffusion = mini::riemann::diffusive::DirectDG<
+    mini::riemann::diffusive::Isotropic<Scalar, kComponents>>;
+using RiemannWithViscosity = mini::spatial::EnergyBasedViscosity<Part,
+    mini::riemann::ConvectionDiffusion<Riemann, Diffusion>>;
+static_assert(mini::riemann::ConvectiveDiffusive<RiemannWithViscosity>);
+
+#if defined(FR)
+#include "mini/spatial/fr/lobatto.hpp"
+using General = mini::spatial::fr::Lobatto<Part, RiemannWithViscosity>;
 #endif
-#ifdef DGSEM
-using Spatial = mini::spatial::dg::Lobatto<Part, Riemann>;
-#endif
-#ifdef FR
-using Spatial = mini::spatial::fr::Lobatto<Part, Riemann>;
-#endif
+
+using Spatial = mini::spatial::WithViscosity<General>;
+
+#endif  // VISCOSITY
 
 /* Choose the time-stepping scheme. */
+#include "mini/temporal/rk.hpp"
 constexpr int kOrders = std::min(3, kDegrees + 1);
 using Temporal = mini::temporal::RungeKutta<kOrders, Scalar>;
 
