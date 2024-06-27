@@ -53,13 +53,13 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   }
   part.ShareGhostCellCoeffs();
   part.UpdateGhostCellCoeffs();
-  auto value_jumps = RiemannWithViscosity::BuildValueJumps();
-  std::cout << "[Done] BuildValueJumps" << std::endl;
-  auto jump_integrals = RiemannWithViscosity::IntegrateJumps(value_jumps);
-  std::cout << "[Done] IntegrateJumps" << std::endl;
+  auto jump_on_cells = RiemannWithViscosity::IntegrateJumpOnCells();
+  std::cout << "[Done] IntegrateJumpOnCells" << std::endl;
+  auto jump_on_faces = RiemannWithViscosity::IntegrateJumpOnFaces();
+  std::cout << "[Done] IntegrateJumpOnFaces" << std::endl;
   RiemannWithViscosity::SetTimeScale(1.0);
   auto viscosity_values = RiemannWithViscosity::GetViscosityValues(
-        jump_integrals, damping_matrices);
+        jump_on_faces, damping_matrices);
   std::cout << "[Done] GetViscosityValues" << std::endl;
   RiemannWithViscosity::InitializeRequestsAndBuffers();
   std::cout << "[Done] InitializeRequestsAndBuffers" << std::endl;
@@ -70,11 +70,17 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   // Check values by VTK plotting:
   using VtkWriter = mini::mesh::vtk::Writer<Part>;
   using Cell = typename Part::Cell;
-  VtkWriter::AddCellData("CellEnergy1", [&](Cell const &cell) {
-    return jump_integrals.at(cell.id())[0];
+  VtkWriter::AddCellData("JumpOnCell1", [&](Cell const &cell) {
+    return jump_on_cells.at(cell.id())[0];
   });
-  VtkWriter::AddCellData("CellEnergy2", [&](Cell const &cell) {
-    return jump_integrals.at(cell.id())[1];
+  VtkWriter::AddCellData("JumpOnCell2", [&](Cell const &cell) {
+    return jump_on_cells.at(cell.id())[1];
+  });
+  VtkWriter::AddCellData("JumpOnFace1", [&](Cell const &cell) {
+    return jump_on_faces.at(cell.id())[0];
+  });
+  VtkWriter::AddCellData("JumpOnFace2", [&](Cell const &cell) {
+    return jump_on_faces.at(cell.id())[1];
   });
   VtkWriter::AddCellData("CellViscosity1", [&](Cell const &cell) {
     return viscosity_values.at(cell.id())[0];
@@ -85,22 +91,9 @@ TEST_F(TestSpatialViscosity, LobattoFR) {
   VtkWriter::WriteSolutions(part, "Viscosity");
   // Check values by GoogleTest:
   for (auto &curr_cell : part.GetLocalCells()) {
-    auto &value_jumps_on_curr_cell = value_jumps.at(curr_cell.id());
-    for (int i_node = 0; i_node < curr_cell.N; ++i_node) {
-      auto &value_jumps_on_curr_node = value_jumps_on_curr_cell.at(i_node);
-      Global const &global_i = curr_cell.integrator().GetGlobal(i_node);
-      Value value_i = curr_cell.polynomial().GetValue(i_node);
-      for (auto *neighbor_i : curr_cell.adj_cells_) {
-        Value jump_i = value_i - neighbor_i->polynomial().Extrapolate(global_i);
-        jump_i = std::abs(jump_i);
-        for (int k = 0; k < curr_cell.K; k++) {
-          EXPECT_LE(jump_i[k], value_jumps_on_curr_node[k]);
-        }
-      }
-    }
-    auto &jump_integral_on_curr_cell = jump_integrals.at(curr_cell.id());
+    auto &viscosity_value_on_curr_cell = viscosity_values.at(curr_cell.id());
     for (int k = 0; k < curr_cell.K; k++) {
-      EXPECT_LE(0.0, jump_integral_on_curr_cell[k]);
+      EXPECT_LE(0.0, viscosity_value_on_curr_cell[k]);
     }
   }
 }

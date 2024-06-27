@@ -571,6 +571,7 @@ class Linear(Energy):
     def _span(diag: np.ndarray, left: np.ndarray, right: np.ndarray) -> np.ndarray:
         """sum_i diag[i] * right.col(i) @ left.row(i)
         """
+        return diag
         n = len(diag)
         result = np.zeros((n, n))
         for i in range(n):
@@ -597,7 +598,6 @@ class Linear(Energy):
         if isinstance(left_nu, np.ndarray):
             left_L, left_R = self._face_to_eigmats[left_face]
             left_nu = Linear._span(left_nu, left_L, left_R)
-            print(left_nu)
             right_L, right_R = self._face_to_eigmats[right_face]
             right_nu = Linear._span(right_nu, right_L, right_R)
         def coeff(x_global: float):

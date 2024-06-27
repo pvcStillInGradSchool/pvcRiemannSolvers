@@ -326,7 +326,7 @@ class EnergyBasedViscosity : public R {
     return jump_on_curr_node /= weight_sum;
   }
 
- public:
+ private:
   static std::vector<std::array<Value, Cell::N>> BuildValueJumps() {
     std::vector<std::array<Value, Cell::N>> value_jumps;
     value_jumps.reserve(part().CountLocalCells());
@@ -340,10 +340,11 @@ class EnergyBasedViscosity : public R {
     return value_jumps;
   }
 
-  static std::vector<Value>
-  IntegrateJumps(std::vector<std::array<Value, Cell::N>> const jumps) {
+ public:
+  static std::vector<Value> IntegrateJumpOnCells() {
     std::vector<Value> jump_integrals;
     jump_integrals.reserve(part().CountLocalCells());
+    auto jumps = BuildValueJumps();
     for (Cell *curr_cell : part_ptr()->GetLocalCellPointers()) {
       auto &integral_on_curr_cell = jump_integrals.emplace_back(Value::Zero());
       auto &jump_on_curr_cell = jumps.at(curr_cell->id());
@@ -358,7 +359,7 @@ class EnergyBasedViscosity : public R {
     return jump_integrals;
   }
 
-  static std::vector<Value> IntegrateJumpsOnFaces() {
+  static std::vector<Value> IntegrateJumpOnFaces() {
     std::vector<Value> jump_integrals;
     jump_integrals.resize(part().CountLocalCells(), Value::Zero());
     for (Face const &face : part_ptr()->GetLocalFaces()) {
@@ -443,8 +444,8 @@ class EnergyBasedViscosity : public R {
   }
 
   static void UpdateProperties() {
-    // auto jump_integrals = IntegrateJumps(BuildValueJumps());
-    auto jump_integrals = IntegrateJumpsOnFaces();
+    // auto jump_integrals = IntegrateJumpOnCells();
+    auto jump_integrals = IntegrateJumpOnFaces();
     auto viscosity_values = GetViscosityValues(
         jump_integrals, damping_matrices_);
     assert(properties_.size()
