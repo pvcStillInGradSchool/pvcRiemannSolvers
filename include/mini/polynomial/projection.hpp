@@ -32,12 +32,13 @@ void Project(Projection *proj, Callable &&func) {
   using Coeff = typename Projection::Coeff;
   using Return = std::invoke_result_t<Callable, Global>;
   static_assert(std::is_same_v<Return, Value> || std::is_scalar_v<Return>);
-  proj->coeff() = integrator::Integrate([&](Global const &xyz) {
+  Coeff coeff = integrator::Integrate([&](Global const &xyz) {
     auto f_col = func(xyz);
     Mat1xN b_row = proj->GlobalToBasisValues(xyz);
     Coeff prod = f_col * b_row;
     return prod;
   }, proj->integrator());
+  proj->SetCoeff(coeff);
 }
 
 template <typename Projection>
@@ -141,14 +142,35 @@ class Projection {
   Coeff const &coeff() const {
     return coeff_;
   }
-  Coeff &coeff() {
-    return coeff_;
-  }
   void SetCoeff(Coeff const &coeff) {
     coeff_ = coeff;
   }
   void SetZero() {
     coeff_.setZero();
+  }
+
+  /**
+   * @brief Set the projection coefficient of a given mode.
+   * 
+   * @param i the index of the mode
+   * @param value the value \f$ \langle u | \phi_i \rangle \f$
+   */
+  void SetValue(int i, Value const &value) {
+    coeff_.col(i) = value;
+  }
+  Scalar GetScalar(int i_field) const {
+    return coeff_.reshaped()[i_field];
+  }
+  void SetScalar(int i_field, Scalar scalar) {
+    coeff_.reshaped()[i_field] = scalar;
+  }
+  Projection &operator+=(Coeff const &coeff) {
+    coeff_ += coeff;
+    return *this;
+  }
+  Projection &operator*=(Scalar ratio) {
+    coeff_ *= ratio;
+    return *this;
   }
   Value average() const {
     return GetAverage(*this);
@@ -272,8 +294,8 @@ class ProjectionWrapper {
   Coeff const &coeff() const {
     return coeff_;
   }
-  Coeff &coeff() {
-    return coeff_;
+  void SetCoeff(Coeff const &coeff) {
+    coeff_ = coeff;
   }
   void SetZero() {
     coeff_.setZero();

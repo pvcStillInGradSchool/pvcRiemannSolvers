@@ -584,8 +584,11 @@ class Hexahedron {
   Coeff const &coeff() const {
     return coeff_;
   }
-  Coeff &coeff() {
-    return coeff_;
+  Scalar GetScalar(int i_field) const {
+    return coeff_.reshaped()[i_field];
+  }
+  void SetScalar(int i_field, Scalar scalar) {
+    coeff_.reshaped()[i_field] = scalar;
   }
   Basis const &basis() const {
     return basis_;

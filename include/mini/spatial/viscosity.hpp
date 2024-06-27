@@ -263,12 +263,12 @@ class EnergyBasedViscosity : public R {
         UpdateCellResidual(cell_ptr, residual.data());
         return residual;
       };
-      auto &solution = curr_cell->polynomial().coeff();
-      solution.setZero();
+      auto &curr_polynomial = curr_cell->polynomial();
+      curr_polynomial.SetZero();
       for (int c = 0; c < Cell::N; ++c) {
-        solution.col(c).setOnes();
+        curr_polynomial.SetValue(c, Value::Ones());
         if (c > 0) {
-          solution.col(c - 1).setZero();
+          curr_polynomial.SetValue(c - 1, Value::Zero());
         }
         Coeff residual = GetCellResidual(curr_cell);
         // Write the residual column into the matrix:
@@ -278,7 +278,7 @@ class EnergyBasedViscosity : public R {
         }
       }
 #if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
-      solution = Coeff::Random();
+      Coeff solution = Coeff::Random();
       Coeff residual = GetCellResidual(curr_cell);
       for (int k = 0; k < Cell::K; ++k) {
         auto const &residual_col = residual.row(k).transpose();

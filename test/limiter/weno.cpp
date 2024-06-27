@@ -180,10 +180,10 @@ TEST_F(TestWenoLimiters, ReconstructScalar) {
       weights[j_cell] /= sum;
     }
     auto &projection_i = cells[i_cell].polynomial();
-    projection_i.coeff() *= weights.back();
+    projection_i *= weights.back();
     for (int j_cell = 0; j_cell < adj_cnt; ++j_cell) {
-      projection_i.coeff() +=
-          (adj_projections[i_cell][j_cell].coeff() *= weights[j_cell]);
+      projection_i +=
+          (adj_projections[i_cell][j_cell] *= weights[j_cell]).coeff();
     }
     std::printf("%8.2f (%2d) <- {%8.2f",
         mini::limiter::weno::GetSmoothness(projection_i)[0], i_cell,

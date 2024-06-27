@@ -364,19 +364,17 @@ class Section {
   }
   void GatherFields() {
     for (int i_cell = head(); i_cell < tail(); ++i_cell) {
-      const auto &cell = cells_.at(i_cell);
-      const auto &coeff = cell.polynomial().coeff();
+      const auto &polynomial = cells_.at(i_cell).polynomial();
       for (int i_field = 1; i_field <= kFields; ++i_field) {
-        fields_.at(i_field).at(i_cell) = coeff.reshaped()[i_field-1];
+        fields_.at(i_field).at(i_cell) = polynomial.GetScalar(i_field - 1);
       }
     }
   }
   void ScatterFields() {
     for (int i_cell = head(); i_cell < tail(); ++i_cell) {
-      auto &cell = cells_.at(i_cell);
-      auto &coeff = cell.polynomial().coeff();
+      auto &polynomial = cells_.at(i_cell).polynomial();
       for (int i_field = 1; i_field <= kFields; ++i_field) {
-        coeff.reshaped()[i_field-1] = fields_.at(i_field).at(i_cell);
+        polynomial.SetScalar(i_field - 1, fields_.at(i_field).at(i_cell));
       }
     }
   }

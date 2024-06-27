@@ -37,6 +37,7 @@ class Extrapolation : public Interpolation {
   using MatNxM = algebra::Matrix<Scalar, N, M>;
   using MatNx1 = algebra::Matrix<Scalar, N, 1>;
   using Mat1xM = algebra::Matrix<Scalar, 1, M>;
+  static constexpr int kFields = K * N;
 
   Projection projection_;
 
@@ -59,12 +60,12 @@ class Extrapolation : public Interpolation {
    * TODO(PVC): check consistency before invoking the expensive matrix production.
    */
   void UpdateModalCoeff() {
-    projection_.coeff() = this->GetValues() * modal_to_nodal_;
+    projection_.SetCoeff(this->GetValues() * modal_to_nodal_);
   }
   void UpdateNodalCoeff() {
     for (int i = 0; i < N; ++i) {
       auto const &global_i = this->integrator().GetGlobal(i);
-      this->SetValue(i, projection_.GlobalToValue(global_i));
+      this->Interpolation::SetValue(i, projection_.GlobalToValue(global_i));
     }
   }
 
@@ -117,6 +118,28 @@ class Extrapolation : public Interpolation {
   void SetCoeff(typename Projection::Coeff const &coeff) {
     projection_.SetCoeff(coeff);
     UpdateNodalCoeff();
+  }
+
+  /**
+   * @brief Almost the same as `Interpolation::SetValue`, except calling `UpdateModalCoeff` when `i_node + 1 == N`.
+   * 
+   */
+  void SetValue(int i_node, Value const &value) {
+    this->Interpolation::SetValue(i_node, value);
+    if (i_node + 1 == N) {
+      UpdateModalCoeff();
+    }
+  }
+
+  /**
+   * @brief Almost the same as `Interpolation::SetScalar`, except calling `UpdateModalCoeff` when `i_field + 1 == K * N`.
+   * 
+   */
+  void SetScalar(int i_field, Scalar scalar) {
+    this->Interpolation::SetScalar(i_field, scalar);
+    if (i_field + 1 == kFields) {
+      UpdateModalCoeff();
+    }
   }
 
   void SetZero() {
