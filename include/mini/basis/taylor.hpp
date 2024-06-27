@@ -18,15 +18,15 @@ namespace basis {
 /**
  * @brief The basis, formed by monomials, of the space spanned by polynomials.
  * 
- * @tparam Scalar the type of coordinates
+ * @tparam S the type of coordinates
  * @tparam kDimensions the dimension of underlying space
  * @tparam kDegrees the maximum degree of its members
  */
-template <std::floating_point Scalar, int kDimensions, int kDegrees>
+template <std::floating_point S, int kDimensions, int kDegrees>
 class Taylor;
 
-template <std::floating_point Scalar, int kDegrees>
-class Taylor<Scalar, 1, kDegrees> {
+template <std::floating_point S, int kDegrees>
+class Taylor<S, 1, kDegrees> {
  public:
   // the maximum degree of members in this basis
   static constexpr int P = kDegrees;
@@ -34,6 +34,7 @@ class Taylor<Scalar, 1, kDegrees> {
   // the number of terms in this basis
   static constexpr int N = P + 1;
 
+  using Scalar = S;
   using Vector = algebra::Vector<Scalar, N>;
 
   /**
@@ -100,12 +101,13 @@ constexpr int GetN(int P) {
 
 }
 
-template <std::floating_point Scalar, int kDimensions, int kDegrees>
+template <std::floating_point S, int kDimensions, int kDegrees>
 class Taylor {
  public:
   static constexpr int P = kDegrees;
   static constexpr int D = kDimensions;
   static constexpr int N = GetN<D>(P);  // the number of components
+  using Scalar = S;
   using MatNx1 = algebra::Matrix<Scalar, N, 1>;
   using Coord = algebra::Matrix<Scalar, D, 1>;
 

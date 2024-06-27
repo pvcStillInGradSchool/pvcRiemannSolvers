@@ -28,14 +28,15 @@ namespace lagrange {
  * 
  * The Lagrange polynomal at the \f$k\f$-th node \f$ L_k(\xi) \f$ is defined as \f$ \prod_{l=0,l\ne k}^{N-1}\frac{\xi-\xi_{l}}{\xi_{k}-\xi_{l}} \f$.
  * 
- * @tparam Scalar the type of nodes
+ * @tparam S the type of nodes
  * @tparam kDegree the degree of each Lagrange polynomial
  */
-template <std::floating_point Scalar, int kDegree>
+template <std::floating_point S, int kDegree>
 class Line {
  public:
   static constexpr int P = kDegree;  // the degree of each member in this basis
   static constexpr int N = P + 1;  // the number of terms in this basis
+  using Scalar = S;
   using Vector = algebra::Matrix<Scalar, 1, N>;
   using Matrix = algebra::Matrix<Scalar, N, N>;
   using Taylor = basis::Taylor<Scalar, 1, kDegree>;
@@ -148,14 +149,16 @@ class Line {
  * 
  * The Lagrange polynomal at the \f$(i,j,k)\f$-th node \f$ L_{i,j,k}(\xi, \eta, \zeta) \f$ is defined as \f$ L_i(\xi)\,L_j(\eta)\,L_k(\zeta) \f$.
  * 
- * @tparam Scalar the type of coordinates
+ * @tparam S the type of coordinates
  * @tparam kDegreeX the degree of each \f$ L_i(\xi) \f$
  * @tparam kDegreeY the degree of each \f$ L_j(\eta) \f$
  * @tparam kDegreeZ the degree of each \f$ L_k(\zeta) \f$
  */
-template <std::floating_point Scalar, int kDegreeX, int kDegreeY, int kDegreeZ>
+template <std::floating_point S, int kDegreeX, int kDegreeY, int kDegreeZ>
 class Hexahedron {
  public:
+  using Scalar = S;
+
   // the type of the Lagrange basis in the 1st dimension
   using LineX = Line<Scalar, kDegreeX>;
 

@@ -14,6 +14,7 @@
 #include "mini/algebra/eigen.hpp"
 #include "mini/integrator/function.hpp"
 #include "mini/basis/linear.hpp"
+#include "mini/polynomial/expansion.hpp"
 
 namespace mini {
 namespace polynomial {
@@ -65,7 +66,8 @@ class ProjectionWrapper;
  */
 template <std::floating_point S, int kDimensions, int kDegrees,
     int kComponents>
-class Projection {
+class Projection : public Expansion<kComponents,
+    basis::OrthoNormal<S, kDimensions, kDegrees>> {
  public:
   static constexpr bool kLocal = false;
   using Scalar = S;
@@ -87,7 +89,6 @@ class Projection {
   using Gradient = algebra::Matrix<Scalar, 3, K>;
 
  private:
-  Coeff coeff_;
   Basis basis_;
 
   static constexpr int kFields = K * N;
@@ -111,7 +112,7 @@ class Projection {
     return basis_(global);
   }
   Value GlobalToValue(Global const &global) const {
-    return coeff_ * basis_(global);
+    return this->coeff_ * basis_(global);
   }
 
   /**
@@ -130,7 +131,7 @@ class Projection {
     *value = GlobalToValue(*global);
   }
   Coeff GetCoeffOnTaylorBasis() const {
-    return coeff_ * basis_.coeff();
+    return this->coeff_ * basis_.coeff();
   }
   Basis const &basis() const {
     return basis_;
@@ -141,22 +142,6 @@ class Projection {
   Global const &center() const {
     return basis().center();
   }
-  Coeff const &coeff() const {
-    return coeff_;
-  }
-  void SetCoeff(Coeff const &coeff) {
-    coeff_ = coeff;
-  }
-  template <typename FieldIndexToScalar>
-  void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
-    for (int i_field = 0; i_field < kFields; ++i_field) {
-      coeff_.reshaped()[i_field] = field_index_to_scalar(i_field);
-    }
-  }
-
-  void SetZero() {
-    coeff_.setZero();
-  }
 
   /**
    * @brief Set the projection coefficient of a given mode.
@@ -165,19 +150,9 @@ class Projection {
    * @param value the value \f$ \langle u | \phi_i \rangle \f$
    */
   void SetValue(int i, Value const &value) {
-    coeff_.col(i) = value;
+    this->coeff_.col(i) = value;
   }
-  Scalar GetScalar(int i_field) const {
-    return coeff_.reshaped()[i_field];
-  }
-  Projection &operator+=(Coeff const &coeff) {
-    coeff_ += coeff;
-    return *this;
-  }
-  Projection &operator*=(Scalar ratio) {
-    coeff_ *= ratio;
-    return *this;
-  }
+
   Value average() const {
     return GetAverage(*this);
   }
@@ -191,7 +166,7 @@ class Projection {
   Gradient GetGlobalGradient(int i) const {
     auto &global = integrator().GetGlobal(i);
     Mat3xN basis_grad = GlobalToBasisGradients(global);
-    return basis_grad * coeff().transpose();
+    return basis_grad * this->coeff_.transpose();
   }
 
   /**
@@ -201,34 +176,12 @@ class Projection {
   std::pair<Value, Gradient> GetGlobalValueGradient(int i) const {
     auto &global = integrator().GetGlobal(i);
     Mat3xN basis_grad = GlobalToBasisGradients(global);
-    return { GlobalToValue(global), basis_grad * coeff().transpose() };
+    return { GlobalToValue(global), basis_grad * this->coeff_.transpose() };
   }
 
   template <typename Callable>
   void Approximate(Callable &&func) {
     Project(this, std::forward<Callable>(func));
-  }
-  const Scalar *GetCoeffFrom(const Scalar *input) {
-    std::memcpy(coeff_.data(), input, sizeof(Scalar) * coeff_.size());
-    return input + coeff_.size();
-  }
-  Scalar *WriteCoeffTo(Scalar *output) const {
-    std::memcpy(output, coeff_.data(), sizeof(Scalar) * coeff_.size());
-    return output + coeff_.size();
-  }
-  static void AddCoeffTo(Coeff const &coeff, Scalar *output) {
-    for (int c = 0; c < N; ++c) {
-      for (int r = 0; r < K; ++r) {
-        *output++ += coeff(r, c);
-      }
-    }
-  }
-  static void MinusCoeff(Coeff const &coeff, Scalar *output) {
-    for (int c = 0; c < N; ++c) {
-      for (int r = 0; r < K; ++r) {
-        *output++ -= coeff(r, c);
-      }
-    }
   }
 };
 
@@ -244,7 +197,8 @@ class Projection {
  */
 template <std::floating_point S, int kDimensions, int kDegrees,
     int kComponents>
-class ProjectionWrapper {
+class ProjectionWrapper : public Expansion<kComponents,
+    typename Projection<S, kDimensions, kDegrees, kComponents>::Basis> {
  public:
   using Base = Projection<S, kDimensions, kDegrees, kComponents>;
   using Scalar = typename Base::Scalar;
@@ -264,7 +218,6 @@ class ProjectionWrapper {
   using Value = typename Base::Value;
 
  public:
-  Coeff coeff_;
   const Basis *basis_ptr_ = nullptr;
 
  public:
@@ -274,7 +227,7 @@ class ProjectionWrapper {
 
   explicit ProjectionWrapper(const Base &that)
       : basis_ptr_(&(that.basis())) {
-    coeff_ = that.coeff();
+    this->coeff_ = that.coeff();
   }
 
   ProjectionWrapper() = default;
@@ -295,16 +248,7 @@ class ProjectionWrapper {
     return basis().integrator();
   }
   Coeff GetCoeffOnTaylorBasis() const {
-    return coeff_ * basis().coeff();
-  }
-  Coeff const &coeff() const {
-    return coeff_;
-  }
-  void SetCoeff(Coeff const &coeff) {
-    coeff_ = coeff;
-  }
-  void SetZero() {
-    coeff_.setZero();
+    return this->coeff() * basis().coeff();
   }
   Global const &center() const {
     return basis().center();
@@ -316,40 +260,21 @@ class ProjectionWrapper {
     return basis()(global);
   }
   Value GlobalToValue(Global const &global) const {
-    return coeff() * GlobalToBasisValues(global);
+    return this->coeff() * GlobalToBasisValues(global);
   }
 
   template <typename Callable>
   void Approximate(Callable &&func) {
     Project(this, std::forward<Callable>(func));
   }
-  ProjectionWrapper &LeftMultiply(const MatKxK &left) {
-    Coeff temp = left * coeff_;
-    coeff_ = temp;
-    return *this;
-  }
-  ProjectionWrapper &operator*=(Scalar ratio) {
-    coeff_ *= ratio;
-    return *this;
-  }
-  ProjectionWrapper &operator/=(Scalar ratio) {
-    coeff_ /= ratio;
-    return *this;
-  }
-  ProjectionWrapper &operator*=(const Value& ratio) {
-    for (int i = 0; i < K; ++i) {
-      coeff_.row(i) *= ratio[i];
-    }
-    return *this;
-  }
   ProjectionWrapper &operator+=(Value offset) {
     offset /= basis().coeff()(0, 0);
-    coeff_.col(0) += offset;
+    this->coeff_.col(0) += offset;
     return *this;
   }
   ProjectionWrapper &operator+=(const ProjectionWrapper &that) {
     assert(this->basis_ptr_ == that.basis_ptr_);
-    coeff_ += that.coeff_;
+    this->coeff_ += that.coeff_;
     return *this;
   }
 };

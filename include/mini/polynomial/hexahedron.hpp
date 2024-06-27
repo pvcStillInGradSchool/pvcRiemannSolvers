@@ -20,6 +20,7 @@
 #include "mini/coordinate/element.hpp"
 #include "mini/basis/lagrange.hpp"
 #include "mini/constant/index.hpp"
+#include "mini/polynomial/expansion.hpp"
 
 namespace mini {
 namespace polynomial {
@@ -34,11 +35,13 @@ using namespace mini::constant::index;
  * @tparam Gx  The quadrature rule in the 1st dimension.
  * @tparam Gy  The quadrature rule in the 2nd dimension.
  * @tparam Gz  The quadrature rule in the 3rd dimension.
- * @tparam kC  The number of function components.
+ * @tparam kComponents  The number of function components.
  * @tparam kL  Formulate in local (parametric) space or not.
  */
-template <class Gx, class Gy, class Gz, int kC, bool kL = false>
-class Hexahedron {
+template <class Gx, class Gy, class Gz, int kComponents, bool kL = false>
+class Hexahedron : public Expansion<kComponents,
+    basis::lagrange::Hexahedron<typename Gx::Scalar,
+        Gx::Q - 1, Gy::Q - 1, Gz::Q - 1>> {
  public:
   static constexpr bool kLocal = kL;
   using IntegratorX = Gx;
@@ -56,8 +59,9 @@ class Hexahedron {
   static constexpr int P = std::max({Px, Py, Pz});
   using Basis = basis::lagrange::Hexahedron<Scalar, Px, Py, Pz>;
   static constexpr int N = Basis::N;
-  static constexpr int K = kC;
+  static constexpr int K = kComponents;
   static constexpr int D = 3;
+  static constexpr int kFields = K * N;
 
  protected:
   using Mat6xN = algebra::Matrix<Scalar, 6, N>;
@@ -77,9 +81,6 @@ class Hexahedron {
 
  private:
   const Integrator *integrator_ptr_ = nullptr;
-  Coeff coeff_;  // u^h(local) = coeff_ @ basis.GetValues(local)
-
-  static constexpr int kFields = K * N;
 
   struct E { };
 
@@ -117,7 +118,7 @@ class Hexahedron {
             + sizeof(Jacobian[N]) + sizeof(Local[N])
         : sizeof(std::array<Mat3xN, N>);
     constexpr size_t all_member_size = large_member_size
-        + sizeof(integrator_ptr_) + sizeof(coeff_);
+        + sizeof(integrator_ptr_) + sizeof(Coeff);
     static_assert(sizeof(Hexahedron) >= all_member_size);
     static_assert(sizeof(Hexahedron) <= all_member_size + 16);
   }
@@ -238,12 +239,12 @@ class Hexahedron {
 
  private:
   Value _LocalToValue(Local const &local) const requires(kLocal) {
-    Value value = coeff_ * basis_.GetValues(local).transpose();
+    Value value = this->coeff() * basis_.GetValues(local).transpose();
     value /= coordinate().LocalToJacobian(local).determinant();
     return value;
   }
   Value _LocalToValue(Local const &local) const requires(!kLocal) {
-    return coeff_ * basis_.GetValues(local).transpose();
+    return this->coeff() * basis_.GetValues(local).transpose();
   }
  
  public:
@@ -273,10 +274,10 @@ class Hexahedron {
 
  private:
   Value _GetValue(int i) const requires(kLocal) {
-    return coeff_.col(i) / jacobian_det_[i];
+    return this->coeff_.col(i) / jacobian_det_[i];
   }
   Value _GetValue(int i) const requires(!kLocal) {
-    return coeff_.col(i);
+    return this->coeff_.col(i);
   }
 
  public:
@@ -299,7 +300,7 @@ class Hexahedron {
     return coeff;
   }
   Coeff _GetValues() const requires(!kLocal) {
-    return coeff_;
+    return this->coeff_;
   }
 
  public:
@@ -313,25 +314,14 @@ class Hexahedron {
 
  private:
   void _SetValue(int i, Value const &value) requires(kLocal) {
-    coeff_.col(i) = value;  // value in physical space
-    coeff_.col(i) *= jacobian_det_[i];  // value in parametric space
+    this->coeff_.col(i) = value;  // value in physical space
+    this->coeff_.col(i) *= jacobian_det_[i];  // value in parametric space
   }
   void _SetValue(int i, Value const &value) requires(!kLocal) {
-    coeff_.col(i) = value;
+    this->coeff_.col(i) = value;
   }
 
  public:
-  void SetZero() {
-    coeff_.setZero();
-  }
-
-  template <typename FieldIndexToScalar>
-  void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
-    for (int i_field = 0; i_field < kFields; ++i_field) {
-      coeff_.reshaped()[i_field] = field_index_to_scalar(i_field);
-    }
-  }
-
   /**
    * @brief Set the value of \f$ u(x,y,z) \f$ at a given integratorian point.
    * 
@@ -385,7 +375,7 @@ class Hexahedron {
     Gradient value_grad; value_grad.setZero();
     Mat3xN const &basis_grads = GetBasisGradients(ijk);
     for (int abc = 0; abc < N; ++abc) {
-      value_grad += basis_grads.col(abc) * coeff_.col(abc).transpose();
+      value_grad += basis_grads.col(abc) * this->coeff_.col(abc).transpose();
     }
     return value_grad;
   }
@@ -397,7 +387,7 @@ class Hexahedron {
     basis_grad.row(Y) = basis_.GetDerivatives(0, 1, 0, x, y, z);
     basis_grad.row(Z) = basis_.GetDerivatives(0, 0, 1, x, y, z);
     for (int abc = 0; abc < N; ++abc) {
-      value_grad += basis_grad.col(abc) * coeff_.col(abc).transpose();
+      value_grad += basis_grad.col(abc) * this->coeff_.col(abc).transpose();
     }
     return value_grad;
   }
@@ -406,7 +396,7 @@ class Hexahedron {
     Jacobian mat = coordinate().LocalToJacobian(local);
     Scalar det = mat.determinant();
     Global det_grad = coordinate().LocalToJacobianDeterminantGradient(local);
-    Value value = coeff_ * basis_.GetValues(local).transpose();
+    Value value = this->coeff_ * basis_.GetValues(local).transpose();
     grad -= (det_grad / det) * value.transpose();
     return mat.inverse() / det * grad;
   }
@@ -418,7 +408,7 @@ class Hexahedron {
  private:
   Gradient _GetGlobalGradient(int ijk) const requires(!kLocal) {
     Mat3xN const &basis_grad = GetBasisGradients(ijk);
-    return basis_grad * coeff().transpose();
+    return basis_grad * this->coeff_.transpose();
   }
   std::pair<Value, Gradient> _GetGlobalValueGradient(int ijk) const
       requires(!kLocal) {
@@ -471,7 +461,7 @@ class Hexahedron {
     Mat6xK value_hess; value_hess.setZero();
     Mat6xN const &basis_hess = GetBasisHessians(ijk);
     for (int abc = 0; abc < N; ++abc) {
-      value_hess += basis_hess.col(abc) * coeff_.col(abc).transpose();
+      value_hess += basis_hess.col(abc) * this->coeff_.col(abc).transpose();
     }
     return value_hess;
   }
@@ -507,7 +497,7 @@ class Hexahedron {
           - mat_before_grad_of_U_[ijk] * scalar_local_grad[Y];
       scalar_hess.row(Z) += scalar_local_grad * mat_after_grad_of_U_[ijk][Z]
           - mat_before_grad_of_U_[ijk] * scalar_local_grad[Z];
-      Scalar scalar_local_val = coeff_(k, ijk);
+      Scalar scalar_local_val = this->coeff_(k, ijk);
       scalar_hess -= mat_before_U_[ijk] * scalar_local_val;
       scalar_hess = jacobian_det_inv_[ijk] * scalar_hess;
       scalar_hess /= jacobian_det_[ijk];
@@ -590,12 +580,6 @@ class Hexahedron {
   Global const &center() const {
     return integrator_ptr_->center();
   }
-  Coeff const &coeff() const {
-    return coeff_;
-  }
-  Scalar GetScalar(int i_field) const {
-    return coeff_.reshaped()[i_field];
-  }
   Basis const &basis() const {
     return basis_;
   }
@@ -612,34 +596,7 @@ class Hexahedron {
       SetValue(ijk, global_to_value(global));
     }
   }
-  const Scalar *GetCoeffFrom(const Scalar *input) {
-    std::memcpy(coeff_.data(), input, sizeof(Scalar) * coeff_.size());
-    return input + coeff_.size();
-  }
-  Scalar *WriteCoeffTo(Scalar *output) const {
-    std::memcpy(output, coeff_.data(), sizeof(Scalar) * coeff_.size());
-    return output + coeff_.size();
-  }
-  /**
-   * @brief Add the given Coeff to the dofs corresponding to the given basis.
-   * 
-   * @param coeff the coeff to be added
-   * @param output the beginning of all dofs
-   */
-  static void AddCoeffTo(Coeff const &coeff, Scalar *output) {
-    for (int c = 0; c < N; ++c) {
-      for (int r = 0; r < K; ++r) {
-        *output++ += coeff(r, c);
-      }
-    }
-  }
-  static void MinusCoeff(Coeff const &coeff, Scalar *output) {
-    for (int c = 0; c < N; ++c) {
-      for (int r = 0; r < K; ++r) {
-        *output++ -= coeff(r, c);
-      }
-    }
-  }
+
   /**
    * @brief Add the given Value to the dofs corresponding to the given basis.
    * 

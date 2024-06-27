@@ -13,10 +13,14 @@ namespace basis {
 /**
  * @brief The \f$ g_\mathrm{left}(\xi) \f$ and \f$ g_\mathrm{right}(\xi) \f$ in Vincent's ESFR schemes.
  * 
- * @tparam Scalar The type of scalar variables.
+ * @tparam S The type of scalar variables.
  */
-template <std::floating_point Scalar>
+template <std::floating_point S>
 class Vincent {
+ public:
+  using Scalar = S;
+
+ private:
   Scalar c_prev_, c_next_;
   int degree_;
 

@@ -24,13 +24,14 @@ namespace basis {
 /**
  * @brief A basis of the linear space formed by polynomials less than or equal to a given degree.
  * 
- * @tparam Scalar the data type of scalar components
+ * @tparam S the data type of scalar components
  * @tparam kDimensions the dimension of the underlying physical space
  * @tparam kDegrees the degree of completeness
  */
-template <std::floating_point Scalar, int kDimensions, int kDegrees>
+template <std::floating_point S, int kDimensions, int kDegrees>
 class Linear {
  public:
+  using Scalar = S;
   using Taylor = basis::Taylor<Scalar, kDimensions, kDegrees>;
   static constexpr int N = Taylor::N;
   using Coord = typename Taylor::Coord;
@@ -83,9 +84,10 @@ class Linear {
   MatNxN coeff_;
 };
 
-template <std::floating_point Scalar, int kDimensions, int kDegrees>
+template <std::floating_point S, int kDimensions, int kDegrees>
 class OrthoNormal {
  public:
+  using Scalar = S;
   using Taylor = basis::Taylor<Scalar, kDimensions, kDegrees>;
   using Linear = basis::Linear<Scalar, kDimensions, kDegrees>;
   static constexpr int N = Linear::N;
