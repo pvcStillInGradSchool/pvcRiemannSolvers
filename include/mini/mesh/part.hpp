@@ -373,9 +373,9 @@ class Section {
   void ScatterFields() {
     for (int i_cell = head(); i_cell < tail(); ++i_cell) {
       auto &polynomial = cells_.at(i_cell).polynomial();
-      for (int i_field = 1; i_field <= kFields; ++i_field) {
-        polynomial.SetScalar(i_field - 1, fields_.at(i_field).at(i_cell));
-      }
+      polynomial.SetCoeff([this, i_cell](int i_field) -> Scalar {
+        return this->fields_.at(i_field + 1).at(i_cell);
+      });
     }
   }
 };

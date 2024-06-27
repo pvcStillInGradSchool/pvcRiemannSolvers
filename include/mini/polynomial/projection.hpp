@@ -86,9 +86,11 @@ class Projection {
   using Value = algebra::Matrix<Scalar, K, 1>;
   using Gradient = algebra::Matrix<Scalar, 3, K>;
 
- public:
+ private:
   Coeff coeff_;
   Basis basis_;
+
+  static constexpr int kFields = K * N;
 
  public:
   explicit Projection(const Integrator &integrator)
@@ -145,6 +147,13 @@ class Projection {
   void SetCoeff(Coeff const &coeff) {
     coeff_ = coeff;
   }
+  template <typename FieldIndexToScalar>
+  void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
+    for (int i_field = 0; i_field < kFields; ++i_field) {
+      coeff_.reshaped()[i_field] = field_index_to_scalar(i_field);
+    }
+  }
+
   void SetZero() {
     coeff_.setZero();
   }
@@ -160,9 +169,6 @@ class Projection {
   }
   Scalar GetScalar(int i_field) const {
     return coeff_.reshaped()[i_field];
-  }
-  void SetScalar(int i_field, Scalar scalar) {
-    coeff_.reshaped()[i_field] = scalar;
   }
   Projection &operator+=(Coeff const &coeff) {
     coeff_ += coeff;

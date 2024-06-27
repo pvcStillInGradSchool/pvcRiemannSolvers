@@ -120,6 +120,13 @@ class Extrapolation : public Interpolation {
     UpdateNodalCoeff();
   }
 
+  template <typename FieldIndexToScalar>
+  void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
+    this->Interpolation::SetCoeff(
+        std::forward<FieldIndexToScalar>(field_index_to_scalar));
+    UpdateModalCoeff();
+  }
+
   /**
    * @brief Almost the same as `Interpolation::SetValue`, except calling `UpdateModalCoeff` when `i_node + 1 == N`.
    * 
@@ -127,17 +134,6 @@ class Extrapolation : public Interpolation {
   void SetValue(int i_node, Value const &value) {
     this->Interpolation::SetValue(i_node, value);
     if (i_node + 1 == N) {
-      UpdateModalCoeff();
-    }
-  }
-
-  /**
-   * @brief Almost the same as `Interpolation::SetScalar`, except calling `UpdateModalCoeff` when `i_field + 1 == K * N`.
-   * 
-   */
-  void SetScalar(int i_field, Scalar scalar) {
-    this->Interpolation::SetScalar(i_field, scalar);
-    if (i_field + 1 == kFields) {
       UpdateModalCoeff();
     }
   }

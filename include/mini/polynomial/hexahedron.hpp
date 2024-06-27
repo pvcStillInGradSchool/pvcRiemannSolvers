@@ -79,6 +79,8 @@ class Hexahedron {
   const Integrator *integrator_ptr_ = nullptr;
   Coeff coeff_;  // u^h(local) = coeff_ @ basis.GetValues(local)
 
+  static constexpr int kFields = K * N;
+
   struct E { };
 
   // cache for (kLocal == true)
@@ -321,6 +323,13 @@ class Hexahedron {
  public:
   void SetZero() {
     coeff_.setZero();
+  }
+
+  template <typename FieldIndexToScalar>
+  void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
+    for (int i_field = 0; i_field < kFields; ++i_field) {
+      coeff_.reshaped()[i_field] = field_index_to_scalar(i_field);
+    }
   }
 
   /**
@@ -586,9 +595,6 @@ class Hexahedron {
   }
   Scalar GetScalar(int i_field) const {
     return coeff_.reshaped()[i_field];
-  }
-  void SetScalar(int i_field, Scalar scalar) {
-    coeff_.reshaped()[i_field] = scalar;
   }
   Basis const &basis() const {
     return basis_;
