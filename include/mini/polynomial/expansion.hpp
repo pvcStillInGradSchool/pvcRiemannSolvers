@@ -55,6 +55,14 @@ class Expansion {
     coeff_ = coeff;
   }
 
+  /**
+   * @brief Set the coefficient corresponding to the given basis.
+   * 
+   */
+  void SetCoeff(int i_basis, Value const &coeff_i) {
+    coeff_.col(i_basis) = coeff_i;
+  }
+
   template <typename FieldIndexToScalar>
   void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
     for (int i_field = 0; i_field < kFields; ++i_field) {

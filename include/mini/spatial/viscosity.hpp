@@ -266,10 +266,10 @@ class EnergyBasedViscosity : public R {
       auto &curr_polynomial = curr_cell->polynomial();
       curr_polynomial.SetZero();
       for (int c = 0; c < Cell::N; ++c) {
-        curr_polynomial.SetValue(c, Value::Ones());
         if (c > 0) {
-          curr_polynomial.SetValue(c - 1, Value::Zero());
+          curr_polynomial.SetCoeff(c - 1, Value::Zero());
         }
+        curr_polynomial.SetCoeff(c, Value::Ones());
         Coeff residual = GetCellResidual(curr_cell);
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);

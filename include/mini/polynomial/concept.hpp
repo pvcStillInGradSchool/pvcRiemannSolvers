@@ -37,6 +37,8 @@ concept HasGeneralMethods = requires(P const &cp, P *p, G const &g,
   { cp.basis() } -> std::same_as<typename P::Basis const &>;
   { cp.coeff() } -> std::same_as<typename P::Coeff const &>;
   { p->SetZero() } -> std::same_as<void>;
+  { p->SetCoeff(typename P::Coeff()) } -> std::same_as<void>;
+  { p->SetCoeff(0, typename P::Value()) } -> std::same_as<void>;
 
   { cp.integrator() } -> std::same_as<typename P::Integrator const &>;
 

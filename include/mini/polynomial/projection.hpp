@@ -143,16 +143,6 @@ class Projection : public Expansion<kComponents,
     return basis().center();
   }
 
-  /**
-   * @brief Set the projection coefficient of a given mode.
-   * 
-   * @param i the index of the mode
-   * @param value the value \f$ \langle u | \phi_i \rangle \f$
-   */
-  void SetValue(int i, Value const &value) {
-    this->coeff_.col(i) = value;
-  }
-
   Value average() const {
     return GetAverage(*this);
   }

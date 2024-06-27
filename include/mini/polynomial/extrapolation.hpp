@@ -128,12 +128,12 @@ class Extrapolation : public Interpolation {
   }
 
   /**
-   * @brief Almost the same as `Interpolation::SetValue`, except calling `UpdateModalCoeff` when `i_node + 1 == N`.
+   * @brief Almost the same as `Interpolation::SetCoeff`, except calling `UpdateModalCoeff` when `i_node + 1 == N`.
    * 
    */
-  void SetValue(int i_node, Value const &value) {
-    this->Interpolation::SetValue(i_node, value);
-    if (i_node + 1 == N) {
+  void SetCoeff(int i_basis, Value const &coeff_i) {
+    this->Interpolation::SetValue(i_basis, coeff_i);
+    if (i_basis + 1 == N) {
       UpdateModalCoeff();
     }
   }
