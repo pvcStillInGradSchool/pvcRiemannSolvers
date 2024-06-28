@@ -25,7 +25,7 @@ class TestRotatedEuler : public ::testing::Test {
     }
   }
   static double rand_f() {
-    return -1 + 2 * std::rand() / (1.0 + RAND_MAX);
+    return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX);
   }
   static double disturb(double x) {
     return x * (1 + rand_f() * 0.05);

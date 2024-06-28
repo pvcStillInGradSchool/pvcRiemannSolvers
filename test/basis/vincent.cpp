@@ -10,7 +10,7 @@
 #include "gtest/gtest.h"
 
 double rand_f() {
-  return -1 + 2 * std::rand() / (1.0 + RAND_MAX);
+  return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX);
 }
 
 class TestBasisVincent : public ::testing::Test {

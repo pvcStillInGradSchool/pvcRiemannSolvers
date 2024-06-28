@@ -30,7 +30,7 @@ class TestRiemannDiffusiveNavierStokes : public ::testing::Test {
   Scalar nu = 0.01, prandtl = 0.7;
 
   static double rand_f() {
-    return -1 + 2 * std::rand() / (1.0 + RAND_MAX);
+    return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX);
   }
   static double disturb(double x) {
     return x * (1 + rand_f() * 0.05);
