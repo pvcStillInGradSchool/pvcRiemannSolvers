@@ -84,6 +84,10 @@ class TestBasisLagrangeHexahedron : public ::testing::Test {
   using Lagrange = mini::basis::lagrange::Hexahedron<Scalar, 2, 3, 4>;
   static_assert(Lagrange::N == 3 * 4 * 5);
 
+  void SetUp() override {
+    std::srand(31415926);
+  }
+
   static Lagrange GetRandomLagrange() {
     return Lagrange {
         Lagrange::LineX{
@@ -156,27 +160,39 @@ TEST_F(TestBasisLagrangeHexahedron, GetDerivatives) {
     auto values_x_minus = lagrange.GetValues(x - delta, y, z);
     auto values_x_plus = lagrange.GetValues(x + delta, y, z);
     derivatives = lagrange.GetDerivatives(1, 0, 0, x, y, z);
-    derivatives -= (values_x_plus - values_x_minus) / (2 * delta);
-    EXPECT_NEAR(derivatives.norm(), 0.0, 1e-3);
+    derivatives.array() /=
+        (values_x_plus - values_x_minus).array() / (2 * delta);
+    EXPECT_NEAR(derivatives.maxCoeff(), 1.0, 1e-8);
+    EXPECT_NEAR(derivatives.minCoeff(), 1.0, 1e-8);
     auto values_y_minus = lagrange.GetValues(x, y - delta, z);
     auto values_y_plus = lagrange.GetValues(x, y + delta, z);
     derivatives = lagrange.GetDerivatives(0, 1, 0, x, y, z);
-    derivatives -= (values_y_plus - values_y_minus) / (2 * delta);
-    EXPECT_NEAR(derivatives.norm(), 0.0, 1e-3);
+    derivatives.array() /=
+        (values_y_plus - values_y_minus).array() / (2 * delta);
+    EXPECT_NEAR(derivatives.maxCoeff(), 1.0, 1e-5);
+    EXPECT_NEAR(derivatives.minCoeff(), 1.0, 1e-5);
     auto values_z_minus = lagrange.GetValues(x, y, z - delta);
     auto values_z_plus = lagrange.GetValues(x, y, z + delta);
     derivatives = lagrange.GetDerivatives(0, 0, 1, x, y, z);
-    derivatives -= (values_z_plus - values_z_minus) / (2 * delta);
-    EXPECT_NEAR(derivatives.norm(), 0.0, 1e-3);
+    derivatives.array() /=
+        (values_z_plus - values_z_minus).array() / (2 * delta);
+    EXPECT_NEAR(derivatives.maxCoeff(), 1.0, 1e-6);
+    EXPECT_NEAR(derivatives.minCoeff(), 1.0, 1e-4);
     derivatives = lagrange.GetDerivatives(2, 0, 0, x, y, z);
-    derivatives -= ((values_x_minus + values_x_plus) - 2 * values_center) / delta2;
-    EXPECT_NEAR(derivatives.norm(), 0.0, 1e1);
+    derivatives.array() /=
+        (values_x_minus + values_x_plus - 2 * values_center).array() / delta2;
+    EXPECT_NEAR(derivatives.maxCoeff(), 1.0, 1e-4);
+    EXPECT_NEAR(derivatives.minCoeff(), 1.0, 1e-4);
     derivatives = lagrange.GetDerivatives(0, 2, 0, x, y, z);
-    derivatives -= ((values_y_plus + values_y_minus) - 2 * values_center) / delta2;
-    EXPECT_NEAR(derivatives.norm(), 0.0, 1e1);
+    derivatives.array() /=
+        (values_y_plus + values_y_minus - 2 * values_center).array() / delta2;
+    EXPECT_NEAR(derivatives.maxCoeff(), 1.0, 1e-4);
+    EXPECT_NEAR(derivatives.minCoeff(), 1.0, 1e-4);
     derivatives = lagrange.GetDerivatives(0, 0, 2, x, y, z);
-    derivatives -= ((values_z_plus + values_z_minus) - 2 * values_center) / delta2;
-    EXPECT_NEAR(derivatives.norm(), 0.0, 1e1);
+    derivatives.array() /=
+        (values_z_plus + values_z_minus - 2 * values_center).array() / delta2;
+    EXPECT_NEAR(derivatives.maxCoeff(), 1.0, 1e-3);
+    EXPECT_NEAR(derivatives.minCoeff(), 1.0, 1e-3);
   }
 }
 
