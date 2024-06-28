@@ -11,13 +11,36 @@ namespace rotated {
 
 template <typename S, int D>
 class Single : public Simple<simple::Single<S, D>> {
+  using Base = Simple<simple::Single<S, D>>;
+
  public:
   using Convection = Single;
+  using Conservative = typename Base::Conservative;
+  using Jacobian = typename Base::Jacobian;
 
   constexpr static int kComponents = 1;
   constexpr static int kDimensions = D;
   using Scalar = S;
+
+ private:
+  static Scalar max_eigen_value_;
+
+ public:
+  static void SetJacobians(Jacobian const &a_x, Jacobian const &a_y,
+      Jacobian const &a_z) {
+    Base::SetJacobians(a_x, a_y, a_z);
+    static_assert(std::is_same_v<Jacobian, Scalar>);
+    max_eigen_value_ = std::hypot(a_x, a_y, a_z);
+  }
+
+  static Scalar GetMaximumSpeed(Conservative const &conservative) {
+    return max_eigen_value_;
+  }
 };
+
+template <typename S, int D>
+typename Single<S, D>::Scalar
+Single<S, D>::max_eigen_value_;
 
 }  // namespace rotated
 }  // namespace riemann

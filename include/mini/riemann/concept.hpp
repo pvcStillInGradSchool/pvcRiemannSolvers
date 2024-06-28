@@ -35,6 +35,7 @@ concept HasConvectiveMethods = requires(R riemann, C const &value) {
   { riemann.GetFluxUpwind(value, value) }
       // e.g. riemann::euler::Flux is derived from algebra::eigen::Vector
       -> std::derived_from<typename R::Flux>;
+  { R::GetMaximumSpeed(value) } -> std::same_as<typename R::Scalar>;
 };
 
 template <typename R>

@@ -2,6 +2,9 @@
 #ifndef MINI_ALGEBRA_EIGEN_HPP_
 #define MINI_ALGEBRA_EIGEN_HPP_
 
+#include <cmath>
+#include <cstdlib>
+
 #include "Eigen/Eigen"
 
 namespace mini {
@@ -59,6 +62,18 @@ void Minimize(Matrix *lhs, Matrix const &rhs)
   for (int k = 0, K = lhs->size(); k < K; ++k) {
     l_data[k] = std::min(l_data[k], r_data[k]);
   }
+}
+
+/**
+ * @brief Get the eigenvalues of a 2x2 matrix. The less first, then the greater.
+ * 
+ */
+template <typename Scalar>
+Vector<Scalar, 2> GetEigenValues(Matrix<Scalar, 2, 2> const &a) {
+  Scalar b = -a(0, 0) - a(1, 1);
+  Scalar c = +a(0, 0) * a(1, 1) - a(0, 1) * a(1, 0);
+  Scalar sqrt_delta = std::sqrt(b * b - 4 * c);
+  return { (-b - sqrt_delta) / 2, (-b + sqrt_delta) / 2 };
 }
 
 template <class MatrixType>
