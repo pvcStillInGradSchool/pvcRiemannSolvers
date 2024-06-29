@@ -141,29 +141,29 @@ int main(int argc, char* argv[]) {
   if (argc != 2) {
     if (i_core == 0) {
       std::cout << "usage:\n"
-          << "  mpirun -n <n_core> " << argv[0] << " <json_file>\n";
+          << "  mpirun -n <n_core> " << argv[0] << " <json_input_file>\n";
     }
     MPI_Finalize();
     exit(0);
   }
 
-  auto json_file = std::ifstream(argv[1]);
-  auto settings = nlohmann::json::parse(json_file);
+  auto json_input_file = std::ifstream(argv[1]);
+  auto json_object = nlohmann::json::parse(json_input_file);
 
-  std::string old_file_name = settings.at("cgns_file");
-  std::string suffix = settings.at("cell_type");
-  double t_start = settings.at("t_start");
-  double t_stop = settings.at("t_stop");
-  int n_steps_per_frame = settings.at("n_steps_per_frame");
-  int n_frames = settings.at("n_frames");
+  std::string old_file_name = json_object.at("cgns_file");
+  std::string suffix = json_object.at("cell_type");
+  double t_start = json_object.at("t_start");
+  double t_stop = json_object.at("t_stop");
+  int n_steps_per_frame = json_object.at("n_steps_per_frame");
+  int n_frames = json_object.at("n_frames");
   int n_steps = n_frames * n_steps_per_frame;
   auto dt = (t_stop - t_start) / n_steps;
-  int i_frame_prev = settings.at("i_frame_prev");
+  int i_frame_prev = json_object.at("i_frame_prev");
   // `i_frame_prev` might be -1, which means no previous result to be loaded.
   int i_frame = std::max(i_frame_prev, 0);
   int n_parts_prev = n_core;
   if (i_frame_prev >= 0) {
-    n_parts_prev = settings.at("n_parts_prev");
+    n_parts_prev = json_object.at("n_parts_prev");
   }
 
   std::string case_name = "standing_" + suffix;
@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
   auto spatial = Spatial(&limiter, &part);
 #else
   auto spatial = Spatial(&part);
-  RiemannWithViscosity::SetTimeScale(settings.at("time_scale"));
+  RiemannWithViscosity::SetTimeScale(json_object.at("time_scale"));
   VtkWriter::AddCellData("CellViscosity", [](Cell const &cell){
     return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[0];
   });
@@ -285,6 +285,13 @@ int main(int argc, char* argv[]) {
   }
 
   if (i_core == 0) {
+    json_object["n_parts_curr"] = n_core;
+    std::string output_name = case_name;
+    output_name += "/Frame";
+    output_name += std::to_string(i_frame - n_frames) + "to";
+    output_name += std::to_string(i_frame) + ".json";
+    auto json_output_file = std::ofstream(output_name);
+    json_output_file << std::setw(2) << json_object << std::endl;
     std::printf("time-range = [%f, %f], frame-range = [%d, %d], dt = %f\n",
         t_start, t_stop, i_frame - n_frames, i_frame, dt);
     std::printf("[Start] MPI_Finalize() on %d cores at %f sec\n",
