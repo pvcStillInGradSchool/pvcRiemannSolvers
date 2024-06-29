@@ -117,6 +117,9 @@ using Spatial = mini::spatial::WithViscosity<General>;
 
 #endif  // VISCOSITY
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+
 int main(int argc, char* argv[]) {
   MPI_Init(NULL, NULL);
   int n_core, i_core;
@@ -129,31 +132,32 @@ int main(int argc, char* argv[]) {
   Diffusion::SetProperty(0.0);
   Diffusion::SetBetaValues(2.0, 1.0 / 12);
 #endif
-  if (argc < 7) {
+  if (argc != 2) {
     if (i_core == 0) {
       std::cout << "usage:\n"
-          << "  mpirun -n <n_core> " << argv[0] << " <cgns_file> <hexa|tetra>"
-          << " <t_start> <t_stop> <n_steps_per_frame> <n_frames>"
-          << " [<i_frame_start> [n_parts_prev]]\n";
+          << "  mpirun -n <n_core> " << argv[0] << " <json_file>\n";
     }
     MPI_Finalize();
     exit(0);
   }
-  auto old_file_name = std::string(argv[1]);
-  auto suffix = std::string(argv[2]);
-  double t_start = std::atof(argv[3]);
-  double t_stop = std::atof(argv[4]);
-  int n_steps_per_frame = std::atoi(argv[5]);
-  int n_frames = std::atoi(argv[6]);
+
+  auto json_file = std::ifstream(argv[1]);
+  auto settings = nlohmann::json::parse(json_file);
+
+  std::string old_file_name = settings.at("cgns_file");
+  std::string suffix = settings.at("cell_type");
+  double t_start = settings.at("t_start");
+  double t_stop = settings.at("t_stop");
+  int n_steps_per_frame = settings.at("n_steps_per_frame");
+  int n_frames = settings.at("n_frames");
   int n_steps = n_frames * n_steps_per_frame;
   auto dt = (t_stop - t_start) / n_steps;
-  int i_frame = 0;
-  if (argc > 7) {
-    i_frame = std::atoi(argv[7]);
-  }
+  int i_frame_prev = settings.at("i_frame_prev");
+  // `i_frame_prev` might be -1, which means no previous result to be loaded.
+  int i_frame = std::max(i_frame_prev, 0);
   int n_parts_prev = n_core;
-  if (argc > 8) {
-    n_parts_prev = std::atoi(argv[8]);
+  if (i_frame_prev >= 0) {
+    n_parts_prev = settings.at("n_parts_prev");
   }
 
   std::string case_name = "standing_" + suffix;
@@ -161,7 +165,7 @@ int main(int argc, char* argv[]) {
   auto time_begin = MPI_Wtime();
 
   /* Partition the mesh. */
-  if (i_core == 0 && (argc == 7 || n_parts_prev != n_core)) {
+  if (i_core == 0 && (i_frame_prev < 0 || n_parts_prev != n_core)) {
     using Shuffler = mini::mesh::Shuffler<idx_t, Scalar>;
     Shuffler::PartitionAndShuffle(case_name, old_file_name, n_core);
   }
@@ -181,7 +185,7 @@ int main(int argc, char* argv[]) {
   auto spatial = Spatial(&limiter, &part);
 #else
   auto spatial = Spatial(&part);
-  RiemannWithViscosity::SetTimeScale(1.0e-2);
+  RiemannWithViscosity::SetTimeScale(settings.at("time_scale"));
   VtkWriter::AddCellData("CellViscosity", [](Cell const &cell){
     return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[0];
   });
@@ -195,7 +199,7 @@ int main(int argc, char* argv[]) {
     return val;
   };
 
-  if (argc == 7) {
+  if (i_frame_prev < 0) {
     if (i_core == 0) {
       std::printf("[Start] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
@@ -238,24 +242,14 @@ int main(int argc, char* argv[]) {
   auto given_state = [](const Global& xyz, double t) -> Value {
     return Value::Zero();
   };
-  if (suffix == "tetra") {
-    spatial.SetInviscidWall("3_S_27");  // Top
-    spatial.SetInviscidWall("3_S_1");   // Back
-    spatial.SetInviscidWall("3_S_32");  // Front
-    spatial.SetInviscidWall("3_S_19");  // Bottom
-    spatial.SetInviscidWall("3_S_15");  // Gap
-    spatial.SetSmartBoundary("3_S_31", given_state);  // Left
-    spatial.SetSmartBoundary("3_S_23", given_state);  // Right
-  } else {
-    assert(suffix == "hexa");
-    spatial.SetInviscidWall("4_S_27");  // Top
-    spatial.SetInviscidWall("4_S_1");   // Back
-    spatial.SetInviscidWall("4_S_32");  // Front
-    spatial.SetInviscidWall("4_S_19");  // Bottom
-    spatial.SetInviscidWall("4_S_15");  // Gap
-    spatial.SetSmartBoundary("4_S_31", given_state);  // Left
-    spatial.SetSmartBoundary("4_S_23", given_state);  // Right
-  }
+  auto prefix = std::string(suffix == "tetra" ? "3_" : "4_");
+  spatial.SetInviscidWall(prefix + "S_27");  // Top
+  spatial.SetInviscidWall(prefix + "S_1");   // Back
+  spatial.SetInviscidWall(prefix + "S_32");  // Front
+  spatial.SetInviscidWall(prefix + "S_19");  // Bottom
+  spatial.SetInviscidWall(prefix + "S_15");  // Gap
+  spatial.SetSmartBoundary(prefix + "S_31", given_state);  // Left
+  spatial.SetSmartBoundary(prefix + "S_23", given_state);  // Right
 
   /* Main Loop */
   auto wtime_start = MPI_Wtime();
