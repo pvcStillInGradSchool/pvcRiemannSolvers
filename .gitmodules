@@ -22,3 +22,7 @@
 	path = ThirdParty/GTestMPI
 	url = https://github.com/AdhocMan/gtest_mpi.git
 	branch = master
+[submodule "nlohmann_json"]
+	path = ThirdParty/nlohmann_json
+	url = https://github.com/nlohmann/json.git
+	branch = develop
