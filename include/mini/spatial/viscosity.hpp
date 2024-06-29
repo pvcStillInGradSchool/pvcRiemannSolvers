@@ -370,7 +370,8 @@ class EnergyBasedViscosity : public R {
         const auto &global = integrator.GetGlobal(i);
         Value jump = holder.polynomial().GlobalToValue(global)
                    - sharer.polynomial().GlobalToValue(global);
-        jump = std::pow(jump, 2) * integrator.GetGlobalWeight(i);
+        Scalar scale = integrator.GetGlobalWeight(i) * face.height();
+        jump = std::pow(jump, 2) * scale;
         jump_integrals.at(holder.id()) += jump;
         jump_integrals.at(sharer.id()) += jump;
       }
@@ -383,7 +384,8 @@ class EnergyBasedViscosity : public R {
         auto const &global = integrator.GetGlobal(i);
         Value jump = holder.polynomial().GlobalToValue(global)
                    - sharer.polynomial().GlobalToValue(global);
-        jump = std::pow(jump, 2) * integrator.GetGlobalWeight(i);
+        Scalar scale = integrator.GetGlobalWeight(i) * face.height();
+        jump = std::pow(jump, 2) * scale;
         jump_integrals.at(holder.id()) += jump;
       }
     }
@@ -413,7 +415,7 @@ class EnergyBasedViscosity : public R {
         return max_speed;
       };
       Scalar max_speed = GetMaximumSpeed(*curr_cell);
-      Scalar cell_length = std::cbrt(curr_cell->volume());
+      Scalar cell_length = curr_cell->length();
       Scalar max_viscosity = max_speed * cell_length / Cell::P;
       Scalar time_base = cell_length / max_speed;
       for (int k = 0; k < Cell::K; ++k) {

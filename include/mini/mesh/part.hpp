@@ -111,6 +111,7 @@ struct Face {
   IntegratorUptr integrator_ptr_;
   Cell *holder_, *sharer_;
   Global holder_to_sharer_;
+  Scalar height_;
   Int id_;  // 0-based, local first, then ghost, then boundary
 
  public:
@@ -127,6 +128,7 @@ struct Face {
       holder_to_sharer_ += center();
       holder_to_sharer_ *= 2;
     }
+    height_ = holder_to_sharer_.norm();
   }
   Face(const Face &) = delete;
   Face &operator=(const Face &) = delete;
@@ -147,6 +149,9 @@ struct Face {
   }
   Scalar area() const {
     return integrator().area();
+  }
+  Scalar height() const {
+    return height_;
   }
   Int id() const {
     return id_;
@@ -201,6 +206,7 @@ struct Cell {
   CoordinateUptr coordinate_ptr_;
   IntegratorUptr integrator_ptr_;
   PolynomialUptr polynomial_ptr_;
+  Scalar length_;
 
  public:
   Int metis_id{-1};
@@ -215,7 +221,7 @@ struct Cell {
       : coordinate_ptr_(std::move(coordinate_ptr)),
         integrator_ptr_(std::move(integrator_ptr)),
         polynomial_ptr_(std::make_unique<Polynomial>(*integrator_ptr_)),
-        metis_id(m_cell) {
+        length_(std::cbrt(volume())), metis_id(m_cell) {
   }
   Cell() = default;
   Cell(Cell const &) = delete;
@@ -224,6 +230,9 @@ struct Cell {
   Cell &operator=(Cell &&that) noexcept = default;
   ~Cell() noexcept = default;
 
+  Scalar length() const {
+    return length_;
+  }
   Scalar volume() const {
     return integrator_ptr_->volume();
   }
