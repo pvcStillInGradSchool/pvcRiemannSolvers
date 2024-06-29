@@ -9,6 +9,9 @@ auto value_right = Gas::PrimitiveToConservative(primitive_right);
 
 Value MyIC(const Global &xyz) {
   auto x = xyz[0];
+  if (x == 2.5) {
+    return (value_left + value_right) / 2;
+  }
   return (x < 2.5) ? value_left : value_right;
 }
 

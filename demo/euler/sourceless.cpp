@@ -36,6 +36,9 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
 #include "mini/mesh/vtk.hpp"
 using VtkWriter = mini::mesh::vtk::Writer<Part>;
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+
 int Main(int argc, char* argv[], IC ic, BC bc) {
   MPI_Init(NULL, NULL);
   int n_core, i_core;
@@ -43,46 +46,42 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   MPI_Comm_rank(MPI_COMM_WORLD, &i_core);
   cgp_mpi_comm(MPI_COMM_WORLD);
 
-  if (argc < 7) {
+  if (argc != 2) {
     if (i_core == 0) {
       std::cout << "usage:\n"
-          << "  mpirun -n <n_core> " << argv[0] << " <cgns_file> <hexa|tetra>"
-          << " <t_start> <t_stop> <n_steps_per_frame> <n_frames>"
-          << " [<i_frame_start> [n_parts_prev]]\n";
+          << "  mpirun -n <n_core> " << argv[0] << " <json_input_file>\n";
     }
     MPI_Finalize();
     exit(0);
   }
-  auto old_file_name = std::string(argv[1]);
-  auto suffix = std::string(argv[2]);
-  double t_start = std::atof(argv[3]);
-  double t_stop = std::atof(argv[4]);
-  int n_steps_per_frame = std::atoi(argv[5]);
-  int n_frames = std::atoi(argv[6]);
+
+  auto json_input_file = std::ifstream(argv[1]);
+  auto json_object = nlohmann::json::parse(json_input_file);
+
+  std::string old_file_name = json_object.at("cgns_file");
+  std::string suffix = json_object.at("cell_type");
+  double t_start = json_object.at("t_start");
+  double t_stop = json_object.at("t_stop");
+  int n_steps_per_frame = json_object.at("n_steps_per_frame");
+  int n_frames = json_object.at("n_frames");
   int n_steps = n_frames * n_steps_per_frame;
   auto dt = (t_stop - t_start) / n_steps;
-  int i_frame = 0;
-  if (argc > 7) {
-    i_frame = std::atoi(argv[7]);
-  }
+  int i_frame_prev = json_object.at("i_frame_prev");
+  // `i_frame_prev` might be -1, which means no previous result to be loaded.
+  int i_frame = std::max(i_frame_prev, 0);
   int n_parts_prev = n_core;
-  if (argc > 8) {
-    n_parts_prev = std::atoi(argv[8]);
+  if (i_frame_prev >= 0) {
+    n_parts_prev = json_object.at("n_parts_prev");
   }
-
-  auto case_name = std::string(argv[0]);
-  auto pos = case_name.find_last_of('/');
-  if (pos != std::string::npos) {
-    case_name = case_name.substr(pos+1);
-  }
+  std::string case_name = json_object.at("case_name");
   case_name.push_back('_');
   case_name += suffix;
 
   auto time_begin = MPI_Wtime();
 
   /* Partition the mesh. */
-  if (i_core == 0 && (argc == 7 || n_parts_prev != n_core)) {
-    using Shuffler = mini::mesh::Shuffler<idx_t, double>;
+  if (i_core == 0 && (i_frame_prev < 0 || n_parts_prev != n_core)) {
+    using Shuffler = mini::mesh::Shuffler<idx_t, Scalar>;
     Shuffler::PartitionAndShuffle(case_name, old_file_name, n_core);
   }
   MPI_Barrier(MPI_COMM_WORLD);
@@ -101,8 +100,11 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
   auto spatial = Spatial(&limiter, &part);
 #else
+  Diffusion::SetProperty(0.0);
+  Diffusion::SetBetaValues(
+      json_object.at("ddg_beta_0"), json_object.at("ddg_beta_1"));
   auto spatial = Spatial(&part);
-  RiemannWithViscosity::SetTimeScale(1.0e-2);
+  RiemannWithViscosity::SetTimeScale(json_object.at("time_scale"));
   for (int k = 0; k < kComponents; ++k) {
     VtkWriter::AddCellData("CellViscosity" + std::to_string(k + 1),
         [k](Cell const &cell) {
@@ -111,7 +113,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
 #endif
 
   /* Initialization. */
-  if (argc == 7) {
+  if (i_frame_prev < 0) {
     spatial.Approximate(ic);
 #ifdef VISCOSITY
     RiemannWithViscosity::Viscosity::UpdateProperties();
@@ -183,6 +185,13 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   }
 
   if (i_core == 0) {
+    json_object["n_parts_curr"] = n_core;
+    std::string output_name = case_name;
+    output_name += "/Frame";
+    output_name += std::to_string(i_frame - n_frames) + "to";
+    output_name += std::to_string(i_frame) + ".json";
+    auto json_output_file = std::ofstream(output_name);
+    json_output_file << std::setw(2) << json_object << std::endl;
     std::printf("time-range = [%f, %f], frame-range = [%d, %d], dt = %f\n",
         t_start, t_stop, i_frame - n_frames, i_frame, dt);
     std::printf("[Start] MPI_Finalize() on %d cores at %f sec\n",

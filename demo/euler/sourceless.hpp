@@ -51,7 +51,7 @@ using Coeff = typename Cell::Coeff;
 static void InstallIntegratorPrototypes(Part *part_ptr);
 
 /* Chose the spatial scheme and the method for shock capturing. */
-#define LIMITER  // one of (LIMITER, VISCOSITY) must be defined
+#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
 
 #ifdef LIMITER
 
