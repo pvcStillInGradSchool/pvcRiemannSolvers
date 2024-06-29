@@ -69,6 +69,12 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
 
 using VtkWriter = mini::mesh::vtk::Writer<Part>;
 
+#include "mini/constant/index.hpp"
+static void ShiftByValue(Global *global, Value const &value) {
+  Scalar &z = (*global)[mini::constant::index::Z];
+  z += (value[0] - 2.) * 0.2;
+}
+
 #define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
 
 #ifdef LIMITER
@@ -190,6 +196,7 @@ int main(int argc, char* argv[]) {
     return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[0];
   });
 #endif
+  VtkWriter::InstallShiftByValue(ShiftByValue);
 
   /* Set initial conditions. */
   auto initial_condition = [&](const Global& xyz){

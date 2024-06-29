@@ -272,6 +272,7 @@ const Local Hexahedron64<Local>::locals[64]{
 
 template <typename Part>
 class Writer {
+ public:
   using Cell = typename Part::Cell;
   using Value = typename Cell::Value;
   using Local = typename Cell::Local;
@@ -280,11 +281,21 @@ class Writer {
 
   using PointData = std::pair<std::string,
       std::function<Scalar(Cell const &, Coord const &, Value const &)>>;
-  static std::vector<PointData> point_data_name_and_func_;
 
   using CellData = std::pair<std::string,
       std::function<Scalar(Cell const &)>>;
+
+  using ShiftByValue = std::function<void(Coord *, Value const &)>;
+
+  template <typename Func>
+  static void InstallShiftByValue(Func &&func) {
+    shift_by_value_ = func;
+  }
+
+ private:
+  static std::vector<PointData> point_data_name_and_func_;
   static std::vector<CellData> cell_data_name_and_func_;
+  static ShiftByValue shift_by_value_;
 
   static CellType GetCellType(int n_corners) {
     CellType cell_type;
@@ -395,7 +406,12 @@ class Writer {
     for (int i = 0; i < n; ++i) {
       auto &global = coords->emplace_back();
       auto &value = values->emplace_back();
+      // The local coordiantes of the nodes in VTK elements are generally different from those in DG, so `LocalToGlobal()` and `LocalToValue()` have to be called.
+      // `LocalToValue()` might call `LocalToGlobal()` internally, so a wrapper of them is required for reusing the intermediate value.
       cell.polynomial().LocalToGlobalAndValue(locals[i], &global, &value);
+      if (shift_by_value_) {
+        shift_by_value_(&global, value);
+      }
       // append extra point data, if there is any
       for (int k = 0, K = point_data_name_and_func_.size(); k < K; ++k) {
         auto &func = point_data_name_and_func_[k].second;
@@ -591,6 +607,10 @@ Writer<Part>::point_data_name_and_func_;
 template <typename Part>
 std::vector<typename Writer<Part>::CellData>
 Writer<Part>::cell_data_name_and_func_;
+
+template <typename Part>
+typename Writer<Part>:: ShiftByValue
+Writer<Part>::shift_by_value_;
 
 }  // namespace vtk
 }  // namespace mesh
