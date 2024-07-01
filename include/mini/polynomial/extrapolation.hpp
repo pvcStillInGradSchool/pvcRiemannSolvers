@@ -141,7 +141,18 @@ class Extrapolation : public Interpolation {
    * 
    */
   void SetCoeff(int i_basis, Value const &coeff_i) {
-    this->Interpolation::SetValue(i_basis, coeff_i);
+    this->Interpolation::SetCoeff(i_basis, coeff_i);
+    if (i_basis + 1 == N) {
+      UpdateModalCoeff();
+    }
+  }
+
+  /**
+   * @brief Almost the same as `Interpolation::SetValue`, except calling `UpdateModalCoeff` when `i_node + 1 == N`.
+   * 
+   */
+  void SetValue(int i_basis, Value const &value_i) {
+    this->Interpolation::SetValue(i_basis, value_i);
     if (i_basis + 1 == N) {
       UpdateModalCoeff();
     }
