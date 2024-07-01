@@ -86,19 +86,22 @@ class Hexahedron : public Expansion<kComponents,
 
   // cache for (kLocal == true)
   /* \f$ \det(\mathbf{J}) \f$ */
-  [[no_unique_address]] std::conditional_t<kLocal, std::array<Scalar, N>, E>
+  [[no_unique_address]] std::conditional_t<true, std::array<Scalar, N>, E>
       jacobian_det_;
   /* \f$ \det(\mathbf{J})\,\mathbf{J}^{-1} \f$ */
-  [[no_unique_address]] std::conditional_t<kLocal, std::array<Jacobian, N>, E>
+  [[no_unique_address]] std::conditional_t<true, std::array<Jacobian, N>, E>
       jacobian_det_inv_;
+  /* \f$ \mathbf{J}^{-1} \f$ */
+  [[no_unique_address]] std::conditional_t<!kLocal, std::array<Jacobian, N>, E>
+      jacobian_inv_;
   /* \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \partial_{\zeta} \end{bmatrix}\det(\mathbf{J}) \f$ */
   [[no_unique_address]] std::conditional_t<kLocal, std::array<Local, N>, E>
       jacobian_det_grad_;
   /* \f$ \underline{J}^{-T}\,J^{-1} \f$ */
-  [[no_unique_address]] std::conditional_t<kLocal, Jacobian[N], E>
+  [[no_unique_address]] std::conditional_t<true, Jacobian[N], E>
       mat_after_hess_of_U_;
   /* \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \partial_{\zeta} \end{bmatrix} \qty(\underline{J}^{-T}\,J^{-1}) \f$ */
-  [[no_unique_address]] std::conditional_t<kLocal, Jacobian[N][3], E>
+  [[no_unique_address]] std::conditional_t<true, Jacobian[N][3], E>
       mat_after_grad_of_U_;
   /* \f$ \underline{C}=\begin{bmatrix}\partial_{\xi}\,J & \partial_{\eta}\,J\end{bmatrix}\underline{J}^{-T}\,J^{-2} \f$ */
   [[no_unique_address]] std::conditional_t<kLocal, Mat1x3[N], E>
@@ -110,13 +113,16 @@ class Hexahedron : public Expansion<kComponents,
   [[no_unique_address]] std::conditional_t<kLocal, E, std::array<Mat3xN, N>>
       basis_global_gradients_;
 
-  static void CheckSize() {
+  static constexpr void CheckSize() {
     constexpr size_t large_member_size = kLocal
         ? sizeof(std::array<Scalar, N>) + sizeof(std::array<Jacobian, N>)
             + sizeof(std::array<Local, N>)
             + sizeof(Jacobian[N]) + sizeof(Jacobian[N][3])
             + sizeof(Jacobian[N]) + sizeof(Local[N])
-        : sizeof(std::array<Mat3xN, N>);
+        : sizeof(std::array<Scalar, N>) + sizeof(std::array<Jacobian, N>)
+            + sizeof(std::array<Jacobian, N>)
+            + sizeof(Jacobian[N]) + sizeof(Jacobian[N][3])
+            + sizeof(std::array<Mat3xN, N>);
     constexpr size_t all_member_size = large_member_size
         + sizeof(integrator_ptr_) + sizeof(Coeff);
     static_assert(sizeof(Hexahedron) >= all_member_size);
@@ -218,6 +224,18 @@ class Hexahedron : public Expansion<kComponents,
       Jacobian jacobian = coordinate().LocalToJacobian(local);
       basis_global_gradients_[ijk] = LocalGradientsToGlobalGradients(
           jacobian, basis_local_gradients_[ijk]);
+      // cache for evaluating Hessian
+      Jacobian inv = jacobian.inverse();
+      Scalar det = jacobian.determinant();
+      jacobian_det_[ijk] = det;
+      jacobian_det_inv_[ijk] = det * inv;
+      jacobian_inv_[ijk] = inv;
+      mat_after_hess_of_U_[ijk] = inv.transpose();
+      auto mat_grad = coordinate().LocalToJacobianGradient(local);
+      Jacobian (&inv_T_grad)[3] = mat_after_grad_of_U_[ijk];
+      inv_T_grad[X] = -(inv * mat_grad[X] * inv).transpose();
+      inv_T_grad[Y] = -(inv * mat_grad[Y] * inv).transpose();
+      inv_T_grad[Z] = -(inv * mat_grad[Z] * inv).transpose();
     }
   }
 
@@ -345,6 +363,10 @@ class Hexahedron : public Expansion<kComponents,
     Jacobian jacobian = coordinate().LocalToJacobian(local);
     return LocalGradientsToGlobalGradients(jacobian, grad);
   }
+
+  const Mat3xN &GetBasisLocalGradients(int ijk) const {
+    return basis_local_gradients_[ijk];
+  }
   /**
    * @brief Get the local gradients of basis at a given integratorian point.
    * 
@@ -368,12 +390,12 @@ class Hexahedron : public Expansion<kComponents,
     return basis_global_gradients_[ijk];
   }
   /**
-   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a given integratorian point.
+   * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} U \f$ (when `kLocal == true`) or \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} u \f$ (when `kLocal == false`) at a given integratorian point.
    * 
    */
-  Gradient GetLocalGradient(int ijk) const requires(kLocal) {
+  Gradient GetLocalGradient(int ijk) const requires(true) {
     Gradient value_grad; value_grad.setZero();
-    Mat3xN const &basis_grads = GetBasisGradients(ijk);
+    Mat3xN const &basis_grads = GetBasisLocalGradients(ijk);
     for (int abc = 0; abc < N; ++abc) {
       value_grad += basis_grads.col(abc) * this->coeff_.col(abc).transpose();
     }
@@ -443,23 +465,12 @@ class Hexahedron : public Expansion<kComponents,
   }
 
   /**
-   * @brief Get the local Hessians of basis at a given integratorian point.
-   * 
-   * This version is compiled only if `kLocal` is `true`.
-   * 
-   * @param ijk the index of the integratorian point
-   * @return const Mat6xN& the local Hessians of basis
-   */
-  const Mat6xN &GetBasisHessians(int ijk) const requires(kLocal) {
-    return basis_local_hessians_[ijk];
-  }
-  /**
    * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\partial_{\xi}\\ \partial_{\xi}\partial_{\eta}\\ \cdots \end{bmatrix} U \f$ at a given integratorian point.
    * 
    */
-  Hessian GetLocalHessian(int ijk) const requires(kLocal) {
+  Hessian GetLocalHessian(int ijk) const requires(true) {
     Mat6xK value_hess; value_hess.setZero();
-    Mat6xN const &basis_hess = GetBasisHessians(ijk);
+    Mat6xN const &basis_hess = basis_local_hessians_[ijk];
     for (int abc = 0; abc < N; ++abc) {
       value_hess += basis_hess.col(abc) * this->coeff_.col(abc).transpose();
     }
@@ -474,6 +485,37 @@ class Hexahedron : public Expansion<kComponents,
   }
 
  private:
+  Hessian _GetGlobalHessian(Gradient const &local_grad_ijk, int ijk) const
+      requires(!kLocal) {
+    Hessian local_hess = GetLocalHessian(ijk);
+    auto &global_hess = local_hess;
+    for (int k = 0; k < K; ++k) {
+      Mat3x3 scalar_hess;
+      scalar_hess(X, X) = local_hess(XX, k);
+      scalar_hess(X, Y) =
+      scalar_hess(Y, X) = local_hess(XY, k);
+      scalar_hess(X, Z) =
+      scalar_hess(Z, X) = local_hess(XZ, k);
+      scalar_hess(Y, Y) = local_hess(YY, k);
+      scalar_hess(Y, Z) =
+      scalar_hess(Z, Y) = local_hess(YZ, k);
+      scalar_hess(Z, Z) = local_hess(ZZ, k);
+      scalar_hess *= mat_after_hess_of_U_[ijk];
+      Mat1x3 scalar_local_grad = local_grad_ijk.col(k);
+      scalar_hess.row(X) += scalar_local_grad * mat_after_grad_of_U_[ijk][X];
+      scalar_hess.row(Y) += scalar_local_grad * mat_after_grad_of_U_[ijk][Y];
+      scalar_hess.row(Z) += scalar_local_grad * mat_after_grad_of_U_[ijk][Z];
+      scalar_hess = jacobian_inv_[ijk] * scalar_hess;
+      global_hess(XX, k) = scalar_hess(X, X);
+      global_hess(XY, k) = scalar_hess(X, Y);
+      global_hess(XZ, k) = scalar_hess(X, Z);
+      global_hess(YY, k) = scalar_hess(Y, Y);
+      global_hess(YZ, k) = scalar_hess(Y, Z);
+      global_hess(ZZ, k) = scalar_hess(Z, Z);
+    }
+    return global_hess;
+  }
+
   Hessian _GetGlobalHessian(Gradient const &local_grad_ijk, int ijk) const
       requires(kLocal) {
     Hessian local_hess = GetLocalHessian(ijk);
@@ -533,6 +575,15 @@ class Hexahedron : public Expansion<kComponents,
         _GetGlobalHessian(local_grad_ijk, ijk) };
   }
 
+  std::tuple<Value, Gradient, Hessian> GetGlobalValueGradientHessian(int ijk) const
+      requires(!kLocal) {
+    auto value_ijk = GetValue(ijk);
+    auto local_grad_ijk = GetLocalGradient(ijk);
+    return { value_ijk, GetGlobalGradient(ijk),
+        // Hessian::Zero() };
+        _GetGlobalHessian(local_grad_ijk, ijk) };
+  }
+
   /**
    * @brief Convert the gradients in local coordinates to the gradients in global coordinates.
    * 
@@ -559,7 +610,7 @@ class Hexahedron : public Expansion<kComponents,
    */
   template <class FluxMatrix>
   FluxMatrix GlobalFluxToLocalFlux(const FluxMatrix &global_flux, int ijk) const
-      requires(kLocal) {
+      requires(true) {
     FluxMatrix local_flux = global_flux * GetJacobianAssociated(ijk);
     return local_flux;
   }
@@ -573,7 +624,7 @@ class Hexahedron : public Expansion<kComponents,
    * @return Jacobian const& the associated matrix of \f$ \mathbf{J} \f$.
    */
   Jacobian const &GetJacobianAssociated(int ijk) const
-      requires(kLocal) {
+      requires(true) {
     return jacobian_det_inv_[ijk];
   }
 
