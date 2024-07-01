@@ -6,6 +6,7 @@
 #include <string>
 
 #define FR // exactly one of (DGFEM, DGSEM, FR) must be defined
+#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
 
 using Scalar = double;
 
@@ -35,10 +36,17 @@ using Polynomial = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, k
 using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 
 #include "mini/polynomial/hexahedron.hpp"
-#include "mini/polynomial/extrapolation.hpp"
 using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, false>;
+
+#ifdef LIMITER
+#include "mini/polynomial/extrapolation.hpp"
 using Polynomial = mini::polynomial::Extrapolation<Interpolation>;
-#endif
+
+#else  // VISCOSITY
+using Polynomial = Interpolation;
+#endif  // LIMITER
+
+#endif  // DGSEM
 
 #include "mini/mesh/part.hpp"
 using Part = mini::mesh::part::Part<cgsize_t, Polynomial>;
@@ -51,8 +59,6 @@ using Coeff = typename Cell::Coeff;
 static void InstallIntegratorPrototypes(Part *part_ptr);
 
 /* Chose the spatial scheme and the method for shock capturing. */
-#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
-
 #ifdef LIMITER
 
 #ifdef DGFEM

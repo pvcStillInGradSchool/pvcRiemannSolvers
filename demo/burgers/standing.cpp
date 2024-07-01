@@ -21,6 +21,7 @@ constexpr int kDegrees = 2;
 using Riemann = mini::riemann::rotated::Burgers<Scalar, kDimensions>;
 
 #define FR // exactly one of (DGFEM, DGSEM, FR) must be defined
+#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
 
 #ifdef DGFEM
 #include "mini/integrator/legendre.hpp"
@@ -33,10 +34,17 @@ using Polynomial = mini::polynomial::Projection<Scalar, kDimensions, kDegrees, k
 using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 
 #include "mini/polynomial/hexahedron.hpp"
-#include "mini/polynomial/extrapolation.hpp"
 using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, false>;
+
+#ifdef LIMITER
+#include "mini/polynomial/extrapolation.hpp"
 using Polynomial = mini::polynomial::Extrapolation<Interpolation>;
-#endif
+
+#else  // VISCOSITY
+using Polynomial = Interpolation;
+#endif  // LIMITER
+
+#endif  // DGSEM
 
 #include "mini/mesh/part.hpp"
 using Part = mini::mesh::part::Part<cgsize_t, Polynomial>;
@@ -74,8 +82,6 @@ static void ShiftByValue(Global *global, Value const &value) {
   Scalar &z = (*global)[mini::constant::index::Z];
   z += (value[0] - 2.) * 0.2;
 }
-
-#define VISCOSITY  // one of (LIMITER, VISCOSITY) must be defined
 
 #ifdef LIMITER
 
