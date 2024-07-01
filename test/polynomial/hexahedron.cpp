@@ -14,30 +14,39 @@
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/constant/index.hpp"
+#include "mini/rand.hpp"
 
 #include "gtest/gtest.h"
 
-using std::sqrt;
 using namespace mini::constant::index;
 
-double rand_f() {
-  return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX);
-}
-
-class TestPolynomialHexahedronProjection : public ::testing::Test {
+class TestPolynomialHexahedron : public ::testing::Test {
  protected:
-  using IntegratorX = mini::integrator::Legendre<double, 4>;
+  using Scalar = double;
+
+  void SetUp() override {
+    std::srand(31415926);
+  }
+
+  static double rand_f(double a = -1., double b = 1.) {
+    return mini::rand::uniform(a, b);
+  }
+};
+
+class TestPolynomialHexahedronProjection : public TestPolynomialHexahedron {
+ protected:
+  using IntegratorX = mini::integrator::Legendre<Scalar, 4>;
   using Integrator = mini::integrator::Hexahedron<IntegratorX, IntegratorX, IntegratorX>;
-  using Coordinate = mini::coordinate::Hexahedron8<double>;
-  using Basis = mini::basis::OrthoNormal<double, 3, 2>;
+  using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
+  using Basis = mini::basis::OrthoNormal<Scalar, 3, 2>;
   using Coord = typename Basis::Coord;
   using Y = typename Basis::MatNx1;
   using A = typename Basis::MatNxN;
-  using ScalarPF = mini::polynomial::Projection<double, 3, 2, 1>;
-  using Mat1x10 = mini::algebra::Matrix<double, 1, 10>;
-  using VectorPF = mini::polynomial::Projection<double, 3, 2, 11>;
-  using Mat11x1 = mini::algebra::Matrix<double, 11, 1>;
-  using Mat11x10 = mini::algebra::Matrix<double, 11, 10>;
+  using ScalarPF = mini::polynomial::Projection<Scalar, 3, 2, 1>;
+  using Mat1x10 = mini::algebra::Matrix<Scalar, 1, 10>;
+  using VectorPF = mini::polynomial::Projection<Scalar, 3, 2, 11>;
+  using Mat11x1 = mini::algebra::Matrix<Scalar, 11, 1>;
+  using Mat11x10 = mini::algebra::Matrix<Scalar, 11, 10>;
 };
 TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   // build a hexa-integrator
@@ -128,9 +137,8 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
   EXPECT_EQ(vector_pf.coeff() * 2, vector_coeff);
 }
 
-class TestPolynomialHexahedronInterpolation : public ::testing::Test {
+class TestPolynomialHexahedronInterpolation : public TestPolynomialHexahedron {
  protected:
-  using Scalar = double;
   using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
   // To approximate quadratic functions in each dimension exactly, at least 3 nodes are needed.
   using IntegratorX = mini::integrator::Legendre<Scalar, 3>;
@@ -150,7 +158,6 @@ TEST_F(TestPolynomialHexahedronInterpolation, StaticMethods) {
   output.setZero();
   EXPECT_EQ(output.norm(), 0.0);
   Scalar *output_data = output.data();
-  std::srand(31415926);
   for (int i_basis = 0; i_basis < N; ++i_basis) {
     Value value;
     for (int i_comp = 0; i_comp < K; ++i_comp) {
@@ -194,9 +201,8 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
     EXPECT_NEAR(value.norm(), 0, 1e-13);
   }
   // test values on random points
-  std::srand(31415926);
   for (int i = 1 << 10; i >= 0; --i) {
-    auto global = Global{ a * rand_f(), b * rand_f(), c * rand_f() };
+    auto global = Global{ rand_f(-a, a), rand_f(-b, b), rand_f(-c, c) };
     auto value = vector_func(global);
     value -= vector_interp.GlobalToValue(global);
     EXPECT_NEAR(value.norm(), 0, 1e-12);
@@ -221,7 +227,6 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
   using Integrator = typename Interpolation::Integrator;
   using Global = typename Integrator::Global;
   using Local = typename Integrator::Local;
-  std::srand(31415926);
   for (int i_cell = 1; i_cell > 0; --i_cell) {
     // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0, b = 30.0, c = 40.0;
