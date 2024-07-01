@@ -2,6 +2,8 @@
 #ifndef MINI_POLYNOMIAL_EXTRAPOLATION_HPP_
 #define MINI_POLYNOMIAL_EXTRAPOLATION_HPP_
 
+#include <concepts>
+
 #include "mini/polynomial/projection.hpp"
 
 namespace mini {
@@ -120,8 +122,15 @@ class Extrapolation : public Interpolation {
     UpdateNodalCoeff();
   }
 
+  void SetCoeff(typename Interpolation::Coeff const &coeff) {
+    this->Interpolation::SetCoeff(coeff);
+    UpdateModalCoeff();
+  }
+
   template <typename FieldIndexToScalar>
-  void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
+      requires std::same_as< Scalar,
+          std::invoke_result_t<FieldIndexToScalar, int> >
+  void SetCoeff(FieldIndexToScalar &&field_index_to_scalar) {
     this->Interpolation::SetCoeff(
         std::forward<FieldIndexToScalar>(field_index_to_scalar));
     UpdateModalCoeff();

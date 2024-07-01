@@ -64,6 +64,8 @@ class Expansion {
   }
 
   template <typename FieldIndexToScalar>
+      requires std::same_as< Scalar,
+          std::invoke_result_t<FieldIndexToScalar, int> >
   void SetCoeff(FieldIndexToScalar && field_index_to_scalar) {
     for (int i_field = 0; i_field < kFields; ++i_field) {
       coeff_.reshaped()[i_field] = field_index_to_scalar(i_field);
