@@ -371,14 +371,8 @@ class Hexahedron : public Expansion<kComponents,
     return basis_local_gradients_[ijk];
   }
 
-  /**
-   * @brief Get the local (when `kLocal == true`) or global (when `kLocal == false`) gradients of basis at a given integratorian point.
-   * 
-   * @param ijk the index of the integratorian point
-   * @return the gradients of basis
-   */
-  const Mat3xN &GetBasisGradients(int ijk) const {
-    return kLocal ? basis_local_gradients_[ijk] : basis_global_gradients_[ijk];
+  const Mat3xN &GetBasisGlobalGradients(int ijk) const requires(!kLocal) {
+    return basis_global_gradients_[ijk];
   }
 
   /**
@@ -444,7 +438,7 @@ class Hexahedron : public Expansion<kComponents,
 
  private:
   Gradient _GetGlobalGradient(int ijk) const requires(!kLocal) {
-    Mat3xN const &basis_grad = GetBasisGradients(ijk);
+    Mat3xN const &basis_grad = GetBasisGlobalGradients(ijk);
     return basis_grad * this->coeff_.transpose();
   }
   std::pair<Value, Gradient> _GetGlobalValueGradient(int ijk) const

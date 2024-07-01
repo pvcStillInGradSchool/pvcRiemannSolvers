@@ -99,6 +99,16 @@ class Lobatto : public General<P, R> {
     return flux;
   }
 
+  static auto const &GetBasisGradients(Polynomial const &polynomial, int q)
+      requires(kLocal) {
+    return polynomial.GetBasisLocalGradients(q);
+  }
+
+  static auto const &GetBasisGradients(Polynomial const &polynomial, int q)
+      requires(!kLocal) {
+    return polynomial.GetBasisGlobalGradients(q);
+  }
+
  public:
   explicit Lobatto(Part *part_ptr)
       : Base(part_ptr) {
@@ -146,7 +156,7 @@ class Lobatto : public General<P, R> {
     const auto &integrator = cell.integrator();
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
       auto flux = GetWeightedFluxMatrix(cell, q);
-      auto const &grad = cell.polynomial().GetBasisGradients(q);
+      auto const &grad = GetBasisGradients(cell.polynomial(), q);
       Coeff prod = flux * grad;
       cell.polynomial().AddCoeffTo(prod, residual);
     }
