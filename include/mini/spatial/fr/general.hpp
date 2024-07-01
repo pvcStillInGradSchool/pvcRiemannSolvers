@@ -239,6 +239,13 @@ class General : public spatial::FiniteElement<P, R> {
     return "FR::General";
   }
 
+  Value GetValueJump(Face const &face, int i_flux_point) const override {
+    auto &holder_flux_point = holder_cache_[face.id()][i_flux_point].second;
+    auto &sharer_flux_point = sharer_cache_[face.id()][i_flux_point].second;
+    return face.holder().polynomial().GetValue(holder_flux_point.ijk)
+         - face.sharer().polynomial().GetValue(sharer_flux_point.ijk);
+  }
+
   Column GetResidualColumn() const override {
     Column residual = this->Base::GetResidualColumn();
     if (Polynomial::kLocal) {

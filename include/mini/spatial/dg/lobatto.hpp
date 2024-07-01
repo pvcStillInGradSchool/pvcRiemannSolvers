@@ -133,6 +133,13 @@ class Lobatto : public General<P, R> {
     return "DG::Lobatto";
   }
 
+  Value GetValueJump(Face const &face, int i_flux_point) const override {
+    auto holder_flux_point_ijk = i_node_on_holder_[face.id()][i_flux_point];
+    auto sharer_flux_point_ijk = i_node_on_sharer_[face.id()][i_flux_point];
+    return face.holder().polynomial().GetValue(holder_flux_point_ijk)
+         - face.sharer().polynomial().GetValue(sharer_flux_point_ijk);
+  }
+
   Column GetResidualColumn() const override {
     Column residual = this->Base::GetResidualColumn();
     // divide mass matrix for each cell

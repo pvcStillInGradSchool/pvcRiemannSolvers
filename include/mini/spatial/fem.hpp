@@ -148,7 +148,7 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
 #endif
   }
 
-  
+  virtual Value GetValueJump(Face const &face, int i_flux_point) const = 0;
 
 #ifdef ENABLE_LOGGING
   std::ofstream &log() const {

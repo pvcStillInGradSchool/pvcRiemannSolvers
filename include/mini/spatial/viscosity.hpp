@@ -396,9 +396,7 @@ class EnergyBasedViscosity : public R {
       const auto &sharer = face.sharer();
       const auto &integrator = face.integrator();
       for (int i = 0; i < integrator.CountPoints(); ++i) {
-        const auto &global = integrator.GetGlobal(i);
-        Value jump = holder.polynomial().GlobalToValue(global)
-                   - sharer.polynomial().GlobalToValue(global);
+        Value jump = spatial_ptr_->GetValueJump(face, i);
         Scalar scale = integrator.GetGlobalWeight(i) * face.height();
         jump = std::pow(jump, 2) * scale;
         jump_integrals.at(holder.id()) += jump;
@@ -410,9 +408,7 @@ class EnergyBasedViscosity : public R {
       const auto &sharer = face.sharer();
       const auto &integrator = face.integrator();
       for (int i = 0; i < integrator.CountPoints(); ++i) {
-        auto const &global = integrator.GetGlobal(i);
-        Value jump = holder.polynomial().GlobalToValue(global)
-                   - sharer.polynomial().GlobalToValue(global);
+        Value jump = spatial_ptr_->GetValueJump(face, i);
         Scalar scale = integrator.GetGlobalWeight(i) * face.height();
         jump = std::pow(jump, 2) * scale;
         jump_integrals.at(holder.id()) += jump;

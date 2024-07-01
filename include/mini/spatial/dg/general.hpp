@@ -47,6 +47,12 @@ class General : public spatial::FiniteElement<P, R> {
     return "DG::General";
   }
 
+  virtual Value GetValueJump(Face const &face, int i_flux_point) const {
+    const auto &global = face.integrator().GetGlobal(i_flux_point);
+    return face.holder().polynomial().GlobalToValue(global)
+         - face.sharer().polynomial().GlobalToValue(global);
+  }
+
  protected:  // implement pure virtual methods declared in Base
   void AddFluxDivergence(Cell const &cell, Scalar *residual) const override {
     assert(residual);

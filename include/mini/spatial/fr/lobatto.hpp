@@ -216,6 +216,13 @@ class Lobatto : public General<P, R> {
     return "FR::Lobatto";
   }
 
+  Value GetValueJump(Face const &face, int i_flux_point) const override {
+    auto &holder_flux_point = holder_cache_[face.id()][i_flux_point];
+    auto &sharer_flux_point = sharer_cache_[face.id()][i_flux_point];
+    return face.holder().polynomial().GetValue(holder_flux_point.ijk)
+         - face.sharer().polynomial().GetValue(sharer_flux_point.ijk);
+  }
+
  protected:  // override virtual methods defined in Base
   void AddFluxToHolderAndSharer(Face const &face,
       Scalar *holder_data, Scalar *sharer_data) const override {
