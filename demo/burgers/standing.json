@@ -7,5 +7,6 @@
   "n_frames": 50,
   "i_frame_prev": -1,
   "n_parts_prev": -1,
-  "time_scale": 1.0e+3
+  "time_scale": 1.0e-2,
+  "shift_by_value": true
 }

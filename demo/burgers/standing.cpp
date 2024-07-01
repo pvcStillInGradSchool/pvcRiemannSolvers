@@ -196,7 +196,9 @@ int main(int argc, char* argv[]) {
     return RiemannWithViscosity::GetPropertyOnCell(cell.id(), 0)[0];
   });
 #endif
-  VtkWriter::InstallShiftByValue(ShiftByValue);
+  if (json_object.at("shift_by_value")) {
+    VtkWriter::InstallShiftByValue(ShiftByValue);
+  }
 
   /* Set initial conditions. */
   auto initial_condition = [&](const Global& xyz){
