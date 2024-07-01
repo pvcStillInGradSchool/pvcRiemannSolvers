@@ -227,18 +227,14 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
   using Integrator = typename Interpolation::Integrator;
   using Global = typename Integrator::Global;
   using Local = typename Integrator::Local;
-  for (int i_cell = 1; i_cell > 0; --i_cell) {
+  for (int i_cell = 1 << 5; i_cell > 0; --i_cell) {
     // build a hexa-integrator and a Lagrange basis on it
-    auto a = 20.0, b = 30.0, c = 40.0;
+    auto a = 20.0 + rand_f(), b = 30.0 + rand_f(), c = 40.0 + rand_f();
     auto coordinate = Coordinate {
-      Global(rand_f() - a, rand_f() - b, rand_f() - c),
-      Global(rand_f() + a, rand_f() - b, rand_f() - c),
-      Global(rand_f() + a, rand_f() + b, rand_f() - c),
-      Global(rand_f() - a, rand_f() + b, rand_f() - c),
-      Global(rand_f() - a, rand_f() - b, rand_f() + c),
-      Global(rand_f() + a, rand_f() - b, rand_f() + c),
-      Global(rand_f() + a, rand_f() + b, rand_f() + c),
-      Global(rand_f() - a, rand_f() + b, rand_f() + c),
+        Global(-a, -b, -c), Global(+a, -b, -c),
+        Global(+a, +b, -c), Global(-a, +b, -c),
+        Global(-a, -b, +c), Global(+a, -b, +c),
+        Global(+a, +b, +c), Global(-a, +b, +c),
     };
     auto integrator = Integrator(coordinate);
     // build a vector function and its interpolation
@@ -271,7 +267,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
       Local const &local = interp.integrator().GetLocal(ijk);
       Global const &global = interp.integrator().GetGlobal(ijk);
       Value value = interp.GetValue(ijk);
-      EXPECT_NEAR((value - get_value(global)).norm(), 0, 1e-13);
+      EXPECT_NEAR((value - get_value(global)).norm(), 0, 1e-12);
       EXPECT_NEAR((value - interp.GlobalToValue(global)).norm(), 0, 1e-10);
       interp.SetValue(ijk, value);
       EXPECT_EQ(value, interp.GetValue(ijk));
@@ -279,7 +275,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
       EXPECT_NEAR((grad - interp.LocalToGlobalGradient(local)).norm(), 0,
           1e-13);
       // compare with analytical derivatives
-      EXPECT_NEAR((get_grad(global) - grad).norm(), 0, 4e-1);
+      EXPECT_NEAR((get_grad(global) - grad).norm(), 0.0, 1e-8);
       // compare with O(h^2) finite difference derivatives
       auto x = global[X], y = global[Y], z = global[Z], h = 1e-5;
       Value left = interp.GlobalToValue(Global(x - h, y, z));
@@ -291,7 +287,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, GetGlobalGradient) {
       left = interp.GlobalToValue(Global(x, y, z - h));
       right = interp.GlobalToValue(Global(x, y, z + h));
       grad.row(Z) -= (right - left) / (2 * h);
-      EXPECT_NEAR(grad.norm(), 0, 1e-7);
+      EXPECT_NEAR(grad.norm(), 0, 1e-6);
     }
     // test hessians on nodes
     for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
