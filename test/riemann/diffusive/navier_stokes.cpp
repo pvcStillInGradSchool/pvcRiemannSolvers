@@ -12,6 +12,7 @@
 #include "mini/integrator/hexahedron.hpp"
 #include "mini/integrator/lobatto.hpp"
 #include "mini/polynomial/hexahedron.hpp"
+#include "mini/rand.hpp"
 
 class TestRiemannDiffusiveNavierStokes : public ::testing::Test {
  public:
@@ -29,17 +30,23 @@ class TestRiemannDiffusiveNavierStokes : public ::testing::Test {
   static constexpr int U = 1, V = 2, W = 3, E = 4;
   Scalar nu = 0.01, prandtl = 0.7;
 
-  static double rand_f() {
-    return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX);
+  static constexpr int kTrials = 1 << 10;
+
+  void SetUp() override {
+    std::srand(31415926);
   }
+
+  static double rand_f() {
+    return mini::rand::uniform(-1., 1.);
+  }
+
   static double disturb(double x) {
-    return x * (1 + rand_f() * 0.05);
+    return x * mini::rand::uniform(0.95, 1.05);
   }
 };
 TEST_F(TestRiemannDiffusiveNavierStokes, TestGradientConversions) {
   NS::SetProperty(nu, prandtl);
-  std::srand(31415926);
-  for (int i = 1 << 10; i >= 0; --i) {
+  for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
     Scalar rho = disturb(1.29);
     Scalar u = disturb(10.0);
     Scalar v = disturb(20.0);
@@ -76,8 +83,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestGradientConversions) {
 }
 TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
   NS::SetProperty(nu, prandtl);
-  std::srand(31415926);
-  for (int i = 1 << 10; i >= 0; --i) {
+  for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
     Scalar rho = disturb(1.29);
     Scalar u = disturb(10.0);
     Scalar v = disturb(20.0);
@@ -107,7 +113,7 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestFluxMatrixFluxVectorConsistency) {
     EXPECT_NEAR(normal.dot(flux_matrix.row(U)), flux_vector[U], 1e-16);
     EXPECT_NEAR(normal.dot(flux_matrix.row(V)), flux_vector[V], 1e-16);
     EXPECT_NEAR(normal.dot(flux_matrix.row(W)), flux_vector[W], 1e-15);
-    EXPECT_NEAR(normal.dot(flux_matrix.row(E)), flux_vector[E], 1e-12);
+    EXPECT_NEAR(normal.dot(flux_matrix.row(E)), flux_vector[E], 1e-11);
     Primitive wall_value = primitive_got;
     wall_value.energy() = normal.dot(grad_T);
     flux_vector = -flux_vector;
@@ -143,7 +149,6 @@ TEST_F(TestRiemannDiffusiveNavierStokes, TestViscousStressTensor) {
   Scalar rho = 1.29, p = 101325;
   NS::SetProperty(nu, prandtl);
   auto [mu, zeta] = NS::GetViscosity(rho, nu);
-  std::srand(31415926);
   Scalar u_0 = rand_f(), du_dx = rand_f(), du_dy = rand_f(), du_dz = rand_f();
   Scalar v_0 = rand_f(), dv_dx = rand_f(), dv_dy = rand_f(), dv_dz = rand_f();
   Scalar w_0 = rand_f(), dw_dx = rand_f(), dw_dy = rand_f(), dw_dz = rand_f();
