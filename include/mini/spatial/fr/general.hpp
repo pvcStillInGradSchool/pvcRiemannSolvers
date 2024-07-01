@@ -44,7 +44,6 @@ class General : public spatial::FiniteElement<P, R> {
   using Index = typename Base::Index;
   using Global = typename Base::Global;
   using Polynomial = typename Base::Polynomial;
-  static_assert(Polynomial::kLocal);
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;
@@ -240,6 +239,27 @@ class General : public spatial::FiniteElement<P, R> {
     return "FR::General";
   }
 
+  Column GetResidualColumn() const override {
+    Column residual = this->Base::GetResidualColumn();
+    if (Polynomial::kLocal) {
+      return residual;
+    }
+    // TODO(PVC): define a virtual method in Base
+    // divide Jacobian determinant for each DoF
+    for (const Cell &cell : this->part().GetLocalCells()) {
+      auto i_cell = cell.id();
+      Scalar *data = this->AddCellDataOffset(&residual, i_cell);
+      const auto &integrator = cell.integrator();
+      for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
+        auto scale = 1.0 / integrator.GetJacobianDeterminant(q);
+        data = cell.polynomial().ScaleValueAt(scale, data);
+      }
+      assert(data == residual.data() + residual.size()
+          || data == this->AddCellDataOffset(&residual, i_cell + 1));
+    }
+    return residual;
+  }
+
  protected:  // override virtual methods defined in Base
   void AddFluxDivergence(Cell const &cell, Scalar *residual) const override {
     assert(residual);
@@ -251,7 +271,7 @@ class General : public spatial::FiniteElement<P, R> {
       flux[q] = polynomial.GlobalFluxToLocalFlux(global_flux, q);
     }
     for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-      auto const &grad = polynomial.GetBasisGradients(q);
+      auto const &grad = polynomial.GetBasisLocalGradients(q);
       Value value = flux[0] * grad.col(0);
       for (int k = 1; k < n; ++k) {
         value += flux[k] * grad.col(k);

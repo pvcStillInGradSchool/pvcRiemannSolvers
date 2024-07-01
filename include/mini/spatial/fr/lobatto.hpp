@@ -43,7 +43,6 @@ class Lobatto : public General<P, R> {
   using Cell = typename Base::Cell;
   using Global = typename Base::Global;
   using Polynomial = typename Base::Polynomial;
-  static_assert(Polynomial::kLocal);
   using Coeff = typename Base::Coeff;
   using Value = typename Base::Value;
   using Temporal = typename Base::Temporal;

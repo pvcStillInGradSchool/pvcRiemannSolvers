@@ -34,7 +34,7 @@ using Gx = mini::integrator::Lobatto<Scalar, kDegrees + 1>;
 
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/polynomial/extrapolation.hpp"
-using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, false>;
 using Polynomial = mini::polynomial::Extrapolation<Interpolation>;
 #endif
 
