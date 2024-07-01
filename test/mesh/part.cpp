@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
 {
   std::printf("Run Part() on proc[%d/%d] at %f sec\n",
       i_core, n_core, MPI_Wtime() - time_begin);
-  using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+  using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, false>;
   using Extrapolation = mini::polynomial::Extrapolation<Interpolation>;
   using Part = mini::mesh::part::Part<cgsize_t, Extrapolation>;
   auto part = Part(case_name, i_core, n_core);

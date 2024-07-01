@@ -195,16 +195,15 @@ class EnergyBasedViscosity : public R {
   }
   static void UpdateCellResidual(Cell *curr_cell, Scalar *residual_data) {
     spatial_ptr_->AddFluxDivergence(*curr_cell, residual_data);
-    Coeff dummy;
     for (Face *face : curr_cell->adj_faces_) {
       if (face->holder_ptr() == curr_cell) {
         spatial_ptr_->AddFluxToHolder(*face, residual_data);
-        // spatial_ptr_->AddFluxToHolderAndSharer(*face, residual_data, nullptr);
       } else {
         spatial_ptr_->AddFluxToSharer(*face, residual_data);
-        // spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), residual_data);
       }
 #if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
+{
+      Coeff dummy;
       Cell const *other = face->other(curr_cell);
       assert(other->polynomial().coeff() == Coeff::Zero());
       Coeff res1, res2;
@@ -222,6 +221,7 @@ class EnergyBasedViscosity : public R {
         spatial_ptr_->AddFluxToHolderAndSharer(*face, dummy.data(), res2.data());
         assert(res1 == res2);
       }
+}
 #endif
     }
     assert(curr_cell->adj_cells_.size() == curr_cell->adj_faces_.size());
@@ -261,6 +261,16 @@ class EnergyBasedViscosity : public R {
         residual = -residual;
         SetViscousProperty(cell_ptr, Value::Ones());
         UpdateCellResidual(cell_ptr, residual.data());
+        if (!Polynomial::kLocal) {
+          // TODO(PVC): Use the virtual method in Base
+          Scalar *data = residual.data();
+          const auto &integrator = cell_ptr->integrator();
+          for (int q = 0; q < Cell::N; ++q) {
+            auto scale = 1. / integrator.GetJacobianDeterminant(q);
+            data = cell_ptr->polynomial().ScaleValueAt(scale, data);
+          }
+          assert(data == residual.data() + Cell::kFields);
+        }
         return residual;
       };
       auto &curr_polynomial = curr_cell->polynomial();
@@ -273,25 +283,44 @@ class EnergyBasedViscosity : public R {
         Coeff residual = GetCellResidual(curr_cell);
         // Write the residual column into the matrix:
         matrix.col(c) = residual.row(0);
+#ifndef NDEBUG
         for (int r = 1; r < Cell::K; ++r) {
-          assert((residual.row(r) - residual.row(0)).squaredNorm() < 1e-10);
+          if ((residual.row(r) - residual.row(0)).squaredNorm() > 1e-10) {
+            std::cout << residual.row(r) << "\n\n";
+            std::cout << residual.row(0) << "\n\n";
+            assert(false);
+          }
         }
+#endif
       }
 #if !defined(NDEBUG) && defined(ENABLE_SLOW_CONSISTENCY_CHECK)
+{
       Coeff solution = Coeff::Random();
+      curr_cell->polynomial().SetCoeff(solution);
+      assert(solution == curr_cell->polynomial().coeff());
       Coeff residual = GetCellResidual(curr_cell);
+      assert(solution == curr_cell->polynomial().coeff());
       for (int k = 0; k < Cell::K; ++k) {
         auto const &residual_col = residual.row(k).transpose();
         auto const &solution_col = solution.row(k).transpose();
-        assert((residual_col - matrix * solution_col).norm() < 1e-10);
+        if ((residual_col - matrix * solution_col).norm() > 1e-10) {
+          std::cout << (residual_col).transpose() << "\n\n";
+          std::cout << (matrix * solution_col).transpose() << "\n\n";
+          assert(false);
+        }
       }
+}
 #endif
-      // Scale the damping matrix by local weight over Jacobian:
-      assert(curr_cell->polynomial().kLocal);
+      // Scale the damping matrix by Gaussian weights:
       for (int r = 0; r < Cell::N; ++r) {
-        Scalar scale
-            = curr_cell->integrator().GetLocalWeight(r)
-            / curr_cell->integrator().GetJacobianDeterminant(r);
+        Scalar scale = curr_cell->integrator().GetLocalWeight(r);
+        Scalar det = curr_cell->integrator().GetJacobianDeterminant(r);
+        if (Polynomial::kLocal) {
+          scale /= det;
+        } else {
+          scale *= det;
+          assert(scale == curr_cell->integrator().GetGlobalWeight(r));
+        }
         assert(scale > 0);
         matrix.row(r) *= scale;
       }

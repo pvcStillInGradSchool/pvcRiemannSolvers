@@ -11,6 +11,8 @@
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/polynomial/extrapolation.hpp"
 
+#define ENABLE_SLOW_CONSISTENCY_CHECK
+
 #include "mini/spatial/viscosity.hpp"
 #include "mini/spatial/fem.hpp"
 #include "mini/spatial/dg/lobatto.hpp"
@@ -23,7 +25,7 @@
 #include "test/spatial/riemann.hpp"
 
 using Polynomial = mini::polynomial::Extrapolation<
-    mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true> >;
+    mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, false> >;
 using Part = mini::mesh::part::Part<cgsize_t, Polynomial>;
 using Global = typename Part::Global;
 

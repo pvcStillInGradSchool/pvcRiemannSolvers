@@ -92,7 +92,7 @@ TEST_F(TestMeshVtk, Writer) {
   auto solution_name = "Interpolation";
   std::printf("Run Write<%s>() on proc[%d/%d] at %f sec\n",
       solution_name, i_core, n_core, MPI_Wtime() - time_begin);
-  using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, true>;
+  using Interpolation = mini::polynomial::Hexahedron<Gx, Gx, Gx, kComponents, false>;
   using Extrapolation = mini::polynomial::Extrapolation<Interpolation>;
   using Part = mini::mesh::part::Part<cgsize_t, Extrapolation>;
   Write<Part>("double_mach", solution_name);
