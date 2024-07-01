@@ -354,8 +354,7 @@ class Hexahedron : public Expansion<kComponents,
     Local local = coordinate().GlobalToLocal(global);
     return basis_.GetValues(local);
   }
-  Mat3xN GlobalToBasisGradients(Global const &global) const {
-    Local local = coordinate().GlobalToLocal(global);
+  Mat3xN LocalToBasisGradients(Local const &local) const {
     Mat3xN grad;
     grad.row(0) = basis_.GetDerivatives(1, 0, 0, local);
     grad.row(1) = basis_.GetDerivatives(0, 1, 0, local);
@@ -363,32 +362,25 @@ class Hexahedron : public Expansion<kComponents,
     Jacobian jacobian = coordinate().LocalToJacobian(local);
     return LocalGradientsToGlobalGradients(jacobian, grad);
   }
+  Mat3xN GlobalToBasisGradients(Global const &global) const {
+    Local local = coordinate().GlobalToLocal(global);
+    return LocalToBasisGradients(local);
+  }
 
   const Mat3xN &GetBasisLocalGradients(int ijk) const {
     return basis_local_gradients_[ijk];
   }
+
   /**
-   * @brief Get the local gradients of basis at a given integratorian point.
-   * 
-   * This version is compiled only if `kLocal` is `true`.
+   * @brief Get the local (when `kLocal == true`) or global (when `kLocal == false`) gradients of basis at a given integratorian point.
    * 
    * @param ijk the index of the integratorian point
-   * @return const Mat3xN& the local gradients of basis
+   * @return the gradients of basis
    */
-  const Mat3xN &GetBasisGradients(int ijk) const requires(kLocal) {
-    return basis_local_gradients_[ijk];
+  const Mat3xN &GetBasisGradients(int ijk) const {
+    return kLocal ? basis_local_gradients_[ijk] : basis_global_gradients_[ijk];
   }
-  /**
-   * @brief Get the global gradients of basis at a given integratorian point.
-   * 
-   * This version is compiled only if `kLocal` is `false`.
-   * 
-   * @param ijk the index of the integratorian point
-   * @return const Mat3xN& the global gradients of basis
-   */
-  const Mat3xN &GetBasisGradients(int ijk) const requires(!kLocal) {
-    return basis_global_gradients_[ijk];
-  }
+
   /**
    * @brief Get \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} U \f$ (when `kLocal == true`) or \f$ \begin{bmatrix}\partial_{\xi}\\ \partial_{\eta}\\ \cdots \end{bmatrix} u \f$ (when `kLocal == false`) at a given integratorian point.
    * 
@@ -413,7 +405,9 @@ class Hexahedron : public Expansion<kComponents,
     }
     return value_grad;
   }
-  Gradient LocalToGlobalGradient(Local const &local) const requires(kLocal) {
+
+ protected:
+  Gradient _LocalToGlobalGradient(Local const &local) const requires(kLocal) {
     Gradient grad = LocalToLocalGradient(local);
     Jacobian mat = coordinate().LocalToJacobian(local);
     Scalar det = mat.determinant();
@@ -422,9 +416,30 @@ class Hexahedron : public Expansion<kComponents,
     grad -= (det_grad / det) * value.transpose();
     return mat.inverse() / det * grad;
   }
-  Gradient GlobalToGlobalGradient(Global const &global) const requires(kLocal) {
+
+  Gradient _LocalToGlobalGradient(Local const &local) const requires(!kLocal) {
+    return LocalToBasisGradients(local) * this->coeff_.transpose();
+  }
+
+ public:
+  Gradient LocalToGlobalGradient(Local const &local) const {
+    return _LocalToGlobalGradient(local);
+  }
+
+ protected:
+  Gradient _GlobalToGlobalGradient(Global const &global) const
+      requires(kLocal) {
     auto local = coordinate().GlobalToLocal(global);
     return LocalToGlobalGradient(local);
+  }
+  Gradient _GlobalToGlobalGradient(Global const &global) const
+      requires(!kLocal) {
+    return GlobalToBasisGradients(global) * this->coeff_.transpose();
+  }
+
+ public:
+  Gradient GlobalToGlobalGradient(Global const &global) const {
+    return _GlobalToGlobalGradient(global);
   }
 
  private:

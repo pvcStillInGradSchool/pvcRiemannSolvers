@@ -294,6 +294,13 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInGlobalFormulation) {
       Global const &global = interp.integrator().GetGlobal(ijk);
       auto [value, grad, hess] = interp.GetGlobalValueGradientHessian(ijk);
       EXPECT_NEAR((value - GetExactValue(global)).norm(), 0, 1e-12);
+      EXPECT_NEAR((value - interp.GlobalToValue(global)).norm(), 0, 1e-10);
+      interp.SetValue(ijk, value);
+      EXPECT_EQ(value, interp.GetValue(ijk));
+      EXPECT_NEAR((grad - interp.LocalToGlobalGradient(local)).norm(), 0,
+          1e-13);
+      EXPECT_NEAR((grad - interp.GlobalToGlobalGradient(global)).norm(), 0,
+          1e-12);
       // compare with analytical derivatives
       EXPECT_NEAR((GetExactGradient(global) - grad).norm(), 0.0, 1e-8);
       EXPECT_NEAR((GetExactHessian(global) - hess).norm(), 0.0, 1e-8);
@@ -309,6 +316,27 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInGlobalFormulation) {
       right = interp.GlobalToValue(Global(x, y, z + h));
       grad.row(Z) -= (right - left) / (2 * h);
       EXPECT_NEAR(grad.norm(), 0, 1e-6);
+      Gradient grad_diff = (
+          interp.GlobalToGlobalGradient(Global(x + h, y, z)) -
+          interp.GlobalToGlobalGradient(Global(x - h, y, z))
+      ) / (2 * h);
+      EXPECT_NEAR((hess.row(XX) - grad_diff.row(X)).norm(), 0, 1e-8);
+      EXPECT_NEAR((hess.row(XY) - grad_diff.row(Y)).norm(), 0, 1e-8);
+      EXPECT_NEAR((hess.row(XZ) - grad_diff.row(Z)).norm(), 0, 1e-8);
+      grad_diff = (
+          interp.GlobalToGlobalGradient(Global(x, y + h, z)) -
+          interp.GlobalToGlobalGradient(Global(x, y - h, z))
+      ) / (2 * h);
+      EXPECT_NEAR((hess.row(YX) - grad_diff.row(X)).norm(), 0, 1e-8);
+      EXPECT_NEAR((hess.row(YY) - grad_diff.row(Y)).norm(), 0, 1e-8);
+      EXPECT_NEAR((hess.row(YZ) - grad_diff.row(Z)).norm(), 0, 1e-8);
+      grad_diff = (
+          interp.GlobalToGlobalGradient(Global(x, y, z + h)) -
+          interp.GlobalToGlobalGradient(Global(x, y, z - h))
+      ) / (2 * h);
+      EXPECT_NEAR((hess.row(ZX) - grad_diff.row(X)).norm(), 0, 1e-8);
+      EXPECT_NEAR((hess.row(ZY) - grad_diff.row(Y)).norm(), 0, 1e-8);
+      EXPECT_NEAR((hess.row(ZZ) - grad_diff.row(Z)).norm(), 0, 1e-8);
     }
   }
 }
@@ -341,6 +369,8 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInLocalFormulation) {
       EXPECT_EQ(value, interp.GetValue(ijk));
       EXPECT_NEAR((grad - interp.LocalToGlobalGradient(local)).norm(), 0,
           1e-13);
+      EXPECT_NEAR((grad - interp.GlobalToGlobalGradient(global)).norm(), 0,
+          1e-12);
       // compare with analytical derivatives
       EXPECT_NEAR((GetExactGradient(global) - grad).norm(), 0.0, 1e-8);
       EXPECT_NEAR((GetExactHessian(global) - hess).norm(), 0.0, 1e-8);
