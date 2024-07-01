@@ -146,7 +146,7 @@ class Projection : public Expansion<kComponents,
   Value average() const {
     return GetAverage(*this);
   }
-  Mat3xN GlobalToBasisGradients(Global const &global) const {
+  Mat3xN GlobalToBasisGlobalGradients(Global const &global) const {
     return basis_.GetGradValue(global).transpose();
   }
   /**
@@ -155,7 +155,7 @@ class Projection : public Expansion<kComponents,
    */
   Gradient GetGlobalGradient(int i) const {
     auto &global = integrator().GetGlobal(i);
-    Mat3xN basis_grad = GlobalToBasisGradients(global);
+    Mat3xN basis_grad = GlobalToBasisGlobalGradients(global);
     return basis_grad * this->coeff_.transpose();
   }
 
@@ -165,7 +165,7 @@ class Projection : public Expansion<kComponents,
    */
   std::pair<Value, Gradient> GetGlobalValueGradient(int i) const {
     auto &global = integrator().GetGlobal(i);
-    Mat3xN basis_grad = GlobalToBasisGradients(global);
+    Mat3xN basis_grad = GlobalToBasisGlobalGradients(global);
     return { GlobalToValue(global), basis_grad * this->coeff_.transpose() };
   }
 

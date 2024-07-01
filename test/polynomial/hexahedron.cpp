@@ -265,7 +265,7 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
     EXPECT_NEAR((value - vector_interp.GetValue(q)).norm(), 0, 1e-13);
     vector_interp.SetValue(q, value);
     EXPECT_EQ(value, vector_interp.GetValue(q));
-    auto grad = vector_interp.GlobalToBasisGradients(global);
+    auto grad = vector_interp.GlobalToBasisGlobalGradients(global);
     grad -= vector_interp.GetBasisGlobalGradients(q);
     EXPECT_NEAR(grad.norm(), 0, 1e-14);
   }

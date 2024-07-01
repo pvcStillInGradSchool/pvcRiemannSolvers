@@ -55,7 +55,7 @@ class General : public spatial::FiniteElement<P, R> {
       const auto &xyz = integrator.GetGlobal(q);
       auto flux = Base::GetFluxMatrix(cell, q);
       flux *= integrator.GetGlobalWeight(q);
-      auto grad = cell.polynomial().GlobalToBasisGradients(xyz);
+      auto grad = cell.polynomial().GlobalToBasisGlobalGradients(xyz);
       Coeff prod = flux * grad;
       cell.polynomial().AddCoeffTo(prod, residual);
     }

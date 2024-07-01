@@ -222,10 +222,9 @@ class Hexahedron : public Expansion<kComponents,
     for (int ijk = 0; ijk < N; ++ijk) {
       auto &local = integrator_ptr_->GetLocal(ijk);
       Jacobian jacobian = coordinate().LocalToJacobian(local);
-      basis_global_gradients_[ijk] = LocalGradientsToGlobalGradients(
-          jacobian, basis_local_gradients_[ijk]);
-      // cache for evaluating Hessian
       Jacobian inv = jacobian.inverse();
+      basis_global_gradients_[ijk] = inv * basis_local_gradients_[ijk];
+      // cache for evaluating Hessian
       Scalar det = jacobian.determinant();
       jacobian_det_[ijk] = det;
       jacobian_det_inv_[ijk] = det * inv;
@@ -354,17 +353,17 @@ class Hexahedron : public Expansion<kComponents,
     Local local = coordinate().GlobalToLocal(global);
     return basis_.GetValues(local);
   }
-  Mat3xN LocalToBasisGradients(Local const &local) const {
+  Mat3xN LocalToBasisGlobalGradients(Local const &local) const {
     Mat3xN grad;
     grad.row(0) = basis_.GetDerivatives(1, 0, 0, local);
     grad.row(1) = basis_.GetDerivatives(0, 1, 0, local);
     grad.row(2) = basis_.GetDerivatives(0, 0, 1, local);
     Jacobian jacobian = coordinate().LocalToJacobian(local);
-    return LocalGradientsToGlobalGradients(jacobian, grad);
+    return jacobian.inverse() * grad;
   }
-  Mat3xN GlobalToBasisGradients(Global const &global) const {
+  Mat3xN GlobalToBasisGlobalGradients(Global const &global) const {
     Local local = coordinate().GlobalToLocal(global);
-    return LocalToBasisGradients(local);
+    return LocalToBasisGlobalGradients(local);
   }
 
   const Mat3xN &GetBasisLocalGradients(int ijk) const {
@@ -412,7 +411,7 @@ class Hexahedron : public Expansion<kComponents,
   }
 
   Gradient _LocalToGlobalGradient(Local const &local) const requires(!kLocal) {
-    return LocalToBasisGradients(local) * this->coeff_.transpose();
+    return LocalToBasisGlobalGradients(local) * this->coeff_.transpose();
   }
 
  public:
@@ -428,7 +427,7 @@ class Hexahedron : public Expansion<kComponents,
   }
   Gradient _GlobalToGlobalGradient(Global const &global) const
       requires(!kLocal) {
-    return GlobalToBasisGradients(global) * this->coeff_.transpose();
+    return GlobalToBasisGlobalGradients(global) * this->coeff_.transpose();
   }
 
  public:
@@ -588,23 +587,10 @@ class Hexahedron : public Expansion<kComponents,
       requires(!kLocal) {
     auto value_ijk = GetValue(ijk);
     auto local_grad_ijk = GetLocalGradient(ijk);
-    return { value_ijk, GetGlobalGradient(ijk),
-        // Hessian::Zero() };
+    Gradient global_grad_ijk = jacobian_inv_[ijk] * local_grad_ijk;
+    assert((GetGlobalGradient(ijk) - global_grad_ijk).norm() < 1e-10);
+    return { value_ijk, global_grad_ijk,
         _GetGlobalHessian(local_grad_ijk, ijk) };
-  }
-
-  /**
-   * @brief Convert the gradients in local coordinates to the gradients in global coordinates.
-   * 
-   * \f$ \begin{bmatrix}\partial_{\xi}\,\phi\\\partial_{\eta}\,\phi\\\partial_{\zeta}\,\phi\end{bmatrix}=\mathbf{J}\begin{bmatrix}\partial_{x}\,\phi\\\partial_{y}\,\phi\\\partial_{z}\,\phi\end{bmatrix} \f$, in which \f$ \mathbf{J}=\begin{bmatrix}\partial_{\xi}\\\partial_{\eta}\\\partial_{\zeta}\end{bmatrix}\begin{bmatrix}x & y & z\end{bmatrix} \f$ is `coordinate::Element::Jacobian`.
-   * 
-   * @param jacobian the Jacobian matrix of the type `coordinate::Element::Jacobian`.
-   * @param local_grad the gradients in local coordinates
-   * @return Mat3xN the gradients in global coordinates
-   */
-  static Mat3xN LocalGradientsToGlobalGradients(const Jacobian &jacobian,
-      Mat3xN const &local_grad) {
-    return jacobian.fullPivLu().solve(local_grad);
   }
 
   /**
