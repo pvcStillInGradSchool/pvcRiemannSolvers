@@ -15,6 +15,7 @@
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/constant/index.hpp"
+#include "mini/algebra/eigen.hpp"
 #include "mini/rand.hpp"
 
 #include "gtest/gtest.h"
@@ -23,7 +24,16 @@ using namespace mini::constant::index;
 
 class TestPolynomialHexahedron : public ::testing::Test {
  protected:
+  static constexpr int kTrials = 1 << 5;
+  static constexpr int kComponents = 11;
   using Scalar = double;
+  using Global = mini::algebra::Vector<Scalar, 3>;
+  using Local = Global;
+  using Value = mini::algebra::Vector<Scalar, kComponents>;
+  using Gradient = mini::algebra::Matrix<Scalar, 3, kComponents>;
+  using Hessian = mini::algebra::Matrix<Scalar, 6, kComponents>;
+
+  static Value coeff_;
 
   void SetUp() override {
     std::srand(31415926);
@@ -32,7 +42,47 @@ class TestPolynomialHexahedron : public ::testing::Test {
   static double rand_f(double a = -1., double b = 1.) {
     return mini::rand::uniform(a, b);
   }
+
+  static Value GetExactValue(Global const& xyz) {
+    auto x = xyz[0], y = xyz[1], z = xyz[2];
+    Value value{ 0, 1, x, y, z, x*x/2, x * y, x * z, y*y/2, y * z, z*z/2 };
+    for (int k = 0; k < kComponents; ++k) {
+      value[k] *= coeff_[k];
+    }
+    return value;
+  }
+
+  static Gradient GetExactGradient(Global const& xyz) {
+    auto x = xyz[0], y = xyz[1], z = xyz[2];
+    Gradient grad;
+    grad << 0, 0, 1, 0, 0, x, y, z, 0, 0, 0,
+            0, 0, 0, 1, 0, 0, x, 0, y, z, 0,
+            0, 0, 0, 0, 1, 0, 0, x, 0, y, z;
+    for (int k = 0; k < kComponents; ++k) {
+      grad.col(k) *= coeff_[k];
+    }
+    return grad;
+  }
+
+  static Hessian GetExactHessian(Global const& xyz) {
+    auto x = xyz[0], y = xyz[1], z = xyz[2];
+    Hessian hess;
+    // Value value{ 0, 1, x, y, z, x*x/2, x * y, x * z, y*y/2, y * z, z*z/2 };
+    hess << 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1;
+    for (int k = 0; k < kComponents; ++k) {
+      hess.col(k) *= coeff_[k];
+    }
+    return hess;
+  };
 };
+
+typename TestPolynomialHexahedron::Value
+TestPolynomialHexahedron::coeff_;
 
 class TestPolynomialHexahedronProjection : public TestPolynomialHexahedron {
  protected:
@@ -222,14 +272,9 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
 }
 TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInGlobalFormulation) {
   using Interpolation = mini::polynomial::Hexahedron<
-      IntegratorX, IntegratorY, IntegratorZ, 11, false>;
-  using Gradient = typename Interpolation::Gradient;
-  using Hessian = typename Interpolation::Hessian;
-  using Value = typename Interpolation::Value;
+      IntegratorX, IntegratorY, IntegratorZ, kComponents, false>;
   using Integrator = typename Interpolation::Integrator;
-  using Global = typename Integrator::Global;
-  using Local = typename Integrator::Local;
-  for (int i_cell = 1 << 1; i_cell > 0; --i_cell) {
+  for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
     // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0 + rand_f(), b = 30.0 + rand_f(), c = 40.0 + rand_f();
     auto coordinate = Coordinate {
@@ -239,53 +284,19 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInGlobalFormulation) {
         Global(+a, +b, +c), Global(-a, +b, +c),
     };
     auto integrator = Integrator(coordinate);
-    // build a vector function and its interpolation
-    Value coeff = Value::Random();
-    auto get_value = [&coeff](Global const& xyz) {
-      auto x = xyz[0], y = xyz[1], z = xyz[2];
-      Value value{ 0, 1, x, y, z, x*x/2, x * y, x * z, y*y/2, y * z, z*z/2 };
-      for (int i = 0; i < Interpolation::K; ++i) {
-        value[i] *= coeff[i];
-      }
-      return value;
-    };
-    auto get_grad = [&coeff](Global const& xyz) {
-      auto x = xyz[0], y = xyz[1], z = xyz[2];
-      Gradient grad;
-      // Value value{ 0, 1, x, y, z, x*x/2, x * y, x * z, y*y/2, y * z, z*z/2 };
-      grad << 0, 0, 1, 0, 0, x, y, z, 0, 0, 0,
-              0, 0, 0, 1, 0, 0, x, 0, y, z, 0,
-              0, 0, 0, 0, 1, 0, 0, x, 0, y, z;
-      for (int i = 0; i < Interpolation::K; ++i) {
-        grad.col(i) *= coeff[i];
-      }
-      return grad;
-    };
-    auto get_hess = [&coeff](Global const& xyz) {
-      auto x = xyz[0], y = xyz[1], z = xyz[2];
-      Hessian hess;
-      // Value value{ 0, 1, x, y, z, x*x/2, x * y, x * z, y*y/2, y * z, z*z/2 };
-      hess << 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-              0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-              0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1;
-      for (int i = 0; i < Interpolation::K; ++i) {
-        hess.col(i) *= coeff[i];
-      }
-      return hess;
-    };
+    // build the interpolation
+    coeff_ = Value::Random();
     auto interp = Interpolation(integrator);
-    interp.Approximate(get_value);
-    // test values and gradients on nodes
+    interp.Approximate(GetExactValue);
+    // test values and derivatives on nodes
     for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
       Local const &local = interp.integrator().GetLocal(ijk);
       Global const &global = interp.integrator().GetGlobal(ijk);
       auto [value, grad, hess] = interp.GetGlobalValueGradientHessian(ijk);
-      EXPECT_NEAR((value - get_value(global)).norm(), 0, 1e-12);
-      // compare with analytical gradients
-      EXPECT_NEAR((get_grad(global) - grad).norm(), 0.0, 1e-8);
+      EXPECT_NEAR((value - GetExactValue(global)).norm(), 0, 1e-12);
+      // compare with analytical derivatives
+      EXPECT_NEAR((GetExactGradient(global) - grad).norm(), 0.0, 1e-8);
+      EXPECT_NEAR((GetExactHessian(global) - hess).norm(), 0.0, 1e-8);
       // compare with O(h^2) finite difference derivatives
       auto x = global[X], y = global[Y], z = global[Z], h = 1e-5;
       Value left = interp.GlobalToValue(Global(x - h, y, z));
@@ -298,21 +309,14 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInGlobalFormulation) {
       right = interp.GlobalToValue(Global(x, y, z + h));
       grad.row(Z) -= (right - left) / (2 * h);
       EXPECT_NEAR(grad.norm(), 0, 1e-6);
-      // compare with analytical hessians
-      EXPECT_NEAR((get_hess(global) - hess).norm(), 0.0, 1e-8);
     }
   }
 }
 TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInLocalFormulation) {
   using Interpolation = mini::polynomial::Hexahedron<
-      IntegratorX, IntegratorY, IntegratorZ, 11, true>;
-  using Gradient = typename Interpolation::Gradient;
-  using Hessian = typename Interpolation::Hessian;
-  using Value = typename Interpolation::Value;
+      IntegratorX, IntegratorY, IntegratorZ, kComponents, true>;
   using Integrator = typename Interpolation::Integrator;
-  using Global = typename Integrator::Global;
-  using Local = typename Integrator::Local;
-  for (int i_cell = 1 << 1; i_cell > 0; --i_cell) {
+  for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
     // build a hexa-integrator and a Lagrange basis on it
     auto a = 20.0 + rand_f(), b = 30.0 + rand_f(), c = 40.0 + rand_f();
     auto coordinate = Coordinate {
@@ -322,45 +326,24 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInLocalFormulation) {
         Global(+a, +b, +c), Global(-a, +b, +c),
     };
     auto integrator = Integrator(coordinate);
-    // build a vector function and its interpolation
-    Value coeff = Value::Random();
-    auto get_value = [&coeff](Global const& xyz) {
-      auto x = xyz[0], y = xyz[1], z = xyz[2];
-      Value value{ 0, 1, x, y, z, x*x/2, x * y, x * z, y*y/2, y * z, z*z/2 };
-      // value = value.cwiseProduct(coeff);
-      for (int i = 0; i < Interpolation::K; ++i) {
-        value[i] *= coeff[i];
-      }
-      return value;
-    };
-    auto get_grad = [&coeff](Global const& xyz) {
-      auto x = xyz[0], y = xyz[1], z = xyz[2];
-      // Value value{  };
-      Gradient grad;
-      grad << 0, 0, 1, 0, 0, x, y, z, 0, 0, 0,
-              0, 0, 0, 1, 0, 0, x, 0, y, z, 0,
-              0, 0, 0, 0, 1, 0, 0, x, 0, y, z;
-      for (int i = 0; i < Interpolation::K; ++i) {
-        grad.col(i) *= coeff[i];
-      }
-      return grad;
-    };
+    // build the interpolation
+    coeff_ = Value::Random();
     auto interp = Interpolation(integrator);
-    interp.Approximate(get_value);
-    // test values and gradients on nodes
+    interp.Approximate(GetExactValue);
+    // test values and derivatives on nodes
     for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
       Local const &local = interp.integrator().GetLocal(ijk);
       Global const &global = interp.integrator().GetGlobal(ijk);
-      Value value = interp.GetValue(ijk);
-      EXPECT_NEAR((value - get_value(global)).norm(), 0, 1e-12);
+      auto [value, grad, hess] = interp.GetGlobalValueGradientHessian(ijk);
+      EXPECT_NEAR((value - GetExactValue(global)).norm(), 0, 1e-12);
       EXPECT_NEAR((value - interp.GlobalToValue(global)).norm(), 0, 1e-10);
       interp.SetValue(ijk, value);
       EXPECT_EQ(value, interp.GetValue(ijk));
-      Gradient grad = interp.GetGlobalGradient(ijk);
       EXPECT_NEAR((grad - interp.LocalToGlobalGradient(local)).norm(), 0,
           1e-13);
       // compare with analytical derivatives
-      EXPECT_NEAR((get_grad(global) - grad).norm(), 0.0, 1e-8);
+      EXPECT_NEAR((GetExactGradient(global) - grad).norm(), 0.0, 1e-8);
+      EXPECT_NEAR((GetExactHessian(global) - hess).norm(), 0.0, 1e-8);
       // compare with O(h^2) finite difference derivatives
       auto x = global[X], y = global[Y], z = global[Z], h = 1e-5;
       Value left = interp.GlobalToValue(Global(x - h, y, z));
@@ -373,13 +356,6 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInLocalFormulation) {
       right = interp.GlobalToValue(Global(x, y, z + h));
       grad.row(Z) -= (right - left) / (2 * h);
       EXPECT_NEAR(grad.norm(), 0, 1e-6);
-    }
-    // test hessians on nodes
-    for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
-      Hessian hess = interp.GetGlobalHessian(ijk);
-      // compare with O(h^2) finite difference derivatives
-      auto const &global = interp.integrator().GetGlobal(ijk);
-      auto x = global[X], y = global[Y], z = global[Z], h = 1e-5;
       Gradient grad_diff = (
           interp.GlobalToGlobalGradient(Global(x + h, y, z)) -
           interp.GlobalToGlobalGradient(Global(x - h, y, z))
