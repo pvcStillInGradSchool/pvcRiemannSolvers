@@ -36,6 +36,10 @@ static void InstallIntegratorPrototypes(Part *part_ptr) {
 #include "mini/mesh/vtk.hpp"
 using VtkWriter = mini::mesh::vtk::Writer<Part>;
 
+#ifdef VISCOSITY
+#include "mini/limiter/average.hpp"
+#endif
+
 #include <fstream>
 #include <nlohmann/json.hpp>
 
@@ -115,9 +119,6 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   /* Initialization. */
   if (i_frame_prev < 0) {
     spatial.Approximate(ic);
-#ifdef VISCOSITY
-    RiemannWithViscosity::Viscosity::UpdateProperties();
-#endif
     if (i_core == 0) {
       std::printf("[Done] Approximate() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
@@ -128,11 +129,13 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     if (suffix == "tetra") {
       mini::limiter::Reconstruct(&part, &limiter);
     }
+#else  // VISCOSITY
+    mini::limiter::average::Reconstruct(spatial.part_ptr());
+#endif
     if (i_core == 0) {
       std::printf("[Done] Reconstruct() on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
     }
-#endif
 
     part.GatherSolutions();
     part.WriteSolutions("Frame0");

@@ -220,9 +220,6 @@ int main(int argc, char* argv[]) {
           n_core, MPI_Wtime() - time_begin);
     }
     spatial.Approximate(initial_condition);
-#ifdef VISCOSITY
-    RiemannWithViscosity::Viscosity::UpdateProperties();
-#endif
     if (i_core == 0) {
       std::printf("[Start] WriteSolutions(Frame0) on %d cores at %f sec\n",
           n_core, MPI_Wtime() - time_begin);
