@@ -27,7 +27,7 @@ class AdvectionUpstreamSplittingMethod {
   using Vector = typename Primitive::Vector;
   using Speed = Scalar;
   // Get F on T Axia
-  Flux GetFluxUpwind(const Primitive& left, const Primitive& right) {
+  Flux GetFluxUpwind(const Primitive& left, const Primitive& right) const {
     constexpr bool kPositive = false, kNegative = true;
     return GetSignedFlux<kPositive>(left) + GetSignedFlux<kNegative>(right);
   }
@@ -50,7 +50,7 @@ class AdvectionUpstreamSplittingMethod {
     return { 1, primitive.u(), primitive.v(), primitive.w(), enthalpy };
   }
   template <bool kNegative>
-  Flux GetSignedFlux(const Primitive& state) {
+  Flux GetSignedFlux(const Primitive& state) const {
     double a = Gas::GetSpeedOfSound(state);
     double h = a * a / Gas::GammaMinusOne() + state.GetKineticEnergy();
     Flux flux = BuildFlux(state, h);
