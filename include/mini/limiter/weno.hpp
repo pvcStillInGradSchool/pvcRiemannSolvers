@@ -372,25 +372,6 @@ class Eigen {
   }
 };
 
-template <typename Cell>
-    requires mini::polynomial::Modal<typename Cell::Polynomial>
-class Dummy {
- public:
-  using Scalar = typename Cell::Scalar;
-  using Polynomial = typename Cell::Polynomial;
-  using ProjectionWrapper = typename Polynomial::Wrapper;
-
- public:
-  Dummy(Scalar w0, Scalar eps, bool verbose = false) {
-  }
-  bool IsNotSmooth(const Cell &cell) {
-    return true;
-  }
-  ProjectionWrapper Reconstruct(const Cell &cell) {
-    return ProjectionWrapper(cell.polynomial());
-  }
-};
-
 }  // namespace weno
 }  // namespace limiter
 }  // namespace mini

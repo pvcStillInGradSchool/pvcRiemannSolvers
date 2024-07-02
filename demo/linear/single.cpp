@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
   part.SetFieldNames({"U"});
 
   /* Build a `Limiter` object. */
-  using Limiter = mini::limiter::weno::Dummy<Cell>;
+  using Limiter = mini::limiter::weno::Lazy<Cell>;
   auto limiter = Limiter(/* w0 = */0.001, /* eps = */1e-6);
 
 #ifdef DGFEM
