@@ -77,7 +77,14 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
   if (i_frame_prev >= 0) {
     n_parts_prev = json_object.at("n_parts_prev");
   }
-  std::string case_name = json_object.at("case_name");
+  std::string case_name = json_object.at("problem_name");
+  (case_name += "_h=") += json_object.at("cell_length");
+  (case_name += "_p=") += std::to_string(kDegrees);
+#ifdef LIMITER
+  case_name += "_limiter";
+#else
+  case_name += "_viscosity";
+#endif
   case_name.push_back('_');
   case_name += suffix;
 

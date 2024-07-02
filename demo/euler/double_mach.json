@@ -1,15 +1,15 @@
 {
-  "problem_name": "shock_tube_sod_exact",
+  "problem_name": "double_mach",
   "cgns_file": "path-to-a-cgns-file",
-  "cell_length": "2e-1",
+  "cell_length": "5e-2",
   "cell_type": "hexa",
   "t_start": 0.0,
-  "t_stop": 1.0,
-  "n_steps_per_frame": 40,
+  "t_stop": 0.25,
+  "n_steps_per_frame": 200,
   "n_frames": 50,
   "i_frame_prev": -1,
-  "n_parts_prev": -1,
+  "n_parts_prev": 32,
   "ddg_beta_0": 2.0,
   "ddg_beta_1": 0.0833333333,
-  "time_scale": 1.0e+2
+  "time_scale": 1.0e-1
 }
