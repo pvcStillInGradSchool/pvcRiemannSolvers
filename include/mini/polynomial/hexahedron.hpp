@@ -623,6 +623,14 @@ class Hexahedron : public Expansion<kComponents,
     return jacobian_det_inv_[ijk];
   }
 
+  Value average() const {
+    Value average = Value::Zero();
+    for (int q = 0; q < integrator().CountPoints(); ++q) {
+      average += GetValue(q) * integrator().GetGlobalWeight(q);
+    }
+    return average / integrator().volume();
+  }
+
   Global const &center() const {
     return integrator_ptr_->center();
   }

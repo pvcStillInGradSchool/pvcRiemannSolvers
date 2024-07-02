@@ -33,15 +33,15 @@ concept HasGeneralMethods = requires(P const &cp, P *p, G const &g,
 
   requires std::same_as<G, typename P::Global>;
   { cp.GlobalToValue(g) } -> std::same_as<typename P::Value>;
+  { cp.average() } -> std::same_as<typename P::Value>;
 
   { cp.basis() } -> std::same_as<typename P::Basis const &>;
   { cp.coeff() } -> std::same_as<typename P::Coeff const &>;
+  { cp.integrator() } -> std::same_as<typename P::Integrator const &>;
+
   { p->SetZero() } -> std::same_as<void>;
   { p->SetCoeff(typename P::Coeff()) } -> std::same_as<void>;
   { p->SetCoeff(0, typename P::Value()) } -> std::same_as<void>;
-
-  { cp.integrator() } -> std::same_as<typename P::Integrator const &>;
-
   { p->Approximate(f) } -> std::same_as<void>;
 };
 
@@ -55,8 +55,6 @@ concept Modal = requires(P const &cp, P *p) {
   requires General<P>;
 
   { cp.projection() };
-
-  { cp.average() } -> std::same_as<typename P::Value>;
 };
 
 template <typename P>
