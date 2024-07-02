@@ -442,14 +442,24 @@ class EnergyBasedViscosity : public R {
       Scalar max_speed = GetMaximumSpeed(*curr_cell);
       Scalar cell_length = curr_cell->length();
       Scalar max_viscosity = max_speed * cell_length / Cell::P;
+      assert(!std::isinf(max_viscosity) && !std::isnan(max_viscosity));
       Scalar time_base = cell_length / max_speed;
       for (int k = 0; k < Cell::K; ++k) {
         auto const &u_row = coeff.row(k);
         auto const &u_col = u_row.transpose();
         Scalar damping_rate = -u_row.dot(damping_matrix_on_curr_cell * u_col);
+        assert(damping_rate >= 0);
         Scalar damping_time = time_base * GetTimeScale();
-        viscosity_on_curr_cell[k] = std::min(max_viscosity,
-            jump_integral_on_curr_cell[k] / (damping_rate * damping_time));
+        viscosity_on_curr_cell[k] = std::min(max_viscosity, std::max(0.0,
+            // to protect against damping_rate == -0.0, which would lead to -inf
+            jump_integral_on_curr_cell[k] / (damping_rate * damping_time)));
+#ifndef NDEBUG
+        if (std::isinf(viscosity_on_curr_cell[k])) {
+          throw std::runtime_error("inf viscosity_on_curr_cell[k]: "
+              + std::to_string(jump_integral_on_curr_cell[k]) + " / "
+              + std::to_string(damping_rate * damping_time));
+        }
+#endif
       }
 #ifndef NDEBUG
       std::fstream log{ "damping" + std::to_string(curr_cell->metis_id) + ".txt", log.out };
