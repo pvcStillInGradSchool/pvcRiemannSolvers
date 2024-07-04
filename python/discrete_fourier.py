@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import spatial
 import riemann
 import temporal
-from plot_settings import line_styles
+from matplotlib_wrapper import line_styles
 
 
 class DiscreteFourierAnalysis:

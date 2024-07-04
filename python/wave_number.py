@@ -8,7 +8,7 @@ import concept
 import spatial
 import riemann
 from polynomial import Huynh, Vincent
-from plot_settings import line_styles
+from matplotlib_wrapper import line_styles
 
 
 class WaveNumberDisplayer:

@@ -8,7 +8,7 @@ import equation
 import riemann
 import spatial
 import temporal
-from plot_settings import line_styles
+from matplotlib_wrapper import line_styles
 
 
 class LinearAdvection(object):
