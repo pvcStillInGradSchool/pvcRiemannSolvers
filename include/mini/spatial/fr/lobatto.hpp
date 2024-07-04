@@ -280,11 +280,8 @@ class Lobatto : public General<P, R> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &holder_flux_point = holder_cache[f];
-          Value u_holder = holder.polynomial().GetValue(
-              holder_flux_point.ijk);
-          Value f_upwind = riemanns[f].GetFluxOnInviscidWall(u_holder);
-          Value f_holder = f_upwind * holder_flux_point.scale;
-          Base::MinusCachedFlux(&f_holder, holder.id(), holder_flux_point);
+          auto f_holder = Base::GetFluxOnInviscidWall(riemanns[f],
+              holder, holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }

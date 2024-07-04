@@ -442,11 +442,8 @@ class General : public spatial::FiniteElement<P, R> {
         assert(kFaceQ == face.integrator().CountPoints());
         for (int f = 0; f < kFaceQ; ++f) {
           auto &[holder_solution_points, holder_flux_point] = holder_cache[f];
-          Value u_holder = holder.polynomial().GetValue(
-              holder_flux_point.ijk);
-          Value f_upwind = riemanns[f].GetFluxOnInviscidWall(u_holder);
-          Value f_holder = f_upwind * holder_flux_point.scale;
-          MinusCachedFlux(&f_holder, holder.id(), holder_flux_point);
+          auto f_holder = GetFluxOnInviscidWall(riemanns[f],
+              holder, holder_flux_point);
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
             Polynomial::MinusValue(f_correction, holder_data, ijk);
@@ -473,6 +470,31 @@ class General : public spatial::FiniteElement<P, R> {
         holder.id(), holder_cache.ijk);
     Riemann::MinusViscousFluxOnNoSlipWall(&f_upwind, property, wall_value,
         u_holder, du_holder, normal, value_penalty);
+    Value f_holder = f_upwind * holder_cache.scale;
+    MinusCachedFlux(&f_holder, holder.id(), holder_cache);
+    return f_holder;
+  }
+  Value GetFluxOnInviscidWall(Riemann const &riemann,
+      Cell const &holder, FluxPointCache const &holder_cache) const
+      requires(!mini::riemann::Diffusive<Riemann>) {
+    auto const &u_holder = holder.polynomial().GetValue(holder_cache.ijk);
+    Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
+    Value f_holder = f_upwind * holder_cache.scale;
+    MinusCachedFlux(&f_holder, holder.id(), holder_cache);
+    return f_holder;
+  }
+  Value GetFluxOnInviscidWall(Riemann const &riemann,
+      Cell const &holder, FluxPointCache const &holder_cache) const
+      requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
+    auto [u_holder, du_holder] =
+        holder.polynomial().GetGlobalValueGradient(holder_cache.ijk);
+    Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
+    const auto &normal = riemann.normal();
+    assert(Collinear(normal, holder_cache.normal));
+    auto const &property = Riemann::Diffusion::GetPropertyOnCell(
+        holder.id(), holder_cache.ijk);
+    riemann.MinusViscousFluxOnInviscidWall(
+        &f_upwind, property, u_holder, du_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     return f_holder;
