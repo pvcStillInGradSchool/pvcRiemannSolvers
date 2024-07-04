@@ -2,6 +2,7 @@
 """
 import unittest
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 from concept import OdeSystem
@@ -159,7 +160,7 @@ class TestRungeKutta(unittest.TestCase):
         plt.plot(time_values, exact_values, label='Exact')
         plt.legend()
         # plt.show()
-        plt.savefig('compare_runge_kutta.svg')
+        savefig('compare_runge_kutta')
 
 
 if __name__ == '__main__':

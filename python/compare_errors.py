@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 from matplotlib import axes
 from scipy import stats
@@ -58,7 +59,7 @@ def plot_slope(errors: dict):
         plt.grid()
     plt.tight_layout()
     # plt.show()
-    plt.savefig('compare_error_slopes.svg')
+    savefig('compare_error_slopes')
 
 
 def plot_history(errors: dict):
@@ -85,7 +86,7 @@ def plot_history(errors: dict):
     fig.tight_layout()
     fig.legend(lines, labels, loc='upper right')
     # plt.show()
-    plt.savefig('compare_error_histories.svg')
+    savefig('compare_error_histories')
 
 
 def compare_schemes(scheme_to_errors: dict):
@@ -110,7 +111,7 @@ def compare_schemes(scheme_to_errors: dict):
         plt.grid()
     plt.tight_layout()
     # plt.show()
-    plt.savefig('compare_schemes.svg')
+    savefig('compare_schemes')
 
 
 if __name__ == '__main__':

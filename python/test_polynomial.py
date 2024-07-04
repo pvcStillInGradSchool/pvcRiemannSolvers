@@ -3,6 +3,7 @@
 import unittest
 import numpy as np
 from scipy import integrate, special
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 from polynomial import Radau, Huynh, Vincent, LagrangeBasis
@@ -57,7 +58,7 @@ class TestRadau(unittest.TestCase):
         plt.plot(points, right_derivatives, 'b-', label= r'$dg_{-1}/d\xi$')
         plt.legend()
         # plt.show()
-        plt.savefig("radau.svg")
+        savefig('Radau')
 
 
 class TestHuynh(unittest.TestCase):
@@ -96,7 +97,7 @@ class TestHuynh(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig("HuynhLumping.svg")
+        savefig('HuynhByLumping')
 
     def test_orthogonality(self):
         """Test g(degree, n_lump) ⟂ Polynpmial_{degree - n_lump - 1}.
@@ -223,7 +224,7 @@ class TestVincent(unittest.TestCase):
         plt.plot(points, right_derivatives, 'b-', label= r'$dg_{+1}/d\xi$')
         plt.legend()
         # plt.show()
-        plt.savefig("HuynhFromVincent.svg")
+        savefig('HuynhByVincent')
 
 
 class TestLagrangeBasis(unittest.TestCase):
@@ -251,7 +252,7 @@ class TestLagrangeBasis(unittest.TestCase):
             plt.plot(points, values[:, i], label=f'$L_{i}$')
         plt.legend()
         # plt.show()
-        plt.savefig("lagrange.svg")
+        savefig('Lagrange')
 
     def test_delta_property(self):
         """Test the delta_property, i.e. L_i(x_j) = delta_{ij}.

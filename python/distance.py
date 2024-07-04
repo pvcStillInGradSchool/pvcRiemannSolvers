@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 
@@ -49,7 +50,7 @@ def contour(prefix: str, polygon: np.ndarray, distance: callable):
     plt.colorbar(c)
     plt.axis('equal')
     plt.tight_layout()
-    plt.savefig(f'{prefix}.svg')
+    savefig(f'{prefix}')
 
 
 if __name__ == '__main__':

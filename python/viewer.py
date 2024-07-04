@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import vtk
 import imageio
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 from matplotlib import colors
 
@@ -84,7 +85,7 @@ class Viewer:
         plt.grid()
         plt.tight_layout()
         file_name = f'{self._actual_path}/Frame{i_frame}.{suffix}'
-        plt.savefig(file_name)
+        savefig(file_name)
         plt.close()
         return file_name
 
@@ -111,7 +112,7 @@ class Viewer:
             norm=colors.LogNorm(vmin=1e-6, vmax=1e0, clip=True))
         fig.colorbar(mappable, location='top', label='Pointwise Errors')
         plt.tight_layout()
-        plt.savefig(f'{self._actual_path}/Error.{self._suffix}')
+        savefig(f'{self._actual_path}/Error.{self._suffix}')
 
     def plot_viscosity(self):
         if self._viscosity is None:
@@ -137,7 +138,7 @@ class Viewer:
             im.set_norm(norm)
         fig.colorbar(images[0], ax=ax, location='right')
         # fig.tight_layout()
-        plt.savefig(f'{self._actual_path}/Viscosity.{self._suffix}',
+        savefig(f'{self._actual_path}/Viscosity.{self._suffix}',
             bbox_inches='tight')
 
 

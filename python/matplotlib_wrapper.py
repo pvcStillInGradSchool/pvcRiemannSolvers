@@ -1,3 +1,7 @@
+from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
+
+
 line_styles = [
     ('dotted',                (0, (1, 1))),
     ('loosely dotted',        (0, (1, 4))),
@@ -12,3 +16,19 @@ line_styles = [
     ('densely dashdotdotted', (0, (2, 1, 1, 1, 1, 1))),
     ('loosely dashdotdotted', (0, (2, 8, 1, 8, 1, 8))),
 ]
+
+
+def savefig(file_name: str, folder_name: str = '../build/output',
+        fig: Figure = None):
+    svg_name = f'{folder_name}/{file_name}.svg'
+    pdf_name = f'{folder_name}/{file_name}.pdf'
+    if fig:
+      fig.savefig(svg_name)
+      fig.savefig(pdf_name)
+    else:
+      plt.savefig(svg_name)
+      plt.savefig(pdf_name)
+
+
+if __name__ == '__main__':
+    pass

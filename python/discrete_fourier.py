@@ -2,6 +2,7 @@
 """
 import argparse
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 import spatial
@@ -123,7 +124,7 @@ class DiscreteFourierAnalysis:
             xticks_labels.append(f'${order}\pi$')
         self.plot(schemes, labels, xticks_ticks, xticks_labels)
         # plt.show()
-        plt.savefig(f'compare_{schemes[-1].name(False)}.svg')
+        savefig(f'compare_{schemes[-1].name(False)}')
 
     def compare_methods(self, degree: int):
         """Compare spatial schemes using the same degree but different methods.
@@ -148,7 +149,7 @@ class DiscreteFourierAnalysis:
             labels.append(schemes[-1].name())
         self.plot(schemes, labels, xticks_ticks, xticks_labels)
         # plt.show()
-        plt.savefig(f'compare_{degree}-degree_methods.svg')
+        savefig(f'compare_{degree}-degree_methods')
 
     def compare_all_degrees(self):
         self.compare_degrees(spatial.LegendreDG)

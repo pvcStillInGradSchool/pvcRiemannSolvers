@@ -3,6 +3,7 @@
 import abc
 import argparse
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 import matplotlib.animation as mpla
 from scipy import optimize
@@ -128,7 +129,7 @@ class SolverBase(abc.ABC):
         plt.legend(loc='upper right')
         plt.tight_layout()
         # plt.show()
-        plt.savefig(filename)
+        savefig(filename)
         plt.close(fig)
         if self._spatial.equation().n_component() == 1:
             error_1, error_2, error_infty = self._measure_errors(t_curr)

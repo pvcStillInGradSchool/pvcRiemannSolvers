@@ -3,6 +3,7 @@
 import argparse
 import numpy as np
 from scipy.interpolate import CubicSpline
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 
@@ -75,7 +76,6 @@ if __name__ == '__main__':
         np.savetxt(f'blasius_x={x}.csv', np.array([u, v, y]).T, delimiter=',',
             header='u,v,y', comments='')
 
-    fig = plt.figure()
     plt.subplot(1, 2, 1)
     plt.plot(u / u_infty, eta)
     plt.xlabel(r'$u/u_\infty$')
@@ -87,4 +87,4 @@ if __name__ == '__main__':
     plt.ylabel(f'{r"$y$"}/{args.y_max}')
     plt.grid()
     plt.tight_layout()
-    fig.savefig('Blasius.svg')
+    savefig('Blasius')

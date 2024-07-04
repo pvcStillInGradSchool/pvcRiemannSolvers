@@ -2,6 +2,7 @@
 """
 import argparse
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 import concept
@@ -207,7 +208,7 @@ class WaveNumberDisplayer:
         plt.tight_layout()
         # plt.show()
         scheme = self.build_scheme(Method, degree, g)
-        plt.savefig(f'all_modes_of_{scheme.name(False)}_p={degree}.svg')
+        savefig(f'all_modes_of_{scheme.name(False)}_p={degree}')
 
     def compare_wave_numbers(self, methods, degrees, degree_to_corrections,
             n_sample: int, compressed: bool, name: str):
@@ -269,7 +270,7 @@ class WaveNumberDisplayer:
         plt.legend(handlelength=4)
         plt.tight_layout()
         # plt.show()
-        plt.savefig(f'{name}.svg')
+        savefig(f'{name}')
 
     def compare_diffusive_schemes(self, method, degree, degree_to_correction,
             n_sample: int, compressed: bool, name: str):
@@ -343,7 +344,7 @@ class WaveNumberDisplayer:
         plt.legend(handlelength=4)
         plt.tight_layout()
         # plt.show()
-        plt.savefig(f'{name}.svg')
+        savefig(f'{name}')
 
 
 if __name__ == '__main__':

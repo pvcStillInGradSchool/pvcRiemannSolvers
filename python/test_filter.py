@@ -2,6 +2,7 @@ import filter
 import sys
 import numpy as np
 from vtk import *
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 
@@ -54,10 +55,10 @@ if __name__ == '__main__':
     plt.plot(xdata, new_array, 'b-', label='New')
     plt.legend()
     plt.tight_layout()
-    plt.savefig('temp.svg')
+    savefig('temp')
 
     fig = plt.figure()
     theta = np.linspace(np.pi / 16, np.pi, 201)
     plt.plot(theta, f.damping(theta))
     plt.loglog()
-    plt.savefig('damping.svg')
+    savefig('damping')

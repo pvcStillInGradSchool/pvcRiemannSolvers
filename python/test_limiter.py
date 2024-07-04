@@ -2,6 +2,7 @@
 """
 import unittest
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 from matplotlib import axes
 
@@ -126,7 +127,7 @@ class TestLimiters(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig('compare_limiters_on_jumps.svg')
+        savefig('compare_limiters_on_jumps')
 
     def test_limiters_on_smooth(self):
         degree = 4
@@ -189,7 +190,7 @@ class TestLimiters(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig('compare_limiters_on_smooth.svg')
+        savefig('compare_limiters_on_smooth')
 
 
 if __name__ == '__main__':

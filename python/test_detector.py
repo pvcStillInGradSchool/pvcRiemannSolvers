@@ -3,6 +3,7 @@
 import unittest
 import numpy as np
 from scipy import special
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 import concept
@@ -150,7 +151,7 @@ class TestDetectors(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig('compare_smoothness_on_jumps.svg')
+        savefig('compare_smoothness_on_jumps')
 
     def test_smoothness_on_smooth(self):
         degree = 4
@@ -199,7 +200,7 @@ class TestDetectors(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig('compare_smoothness_on_smooth.svg')
+        savefig('compare_smoothness_on_smooth')
 
     def test_detectors_on_smooth(self):
         degree = 4
@@ -230,7 +231,7 @@ class TestDetectors(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig('compare_detectors_on_smooth.svg')
+        savefig('compare_detectors_on_smooth')
 
     def test_detectors_on_euler(self):
         roe = riemann.Euler(1.4)

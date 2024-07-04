@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 
@@ -86,5 +87,5 @@ if __name__ == '__main__':
     plt.ylim(0.75, 1.05)
     plt.legend()
     plt.tight_layout()
-    plt.savefig('quad4.svg')
+    savefig('quad4')
 

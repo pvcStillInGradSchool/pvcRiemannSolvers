@@ -3,6 +3,7 @@
 import unittest
 import numpy as np
 from scipy import integrate
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 import expansion
@@ -98,7 +99,7 @@ class TestTaylor(unittest.TestCase):
         plt.ylim([-1.5, 2.0])
         plt.tight_layout()
         # plt.show()
-        plt.savefig("expansion.Taylor.svg")
+        savefig('expansion.Taylor')
 
     def test_consistency_with_shifted(self):
         """Test consistency with a shifted Expansion.
@@ -174,7 +175,7 @@ class TestLagrangeOnUniformRoots(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig("expansion.LagrangeOnUniformRoots.svg")
+        savefig('expansion.LagrangeOnUniformRoots')
 
     def test_values_at_sample_points(self):
         """Test values at sample points.
@@ -334,7 +335,7 @@ class TestLagrangeOnLegendreRoots(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig("expansion.LagrangeOnLegendreRoots.svg")
+        savefig('expansion.LagrangeOnLegendreRoots')
 
     def test_values_at_sample_points(self):
         """Test values at sample points.
@@ -520,7 +521,7 @@ class TestLagrangeOnLobattoRoots(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig("expansion.LagrangeOnLobattoRoots.svg")
+        savefig('expansion.LagrangeOnLobattoRoots')
 
     def test_values_at_sample_points(self):
         """Test values at sample points.
@@ -706,7 +707,7 @@ class TestLegendre(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig("expansion.Legendre.svg")
+        savefig('expansion.Legendre')
 
     def test_average(self):
         """Test the method for getting average values.

@@ -476,6 +476,7 @@ class LaxFriedrichs(ApproximateEuler):
 
 
 if __name__ == '__main__':
+    from matplotlib_wrapper import savefig
     from matplotlib import pyplot as plt
 
     euler = equation.Euler(gamma=1.4)
@@ -545,4 +546,4 @@ if __name__ == '__main__':
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig(f'{case_name}.svg')
+        savefig(f'{case_name}')

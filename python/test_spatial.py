@@ -2,6 +2,7 @@
 """
 import unittest
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 import spatial
@@ -67,7 +68,7 @@ class TestFRonLegendreRoots(unittest.TestCase):
         plt.legend()
         plt.tight_layout()
         # plt.show()
-        plt.savefig("FRonLegendreRoots.svg")
+        savefig('FRonLegendreRoots')
 
     def test_resolution(self):
         degree = 4
@@ -95,7 +96,7 @@ class TestFRonLegendreRoots(unittest.TestCase):
             plt.grid()
         plt.tight_layout()
         # plt.show()
-        plt.savefig("compare_resolutions.svg")
+        savefig('compare_resolutions')
 
     def _get_spatial_matrices(self, scheme: spatial.DiscontinuousGalerkin, i_cell: int):
         i_prev = i_cell - 1

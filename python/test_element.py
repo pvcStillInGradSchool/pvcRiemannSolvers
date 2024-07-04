@@ -2,6 +2,7 @@
 """
 import unittest
 import numpy as np
+from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
 
 import coordinate
@@ -143,7 +144,7 @@ class TestFRonLegendreRoots(unittest.TestCase):
             label='Upwind Flux At Right')
         plt.legend()
         # plt.show()
-        plt.savefig("RadauFRonLegendreRoots.svg")
+        savefig('RadauFRonLegendreRoots')
 
     def test_get_dg_flux(self):
         """Test the values of the discontinuous flux.
