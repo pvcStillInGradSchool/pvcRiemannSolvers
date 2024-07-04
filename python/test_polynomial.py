@@ -85,12 +85,16 @@ class TestHuynh(unittest.TestCase):
             plt.subplot(1, 2, 1)
             plt.plot(points, right_values, label=huynh.name())
             plt.subplot(1, 2, 2)
-            plt.plot(points, right_derivatives,
-                     label=r'$(\mathrm{d}/\mathrm{d}\xi)$'+huynh.name())
+            plt.plot(points, right_derivatives, label=huynh.name())
         plt.subplot(1, 2, 1)
+        plt.xlabel(r'$\xi$')
+        plt.ylabel(r'$g$')
         plt.legend()
         plt.subplot(1, 2, 2)
+        plt.xlabel(r'$\xi$')
+        plt.ylabel(r'$\mathrm{d}g/\mathrm{d}\xi$')
         plt.legend()
+        plt.tight_layout()
         # plt.show()
         plt.savefig("HuynhLumping.svg")
 

@@ -96,6 +96,7 @@ class TestTaylor(unittest.TestCase):
             plt.plot(points, approx_values, label= f'$p={degree}$')
         plt.legend()
         plt.ylim([-1.5, 2.0])
+        plt.tight_layout()
         # plt.show()
         plt.savefig("expansion.Taylor.svg")
 
@@ -169,8 +170,9 @@ class TestLagrangeOnUniformRoots(unittest.TestCase):
             for i in range(len(points)):
                 approx_values[i] = my_expansion.global_to_value(points[i])
             plt.plot(points, approx_values, label= f'$p={degree}$')
-        plt.legend()
         plt.ylim([-1.5, 2.0])
+        plt.legend()
+        plt.tight_layout()
         # plt.show()
         plt.savefig("expansion.LagrangeOnUniformRoots.svg")
 
@@ -328,8 +330,9 @@ class TestLagrangeOnLegendreRoots(unittest.TestCase):
             for i in range(len(points)):
                 approx_values[i] = my_expansion.global_to_value(points[i])
             plt.plot(points, approx_values, label= f'$p={degree}$')
-        plt.legend()
         plt.ylim([-1.5, 2.0])
+        plt.legend()
+        plt.tight_layout()
         # plt.show()
         plt.savefig("expansion.LagrangeOnLegendreRoots.svg")
 
@@ -513,8 +516,9 @@ class TestLagrangeOnLobattoRoots(unittest.TestCase):
             for i in range(len(points)):
                 approx_values[i] = my_expansion.global_to_value(points[i])
             plt.plot(points, approx_values, label= f'$p={degree}$')
-        plt.legend()
         plt.ylim([-1.5, 2.0])
+        plt.legend()
+        plt.tight_layout()
         # plt.show()
         plt.savefig("expansion.LagrangeOnLobattoRoots.svg")
 
@@ -698,8 +702,9 @@ class TestLegendre(unittest.TestCase):
             for i in range(len(points)):
                 approx_values[i] = my_expansion.global_to_value(points[i])
             plt.plot(points, approx_values, label= f'$p={degree}$')
-        plt.legend()
         plt.ylim([-1.5, 2.0])
+        plt.legend()
+        plt.tight_layout()
         # plt.show()
         plt.savefig("expansion.Legendre.svg")
 

@@ -542,6 +542,7 @@ if __name__ == '__main__':
             plt.grid(True)
             plt.title(titles[i])
             plt.plot(x_vec*l+l/2, y_data[i], '.', markersize='3')
+        plt.legend()
         plt.tight_layout()
         # plt.show()
         plt.savefig(f'{case_name}.svg')

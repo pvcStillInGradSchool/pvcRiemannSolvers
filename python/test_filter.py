@@ -53,6 +53,7 @@ if __name__ == '__main__':
     plt.plot(xdata, old_array, 'r-', label='Old')
     plt.plot(xdata, new_array, 'b-', label='New')
     plt.legend()
+    plt.tight_layout()
     plt.savefig('temp.svg')
 
     fig = plt.figure()

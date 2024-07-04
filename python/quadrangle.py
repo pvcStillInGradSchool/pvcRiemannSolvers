@@ -85,5 +85,6 @@ if __name__ == '__main__':
     plt.xlim(1.90, 2.10)
     plt.ylim(0.75, 1.05)
     plt.legend()
+    plt.tight_layout()
     plt.savefig('quad4.svg')
 
