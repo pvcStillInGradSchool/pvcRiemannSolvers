@@ -96,6 +96,10 @@ class Simple {
     convection_coefficient_[Z] = a_z;
   }
 
+  Conservative MinusMirroredValue(Conservative const &value) const {
+    return Conservative::Zero();
+  }
+
  protected:
   UnrotatedSimple unrotated_simple_;
   const Frame *frame_;

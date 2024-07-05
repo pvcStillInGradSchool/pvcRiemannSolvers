@@ -92,6 +92,14 @@ class EnergyBasedViscosity : public R {
     MinusViscousFlux(flux, nu, c_val, c_grad, normal);
   }
 
+  void MinusViscousFluxOnNeumannWall(Flux *flux, Property const &nu,
+      Conservative const &c_val) const {
+    typename Convection::Conservative value_jump =
+        this->Convection::MinusMirroredValue(c_val);
+    Scalar penalty = this->Diffusion::GetValuePenalty();
+    flux->array() -= nu.array() * value_jump.array() * penalty;
+  }
+
   /**
    * @brief non-constant condition for static assertion 
    * 

@@ -86,6 +86,18 @@ class Euler {
   }
 
  public:
+  /**
+   * @brief Subtract the given value from the mirrored value.
+   * 
+   */
+  Value MinusMirroredValue(Value const &value) const {
+    Value value_jump = Value::Zero();
+    // In the normal frame, only momentumX is flipped:
+    value_jump.momentumX() = -2 * value.momentumX();
+    NormalToGlobal(&value_jump);
+    return value_jump;
+  }
+
   void GlobalToNormal(Value* v) const requires(kDimensions == 2) {
     Vector &p = v->momentum();
     Scalar p_a = p[X] * a(X) + p[Y] * a(Y);

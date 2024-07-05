@@ -486,15 +486,11 @@ class General : public spatial::FiniteElement<P, R> {
   Value GetFluxOnInviscidWall(Riemann const &riemann,
       Cell const &holder, FluxPointCache const &holder_cache) const
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    auto [u_holder, du_holder] =
-        holder.polynomial().GetGlobalValueGradient(holder_cache.ijk);
-    Value f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
-    const auto &normal = riemann.normal();
-    assert(Collinear(normal, holder_cache.normal));
+    auto const &u_holder = holder.polynomial().GetValue(holder_cache.ijk);
+    auto f_upwind = riemann.GetFluxOnInviscidWall(u_holder);
     auto const &property = Riemann::Diffusion::GetPropertyOnCell(
         holder.id(), holder_cache.ijk);
-    riemann.MinusViscousFluxOnInviscidWall(
-        &f_upwind, property, u_holder, du_holder);
+    riemann.MinusViscousFluxOnNeumannWall(&f_upwind, property, u_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     return f_holder;
@@ -502,7 +498,7 @@ class General : public spatial::FiniteElement<P, R> {
   Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
       Cell const &holder, FluxPointCache const &holder_cache) const
       requires(!mini::riemann::Diffusive<Riemann>) {
-    Value u_holder = holder.polynomial().GetValue(holder_cache.ijk);
+    auto const &u_holder = holder.polynomial().GetValue(holder_cache.ijk);
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
@@ -511,14 +507,11 @@ class General : public spatial::FiniteElement<P, R> {
   Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
       Cell const &holder, FluxPointCache const &holder_cache) const
       requires(mini::riemann::ConvectiveDiffusive<Riemann>) {
-    auto [u_holder, du_holder] =
-        holder.polynomial().GetGlobalValueGradient(holder_cache.ijk);
-    Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
-    const auto &normal = riemann.normal();
-    assert(Collinear(normal, holder_cache.normal));
+    auto const &u_holder = holder.polynomial().GetValue(holder_cache.ijk);
+    auto f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
     auto const &property = Riemann::Diffusion::GetPropertyOnCell(
         holder.id(), holder_cache.ijk);
-    Riemann::MinusViscousFlux(&f_upwind, property, u_holder, du_holder, normal);
+    riemann.MinusViscousFluxOnNeumannWall(&f_upwind, property, u_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
     assert(f_holder.norm() < 1e-6);

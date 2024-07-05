@@ -25,6 +25,7 @@ class DirectDG : public DiffusionModel {
   using FluxMatrix = typename Base::FluxMatrix;
   using Flux = typename Base::Flux;
   using Hessian = algebra::Matrix<Scalar, 6, Base::kComponents>;
+  using Property = typename Base::Property;
 
  protected:
   static Scalar beta_0_;
@@ -35,6 +36,10 @@ class DirectDG : public DiffusionModel {
   void SetDistance(Scalar distance) {
     assert(distance > 0);
     distance_ = distance;
+  }
+
+  void MinusViscousFluxOnNeumannWall(Flux *flux, Property const &nu,
+      Conservative const &c_val) const {
   }
 
   Gradient GetCommonGradient(Vector normal,
