@@ -8,6 +8,8 @@
 #include "mini/geometry/pi.hpp"
 #include "mini/riemann/euler/types.hpp"
 #include "mini/riemann/euler/exact.hpp"
+
+#define SOLVE_RIEMANN_PROBLEM_ON_INVISCID_WALL_
 #include "mini/riemann/rotated/euler.hpp"
 
 namespace mini {
@@ -135,9 +137,13 @@ TEST_F(TestRotatedEuler, Test3dSolver) {
     auto right_c = left_c;
     right_c.momentumX() = -left_c.momentumX();
     auto flux = solver.GetFluxOnInviscidWall(left_c);
+#ifdef SOLVE_RIEMANN_PROBLEM_ON_INVISCID_WALL_
     CompareFlux(solver.GetFluxUpwind(left_c, right_c), flux);
+    EXPECT_NEAR(flux.momentumX() / p, 1.0, 5e-2);
+#else
+    EXPECT_NEAR(p, flux.momentumX(), 1e-10);
+#endif
     EXPECT_EQ(0.0, flux.mass());
-    EXPECT_NEAR(1.0, flux.momentumX() / p, 1e-1);
     EXPECT_EQ(0.0, flux.momentumY());
     EXPECT_EQ(0.0, flux.momentumZ());
     EXPECT_EQ(0.0, flux.energy());

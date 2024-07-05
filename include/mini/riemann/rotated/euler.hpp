@@ -156,11 +156,19 @@ class Euler {
     return GlobalPrimitivePairToGlobalFlux(&primitive__left, &primitive_right);
   }
   Flux GetFluxOnInviscidWall(Conservative const &conservative_interior) const {
+#ifdef SOLVE_RIEMANN_PROBLEM_ON_INVISCID_WALL_
     auto primitive__left = Gas::ConservativeToPrimitive(conservative_interior);
     GlobalToNormal(&primitive__left);
     auto primitive_right = primitive__left;
     primitive_right.u() = -primitive__left.u();
     return NormalPrimitivePairToGlobalFlux(primitive__left, primitive_right);
+#else
+    auto primitive = Gas::ConservativeToPrimitive(conservative_interior);
+    Flux flux = Flux::Zero();
+    flux.momentumX() = primitive.p();
+    NormalToGlobal(&flux);
+    return flux;
+#endif
   }
 
   /**
