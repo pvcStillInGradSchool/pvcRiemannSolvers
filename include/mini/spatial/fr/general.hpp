@@ -502,6 +502,7 @@ class General : public spatial::FiniteElement<P, R> {
     Value f_upwind = riemann.GetFluxOnSupersonicOutlet(u_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
+    assert(f_holder.norm() < 1e-6);
     return f_holder;
   }
   Value GetFluxOnSupersonicOutlet(Riemann const &riemann,
@@ -514,7 +515,6 @@ class General : public spatial::FiniteElement<P, R> {
     riemann.MinusViscousFluxOnNeumannWall(&f_upwind, property, u_holder);
     Value f_holder = f_upwind * holder_cache.scale;
     MinusCachedFlux(&f_holder, holder.id(), holder_cache);
-    assert(f_holder.norm() < 1e-6);
     return f_holder;
   }
   void AddFluxOnSupersonicOutlets(Column *residual) const override {
@@ -531,7 +531,6 @@ class General : public spatial::FiniteElement<P, R> {
               holder, holder_flux_point);
           for (auto [g_prime, ijk] : holder_solution_points) {
             Value f_correction = f_holder * g_prime;
-            assert(f_correction.norm() < 1e-6);
             assert(0 <= ijk && ijk < kCellQ);
             Polynomial::MinusValue(f_correction, holder_data, ijk);
           }

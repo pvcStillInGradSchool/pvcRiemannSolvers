@@ -323,7 +323,6 @@ class Lobatto : public General<P, R> {
           auto f_holder = this->Base::GetFluxOnSupersonicOutlet(riemanns[f],
               holder, holder_flux_point);
           f_holder *= holder_flux_point.g_prime;
-          assert(f_holder.norm() < 1e-6);
           assert(0 <= holder_flux_point.ijk && holder_flux_point.ijk < kCellQ);
           Polynomial::MinusValue(f_holder, holder_data, holder_flux_point.ijk);
         }

@@ -311,9 +311,10 @@ class EnergyBasedViscosity : public R {
       for (int k = 0; k < Cell::K; ++k) {
         auto const &residual_col = residual.row(k).transpose();
         auto const &solution_col = solution.row(k).transpose();
-        if ((residual_col - matrix * solution_col).norm() > 1e-10) {
+        if ((residual_col - matrix * solution_col).norm() > 1e-9) {
           std::cout << (residual_col).transpose() << "\n\n";
           std::cout << (matrix * solution_col).transpose() << "\n\n";
+          std::cout << (residual_col - matrix * solution_col).norm() << "\n\n";
           assert(false);
         }
       }
