@@ -91,13 +91,8 @@ class TestPolynomialHexahedronProjection : public TestPolynomialHexahedron {
   using Coordinate = mini::coordinate::Hexahedron8<Scalar>;
   using Basis = mini::basis::OrthoNormal<Scalar, 3, 2>;
   using Coord = typename Basis::Coord;
-  using Y = typename Basis::MatNx1;
-  using A = typename Basis::MatNxN;
-  using ScalarPF = mini::polynomial::Projection<Scalar, 3, 2, 1>;
-  using Mat1x10 = mini::algebra::Matrix<Scalar, 1, 10>;
-  using VectorPF = mini::polynomial::Projection<Scalar, 3, 2, 11>;
-  using Mat11x1 = mini::algebra::Matrix<Scalar, 11, 1>;
-  using Mat11x10 = mini::algebra::Matrix<Scalar, 11, 10>;
+  using ScalarProjection = mini::polynomial::Projection<Scalar, 3, 2, 1>;
+  using VectorProjection = mini::polynomial::Projection<Scalar, 3, 2, 11>;
 };
 TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   // build a hexa-integrator
@@ -111,9 +106,9 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   // check orthonormality
   double residual = (Integrate([&basis](const Coord& xyz) {
     auto col = basis(xyz);
-    A prod = col * col.transpose();
+    typename Basis::MatNxN prod = col * col.transpose();
     return prod;
-  }, integrator) - A::Identity()).norm();
+  }, integrator) - Basis::MatNxN::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-14);
   // build another hexa-integrator
   Coord shift = {-1, 2, 3};
@@ -133,9 +128,9 @@ TEST_F(TestPolynomialHexahedronProjection, OrthoNormal) {
   // check orthonormality
   residual = (Integrate([&basis](const Coord& xyz) {
     auto col = basis(xyz);
-    A prod = col * col.transpose();
+    typename Basis::MatNxN prod = col * col.transpose();
     return prod;
-  }, integrator) - A::Identity()).norm();
+  }, integrator) - Basis::MatNxN::Identity()).norm();
   EXPECT_NEAR(residual, 0.0, 1e-14);
 }
 TEST_F(TestPolynomialHexahedronProjection, Projection) {
@@ -144,47 +139,50 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
     Coord(-1, -1, +1), Coord(+1, -1, +1), Coord(+1, +1, +1), Coord(-1, +1, +1),
   };
   auto integrator = Integrator(coordinate);
-  auto scalar_pf = ScalarPF(integrator);
+  auto scalar_pf = ScalarProjection(integrator);
   scalar_pf.Approximate([](Coord const& xyz){
     return xyz[0] * xyz[1] + xyz[2];
   });
-  Mat1x10 diff = scalar_pf.GetCoeffOnTaylorBasis()
-      - Mat1x10(0, 0, 0, 1, 0, 1, 0, 0, 0, 0);
+  typename ScalarProjection::Coeff diff
+      = scalar_pf.GetCoeffOnTaylorBasis()
+      - typename ScalarProjection::Coeff(0, 0, 0, 1, 0, 1, 0, 0, 0, 0);
   EXPECT_NEAR(diff.norm(), 0.0, 1e-14);
   // Check SetZero():
   scalar_pf.SetZero();
-  EXPECT_EQ(scalar_pf.coeff(), Mat1x10::Zero());
+  EXPECT_EQ(scalar_pf.coeff(), ScalarProjection::Coeff::Zero());
   // Check SetCoeff():
-  Mat1x10 scalar_coeff = Mat1x10::Random();
-  EXPECT_NE(scalar_coeff, Mat1x10::Zero());
+  typename ScalarProjection::Coeff scalar_coeff
+      = ScalarProjection::Coeff::Random();
+  EXPECT_NE(scalar_coeff, ScalarProjection::Coeff::Zero());
   scalar_pf.SetCoeff(scalar_coeff);
   EXPECT_EQ(scalar_pf.coeff(), scalar_coeff);
   // Check AddCoeffTo():
-  ScalarPF::AddCoeffTo(scalar_pf.coeff(), scalar_coeff.data());
+  ScalarProjection::AddCoeffTo(scalar_pf.coeff(), scalar_coeff.data());
   EXPECT_EQ(scalar_pf.coeff() * 2, scalar_coeff);
-  auto vector_pf = VectorPF(integrator);
-  vector_pf.Approximate([](Coord const& xyz) {
+  auto vector_pf = VectorProjection(integrator);
+  vector_pf.Approximate([](Coord const& xyz)
+      -> typename VectorProjection::Value {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
-    Mat11x1 func(0, 1,
-                x, y, z,
-                x * x, x * y, x * z, y * y, y * z, z * z);
-    return func;
+    return { 0, 1, x, y, z,
+        x * x, x * y, x * z, y * y, y * z, z * z};
   });
-  Mat11x10 exact_vector;
+  typename VectorProjection::Coeff exact_vector;
   exact_vector.row(0).setZero();
   exact_vector.bottomRows(10).setIdentity();
-  Mat11x10 abs_diff = vector_pf.GetCoeffOnTaylorBasis() - exact_vector;
+  typename VectorProjection::Coeff abs_diff
+      = vector_pf.GetCoeffOnTaylorBasis() - exact_vector;
   EXPECT_NEAR(abs_diff.norm(), 0.0, 1e-14);
   // Check SetZero():
   vector_pf.SetZero();
-  EXPECT_EQ(vector_pf.coeff(), Mat11x10::Zero());
+  EXPECT_EQ(vector_pf.coeff(), VectorProjection::Coeff::Zero());
   // Check SetCoeff():
-  Mat11x10 vector_coeff = Mat11x10::Random();
-  EXPECT_NE(vector_coeff, Mat11x10::Zero());
+  typename VectorProjection::Coeff vector_coeff
+      = VectorProjection::Coeff::Random();
+  EXPECT_NE(vector_coeff, VectorProjection::Coeff::Zero());
   vector_pf.SetCoeff(vector_coeff);
   EXPECT_EQ(vector_pf.coeff(), vector_coeff);
   // Check AddCoeffTo():
-  VectorPF::AddCoeffTo(vector_pf.coeff(), vector_coeff.data());
+  VectorProjection::AddCoeffTo(vector_pf.coeff(), vector_coeff.data());
   EXPECT_EQ(vector_pf.coeff() * 2, vector_coeff);
 }
 
