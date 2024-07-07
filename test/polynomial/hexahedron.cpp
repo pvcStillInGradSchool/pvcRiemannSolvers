@@ -193,14 +193,25 @@ class TestPolynomialHexahedronInterpolation : public TestPolynomialHexahedron {
   using IntegratorX = mini::integrator::Legendre<Scalar, 3>;
   using IntegratorY = mini::integrator::Lobatto<Scalar, 3>;
   using IntegratorZ = mini::integrator::Lobatto<Scalar, 4>;
-  using Interpolation = mini::polynomial::Hexahedron<IntegratorX, IntegratorY, IntegratorZ, 11>;
-  using Basis = typename Interpolation::Basis;
-  using Integrator = typename Interpolation::Integrator;
-  using Coeff = typename Interpolation::Coeff;
-  using Value = typename Interpolation::Value;
-  using Global = typename Integrator::Global;
+
+  template <bool kLocal>
+  static void CheckStaticMembers();
+
+  template <bool kLocal>
+  static void CheckValues();
+
+  template <bool kLocal>
+  static void CheckDerivatives();
+
+  template <bool kLocal>
+  static void CheckCollinearPoints();
 };
-TEST_F(TestPolynomialHexahedronInterpolation, StaticMethods) {
+
+template <bool kLocal>
+void TestPolynomialHexahedronInterpolation::CheckStaticMembers() {
+  using Interpolation = mini::polynomial::Hexahedron<
+      IntegratorX, IntegratorY, IntegratorZ, kComponents, kLocal>;
+  using Integrator = typename Interpolation::Integrator;
   constexpr int N = Interpolation::N;
   constexpr int K = Interpolation::K;
   mini::algebra::Vector<Scalar, N * K> output;
@@ -224,7 +235,16 @@ TEST_F(TestPolynomialHexahedronInterpolation, StaticMethods) {
     EXPECT_EQ(output.norm(), 0.0);
   }
 }
-TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
+TEST_F(TestPolynomialHexahedronInterpolation, StaticMembers) {
+  CheckStaticMembers<true>();
+  CheckStaticMembers<false>();
+}
+
+template <bool kLocal>
+void TestPolynomialHexahedronInterpolation::CheckValues() {
+  using Interpolation = mini::polynomial::Hexahedron<
+      IntegratorX, IntegratorY, IntegratorZ, kComponents, kLocal>;
+  using Integrator = typename Interpolation::Integrator;
   // build a hexa-integrator and a Lagrange basis on it
   auto a = 2.0, b = 3.0, c = 4.0;
   auto coordinate = Coordinate {
@@ -234,43 +254,33 @@ TEST_F(TestPolynomialHexahedronInterpolation, OnVectorFunction) {
     Global(+a, +b, +c), Global(-a, +b, +c),
   };
   auto integrator = Integrator(coordinate);
-  // build a vector function and its interpolation
-  auto vector_func = [](Global const& xyz) {
-    auto x = xyz[0], y = xyz[1], z = xyz[2];
-    Value value{ 0, 1, x, y, z, x * x, x * y, x * z, y * y, y * z, z * z };
-    return value;
-  };
+  // build the interpolation
   auto vector_interp = Interpolation(integrator);
-  vector_interp.Approximate(vector_func);
+  vector_interp.Approximate(GetExactValue);
   // test values on nodes
-  for (int ijk = 0; ijk < Basis::N; ++ijk) {
+  for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
     auto &global = vector_interp.integrator().GetGlobal(ijk);
-    auto value = vector_func(global);
+    auto value = GetExactValue(global);
     value -= vector_interp.GlobalToValue(global);
     EXPECT_NEAR(value.norm(), 0, 1e-13);
   }
   // test values on random points
-  for (int i = 1 << 10; i >= 0; --i) {
+  for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
     auto global = Global{ rand_f(-a, a), rand_f(-b, b), rand_f(-c, c) };
-    auto value = vector_func(global);
+    auto value = GetExactValue(global);
     value -= vector_interp.GlobalToValue(global);
     EXPECT_NEAR(value.norm(), 0, 1e-12);
   }
-  // test value query methods
-  for (int q = 0, n = integrator.CountPoints(); q < n; ++q) {
-    Global global = vector_interp.integrator().GetGlobal(q);
-    Value value = vector_interp.GlobalToValue(global);
-    EXPECT_NEAR((value - vector_interp.GetValue(q)).norm(), 0, 1e-13);
-    vector_interp.SetValue(q, value);
-    EXPECT_EQ(value, vector_interp.GetValue(q));
-    auto grad = vector_interp.GlobalToBasisGlobalGradients(global);
-    grad -= vector_interp.GetBasisGlobalGradients(q);
-    EXPECT_NEAR(grad.norm(), 0, 1e-14);
-  }
 }
-TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInGlobalFormulation) {
+TEST_F(TestPolynomialHexahedronInterpolation, Values) {
+  CheckValues<true>();
+  CheckValues<false>();
+}
+
+template <bool kLocal>
+void TestPolynomialHexahedronInterpolation::CheckDerivatives() {
   using Interpolation = mini::polynomial::Hexahedron<
-      IntegratorX, IntegratorY, IntegratorZ, kComponents, false>;
+      IntegratorX, IntegratorY, IntegratorZ, kComponents, kLocal>;
   using Integrator = typename Interpolation::Integrator;
   for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
     // build a hexa-integrator and a Lagrange basis on it
@@ -338,77 +348,16 @@ TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInGlobalFormulation) {
     }
   }
 }
-TEST_F(TestPolynomialHexahedronInterpolation, DerivativesInLocalFormulation) {
-  using Interpolation = mini::polynomial::Hexahedron<
-      IntegratorX, IntegratorY, IntegratorZ, kComponents, true>;
-  using Integrator = typename Interpolation::Integrator;
-  for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
-    // build a hexa-integrator and a Lagrange basis on it
-    auto a = 20.0 + rand_f(), b = 30.0 + rand_f(), c = 40.0 + rand_f();
-    auto coordinate = Coordinate {
-        Global(-a, -b, -c), Global(+a, -b, -c),
-        Global(+a, +b, -c), Global(-a, +b, -c),
-        Global(-a, -b, +c), Global(+a, -b, +c),
-        Global(+a, +b, +c), Global(-a, +b, +c),
-    };
-    auto integrator = Integrator(coordinate);
-    // build the interpolation
-    coeff_ = Value::Random();
-    auto interp = Interpolation(integrator);
-    interp.Approximate(GetExactValue);
-    // test values and derivatives on nodes
-    for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
-      Local const &local = interp.integrator().GetLocal(ijk);
-      Global const &global = interp.integrator().GetGlobal(ijk);
-      auto [value, grad, hess] = interp.GetGlobalValueGradientHessian(ijk);
-      EXPECT_NEAR((value - GetExactValue(global)).norm(), 0, 1e-12);
-      EXPECT_NEAR((value - interp.GlobalToValue(global)).norm(), 0, 1e-10);
-      interp.SetValue(ijk, value);
-      EXPECT_EQ(value, interp.GetValue(ijk));
-      EXPECT_NEAR((grad - interp.LocalToGlobalGradient(local)).norm(), 0,
-          1e-13);
-      EXPECT_NEAR((grad - interp.GlobalToGlobalGradient(global)).norm(), 0,
-          1e-12);
-      // compare with analytical derivatives
-      EXPECT_NEAR((GetExactGradient(global) - grad).norm(), 0.0, 1e-8);
-      EXPECT_NEAR((GetExactHessian(global) - hess).norm(), 0.0, 1e-8);
-      // compare with O(h^2) finite difference derivatives
-      auto x = global[X], y = global[Y], z = global[Z], h = 1e-5;
-      Value left = interp.GlobalToValue(Global(x - h, y, z));
-      Value right = interp.GlobalToValue(Global(x + h, y, z));
-      grad.row(X) -= (right - left) / (2 * h);
-      left = interp.GlobalToValue(Global(x, y - h, z));
-      right = interp.GlobalToValue(Global(x, y + h, z));
-      grad.row(Y) -= (right - left) / (2 * h);
-      left = interp.GlobalToValue(Global(x, y, z - h));
-      right = interp.GlobalToValue(Global(x, y, z + h));
-      grad.row(Z) -= (right - left) / (2 * h);
-      EXPECT_NEAR(grad.norm(), 0, 1e-6);
-      Gradient grad_diff = (
-          interp.GlobalToGlobalGradient(Global(x + h, y, z)) -
-          interp.GlobalToGlobalGradient(Global(x - h, y, z))
-      ) / (2 * h);
-      EXPECT_NEAR((hess.row(XX) - grad_diff.row(X)).norm(), 0, 1e-8);
-      EXPECT_NEAR((hess.row(XY) - grad_diff.row(Y)).norm(), 0, 1e-8);
-      EXPECT_NEAR((hess.row(XZ) - grad_diff.row(Z)).norm(), 0, 1e-8);
-      grad_diff = (
-          interp.GlobalToGlobalGradient(Global(x, y + h, z)) -
-          interp.GlobalToGlobalGradient(Global(x, y - h, z))
-      ) / (2 * h);
-      EXPECT_NEAR((hess.row(YX) - grad_diff.row(X)).norm(), 0, 1e-8);
-      EXPECT_NEAR((hess.row(YY) - grad_diff.row(Y)).norm(), 0, 1e-8);
-      EXPECT_NEAR((hess.row(YZ) - grad_diff.row(Z)).norm(), 0, 1e-8);
-      grad_diff = (
-          interp.GlobalToGlobalGradient(Global(x, y, z + h)) -
-          interp.GlobalToGlobalGradient(Global(x, y, z - h))
-      ) / (2 * h);
-      EXPECT_NEAR((hess.row(ZX) - grad_diff.row(X)).norm(), 0, 1e-8);
-      EXPECT_NEAR((hess.row(ZY) - grad_diff.row(Y)).norm(), 0, 1e-8);
-      EXPECT_NEAR((hess.row(ZZ) - grad_diff.row(Z)).norm(), 0, 1e-8);
-    }
-  }
+TEST_F(TestPolynomialHexahedronInterpolation, Derivatives) {
+  CheckDerivatives<true>();
+  CheckDerivatives<false>();
 }
-TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
+
+template <bool kLocal>
+void TestPolynomialHexahedronInterpolation::CheckCollinearPoints() {
+  using Interpolation = mini::polynomial::Hexahedron<
+      IntegratorX, IntegratorY, IntegratorZ, kComponents, kLocal>;
+  using Integrator = typename Interpolation::Integrator;
   // build a hexa-integrator and a Coordinate interpolation on it
   auto a = 2.0, b = 3.0, c = 4.0;
   auto cell_coordinate = Coordinate {
@@ -540,6 +489,10 @@ TEST_F(TestPolynomialHexahedronInterpolation, FindCollinearPoints) {
       }
     }
   }
+}
+TEST_F(TestPolynomialHexahedronInterpolation, CollinearPoints) {
+  CheckCollinearPoints<true>();
+  CheckCollinearPoints<false>();
 }
 
 int main(int argc, char* argv[]) {
