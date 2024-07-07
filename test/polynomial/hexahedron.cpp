@@ -271,6 +271,21 @@ void TestPolynomialHexahedronInterpolation::CheckValues() {
     value -= vector_interp.GlobalToValue(global);
     EXPECT_NEAR(value.norm(), 0, 1e-12);
   }
+  // test SetCoeff() and SetValue()
+  vector_interp.SetZero();
+  EXPECT_EQ(vector_interp.coeff(), Interpolation::Coeff::Zero());
+  Interpolation another_interp = vector_interp;
+  typename Interpolation::Coeff coeff;
+  for (int ijk = 0; ijk < Interpolation::N; ++ijk) {
+    Value value = Value::Random();
+    coeff.col(ijk) = value;
+    EXPECT_NE(vector_interp.coeff(), coeff);
+    vector_interp.SetCoeff(ijk, value);
+    another_interp.SetValue(ijk, value);
+    EXPECT_NEAR((another_interp.GetValue(ijk) - value).norm(),
+        0.0, 1e-15);
+  }
+  EXPECT_EQ(vector_interp.coeff(), coeff);
 }
 TEST_F(TestPolynomialHexahedronInterpolation, Values) {
   CheckValues<true>();

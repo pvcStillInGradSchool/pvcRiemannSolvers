@@ -51,7 +51,28 @@ TEST_F(TestPolynomialExtrapolation, Hexahedron) {
   static_assert(std::is_same_v<Integrator, typename Interpolation::Integrator>);
   using Value = typename Interpolation::Value;
   using Extrapolation = mini::polynomial::Extrapolation<Interpolation>;
+  using Projection = typename Extrapolation::Projection;
   auto extrapolation = Extrapolation(integrator);
+  // test SetCoeff() and SetValue()
+  extrapolation.SetZero();
+  EXPECT_EQ(extrapolation.coeff(),
+      Extrapolation::Coeff::Zero());
+  EXPECT_EQ(extrapolation.interpolation().coeff(),
+      Interpolation::Coeff::Zero());
+  EXPECT_EQ(extrapolation.projection().coeff(),
+      Projection::Coeff::Zero());
+  Extrapolation another_extrapolation = extrapolation;
+  typename Extrapolation::Coeff coeff;
+  for (int ijk = 0; ijk < Extrapolation::N; ++ijk) {
+    Value value = Value::Random();
+    coeff.col(ijk) = value;
+    EXPECT_NE(extrapolation.coeff(), coeff);
+    extrapolation.SetCoeff(ijk, value);
+    another_extrapolation.SetValue(ijk, value);
+    EXPECT_NEAR((another_extrapolation.GetValue(ijk) - value).norm(),
+        0.0, 1e-15);
+  }
+  EXPECT_EQ(extrapolation.coeff(), coeff);
   // approximate a polynomial function
   auto exact = [](Global const &global) -> Value {
     using mini::constant::index::X;
