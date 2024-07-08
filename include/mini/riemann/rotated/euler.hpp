@@ -341,6 +341,14 @@ class Euler {
     auto u = primitive.velocity().norm();
     return std::max(c + u, c - u);
   }
+
+  static Conservative GetReferenceValueSquare(Conservative const &conservative) {
+    Conservative squares;
+    squares.mass() = conservative.mass() * conservative.mass();
+    squares.energy() = conservative.energy() * conservative.energy();
+    squares.momentum() = Vector::Ones() * conservative.momentum().squaredNorm();
+    return squares;
+  }
 };
 
 }  // namespace rotated

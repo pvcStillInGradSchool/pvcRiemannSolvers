@@ -450,11 +450,29 @@ class EnergyBasedViscosity : public R {
         return max_speed;
       };
       Scalar max_speed = GetMaximumSpeed(*curr_cell);
+      auto GetReferenceValueSquare = [](Cell const &cell) -> Value {
+        typename Convection::Conservative value_square
+            = Value::Ones() * 1e-5;  // avoid 0 in divisor
+        auto const &polynomial = cell.polynomial();
+        for (int i = 0; i < Cell::N; ++i) {
+          mini::algebra::Maximize(&value_square,
+              Convection::GetReferenceValueSquare(polynomial.GetValue(i)));
+        }
+        return value_square;
+      };
+      Value reference_value_square = GetReferenceValueSquare(*curr_cell);
       Scalar cell_length = curr_cell->length();
       Scalar max_viscosity = max_speed * cell_length / Cell::P;
       assert(!std::isinf(max_viscosity) && !std::isnan(max_viscosity));
       Scalar time_base = cell_length / max_speed;
+      reference_value_square *= std::pow(cell_length,
+          (Cell::P + 1)/* accuracy */ + 3/* volume */);
+      // Now, reference_value_square[k] == |u_k|^2 * h_j^{P + 1} * |E_j|
       for (int k = 0; k < Cell::K; ++k) {
+        if (jump_integral_on_curr_cell[k] < reference_value_square[k]) {
+          viscosity_on_curr_cell[k] = 0.;
+          continue;
+        }
         auto const &u_row = coeff.row(k);
         auto const &u_col = u_row.transpose();
         Scalar damping_rate = -u_row.dot(damping_matrix_on_curr_cell * u_col);
