@@ -6,17 +6,20 @@
 #include "mini/basis/vincent.hpp"
 #include "mini/integrator/line.hpp"
 #include "mini/integrator/function.hpp"
+#include "mini/rand.hpp"
 
 #include "gtest/gtest.h"
-
-double rand_f() {
-  return -1 + 2.0 * std::rand() / (1.0 + RAND_MAX);
-}
 
 class TestBasisVincent : public ::testing::Test {
  protected:
   using Scalar = double;
   using Vincent = mini::basis::Vincent<Scalar>;
+
+  static constexpr int kTrials = 1 << 10;
+
+  void SetUp() override {
+    std::srand(31415926);
+  }
 };
 TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
   auto line_integrator = mini::integrator::Line<Scalar, 1, 6>(-1, 1);
@@ -36,9 +39,8 @@ TEST_F(TestBasisVincent, DiscontinuousGalerkin) {
       EXPECT_NEAR(ip, 0, 1e-15);
     }
     // check derivatives
-    std::srand(31415926);
-    for (int i = 1 << 10; i >= 0; --i) {
-      auto local = rand_f();
+    for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
+      auto local = mini::rand::uniform(-1., 1.);
       EXPECT_EQ(vincent.LocalToRightDerivative(local),
                -vincent.LocalToLeftDerivative(-local));
       auto approx = (vincent.LocalToLeftValue(local + 1e-6)
@@ -65,9 +67,8 @@ TEST_F(TestBasisVincent, HuynhLumpingLobatto) {
       EXPECT_NEAR(ip, 0, 1e-15);
     }
     // check derivatives
-    std::srand(31415926);
-    for (int i = 1 << 10; i >= 0; --i) {
-      auto local = rand_f();
+    for (int i_trial = 0; i_trial < kTrials; ++i_trial) {
+      auto local = mini::rand::uniform(-1., 1.);
       EXPECT_EQ(vincent.LocalToRightDerivative(local),
                -vincent.LocalToLeftDerivative(-local));
       auto approx = (vincent.LocalToLeftValue(local + 1e-6)

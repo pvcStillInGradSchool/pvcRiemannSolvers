@@ -13,20 +13,20 @@
 #include "mini/integrator/quadrangle.hpp"
 #include "mini/coordinate/quadrangle.hpp"
 #include "mini/basis/taylor.hpp"
+#include "mini/rand.hpp"
 
 #include "gtest/gtest.h"
 
-double rand_f() {
-  return std::rand() / (1.0 + RAND_MAX);
-}
 
 class TestBasisTaylor : public ::testing::Test {
+  void SetUp() override {
+    std::srand(31415926);
+  }
 };
 TEST_F(TestBasisTaylor, In1dSpace) {
   using Basis = mini::basis::Taylor<double, 1, 5>;
   static_assert(Basis::N == 6);
-  std::srand(31415926);
-  double x{rand_f()};
+  double x = mini::rand::uniform(0., 1.);
   EXPECT_NE(x, 0);
   typename Basis::Vector res;
   res = Basis::GetValues(x);
@@ -82,8 +82,8 @@ TEST_F(TestBasisTaylor, In1dSpace) {
 TEST_F(TestBasisTaylor, In2dSpace) {
   using Basis = mini::basis::Taylor<double, 2, 2>;
   static_assert(Basis::N == 6);
-  std::srand(31415926);
-  double x{rand_f()}, y{rand_f()};
+  double x = mini::rand::uniform(0., 1.);
+  double y = mini::rand::uniform(0., 1.);
   typename Basis::MatNx1 res;
   res = Basis::GetValue({x, y});
   EXPECT_EQ(res[0], 1);
@@ -104,8 +104,9 @@ TEST_F(TestBasisTaylor, In2dSpace) {
 TEST_F(TestBasisTaylor, In3dSpace) {
   using Basis = mini::basis::Taylor<double, 3, 2>;
   static_assert(Basis::N == 10);
-  std::srand(31415926);
-  double x{rand_f()}, y{rand_f()}, z{rand_f()};
+  double x = mini::rand::uniform(0., 1.);
+  double y = mini::rand::uniform(0., 1.);
+  double z = mini::rand::uniform(0., 1.);
   typename Basis::MatNx1 res;
   res = Basis::GetValue({x, y, z});
   EXPECT_EQ(res[0], 1);
