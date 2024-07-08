@@ -38,6 +38,7 @@ using VtkWriter = mini::mesh::vtk::Writer<Part>;
 
 #ifdef VISCOSITY
 #include "mini/limiter/average.hpp"
+#include "mini/limiter/majority.hpp"
 #endif
 
 #include <fstream>
@@ -137,7 +138,14 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
       mini::limiter::Reconstruct(&part, &limiter);
     }
 #else  // VISCOSITY
-    mini::limiter::average::Reconstruct(spatial.part_ptr());
+    std::string initial_limiter = json_object.at("initial_limiter");
+    if (initial_limiter == "majority") {
+      mini::limiter::majority::Reconstruct(spatial.part_ptr());
+    } else {
+      assert(initial_limiter == "average");
+      mini::limiter::average::Reconstruct(spatial.part_ptr());
+    }
+    RiemannWithViscosity::Viscosity::UpdateProperties();
 #endif
     if (i_core == 0) {
       std::printf("[Done] Reconstruct() on %d cores at %f sec\n",
