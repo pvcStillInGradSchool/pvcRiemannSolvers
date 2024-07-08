@@ -3,8 +3,8 @@
  */
 LC = 0.1;  // average length of cell edges, a.k.a. characteristic length
 LX = 2.5;  // length along x-axis
-LY = 0.4;  // length along y-axis
-LZ = 0.5;  // length along z-axis
+LY = 2 * LC;  // length along y-axis
+LZ = 3 * LC;  // length along z-axis
 
 Point(1) = { LX, 0., 0., LC };
 Point(2) = { LX+LX, 0., 0., LC };
@@ -25,7 +25,7 @@ Curve Loop(1) = { 1, 2, 3, 4 };
 Curve Loop(2) = { 5, 6, 7, -4 };
 Plane Surface(1) = { 1 };
 Plane Surface(2) = { 2 };
-// Recombine Surface{ 1, 2 };
+Recombine Surface{ 1, 2 };
 out[] = Extrude{ 0, 0, LZ }{
   Surface{ 1, 2 }; Layers{ Ceil(LZ/LC/2)*2 - 1 };  Recombine;
 };

@@ -1,5 +1,5 @@
 {
-  "problem_name": "shock_tube_sod_exact",
+  "problem_name": "shock_tube_sod",
   "cgns_file": "path-to-a-cgns-file",
   "cell_length": "2e-1",
   "cell_type": "hexa",
