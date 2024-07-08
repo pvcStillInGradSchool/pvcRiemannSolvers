@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
   constexpr int kDimensions = 3;
   using Convection = mini::riemann::rotated::Single<Scalar, kDimensions>;
   auto a_x = -10.0;
-  using Diffusion = mini::riemann::diffusive::DirectDG<
+  using Diffusion = mini::riemann::diffusive::Direct<
       mini::riemann::diffusive::Isotropic<Scalar, 1>
   >;
   using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;

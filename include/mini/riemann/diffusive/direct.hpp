@@ -1,6 +1,6 @@
 // Copyright 2023 PEI Weicheng
-#ifndef MINI_RIEMANN_DIFFUSIVE_DIRECT_DG_HPP_
-#define MINI_RIEMANN_DIFFUSIVE_DIRECT_DG_HPP_
+#ifndef MINI_RIEMANN_DIFFUSIVE_DIRECT_HPP_
+#define MINI_RIEMANN_DIFFUSIVE_DIRECT_HPP_
 
 #include "mini/algebra/eigen.hpp"
 #include "mini/constant/index.hpp"
@@ -12,11 +12,11 @@ namespace diffusive {
 using namespace mini::constant::index;
 
 template <typename DiffusionModel>
-class DirectDG : public DiffusionModel {
+class Direct : public DiffusionModel {
   using Base = DiffusionModel;
 
  public:
-  using Diffusion = DirectDG;
+  using Diffusion = Direct;
 
   using Scalar = typename Base::Scalar;
   using Vector = typename Base::Vector;
@@ -89,13 +89,17 @@ class DirectDG : public DiffusionModel {
     return beta_1_ * distance_;
   }
 };
+
 template <typename DiffusionModel>
-typename DirectDG<DiffusionModel>::Scalar DirectDG<DiffusionModel>::beta_0_;
+typename Direct<DiffusionModel>::Scalar
+Direct<DiffusionModel>::beta_0_;
+
 template <typename DiffusionModel>
-typename DirectDG<DiffusionModel>::Scalar DirectDG<DiffusionModel>::beta_1_;
+typename Direct<DiffusionModel>::Scalar
+Direct<DiffusionModel>::beta_1_;
 
 }  // namespace diffusive
 }  // namespace riemann
 }  // namespace mini
 
-#endif  // MINI_RIEMANN_DIFFUSIVE_DIRECT_DG_HPP_
+#endif  // MINI_RIEMANN_DIFFUSIVE_DIRECT_HPP_

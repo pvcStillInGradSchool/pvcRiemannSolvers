@@ -16,7 +16,7 @@
 template class mini::riemann::rotated::Multiple<
     Scalar, kComponents, kDimensions>;
 template class mini::riemann::diffusive::Anisotropic<Scalar, kComponents>;
-template class mini::riemann::diffusive::DirectDG<Viscosity>;
+template class mini::riemann::diffusive::Direct<Viscosity>;
 template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 
 int Main(int argc, char* argv[], IC ic, BC bc) {

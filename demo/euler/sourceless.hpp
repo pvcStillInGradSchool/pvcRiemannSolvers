@@ -90,7 +90,7 @@ using Spatial = mini::spatial::WithLimiter<General, Limiter>;
 #include "mini/spatial/viscosity.hpp"
 #include "mini/spatial/with_viscosity.hpp"
 
-using Diffusion = mini::riemann::diffusive::DirectDG<
+using Diffusion = mini::riemann::diffusive::Direct<
     mini::riemann::diffusive::Isotropic<Scalar, kComponents>>;
 using RiemannWithViscosity = mini::spatial::EnergyBasedViscosity<Part,
     mini::riemann::ConvectionDiffusion<Riemann, Diffusion>>;

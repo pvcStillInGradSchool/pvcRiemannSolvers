@@ -50,8 +50,8 @@ using Convection = mini::riemann::rotated::Euler<Unrotated>;
 extern template class mini::riemann::diffusive::NavierStokes<Gas>;
 using NavierStokes =  mini::riemann::diffusive::NavierStokes<Gas>;
 
-extern template class mini::riemann::diffusive::DirectDG<NavierStokes>;
-using Diffusion = mini::riemann::diffusive::DirectDG<NavierStokes>;
+extern template class mini::riemann::diffusive::Direct<NavierStokes>;
+using Diffusion = mini::riemann::diffusive::Direct<NavierStokes>;
 
 extern template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;

@@ -24,7 +24,7 @@ template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 template class mini::riemann::euler::HartenLaxLeerContact<Gas, kDimensions>;
 template class mini::riemann::rotated::Euler<Unrotated>;
 template class mini::riemann::diffusive::NavierStokes<Gas>;
-template class mini::riemann::diffusive::DirectDG<NavierStokes>;
+template class mini::riemann::diffusive::Direct<NavierStokes>;
 template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 
 static void InstallIntegratorPrototypes(Part *part_ptr) {

@@ -19,7 +19,7 @@ namespace spatial {
 
 using Convection = mini::
     riemann::rotated::Multiple<Scalar, kComponents, kDimensions>;
-using Diffusion = mini::riemann::diffusive::DirectDG<
+using Diffusion = mini::riemann::diffusive::Direct<
     mini::riemann::diffusive::Isotropic<Scalar, kComponents>
 >;
 using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;

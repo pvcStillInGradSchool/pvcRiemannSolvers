@@ -39,8 +39,8 @@ extern template class mini::riemann::diffusive::Anisotropic<
 using Viscosity = mini::riemann::diffusive::Anisotropic<
     Scalar, kComponents>;
 
-extern template class mini::riemann::diffusive::DirectDG<Viscosity>;
-using Diffusion = mini::riemann::diffusive::DirectDG<Viscosity>;
+extern template class mini::riemann::diffusive::Direct<Viscosity>;
+using Diffusion = mini::riemann::diffusive::Direct<Viscosity>;
 
 extern template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
