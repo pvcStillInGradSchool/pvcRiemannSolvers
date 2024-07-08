@@ -110,8 +110,8 @@ struct Face {
   CoordinateUptr coordinate_ptr_;
   IntegratorUptr integrator_ptr_;
   Cell *holder_, *sharer_;
+  Scalar holder_height_, sharer_height_;
   Global holder_to_sharer_;
-  Scalar height_;
   Int id_;  // 0-based, local first, then ghost, then boundary
 
  public:
@@ -120,6 +120,8 @@ struct Face {
       : coordinate_ptr_(std::move(coordinate_ptr)),
         integrator_ptr_(std::move(integrator_ptr)),
         holder_(holder), sharer_(sharer),
+        holder_height_(holder ? holder->volume() / area() : -1),
+        sharer_height_(sharer ? sharer->volume() / area() : -1),
         holder_to_sharer_(-holder->center()),
         id_(id) {
     if (sharer) {
@@ -128,7 +130,6 @@ struct Face {
       holder_to_sharer_ += center();
       holder_to_sharer_ *= 2;
     }
-    height_ = holder_to_sharer_.norm();
   }
   Face(const Face &) = delete;
   Face &operator=(const Face &) = delete;
@@ -150,8 +151,13 @@ struct Face {
   Scalar area() const {
     return integrator().area();
   }
-  Scalar height() const {
-    return height_;
+  Scalar holder_height() const {
+    assert(holder_);
+    return holder_height_;
+  }
+  Scalar sharer_height() const {
+    assert(sharer_);
+    return sharer_height_;
   }
   Int id() const {
     return id_;

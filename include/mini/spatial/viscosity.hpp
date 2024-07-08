@@ -406,10 +406,11 @@ class EnergyBasedViscosity : public R {
       const auto &integrator = face.integrator();
       for (int i = 0; i < integrator.CountPoints(); ++i) {
         Value jump = spatial_ptr_->GetValueJump(face, i);
-        Scalar scale = integrator.GetGlobalWeight(i) * face.height();
-        jump = std::pow(jump, 2) * scale;
-        jump_integrals.at(holder.id()) += jump;
-        jump_integrals.at(sharer.id()) += jump;
+        jump.array() *= jump.array();
+        jump_integrals.at(holder.id()) += jump
+            * (integrator.GetGlobalWeight(i) * face.holder_height());
+        jump_integrals.at(sharer.id()) += jump
+            * (integrator.GetGlobalWeight(i) * face.sharer_height());
       }
     }
     for (Face const &face : part_ptr()->GetGhostFaces()) {
@@ -418,9 +419,9 @@ class EnergyBasedViscosity : public R {
       const auto &integrator = face.integrator();
       for (int i = 0; i < integrator.CountPoints(); ++i) {
         Value jump = spatial_ptr_->GetValueJump(face, i);
-        Scalar scale = integrator.GetGlobalWeight(i) * face.height();
-        jump = std::pow(jump, 2) * scale;
-        jump_integrals.at(holder.id()) += jump;
+        jump.array() *= jump.array();
+        jump_integrals.at(holder.id()) += jump
+            * (integrator.GetGlobalWeight(i) * face.holder_height());
       }
     }
     assert(jump_integrals.size() == part().CountLocalCells());
