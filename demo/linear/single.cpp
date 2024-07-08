@@ -13,7 +13,7 @@
 #include "mini/riemann/concept.hpp"
 #include "mini/riemann/rotated/single.hpp"
 #include "mini/riemann/diffusive/linear.hpp"
-#include "mini/riemann/diffusive/direct_dg.hpp"
+#include "mini/riemann/diffusive/direct.hpp"
 #include "mini/polynomial/projection.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/mesh/part.hpp"

@@ -26,7 +26,7 @@
 #include "mini/spatial/fem.hpp"
 #include "mini/riemann/concept.hpp"
 #include "mini/riemann/diffusive/linear.hpp"
-#include "mini/riemann/diffusive/direct_dg.hpp"
+#include "mini/riemann/diffusive/direct.hpp"
 
 namespace mini {
 namespace spatial {

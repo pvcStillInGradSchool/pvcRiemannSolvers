@@ -10,7 +10,7 @@
 #include "mini/riemann/concept.hpp"
 #include "mini/riemann/rotated/multiple.hpp"
 #include "mini/riemann/diffusive/linear.hpp"
-#include "mini/riemann/diffusive/direct_dg.hpp"
+#include "mini/riemann/diffusive/direct.hpp"
 
 #include "test/mesh/part.hpp"
 

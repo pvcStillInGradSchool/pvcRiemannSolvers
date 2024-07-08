@@ -18,7 +18,7 @@
 #include "mini/riemann/euler/exact.hpp"
 #include "mini/riemann/rotated/euler.hpp"
 #include "mini/riemann/diffusive/navier_stokes.hpp"
-#include "mini/riemann/diffusive/direct_dg.hpp"
+#include "mini/riemann/diffusive/direct.hpp"
 #include "mini/polynomial/hexahedron.hpp"
 #include "mini/mesh/part.hpp"
 #include "mini/temporal/rk.hpp"
