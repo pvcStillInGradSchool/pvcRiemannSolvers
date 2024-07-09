@@ -16,6 +16,7 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 
 #ifndef NDEBUG
 #include <fstream>
@@ -440,27 +441,22 @@ class EnergyBasedViscosity : public R {
       auto const &coeff = curr_cell->polynomial().coeff();
       assert(coeff.rows() == Cell::K);
       assert(coeff.cols() == Cell::N);
-      auto GetMaximumSpeed = [](Cell const &cell) -> Scalar {
-        Scalar max_speed = 1e-5;  // avoid 0 in divisor
+      auto GetMaximumSpeedAndReferenceValueSquare = [](Cell const &cell)
+            -> std::pair<Scalar, Value> {
+        Scalar speed, max_speed{ 1e-5/* avoid 0 in divisor */ };
+        typename Convection::Conservative squares,
+            max_squares{ Value::Ones() * 1e-5/* avoid 0 in divisor */ };
         auto const &polynomial = cell.polynomial();
         for (int i = 0; i < Cell::N; ++i) {
-          max_speed = std::max(max_speed,
-              Convection::GetMaximumSpeed(polynomial.GetValue(i)));
+            speed = Convection::GetMaximumSpeedAndReferenceValueSquare(
+                polynomial.GetValue(i), &squares);
+            max_speed = std::max(max_speed, speed);
+            mini::algebra::Maximize(&max_squares, squares);
         }
-        return max_speed;
+        return { max_speed, max_squares };
       };
-      Scalar max_speed = GetMaximumSpeed(*curr_cell);
-      auto GetReferenceValueSquare = [](Cell const &cell) -> Value {
-        typename Convection::Conservative value_square
-            = Value::Ones() * 1e-5;  // avoid 0 in divisor
-        auto const &polynomial = cell.polynomial();
-        for (int i = 0; i < Cell::N; ++i) {
-          mini::algebra::Maximize(&value_square,
-              Convection::GetReferenceValueSquare(polynomial.GetValue(i)));
-        }
-        return value_square;
-      };
-      Value reference_value_square = GetReferenceValueSquare(*curr_cell);
+      auto [max_speed, reference_value_square]
+          = GetMaximumSpeedAndReferenceValueSquare(*curr_cell);
       Scalar cell_length = curr_cell->length();
       Scalar max_viscosity = max_speed * cell_length / Cell::P;
       assert(!std::isinf(max_viscosity) && !std::isnan(max_viscosity));

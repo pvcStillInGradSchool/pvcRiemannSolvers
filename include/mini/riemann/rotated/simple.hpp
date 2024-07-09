@@ -100,10 +100,6 @@ class Simple {
     return Conservative::Zero();
   }
 
-  static Conservative GetReferenceValueSquare(Conservative const &conservative) {
-    return conservative;
-  }
-
  protected:
   UnrotatedSimple unrotated_simple_;
   const Frame *frame_;

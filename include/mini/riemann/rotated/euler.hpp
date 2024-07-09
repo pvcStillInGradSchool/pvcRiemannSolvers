@@ -342,12 +342,14 @@ class Euler {
     return std::max(c + u, c - u);
   }
 
-  static Conservative GetReferenceValueSquare(Conservative const &conservative) {
-    Conservative squares;
-    squares.mass() = conservative.mass() * conservative.mass();
-    squares.energy() = conservative.energy() * conservative.energy();
-    squares.momentum() = Vector::Ones() * conservative.momentum().squaredNorm();
-    return squares;
+  static Scalar GetMaximumSpeedAndReferenceValueSquare(
+        Conservative const &conservative, Conservative *squares) {
+    squares->mass() = conservative.mass() * conservative.mass();
+    squares->energy() = conservative.energy() * conservative.energy();
+    Scalar lambda_max = GetMaximumSpeed(conservative);
+    squares->momentum() = Vector::Ones()
+        * (squares->mass() * lambda_max * lambda_max);
+    return lambda_max;
   }
 };
 

@@ -49,6 +49,12 @@ class Burgers : public Simple<simple::Burgers<S, D>> {
   static Scalar GetMaximumSpeed(Conservative const &conservative) {
     return k_max_ * std::abs(conservative[0]);
   }
+
+  static Scalar GetMaximumSpeedAndReferenceValueSquare(
+        Conservative const &conservative, Conservative *squares) {
+    squares->array() = conservative.array() * conservative.array();
+    return GetMaximumSpeed(conservative);
+  }
 };
 
 template <typename S, int D>

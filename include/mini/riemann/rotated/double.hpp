@@ -61,6 +61,12 @@ class Double : public Simple<simple::Double<S, D>> {
   static Scalar GetMaximumSpeed(Conservative const &conservative) {
     return max_eigen_value_;
   }
+
+  static Scalar GetMaximumSpeedAndReferenceValueSquare(
+        Conservative const &conservative, Conservative *squares) {
+    squares->array() = conservative.array() * conservative.array();
+    return GetMaximumSpeed(conservative);
+  }
 };
 
 template <typename S, int D>
