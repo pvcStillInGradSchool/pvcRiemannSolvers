@@ -156,8 +156,8 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
   EXPECT_NE(scalar_coeff, ScalarProjection::Coeff::Zero());
   scalar_pf.SetCoeff(scalar_coeff);
   EXPECT_EQ(scalar_pf.coeff(), scalar_coeff);
-  // Check AddCoeffTo():
-  ScalarProjection::AddCoeffTo(scalar_pf.coeff(), scalar_coeff.data());
+  // Check AddToResidual():
+  ScalarProjection::AddToResidual(scalar_pf.coeff(), scalar_coeff.data());
   EXPECT_EQ(scalar_pf.coeff() * 2, scalar_coeff);
   auto vector_pf = VectorProjection(integrator);
   vector_pf.Approximate([](Coord const& xyz)
@@ -181,8 +181,8 @@ TEST_F(TestPolynomialHexahedronProjection, Projection) {
   EXPECT_NE(vector_coeff, VectorProjection::Coeff::Zero());
   vector_pf.SetCoeff(vector_coeff);
   EXPECT_EQ(vector_pf.coeff(), vector_coeff);
-  // Check AddCoeffTo():
-  VectorProjection::AddCoeffTo(vector_pf.coeff(), vector_coeff.data());
+  // Check AddToResidual():
+  VectorProjection::AddToResidual(vector_pf.coeff(), vector_coeff.data());
   EXPECT_EQ(vector_pf.coeff() * 2, vector_coeff);
 }
 

@@ -165,7 +165,7 @@ class Lobatto : public General<P, R> {
       auto flux = GetWeightedFluxMatrix(cell, q);
       auto const &grad = GetBasisGradients(cell.polynomial(), q);
       Coeff prod = flux * grad;
-      cell.polynomial().AddCoeffTo(prod, residual);
+      Polynomial::AddToResidual(prod, residual);
     }
   }
   void AddFluxToHolderAndSharer(Face const &face,

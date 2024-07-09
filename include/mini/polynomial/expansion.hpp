@@ -88,17 +88,17 @@ class Expansion {
     std::memcpy(output, coeff_.data(), sizeof(Scalar) * coeff_.size());
     return output + coeff_.size();
   }
-  static void AddCoeffTo(Coeff const &coeff, Scalar *output) {
+
+  /**
+   * @brief Add data in a Coeff-like object to the residual of a Cell.
+   * 
+   * @param coeff 
+   * @param residual 
+   */
+  static void AddToResidual(Coeff const &coeff, Scalar *residual) {
     for (int c = 0; c < N; ++c) {
       for (int r = 0; r < K; ++r) {
-        *output++ += coeff(r, c);
-      }
-    }
-  }
-  static void MinusCoeff(Coeff const &coeff, Scalar *output) {
-    for (int c = 0; c < N; ++c) {
-      for (int r = 0; r < K; ++r) {
-        *output++ -= coeff(r, c);
+        *residual++ += coeff(r, c);
       }
     }
   }
