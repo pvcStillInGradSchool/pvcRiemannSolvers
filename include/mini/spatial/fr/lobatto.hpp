@@ -421,6 +421,11 @@ class Lobatto : public General<P, R> {
       }
     }
   }
+
+ protected:
+  static Scalar GetCflNumber(int rk_order) {
+    return 2 * Base::Base::GetCflNumber(rk_order);
+  }
 };
 
 }  // namespace fr

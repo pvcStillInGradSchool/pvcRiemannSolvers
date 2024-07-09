@@ -19,6 +19,23 @@
 namespace mini {
 namespace spatial {
 
+namespace {
+
+double cfl_[/* rk_order */][/* dg_degree */9] = {
+  // rk_order = 0:
+  { 1.000 },
+  // rk_order = 1:
+  { 1.000, 0.333, },
+  // rk_order = 2:
+  { 1.000, 0.333, 0.209, 0.130, 0.089, 0.066, 0.051, 0.040, 0.033 },
+  // rk_order = 3:
+  { 1.256, 0.409, 0.209, 0.130, 0.089, 0.066, 0.051, 0.040, 0.033 },
+  // rk_order = 4:
+  { 1.392, 0.464, 0.235, 0.145, 0.100, 0.073, 0.056, 0.045, 0.037 },
+};
+
+}
+
 using namespace mini::constant::index;
 
 static bool Near(auto const &x, auto const &y) {
@@ -387,6 +404,16 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
  public:
   static FluxMatrix GetFluxMatrix(const Cell &cell, int q) {
     return _GetFluxMatrix(cell, q);
+  }
+
+ protected:
+  static Scalar GetCflNumber(int rk_order) {
+    return cfl_[rk_order][Part::kDegrees];
+  }
+
+ public:
+  Scalar GetTimeStep(Scalar dt_guess, int rk_order) const {
+    return dt_guess;
   }
 };
 

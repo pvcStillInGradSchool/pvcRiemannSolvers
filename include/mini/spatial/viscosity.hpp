@@ -432,6 +432,7 @@ class EnergyBasedViscosity : public R {
   static std::vector<Value> GetViscosityValues(
       std::vector<Value> const &jump_integrals,
       std::vector<DampingMatrix> const &damping_matrices) {
+    min_dt_ = 1.e+100;
     std::vector<Value> viscosity_values;
     viscosity_values.reserve(part().CountLocalCells());
     for (Cell *curr_cell : part_ptr()->GetLocalCellPointers()) {
@@ -458,6 +459,7 @@ class EnergyBasedViscosity : public R {
       auto [max_speed, reference_value_square]
           = GetMaximumSpeedAndReferenceValueSquare(*curr_cell);
       Scalar cell_length = curr_cell->length();
+      min_dt_ = std::min(min_dt_, cell_length / max_speed);
       Scalar max_viscosity = max_speed * cell_length / Cell::P;
       assert(!std::isinf(max_viscosity) && !std::isnan(max_viscosity));
       Scalar time_base = cell_length / max_speed;
@@ -477,6 +479,8 @@ class EnergyBasedViscosity : public R {
         viscosity_on_curr_cell[k] = std::min(max_viscosity, std::max(0.0,
             // to protect against damping_rate == -0.0, which would lead to -inf
             jump_integral_on_curr_cell[k] / (damping_rate * damping_time)));
+        min_dt_ = std::min(min_dt_, cell_length / (max_speed
+            + GetSpatialFactor() * viscosity_on_curr_cell[k] / cell_length));
 #ifndef NDEBUG
         if (std::isinf(viscosity_on_curr_cell[k])) {
           throw std::runtime_error("inf viscosity_on_curr_cell[k]: "
@@ -521,6 +525,35 @@ class EnergyBasedViscosity : public R {
       std::ranges::fill(properties, viscosity_value);
      */
   }
+
+ protected:
+  static Scalar min_dt_;
+
+ public:
+  static Scalar GetMinimumTimeStep() {
+    return min_dt_;
+  }
+  static constexpr Scalar GetSpatialFactor() {
+    static_assert(0 <= Cell::P && Cell::P < 7);
+    switch (Cell::P) {
+    case 0:
+      return 1.;
+    case 1:
+      return 4.;
+    case 2:
+      return 8.;
+    case 3:
+      return 12.;
+    case 4:
+      return 28.;
+    case 5:
+      return 50.;
+    case 6:
+      return 90.;
+    default:
+      return -1;
+    }
+  }
 };
 
 template <typename P, typename R>
@@ -550,6 +583,10 @@ EnergyBasedViscosity<P, R>::spatial_ptr_;
 template <typename P, typename R>
 typename EnergyBasedViscosity<P, R>::Scalar
 EnergyBasedViscosity<P, R>::time_scale_;
+
+template <typename P, typename R>
+typename EnergyBasedViscosity<P, R>::Scalar
+EnergyBasedViscosity<P, R>::min_dt_;
 
 }  // namespace spatial
 }  // namespace mini
