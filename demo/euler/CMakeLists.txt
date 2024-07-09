@@ -19,6 +19,7 @@ set (cases
   # two-dimensional problems:
   double_mach
   forward_step
+  riemann2d
   # three-dimensional problems:
   ship
   yf17
