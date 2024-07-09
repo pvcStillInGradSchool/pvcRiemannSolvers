@@ -65,15 +65,17 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
 
   std::string old_file_name = json_object.at("cgns_file");
   std::string suffix = json_object.at("cell_type");
-  double t_start = json_object.at("t_start");
-  double t_stop = json_object.at("t_stop");
-  int n_steps_per_frame = json_object.at("n_steps_per_frame");
-  int n_frames = json_object.at("n_frames");
-  int n_steps = n_frames * n_steps_per_frame;
-  auto dt = (t_stop - t_start) / n_steps;
-  int i_frame_prev = json_object.at("i_frame_prev");
+  const double t_start = json_object.at("t_start");
+  const double t_stop = json_object.at("t_stop");
+  const int n_frames = json_object.at("n_frames");
+  const double dt_per_frame = (t_stop - t_start) / n_frames;
+  const int n_steps_per_frame = json_object.at("n_steps_per_frame");
+  const int n_steps = n_frames * n_steps_per_frame;
+  const double dt_max = (t_stop - t_start) / n_steps;
+  const int i_frame_prev = json_object.at("i_frame_prev");
   // `i_frame_prev` might be -1, which means no previous result to be loaded.
-  int i_frame = std::max(i_frame_prev, 0);
+  const int i_frame_min = std::max(i_frame_prev, 0);
+  const int i_frame_max = i_frame_min + n_frames;
   int n_parts_prev = n_core;
   if (i_frame_prev >= 0) {
     n_parts_prev = json_object.at("n_parts_prev");
@@ -161,12 +163,12 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     }
   } else {
     std::string soln_name = (n_parts_prev != n_core)
-        ? "shuffled" : "Frame" + std::to_string(i_frame);
+        ? "shuffled" : "Frame" + std::to_string(i_frame_min);
     part.ReadSolutions(soln_name);
     part.ScatterSolutions();
     if (i_core == 0) {
       std::printf("[Done] ReadSolutions(Frame%d) on %d cores at %f sec\n",
-          i_frame, n_core, MPI_Wtime() - time_begin);
+          i_frame_min, n_core, MPI_Wtime() - time_begin);
     }
   }
 
@@ -178,40 +180,59 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
 
   /* Main Loop */
   auto wtime_start = MPI_Wtime();
-  for (int i_step = 1; i_step <= n_steps; ++i_step) {
-    double t_curr = t_start + dt * (i_step - 1);
-    temporal.Update(&spatial, t_curr, dt);
-
-    auto wtime_curr = MPI_Wtime() - wtime_start;
-    auto wtime_total = wtime_curr * n_steps / i_step;
-    if (i_core == 0) {
-      std::printf("[Done] Update(Step%d/%d) on %d cores at %f / %f sec\n",
-          i_step, n_steps, n_core, wtime_curr, wtime_total);
-    }
-
-    if (i_step % n_steps_per_frame == 0) {
-      ++i_frame;
-      auto frame_name = "Frame" + std::to_string(i_frame);
-      part.GatherSolutions();
-      part.WriteSolutions(frame_name);
-      VtkWriter::WriteSolutions(part, frame_name);
+  double t_curr = t_start;
+  for (int i_frame = i_frame_min; i_frame < i_frame_max; ++i_frame) {
+    double t_next = t_curr + dt_per_frame;
+    while (t_curr < t_next) {
+      double dt_guess = std::min(t_next - t_curr, dt_max);
+      double dt_local = spatial.GetTimeStep(dt_guess, kOrders);
+      assert(dt_local <= dt_guess);
+      double dt;  // i.e. dt_global
+      MPI_Allreduce(&dt_local, &dt, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+      if (dt_local <= dt) {
+        assert(dt_local == dt);
+        if (dt < dt_guess) {
+          std::printf("[Next] dt = %4.2e determined by dt_local on core[%d]\n",
+              dt, i_core);
+        } else if (i_core == 0) {
+          std::printf("[Next] dt = %4.2e determined by %s\n",
+              dt, dt < dt_max ? "t_next - t_curr" : "dt_max");
+        }
+      }
+      temporal.Update(&spatial, t_curr, dt);
+      t_curr += dt;
+      // Print current percentage:
+      double wtime_curr = MPI_Wtime() - wtime_start;
+      double percentage = (t_curr - t_start) / (t_stop - t_start);
+      double wtime_total = wtime_curr / percentage;
       if (i_core == 0) {
-        std::printf("[Done] WriteSolutions(Frame%d) on %d cores at %f sec\n",
-            i_frame, n_core, MPI_Wtime() - wtime_start);
+        std::printf("[Done] %4.2f / 100 on %d cores at %f / %f sec\n",
+            percentage * 100, n_core, wtime_curr, wtime_total);
       }
     }
+
+    // Write the solutions at the next frame:
+    auto frame_name = "Frame" + std::to_string(i_frame + 1);
+    part.GatherSolutions();
+    part.WriteSolutions(frame_name);
+    VtkWriter::WriteSolutions(part, frame_name);
+    if (i_core == 0) {
+      std::printf("[Done] WriteSolutions(Frame%d) on %d cores at %f sec\n",
+          i_frame + 1, n_core, MPI_Wtime() - wtime_start);
+    }
   }
+  assert(i_frame == i_frame_min);
 
   if (i_core == 0) {
     json_object["n_parts_curr"] = n_core;
     std::string output_name = case_name;
     output_name += "/Frame";
-    output_name += std::to_string(i_frame - n_frames) + "to";
-    output_name += std::to_string(i_frame) + ".json";
+    output_name += std::to_string(i_frame_min) + "to";
+    output_name += std::to_string(i_frame_max) + ".json";
     auto json_output_file = std::ofstream(output_name);
     json_output_file << std::setw(2) << json_object << std::endl;
-    std::printf("time-range = [%f, %f], frame-range = [%d, %d], dt = %f\n",
-        t_start, t_stop, i_frame - n_frames, i_frame, dt);
+    std::printf("time-range = [%f, %f], frame-range = [%d, %d]\n",
+        t_start, t_stop, i_frame_min, i_frame_max);
     std::printf("[Start] MPI_Finalize() on %d cores at %f sec\n",
         n_core, MPI_Wtime() - time_begin);
   }

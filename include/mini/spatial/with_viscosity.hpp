@@ -44,11 +44,15 @@ class WithViscosity : public ConcreteFiniteElement {
 
  public:  // override virtual methods declared in ConcreteFiniteElement
   Column GetResidualColumn() const override {
-    Riemann::Viscosity::UpdateProperties();
     // TODO(PVC): overlap communication with computation
     Riemann::Viscosity::ShareGhostCellProperties();
     Riemann::Viscosity::UpdateGhostCellProperties();
     return this->Base::GetResidualColumn();
+  }
+
+  void SetSolutionColumn(Column const &column) override {
+    this->Base::SetSolutionColumn(column);
+    Riemann::Viscosity::UpdateProperties();
   }
 
   template <class Callable>
