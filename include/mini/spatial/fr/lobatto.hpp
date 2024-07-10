@@ -216,6 +216,10 @@ class Lobatto : public General<P, R> {
     return "FR::Lobatto";
   }
 
+  Scalar GetTimeStep(Scalar dt_guess, int rk_order) const override {
+    return 2.0 * Base::GetTimeStep(dt_guess, rk_order);
+  }
+
   Value GetValueJump(Face const &face, int i_flux_point) const override {
     auto &holder_flux_point = holder_cache_[face.id()][i_flux_point];
     auto &sharer_flux_point = sharer_cache_[face.id()][i_flux_point];

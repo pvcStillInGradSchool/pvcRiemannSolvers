@@ -412,8 +412,24 @@ class FiniteElement : public temporal::System<typename P::Scalar> {
   }
 
  public:
-  Scalar GetTimeStep(Scalar dt_guess, int rk_order) const {
-    return dt_guess;
+  virtual Scalar GetTimeStep(Scalar dt_guess, int rk_order) const {
+    auto GetMaximumSpeed = [](Cell const &cell) -> Scalar {
+      Scalar speed, max_speed{ 1e-5/* avoid 0 in divisor */ };
+      auto const &polynomial = cell.polynomial();
+      for (int i = 0; i < Cell::N; ++i) {
+          speed = Riemann::Convection::GetMaximumSpeed(
+              polynomial.GetValue(i));
+          max_speed = std::max(max_speed, speed);
+      }
+      return max_speed;
+    };
+    Scalar min_dt = 1.e+100;
+    for (Cell const &curr_cell : part().GetLocalCells()) {
+      min_dt = std::min(min_dt,
+          curr_cell.length() / GetMaximumSpeed(curr_cell));
+    }
+    Scalar dt = GetCflNumber(rk_order) * min_dt;
+    return std::min(dt, dt_guess);
   }
 };
 

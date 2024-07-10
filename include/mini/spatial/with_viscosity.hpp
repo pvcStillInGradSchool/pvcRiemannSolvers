@@ -61,7 +61,7 @@ class WithViscosity : public ConcreteFiniteElement {
     Riemann::Viscosity::UpdateProperties();
   }
 
-  Scalar GetTimeStep(Scalar dt_guess, int rk_order) const {
+  Scalar GetTimeStep(Scalar dt_guess, int rk_order) const override {
     Scalar dt = Base::GetCflNumber(rk_order)
         * Riemann::Viscosity::GetMinimumTimeStep();
     return std::min(dt, dt_guess);
