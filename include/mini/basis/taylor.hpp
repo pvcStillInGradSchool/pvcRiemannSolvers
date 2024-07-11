@@ -167,7 +167,7 @@ class Taylor {
 
  public:
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
       requires(kDegrees == 0) {
     MatKxN res; res.setZero();
     return res;
@@ -181,7 +181,7 @@ class Taylor {
   }
 
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
       requires(kDegrees == 1) {
     MatKxN res = coeff; res.col(0).setZero();
     return res;
@@ -201,7 +201,7 @@ class Taylor {
   }
 
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
       requires(kDegrees == 2) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     MatKxN res = coeff; res.col(0).setZero();
@@ -262,7 +262,7 @@ class Taylor {
   }
 
   template <typename MatKxN>
-  static MatKxN GetPdvValue(const Coord &xyz, const MatKxN &coeff)
+  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
       requires(kDegrees == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};

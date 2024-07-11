@@ -101,10 +101,10 @@ TEST_F(TestProjection, PartialDerivatives) {
   static_assert(ProjFunc::N == 10);
   auto x = 0.3, y = 0.4, z = 0.5;
   auto point = Coord{ x, y, z };
-  auto pdv_actual = Taylor::GetPdvValue(point - projection.center(),
+  auto pdv_actual = Taylor::GetPartialDerivatives(point - projection.center(),
       projection.GetCoeffOnTaylorBasis());
   auto coeff = ProjFunc::Coeff(); coeff.setIdentity();
-  auto pdv_expect = Taylor::GetPdvValue(point, coeff);
+  auto pdv_expect = Taylor::GetPartialDerivatives(point, coeff);
   ProjFunc::Coeff diff = pdv_actual - pdv_expect;
   EXPECT_NEAR(diff.norm(), 0.0, 1e-13);
   auto pdv_values = ProjFunc::Coeff(); pdv_values.setZero();
