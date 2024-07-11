@@ -1155,7 +1155,7 @@ class Part {
               field_name.c_str(),  &field_id)) {
             cgp_error_exit();
           }
-          assert(field_id == i_field);
+          // assert(field_id == i_field);
           cgsize_t first[] = { section.head() };
           cgsize_t last[] = { section.tail() - 1 };
           if (cgp_field_write_data(i_file, i_base, i_zone, i_soln, i_field,

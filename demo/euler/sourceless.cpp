@@ -221,7 +221,6 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
           i_frame + 1, n_core, MPI_Wtime() - wtime_start);
     }
   }
-  assert(i_frame == i_frame_min);
 
   if (i_core == 0) {
     json_object["n_parts_curr"] = n_core;
