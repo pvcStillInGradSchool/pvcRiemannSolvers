@@ -47,16 +47,24 @@ struct _Index<2> {
     XX, XY, YY,
     XXX, XXY, XYY, YYY,
     XXXX, XXXY, XXYY, XYYY, YYYY,
+    XXXXX,
   };
+  static_assert(XXXXX == GetN<2>(4));
 };
 
 template <>
 struct _Index<3> {
   enum {
     X = 1, Y, Z,
-    XX, XY, XZ, YY, YZ, ZZ,
-    XXX, XXY, XXZ, XYY, XYZ, XZZ, YYY, YYZ, YZZ, ZZZ,
+    XX, XY, XZ,
+        YY, YZ, ZZ,
+    XXX, XXY, XXZ, XYY, XYZ, XZZ,
+                   YYY, YYZ, YZZ, ZZZ,
+    XXXX, XXXY, XXXZ, XXYY, XXYZ, XXZZ, XYYY, XYYZ, XYZZ, XZZZ,
+                                        YYYY, YYYZ, YYZZ, YZZZ, ZZZZ,
+    XXXXX,
   };
+  static_assert(XXXXX == GetN<3>(4));
 };
 
 }

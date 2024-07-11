@@ -24,77 +24,66 @@ namespace weno {
 
 template <std::floating_point Scalar, int kComponents, int kDegrees>
 class Smoothness {
-  static constexpr int X{1}, Y{2}, Z{3};
-  static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
-  static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
-  static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
-
  public:
+  using Taylor = basis::Taylor<Scalar, 3, kDegrees>;
+  using Index = typename Taylor::Index;
   static constexpr int K = kComponents;
-  static constexpr int N = basis::Taylor<Scalar, 3, kDegrees>::N;
+  static constexpr int N = Taylor::N;
+  static constexpr int D = Taylor::D;
   using MatKx1 = algebra::Matrix<Scalar, K, 1>;
   using MatKxN = algebra::Matrix<Scalar, K, N>;
 
-  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
-      requires(kDegrees == 0) {
-    MatKx1 smoothness; smoothness.setZero();
-    return smoothness;
+  static void AddSmoothness(const MatKxN &integral, Scalar weight,
+      int i_pdv_begin, int i_pdv_end, MatKx1 *total_smoothness) {
+    int i_pdv = i_pdv_begin;
+    MatKx1 smoothness = integral.col(i_pdv);
+    while (++i_pdv < i_pdv_end) {
+      smoothness += integral.col(i_pdv);
+    }
+    smoothness *= weight;
+    *total_smoothness += smoothness;
+  }
+
+  /**
+   * @brief Get the weight of `k`th-order partial derivatives.
+   * 
+   * @param volume 
+   * @param order 
+   * @return Scalar 
+   */
+  static Scalar GetWeight(Scalar volume, int k) {
+    auto k_factorial = std::tgamma(k + 1);
+    return std::pow(volume, k * 2. / D - 1) / (k_factorial * k_factorial);
   }
 
   static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
       requires(kDegrees == 1) {
-    MatKx1 smoothness = integral.col(X);
-    smoothness += integral.col(Y);
-    smoothness += integral.col(Z);
+    MatKx1 smoothness = integral.col(Index::X);
+    smoothness += integral.col(Index::Y);
+    smoothness += integral.col(Index::Z);
     return smoothness;
   }
 
   static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
       requires(kDegrees == 2) {
-    auto w1  // weight of 1st-order partial derivatives
-        = std::pow(volume, 2./3-1);
-    MatKx1 smoothness = integral.col(X);
-    smoothness += integral.col(Y);
-    smoothness += integral.col(Z);
-    smoothness *= w1;
-    auto w2  // weight of 2nd-order partial derivatives
-        = std::pow(volume, 4./3-1);
-    smoothness += integral.col(XX) * w2;
-    smoothness += integral.col(XY) * w2;
-    smoothness += integral.col(XZ) * w2;
-    smoothness += integral.col(YY) * w2;
-    smoothness += integral.col(YZ) * w2;
-    smoothness += integral.col(ZZ) * w2;
+    MatKx1 smoothness = integral.col(Index::X);
+    smoothness += integral.col(Index::Y);
+    smoothness += integral.col(Index::Z);
+    smoothness *= GetWeight(volume, 1);
+    AddSmoothness(integral, GetWeight(volume, 2), Index::XX, Index::XXX,
+        &smoothness);
     return smoothness;
   }
   static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
       requires(kDegrees == 3) {
-    auto w1  // weight of 1st-order partial derivatives
-        = std::pow(volume, 2./3-1);
-    MatKx1 smoothness = integral.col(X);
-    smoothness += integral.col(Y);
-    smoothness += integral.col(Z);
-    smoothness *= w1;
-    auto w2  // weight of 2nd-order partial derivatives
-        = std::pow(volume, 4./3-1);
-    smoothness += integral.col(XX) * w2;
-    smoothness += integral.col(XY) * w2;
-    smoothness += integral.col(XZ) * w2;
-    smoothness += integral.col(YY) * w2;
-    smoothness += integral.col(YZ) * w2;
-    smoothness += integral.col(ZZ) * w2;
-    auto w3  // weight of 3rd-order partial derivatives
-        = volume;  // = std::pow(volume, 6./3-1);
-    smoothness += integral.col(XXX) * w3;
-    smoothness += integral.col(XXY) * w3;
-    smoothness += integral.col(XXZ) * w3;
-    smoothness += integral.col(XYY) * w3;
-    smoothness += integral.col(XYZ) * w3;
-    smoothness += integral.col(XZZ) * w3;
-    smoothness += integral.col(YYY) * w3;
-    smoothness += integral.col(YYZ) * w3;
-    smoothness += integral.col(YZZ) * w3;
-    smoothness += integral.col(ZZZ) * w3;
+    MatKx1 smoothness = integral.col(Index::X);
+    smoothness += integral.col(Index::Y);
+    smoothness += integral.col(Index::Z);
+    smoothness *= GetWeight(volume, 1);
+    AddSmoothness(integral, GetWeight(volume, 2), Index::XX, Index::XXX,
+        &smoothness);
+    AddSmoothness(integral, GetWeight(volume, 3), Index::XXX, Index::XXXX,
+        &smoothness);
     return smoothness;
   }
 };
