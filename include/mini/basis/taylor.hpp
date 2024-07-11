@@ -15,6 +15,52 @@
 namespace mini {
 namespace basis {
 
+namespace {
+
+template <int D>
+constexpr int GetN(int P);
+
+template <>
+constexpr int GetN<1>(int P) {
+  return 1 + P;
+}
+
+template <int D>
+constexpr int GetN(int P) {
+  return (GetN<D - 1>(P) * (D + P)) / D;
+}
+
+template <int kDimensions>
+struct _Index;
+
+template <>
+struct _Index<1> {
+  enum {
+    X = 1, XX, XXX, XXXX, XXXXX, XXXXXX,
+  };
+};
+
+template <>
+struct _Index<2> {
+  enum {
+    X = 1, Y,
+    XX, XY, YY,
+    XXX, XXY, XYY, YYY,
+    XXXX, XXXY, XXYY, XYYY, YYYY,
+  };
+};
+
+template <>
+struct _Index<3> {
+  enum {
+    X = 1, Y, Z,
+    XX, XY, XZ, YY, YZ, ZZ,
+    XXX, XXY, XXZ, XYY, XYZ, XZZ, YYY, YYZ, YZZ, ZZZ,
+  };
+};
+
+}
+
 /**
  * @brief The basis, formed by monomials, of the space spanned by polynomials.
  * 
@@ -28,14 +74,18 @@ class Taylor;
 template <std::floating_point S, int kDegrees>
 class Taylor<S, 1, kDegrees> {
  public:
+  static constexpr int D = 1;
+
   // the maximum degree of members in this basis
   static constexpr int P = kDegrees;
 
   // the number of terms in this basis
-  static constexpr int N = P + 1;
+  static constexpr int N = GetN<D>(P);
 
   using Scalar = S;
   using Vector = algebra::Vector<Scalar, N>;
+
+  using Index = _Index<1>;
 
   /**
    * @brief Get the values of all basis functions at an arbitrary point.
@@ -84,23 +134,6 @@ class Taylor<S, 1, kDegrees> {
   }
 };
 
-namespace {
-
-template <int D>
-constexpr int GetN(int P);
-
-template <>
-constexpr int GetN<1>(int P) {
-  return 1 + P;
-}
-
-template <int D>
-constexpr int GetN(int P) {
-  return (GetN<D - 1>(P) * (D + P)) / D;
-}
-
-}
-
 template <std::floating_point S, int kDimensions, int kDegrees>
 class Taylor {
  public:
@@ -115,6 +148,7 @@ class Taylor {
   using MatNx1 = Matrix<N, 1>;
   using Coord = Matrix<D, 1>;
 
+  using Index = _Index<kDimensions>;
 
   static MatNx1 GetValue(const Coord &coord) {
     return _GetValue(coord);
@@ -165,11 +199,6 @@ class Taylor {
         y * yy, y * yz, y * zz, z * zz };
   }
 
-  static constexpr int X{1}, Y{2}, Z{3};
-  static constexpr int XX{4}, XY{5}, XZ{6}, YY{7}, YZ{8}, ZZ{9};
-  static constexpr int XXX{10}, XXY{11}, XXZ{12}, XYY{13}, XYZ{14}, XZZ{15};
-  static constexpr int YYY{16}, YYZ{17}, YZZ{18}, ZZZ{19};
-
  public:
   template <typename MatKxN>
   static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
@@ -197,11 +226,11 @@ class Taylor {
       const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 1) {
     algebra::Matrix<Scalar, K, 3> res;
     // pdv_x
-    res.col(0) = coeff.col(X);
+    res.col(0) = coeff.col(Index::Index::X);
     // pdv_y
-    res.col(1) = coeff.col(Y);
+    res.col(1) = coeff.col(Index::Index::Y);
     // pdv_z
-    res.col(2) = coeff.col(Z);
+    res.col(2) = coeff.col(Index::Index::Z);
     return res;
   }
 
@@ -211,35 +240,35 @@ class Taylor {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     MatKxN res = coeff; res.col(0).setZero();
     // pdv_x
-    assert(res.col(X) == coeff.col(X));
-    res.col(X) += coeff.col(XX) * (2 * x);
-    res.col(X) += coeff.col(XY) * y;
-    res.col(X) += coeff.col(XZ) * z;
+    assert(res.col(Index::X) == coeff.col(Index::X));
+    res.col(Index::X) += coeff.col(Index::XX) * (2 * x);
+    res.col(Index::X) += coeff.col(Index::XY) * y;
+    res.col(Index::X) += coeff.col(Index::XZ) * z;
     // pdv_y
-    assert(res.col(Y) == coeff.col(Y));
-    res.col(Y) += coeff.col(XY) * x;
-    res.col(Y) += coeff.col(YY) * (2 * y);
-    res.col(Y) += coeff.col(YZ) * z;
+    assert(res.col(Index::Y) == coeff.col(Index::Y));
+    res.col(Index::Y) += coeff.col(Index::XY) * x;
+    res.col(Index::Y) += coeff.col(Index::YY) * (2 * y);
+    res.col(Index::Y) += coeff.col(Index::YZ) * z;
     // pdv_z
-    assert(res.col(Z) == coeff.col(Z));
-    res.col(Z) += coeff.col(XZ) * x;
-    res.col(Z) += coeff.col(YZ) * y;
-    res.col(Z) += coeff.col(ZZ) * (2 * z);
+    assert(res.col(Index::Z) == coeff.col(Index::Z));
+    res.col(Index::Z) += coeff.col(Index::XZ) * x;
+    res.col(Index::Z) += coeff.col(Index::YZ) * y;
+    res.col(Index::Z) += coeff.col(Index::ZZ) * (2 * z);
     // pdv_xx
-    res.col(XX) += coeff.col(XX);
-    assert(res.col(XX) == coeff.col(XX) * 2);
+    res.col(Index::XX) += coeff.col(Index::XX);
+    assert(res.col(Index::XX) == coeff.col(Index::XX) * 2);
     // pdv_xy
-    assert(res.col(XY) == coeff.col(XY));
+    assert(res.col(Index::XY) == coeff.col(Index::XY));
     // pdv_xz
-    assert(res.col(XZ) == coeff.col(XZ));
+    assert(res.col(Index::XZ) == coeff.col(Index::XZ));
     // pdv_yy
-    res.col(YY) += coeff.col(YY);
-    assert(res.col(YY) == coeff.col(YY) * 2);
+    res.col(Index::YY) += coeff.col(Index::YY);
+    assert(res.col(Index::YY) == coeff.col(Index::YY) * 2);
     // pdv_yz
-    assert(res.col(YZ) == coeff.col(YZ));
+    assert(res.col(Index::YZ) == coeff.col(Index::YZ));
     // pdv_zz
-    res.col(ZZ) += coeff.col(ZZ);
-    assert(res.col(ZZ) == coeff.col(ZZ) * 2);
+    res.col(Index::ZZ) += coeff.col(Index::ZZ);
+    assert(res.col(Index::ZZ) == coeff.col(Index::ZZ) * 2);
     return res;
   }
 
@@ -249,20 +278,20 @@ class Taylor {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     algebra::Matrix<Scalar, K, 3> res;
     // pdv_x
-    res.col(0) = coeff.col(X);
-    res.col(0) += coeff.col(XX) * (2 * x);
-    res.col(0) += coeff.col(XY) * y;
-    res.col(0) += coeff.col(XZ) * z;
+    res.col(0) = coeff.col(Index::X);
+    res.col(0) += coeff.col(Index::XX) * (2 * x);
+    res.col(0) += coeff.col(Index::XY) * y;
+    res.col(0) += coeff.col(Index::XZ) * z;
     // pdv_y
-    res.col(1) = coeff.col(Y);
-    res.col(1) += coeff.col(XY) * x;
-    res.col(1) += coeff.col(YY) * (2 * y);
-    res.col(1) += coeff.col(YZ) * z;
+    res.col(1) = coeff.col(Index::Y);
+    res.col(1) += coeff.col(Index::XY) * x;
+    res.col(1) += coeff.col(Index::YY) * (2 * y);
+    res.col(1) += coeff.col(Index::YZ) * z;
     // pdv_z
-    res.col(2) = coeff.col(Z);
-    res.col(2) += coeff.col(XZ) * x;
-    res.col(2) += coeff.col(YZ) * y;
-    res.col(2) += coeff.col(ZZ) * (2 * z);
+    res.col(2) = coeff.col(Index::Z);
+    res.col(2) += coeff.col(Index::XZ) * x;
+    res.col(2) += coeff.col(Index::YZ) * y;
+    res.col(2) += coeff.col(Index::ZZ) * (2 * z);
     return res;
   }
 
@@ -273,106 +302,106 @@ class Taylor {
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
     MatKxN res = coeff; res.col(0).setZero();
     // pdv_x
-    assert(res.col(X) == coeff.col(X));
-    res.col(X) += coeff.col(XX) * (2 * x);
-    res.col(X) += coeff.col(XY) * y;
-    res.col(X) += coeff.col(XZ) * z;
-    res.col(X) += coeff.col(XXX) * (3 * xx);
-    res.col(X) += coeff.col(XXY) * (2 * xy);
-    res.col(X) += coeff.col(XXZ) * (2 * xz);
-    res.col(X) += coeff.col(XYY) * yy;
-    res.col(X) += coeff.col(XYZ) * yz;
-    res.col(X) += coeff.col(XZZ) * zz;
+    assert(res.col(Index::X) == coeff.col(Index::X));
+    res.col(Index::X) += coeff.col(Index::XX) * (2 * x);
+    res.col(Index::X) += coeff.col(Index::XY) * y;
+    res.col(Index::X) += coeff.col(Index::XZ) * z;
+    res.col(Index::X) += coeff.col(Index::XXX) * (3 * xx);
+    res.col(Index::X) += coeff.col(Index::XXY) * (2 * xy);
+    res.col(Index::X) += coeff.col(Index::XXZ) * (2 * xz);
+    res.col(Index::X) += coeff.col(Index::XYY) * yy;
+    res.col(Index::X) += coeff.col(Index::XYZ) * yz;
+    res.col(Index::X) += coeff.col(Index::XZZ) * zz;
     // pdv_y
-    assert(res.col(Y) == coeff.col(Y));
-    res.col(Y) += coeff.col(XY) * x;
-    res.col(Y) += coeff.col(YY) * (2 * y);
-    res.col(Y) += coeff.col(YZ) * z;
-    res.col(Y) += coeff.col(XXY) * xx;
-    res.col(Y) += coeff.col(XYZ) * xz;
-    res.col(Y) += coeff.col(XYY) * (2 * xy);
-    res.col(Y) += coeff.col(YYY) * (3 * yy);
-    res.col(Y) += coeff.col(YYZ) * (2 * yz);
-    res.col(Y) += coeff.col(YZZ) * zz;
+    assert(res.col(Index::Y) == coeff.col(Index::Y));
+    res.col(Index::Y) += coeff.col(Index::XY) * x;
+    res.col(Index::Y) += coeff.col(Index::YY) * (2 * y);
+    res.col(Index::Y) += coeff.col(Index::YZ) * z;
+    res.col(Index::Y) += coeff.col(Index::XXY) * xx;
+    res.col(Index::Y) += coeff.col(Index::XYZ) * xz;
+    res.col(Index::Y) += coeff.col(Index::XYY) * (2 * xy);
+    res.col(Index::Y) += coeff.col(Index::YYY) * (3 * yy);
+    res.col(Index::Y) += coeff.col(Index::YYZ) * (2 * yz);
+    res.col(Index::Y) += coeff.col(Index::YZZ) * zz;
     // pdv_z
-    assert(res.col(Z) == coeff.col(Z));
-    res.col(Z) += coeff.col(XZ) * x;
-    res.col(Z) += coeff.col(YZ) * y;
-    res.col(Z) += coeff.col(ZZ) * (2 * z);
-    res.col(Z) += coeff.col(XXZ) * xx;
-    res.col(Z) += coeff.col(XYZ) * xy;
-    res.col(Z) += coeff.col(XZZ) * (2 * xz);
-    res.col(Z) += coeff.col(YYZ) * yy;
-    res.col(Z) += coeff.col(YZZ) * (2 * yz);
-    res.col(Z) += coeff.col(ZZZ) * (3 * zz);
+    assert(res.col(Index::Z) == coeff.col(Index::Z));
+    res.col(Index::Z) += coeff.col(Index::XZ) * x;
+    res.col(Index::Z) += coeff.col(Index::YZ) * y;
+    res.col(Index::Z) += coeff.col(Index::ZZ) * (2 * z);
+    res.col(Index::Z) += coeff.col(Index::XXZ) * xx;
+    res.col(Index::Z) += coeff.col(Index::XYZ) * xy;
+    res.col(Index::Z) += coeff.col(Index::XZZ) * (2 * xz);
+    res.col(Index::Z) += coeff.col(Index::YYZ) * yy;
+    res.col(Index::Z) += coeff.col(Index::YZZ) * (2 * yz);
+    res.col(Index::Z) += coeff.col(Index::ZZZ) * (3 * zz);
     // pdv_xx
-    res.col(XX) += coeff.col(XXY) * y;
-    res.col(XX) += coeff.col(XXZ) * z;
-    res.col(XX) += coeff.col(XXX) * x * 3;
-    res.col(XX) += res.col(XX);
-    assert(1e-10 > (res.col(XX) - 2 * (coeff.col(XXX) * x * 3
-        + coeff.col(XX) + coeff.col(XXY) * y + coeff.col(XXZ) * z)).norm());
+    res.col(Index::XX) += coeff.col(Index::XXY) * y;
+    res.col(Index::XX) += coeff.col(Index::XXZ) * z;
+    res.col(Index::XX) += coeff.col(Index::XXX) * x * 3;
+    res.col(Index::XX) += res.col(Index::XX);
+    assert(1e-10 > (res.col(Index::XX) - 2 * (coeff.col(Index::XXX) * x * 3
+        + coeff.col(Index::XX) + coeff.col(Index::XXY) * y + coeff.col(Index::XXZ) * z)).norm());
     // pdv_xy
-    res.col(XY) += coeff.col(XXY) * x * 2;
-    res.col(XY) += coeff.col(XYY) * y * 2;
-    res.col(XY) += coeff.col(XYZ) * z;
-    assert(1e-10 > (res.col(XY) - (coeff.col(XY) + coeff.col(XYZ) * z
-        + 2 * (coeff.col(XXY) * x + coeff.col(XYY) * y))).norm());
+    res.col(Index::XY) += coeff.col(Index::XXY) * x * 2;
+    res.col(Index::XY) += coeff.col(Index::XYY) * y * 2;
+    res.col(Index::XY) += coeff.col(Index::XYZ) * z;
+    assert(1e-10 > (res.col(Index::XY) - (coeff.col(Index::XY) + coeff.col(Index::XYZ) * z
+        + 2 * (coeff.col(Index::XXY) * x + coeff.col(Index::XYY) * y))).norm());
     // pdv_xz
-    res.col(XZ) += coeff.col(XXZ) * x * 2;
-    res.col(XZ) += coeff.col(XZZ) * z * 2;
-    res.col(XZ) += coeff.col(XYZ) * y;
-    assert(1e-10 > (res.col(XZ) - (coeff.col(XZ) + coeff.col(XYZ) * y
-        + 2 * (coeff.col(XXZ) * x + coeff.col(XZZ) * z))).norm());
+    res.col(Index::XZ) += coeff.col(Index::XXZ) * x * 2;
+    res.col(Index::XZ) += coeff.col(Index::XZZ) * z * 2;
+    res.col(Index::XZ) += coeff.col(Index::XYZ) * y;
+    assert(1e-10 > (res.col(Index::XZ) - (coeff.col(Index::XZ) + coeff.col(Index::XYZ) * y
+        + 2 * (coeff.col(Index::XXZ) * x + coeff.col(Index::XZZ) * z))).norm());
     // pdv_yy
-    res.col(YY) += coeff.col(XYY) * x;
-    res.col(YY) += coeff.col(YYZ) * z;
-    res.col(YY) += coeff.col(YYY) * y * 3;
-    res.col(YY) += res.col(YY);
-    assert(1e-10 > (res.col(YY) - 2 * (coeff.col(YYY) * y * 3
-        + coeff.col(YY) + coeff.col(XYY) * x + coeff.col(YYZ) * z)).norm());
+    res.col(Index::YY) += coeff.col(Index::XYY) * x;
+    res.col(Index::YY) += coeff.col(Index::YYZ) * z;
+    res.col(Index::YY) += coeff.col(Index::YYY) * y * 3;
+    res.col(Index::YY) += res.col(Index::YY);
+    assert(1e-10 > (res.col(Index::YY) - 2 * (coeff.col(Index::YYY) * y * 3
+        + coeff.col(Index::YY) + coeff.col(Index::XYY) * x + coeff.col(Index::YYZ) * z)).norm());
     // pdv_yz
-    res.col(YZ) += coeff.col(XYZ) * x;
-    res.col(YZ) += coeff.col(YYZ) * y * 2;
-    res.col(YZ) += coeff.col(YZZ) * z * 2;
-    assert(1e-10 > (res.col(YZ) - (coeff.col(YZ) + coeff.col(XYZ) * x
-        + 2 * (coeff.col(YYZ) * y + coeff.col(YZZ) * z))).norm());
+    res.col(Index::YZ) += coeff.col(Index::XYZ) * x;
+    res.col(Index::YZ) += coeff.col(Index::YYZ) * y * 2;
+    res.col(Index::YZ) += coeff.col(Index::YZZ) * z * 2;
+    assert(1e-10 > (res.col(Index::YZ) - (coeff.col(Index::YZ) + coeff.col(Index::XYZ) * x
+        + 2 * (coeff.col(Index::YYZ) * y + coeff.col(Index::YZZ) * z))).norm());
     // pdv_zz
-    res.col(ZZ) += coeff.col(XZZ) * x;
-    res.col(ZZ) += coeff.col(YZZ) * y;
-    res.col(ZZ) += coeff.col(ZZZ) * z * 3;
-    res.col(ZZ) += res.col(ZZ);
-    assert(1e-10 > (res.col(ZZ) - 2 * (coeff.col(ZZZ) * z * 3
-        + coeff.col(ZZ) + coeff.col(XZZ) * x + coeff.col(YZZ) * y)).norm());
+    res.col(Index::ZZ) += coeff.col(Index::XZZ) * x;
+    res.col(Index::ZZ) += coeff.col(Index::YZZ) * y;
+    res.col(Index::ZZ) += coeff.col(Index::ZZZ) * z * 3;
+    res.col(Index::ZZ) += res.col(Index::ZZ);
+    assert(1e-10 > (res.col(Index::ZZ) - 2 * (coeff.col(Index::ZZZ) * z * 3
+        + coeff.col(Index::ZZ) + coeff.col(Index::XZZ) * x + coeff.col(Index::YZZ) * y)).norm());
     // pdv_xxx
-    res.col(XXX) *= 6;
-    assert(res.col(XXX) == coeff.col(XXX) * 6);
+    res.col(Index::XXX) *= 6;
+    assert(res.col(Index::XXX) == coeff.col(Index::XXX) * 6);
     // pdv_xxy
-    res.col(XXY) += res.col(XXY);
-    assert(res.col(XXY) == coeff.col(XXY) * 2);
+    res.col(Index::XXY) += res.col(Index::XXY);
+    assert(res.col(Index::XXY) == coeff.col(Index::XXY) * 2);
     // pdv_xxz
-    res.col(XXZ) += res.col(XXZ);
-    assert(res.col(XXZ) == coeff.col(XXZ) * 2);
+    res.col(Index::XXZ) += res.col(Index::XXZ);
+    assert(res.col(Index::XXZ) == coeff.col(Index::XXZ) * 2);
     // pdv_xyy
-    res.col(XYY) += res.col(XYY);
-    assert(res.col(XYY) == coeff.col(XYY) * 2);
+    res.col(Index::XYY) += res.col(Index::XYY);
+    assert(res.col(Index::XYY) == coeff.col(Index::XYY) * 2);
     // pdv_xyz
-    assert(res.col(XYZ) == coeff.col(XYZ));
+    assert(res.col(Index::XYZ) == coeff.col(Index::XYZ));
     // pdv_xzz
-    res.col(XZZ) += res.col(XZZ);
-    assert(res.col(XZZ) == coeff.col(XZZ) * 2);
+    res.col(Index::XZZ) += res.col(Index::XZZ);
+    assert(res.col(Index::XZZ) == coeff.col(Index::XZZ) * 2);
     // pdv_yyy
-    res.col(YYY) *= 6;
-    assert(res.col(YYY) == coeff.col(YYY) * 6);
+    res.col(Index::YYY) *= 6;
+    assert(res.col(Index::YYY) == coeff.col(Index::YYY) * 6);
     // pdv_yyz
-    res.col(YYZ) += res.col(YYZ);
-    assert(res.col(YYZ) == coeff.col(YYZ) * 2);
+    res.col(Index::YYZ) += res.col(Index::YYZ);
+    assert(res.col(Index::YYZ) == coeff.col(Index::YYZ) * 2);
     // pdv_yzz
-    res.col(YZZ) += res.col(YZZ);
-    assert(res.col(YZZ) == coeff.col(YZZ) * 2);
+    res.col(Index::YZZ) += res.col(Index::YZZ);
+    assert(res.col(Index::YZZ) == coeff.col(Index::YZZ) * 2);
     // pdv_zzz
-    res.col(ZZZ) *= 6;
-    assert(res.col(ZZZ) == coeff.col(ZZZ) * 6);
+    res.col(Index::ZZZ) *= 6;
+    assert(res.col(Index::ZZZ) == coeff.col(Index::ZZZ) * 6);
     return res;
   }
 
@@ -383,38 +412,38 @@ class Taylor {
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
     algebra::Matrix<Scalar, K, 3> res;
     // pdv_x
-    res.col(0) = coeff.col(X);
-    res.col(0) += coeff.col(XX) * (2 * x);
-    res.col(0) += coeff.col(XY) * y;
-    res.col(0) += coeff.col(XZ) * z;
-    res.col(0) += coeff.col(XXX) * (3 * xx);
-    res.col(0) += coeff.col(XXY) * (2 * xy);
-    res.col(0) += coeff.col(XXZ) * (2 * xz);
-    res.col(0) += coeff.col(XYY) * yy;
-    res.col(0) += coeff.col(XYZ) * yz;
-    res.col(0) += coeff.col(XZZ) * zz;
+    res.col(0) = coeff.col(Index::X);
+    res.col(0) += coeff.col(Index::XX) * (2 * x);
+    res.col(0) += coeff.col(Index::XY) * y;
+    res.col(0) += coeff.col(Index::XZ) * z;
+    res.col(0) += coeff.col(Index::XXX) * (3 * xx);
+    res.col(0) += coeff.col(Index::XXY) * (2 * xy);
+    res.col(0) += coeff.col(Index::XXZ) * (2 * xz);
+    res.col(0) += coeff.col(Index::XYY) * yy;
+    res.col(0) += coeff.col(Index::XYZ) * yz;
+    res.col(0) += coeff.col(Index::XZZ) * zz;
     // pdv_y
-    res.col(1) = coeff.col(Y);
-    res.col(1) += coeff.col(XY) * x;
-    res.col(1) += coeff.col(YY) * (2 * y);
-    res.col(1) += coeff.col(YZ) * z;
-    res.col(1) += coeff.col(XXY) * xx;
-    res.col(1) += coeff.col(XYZ) * xz;
-    res.col(1) += coeff.col(XYY) * (2 * xy);
-    res.col(1) += coeff.col(YYY) * (3 * yy);
-    res.col(1) += coeff.col(YYZ) * (2 * yz);
-    res.col(1) += coeff.col(YZZ) * zz;
+    res.col(1) = coeff.col(Index::Y);
+    res.col(1) += coeff.col(Index::XY) * x;
+    res.col(1) += coeff.col(Index::YY) * (2 * y);
+    res.col(1) += coeff.col(Index::YZ) * z;
+    res.col(1) += coeff.col(Index::XXY) * xx;
+    res.col(1) += coeff.col(Index::XYZ) * xz;
+    res.col(1) += coeff.col(Index::XYY) * (2 * xy);
+    res.col(1) += coeff.col(Index::YYY) * (3 * yy);
+    res.col(1) += coeff.col(Index::YYZ) * (2 * yz);
+    res.col(1) += coeff.col(Index::YZZ) * zz;
     // pdv_z
-    res.col(2) = coeff.col(Z);
-    res.col(2) += coeff.col(XZ) * x;
-    res.col(2) += coeff.col(YZ) * y;
-    res.col(2) += coeff.col(ZZ) * (2 * z);
-    res.col(2) += coeff.col(XXZ) * xx;
-    res.col(2) += coeff.col(XYZ) * xy;
-    res.col(2) += coeff.col(XZZ) * (2 * xz);
-    res.col(2) += coeff.col(YYZ) * yy;
-    res.col(2) += coeff.col(YZZ) * (2 * yz);
-    res.col(2) += coeff.col(ZZZ) * (3 * zz);
+    res.col(2) = coeff.col(Index::Z);
+    res.col(2) += coeff.col(Index::XZ) * x;
+    res.col(2) += coeff.col(Index::YZ) * y;
+    res.col(2) += coeff.col(Index::ZZ) * (2 * z);
+    res.col(2) += coeff.col(Index::XXZ) * xx;
+    res.col(2) += coeff.col(Index::XYZ) * xy;
+    res.col(2) += coeff.col(Index::XZZ) * (2 * xz);
+    res.col(2) += coeff.col(Index::YYZ) * yy;
+    res.col(2) += coeff.col(Index::YZZ) * (2 * yz);
+    res.col(2) += coeff.col(Index::ZZZ) * (3 * zz);
     return res;
   }
 };
