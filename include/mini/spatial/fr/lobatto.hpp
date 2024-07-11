@@ -217,7 +217,7 @@ class Lobatto : public General<P, R> {
   }
 
   Scalar GetTimeStep(Scalar dt_guess, int rk_order) const override {
-    return 2.0 * Base::GetTimeStep(dt_guess, rk_order);
+    return std::min(dt_guess, 2.0 * Base::GetTimeStep(dt_guess, rk_order));
   }
 
   Value GetValueJump(Face const &face, int i_flux_point) const override {

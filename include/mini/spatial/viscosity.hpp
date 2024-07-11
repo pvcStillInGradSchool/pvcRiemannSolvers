@@ -541,9 +541,9 @@ class EnergyBasedViscosity : public R {
     case 1:
       return 4.;
     case 2:
-      return 8.;
+      return 10.;
     case 3:
-      return 12.;
+      return 40.;
     case 4:
       return 28.;
     case 5:

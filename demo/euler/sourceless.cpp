@@ -185,7 +185,7 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
     double t_next = t_curr + dt_per_frame;
     while (t_curr < t_next) {
       double dt_guess = std::min(t_next - t_curr, dt_max);
-      double dt_local = spatial.GetTimeStep(dt_guess, kOrders);
+      double dt_local = (&spatial)->GetTimeStep(dt_guess, kOrders);
       assert(dt_local <= dt_guess);
       double dt;  // i.e. dt_global
       MPI_Allreduce(&dt_local, &dt, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);

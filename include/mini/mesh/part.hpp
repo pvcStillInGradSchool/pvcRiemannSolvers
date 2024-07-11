@@ -227,7 +227,7 @@ struct Cell {
       : coordinate_ptr_(std::move(coordinate_ptr)),
         integrator_ptr_(std::move(integrator_ptr)),
         polynomial_ptr_(std::make_unique<Polynomial>(*integrator_ptr_)),
-        length_(std::cbrt(volume())), metis_id(m_cell) {
+        length_(std::cbrt(volume()) * 0.5), metis_id(m_cell) {
   }
   Cell() = default;
   Cell(Cell const &) = delete;
