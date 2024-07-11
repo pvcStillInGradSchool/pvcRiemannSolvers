@@ -150,6 +150,7 @@ class Taylor {
 
   using Index = _Index<kDimensions>;
 
+ public:
   static MatNx1 GetValue(const Coord &coord) {
     return _GetValue(coord);
   }
@@ -200,45 +201,33 @@ class Taylor {
   }
 
  public:
-  template <typename MatKxN>
-  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
-      requires(kDegrees == 0) {
-    MatKxN res; res.setZero();
+  template <int K> static Matrix<K, N>
+  GetPartialDerivatives(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(2 <= D && D <= 3 && 0 <= P && P <= 3) {
+    return _GetPartialDerivatives(xyz, coeff);
+  }
+
+ private:
+  template <int K> static Matrix<K, N>
+  _GetPartialDerivatives(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(P == 0) {
+    return Matrix<K, N>::Zero();
+  }
+
+  template <int K> static Matrix<K, N>
+  _GetPartialDerivatives(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(P == 1) {
+    Matrix<K, N> res = coeff;
+    res.col(0).setZero();
     return res;
   }
 
-  template <int K>
-  static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 0) {
-    algebra::Matrix<Scalar, K, 3> res; res.setZero();
-    return res;
-  }
-
-  template <typename MatKxN>
-  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
-      requires(kDegrees == 1) {
-    MatKxN res = coeff; res.col(0).setZero();
-    return res;
-  }
-
-  template <int K>
-  static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 1) {
-    algebra::Matrix<Scalar, K, 3> res;
-    // pdv_x
-    res.col(0) = coeff.col(Index::Index::X);
-    // pdv_y
-    res.col(1) = coeff.col(Index::Index::Y);
-    // pdv_z
-    res.col(2) = coeff.col(Index::Index::Z);
-    return res;
-  }
-
-  template <typename MatKxN>
-  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
-      requires(kDegrees == 2) {
+  template <int K> static Matrix<K, N>
+  _GetPartialDerivatives(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(D == 3 && P == 2) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
-    MatKxN res = coeff; res.col(0).setZero();
+    Matrix<K, N> res = coeff;
+    res.col(0).setZero();
     // pdv_x
     assert(res.col(Index::X) == coeff.col(Index::X));
     res.col(Index::X) += coeff.col(Index::XX) * (2 * x);
@@ -272,35 +261,13 @@ class Taylor {
     return res;
   }
 
-  template <int K>
-  static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 2) {
-    auto x = xyz[0], y = xyz[1], z = xyz[2];
-    algebra::Matrix<Scalar, K, 3> res;
-    // pdv_x
-    res.col(0) = coeff.col(Index::X);
-    res.col(0) += coeff.col(Index::XX) * (2 * x);
-    res.col(0) += coeff.col(Index::XY) * y;
-    res.col(0) += coeff.col(Index::XZ) * z;
-    // pdv_y
-    res.col(1) = coeff.col(Index::Y);
-    res.col(1) += coeff.col(Index::XY) * x;
-    res.col(1) += coeff.col(Index::YY) * (2 * y);
-    res.col(1) += coeff.col(Index::YZ) * z;
-    // pdv_z
-    res.col(2) = coeff.col(Index::Z);
-    res.col(2) += coeff.col(Index::XZ) * x;
-    res.col(2) += coeff.col(Index::YZ) * y;
-    res.col(2) += coeff.col(Index::ZZ) * (2 * z);
-    return res;
-  }
-
-  template <typename MatKxN>
-  static MatKxN GetPartialDerivatives(const Coord &xyz, const MatKxN &coeff)
-      requires(kDegrees == 3) {
+  template <int K> static Matrix<K, N>
+  _GetPartialDerivatives(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(D == 3 && P == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
-    MatKxN res = coeff; res.col(0).setZero();
+    Matrix<K, N> res = coeff;
+    res.col(0).setZero();
     // pdv_x
     assert(res.col(Index::X) == coeff.col(Index::X));
     res.col(Index::X) += coeff.col(Index::XX) * (2 * x);
@@ -339,40 +306,28 @@ class Taylor {
     res.col(Index::XX) += coeff.col(Index::XXZ) * z;
     res.col(Index::XX) += coeff.col(Index::XXX) * x * 3;
     res.col(Index::XX) += res.col(Index::XX);
-    assert(1e-10 > (res.col(Index::XX) - 2 * (coeff.col(Index::XXX) * x * 3
-        + coeff.col(Index::XX) + coeff.col(Index::XXY) * y + coeff.col(Index::XXZ) * z)).norm());
     // pdv_xy
     res.col(Index::XY) += coeff.col(Index::XXY) * x * 2;
     res.col(Index::XY) += coeff.col(Index::XYY) * y * 2;
     res.col(Index::XY) += coeff.col(Index::XYZ) * z;
-    assert(1e-10 > (res.col(Index::XY) - (coeff.col(Index::XY) + coeff.col(Index::XYZ) * z
-        + 2 * (coeff.col(Index::XXY) * x + coeff.col(Index::XYY) * y))).norm());
     // pdv_xz
     res.col(Index::XZ) += coeff.col(Index::XXZ) * x * 2;
     res.col(Index::XZ) += coeff.col(Index::XZZ) * z * 2;
     res.col(Index::XZ) += coeff.col(Index::XYZ) * y;
-    assert(1e-10 > (res.col(Index::XZ) - (coeff.col(Index::XZ) + coeff.col(Index::XYZ) * y
-        + 2 * (coeff.col(Index::XXZ) * x + coeff.col(Index::XZZ) * z))).norm());
     // pdv_yy
     res.col(Index::YY) += coeff.col(Index::XYY) * x;
     res.col(Index::YY) += coeff.col(Index::YYZ) * z;
     res.col(Index::YY) += coeff.col(Index::YYY) * y * 3;
     res.col(Index::YY) += res.col(Index::YY);
-    assert(1e-10 > (res.col(Index::YY) - 2 * (coeff.col(Index::YYY) * y * 3
-        + coeff.col(Index::YY) + coeff.col(Index::XYY) * x + coeff.col(Index::YYZ) * z)).norm());
     // pdv_yz
     res.col(Index::YZ) += coeff.col(Index::XYZ) * x;
     res.col(Index::YZ) += coeff.col(Index::YYZ) * y * 2;
     res.col(Index::YZ) += coeff.col(Index::YZZ) * z * 2;
-    assert(1e-10 > (res.col(Index::YZ) - (coeff.col(Index::YZ) + coeff.col(Index::XYZ) * x
-        + 2 * (coeff.col(Index::YYZ) * y + coeff.col(Index::YZZ) * z))).norm());
     // pdv_zz
     res.col(Index::ZZ) += coeff.col(Index::XZZ) * x;
     res.col(Index::ZZ) += coeff.col(Index::YZZ) * y;
     res.col(Index::ZZ) += coeff.col(Index::ZZZ) * z * 3;
     res.col(Index::ZZ) += res.col(Index::ZZ);
-    assert(1e-10 > (res.col(Index::ZZ) - 2 * (coeff.col(Index::ZZZ) * z * 3
-        + coeff.col(Index::ZZ) + coeff.col(Index::XZZ) * x + coeff.col(Index::YZZ) * y)).norm());
     // pdv_xxx
     res.col(Index::XXX) *= 6;
     assert(res.col(Index::XXX) == coeff.col(Index::XXX) * 6);
@@ -405,12 +360,62 @@ class Taylor {
     return res;
   }
 
-  template <int K>
-  static auto GetGradValue(const Coord &xyz,
-      const algebra::Matrix<Scalar, K, N> &coeff) requires(kDegrees == 3) {
+ public:
+  template <int K> static Matrix<K, D>
+  GetGradValue(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(2 <= D && D <= 3 && 0 <= P && P <= 3) {
+    return _GetGradValue(xyz, coeff); 
+  }
+
+ private:
+  template <int K> static Matrix<K, D>
+  _GetGradValue(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(P == 0) {
+    return Matrix<K, D>::Zero();
+  }
+
+  template <int K> static Matrix<K, D>
+  _GetGradValue(const Coord &xyz, const Matrix<K, N> &coeff)
+        requires(D == 3 && P == 1) {
+    Matrix<K, D> res;
+    // pdv_x
+    res.col(0) = coeff.col(Index::X);
+    // pdv_y
+    res.col(1) = coeff.col(Index::Y);
+    // pdv_z
+    res.col(2) = coeff.col(Index::Z);
+    return res;
+  }
+
+  template <int K> static Matrix<K, D>
+  _GetGradValue(const Coord &xyz, const Matrix<K, N> &coeff)
+      requires(D == 3 && P == 2) {
+    auto x = xyz[0], y = xyz[1], z = xyz[2];
+    Matrix<K, D> res;
+    // pdv_x
+    res.col(0) = coeff.col(Index::X);
+    res.col(0) += coeff.col(Index::XX) * (2 * x);
+    res.col(0) += coeff.col(Index::XY) * y;
+    res.col(0) += coeff.col(Index::XZ) * z;
+    // pdv_y
+    res.col(1) = coeff.col(Index::Y);
+    res.col(1) += coeff.col(Index::XY) * x;
+    res.col(1) += coeff.col(Index::YY) * (2 * y);
+    res.col(1) += coeff.col(Index::YZ) * z;
+    // pdv_z
+    res.col(2) = coeff.col(Index::Z);
+    res.col(2) += coeff.col(Index::XZ) * x;
+    res.col(2) += coeff.col(Index::YZ) * y;
+    res.col(2) += coeff.col(Index::ZZ) * (2 * z);
+    return res;
+  }
+
+  template <int K> static Matrix<K, D>
+  _GetGradValue(const Coord &xyz, const Matrix<K, N> &coeff)
+        requires(D == 3 && P == 3) {
     auto x = xyz[0], y = xyz[1], z = xyz[2];
     auto xx{x * x}, xy{x * y}, xz{x * z}, yy{y * y}, yz{y * z}, zz{z * z};
-    algebra::Matrix<Scalar, K, 3> res;
+    Matrix<K, D> res;
     // pdv_x
     res.col(0) = coeff.col(Index::X);
     res.col(0) += coeff.col(Index::XX) * (2 * x);
