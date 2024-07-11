@@ -159,6 +159,123 @@ TEST_F(TestBasisTaylor, D3P2) {
   auto pdv_actual = Basis::GetPartialDerivatives({ x, y, z }, coeff);
   EXPECT_EQ(pdv_expect, pdv_actual);
 }
+TEST_F(TestBasisTaylor, D3P3) {
+  using Basis = mini::basis::Taylor<double, 3, 3>;
+  using Index = typename Basis::Index;
+  static_assert(Basis::N == 20);
+  double x = mini::rand::uniform(1., 2.);
+  double y = mini::rand::uniform(1., 2.);
+  double z = mini::rand::uniform(1., 2.);
+  typename Basis::MatNx1 res;
+  res = Basis::GetValue({x, y, z});
+  EXPECT_EQ(res[0], 1);
+  EXPECT_EQ(res[Index::X], x);
+  EXPECT_EQ(res[Index::Y], y);
+  EXPECT_EQ(res[Index::Z], z);
+  EXPECT_EQ(res[Index::XX], x * x);
+  EXPECT_EQ(res[Index::XY], x * y);
+  EXPECT_EQ(res[Index::XZ], x * z);
+  EXPECT_EQ(res[Index::YY], y * y);
+  EXPECT_EQ(res[Index::YZ], y * z);
+  EXPECT_EQ(res[Index::ZZ], z * z);
+  EXPECT_EQ(res[Index::XXX], x * x * x);
+  EXPECT_NEAR(res[Index::XXY], x * x * y, 1e-15);
+  EXPECT_NEAR(res[Index::XXZ], x * x * z, 1e-15);
+  EXPECT_EQ(res[Index::XYY], x * y * y);
+  EXPECT_NEAR(res[Index::XYZ], x * y * z, 1e-15);
+  EXPECT_EQ(res[Index::XZZ], x * z * z);
+  EXPECT_EQ(res[Index::YYY], y * y * y);
+  EXPECT_EQ(res[Index::YYZ], y * y * z);
+  EXPECT_EQ(res[Index::YZZ], y * z * z);
+  EXPECT_EQ(res[Index::ZZZ], z * z * z);
+  using Coeff = typename Basis::Matrix<Basis::N, Basis::N>;
+  Coeff coeff = Coeff::Identity();
+  auto pdv = Basis::GetPartialDerivatives({ x, y, z }, coeff);
+  // pdv_expect[func_index][pdv_index]
+  // minus non-zero pdvs of x, y, z
+  EXPECT_EQ(0, pdv(Index::X, Index::X) -= 1);
+  EXPECT_EQ(0, pdv(Index::Y, Index::Y) -= 1);
+  EXPECT_EQ(0, pdv(Index::Z, Index::Z) -= 1);
+  // minus non-zero pdvs of xx
+  EXPECT_EQ(0, pdv(Index::XX, Index::X) -= 2 * x);
+  EXPECT_EQ(0, pdv(Index::XX, Index::XX) -= 2);
+  // minus non-zero pdvs of xy
+  EXPECT_EQ(0, pdv(Index::XY, Index::X) -= y);
+  EXPECT_EQ(0, pdv(Index::XY, Index::Y) -= x);
+  EXPECT_EQ(0, pdv(Index::XY, Index::XY) -= 1);
+  // minus non-zero pdvs of xz
+  EXPECT_EQ(0, pdv(Index::XZ, Index::X) -= z);
+  EXPECT_EQ(0, pdv(Index::XZ, Index::Z) -= x);
+  EXPECT_EQ(0, pdv(Index::XZ, Index::XZ) -= 1);
+  // minus non-zero pdvs of yy
+  EXPECT_EQ(0, pdv(Index::YY, Index::Y) -= 2 * y);
+  EXPECT_EQ(0, pdv(Index::YY, Index::YY) -= 2);
+  // minus non-zero pdvs of yz
+  EXPECT_EQ(0, pdv(Index::YZ, Index::Y) -= z);
+  EXPECT_EQ(0, pdv(Index::YZ, Index::Z) -= y);
+  EXPECT_EQ(0, pdv(Index::YZ, Index::YZ) -= 1);
+  // minus non-zero pdvs of zz
+  EXPECT_EQ(0, pdv(Index::ZZ, Index::Z) -= 2 * z);
+  EXPECT_EQ(0, pdv(Index::ZZ, Index::ZZ) -= 2);
+  // minus non-zero pdvs of xxx
+  EXPECT_EQ(0, pdv(Index::XXX, Index::X) -= 3 * (x * x));
+  EXPECT_EQ(0, pdv(Index::XXX, Index::XX) -= 3 * 2 * x);
+  EXPECT_EQ(0, pdv(Index::XXX, Index::XXX) -= 3 * 2 * 1);
+  // minus non-zero pdvs of xxy
+  EXPECT_EQ(0, pdv(Index::XXY, Index::X) -= 2 * x * y);
+  EXPECT_EQ(0, pdv(Index::XXY, Index::Y) -= x * x);
+  EXPECT_EQ(0, pdv(Index::XXY, Index::XX) -= 2 * y);
+  EXPECT_EQ(0, pdv(Index::XXY, Index::XY) -= 2 * x);
+  EXPECT_EQ(0, pdv(Index::XXY, Index::XXY) -= 2);
+  // minus non-zero pdvs of xxz
+  EXPECT_EQ(0, pdv(Index::XXZ, Index::X) -= 2 * x * z);
+  EXPECT_EQ(0, pdv(Index::XXZ, Index::Z) -= x * x);
+  EXPECT_EQ(0, pdv(Index::XXZ, Index::XX) -= 2 * z);
+  EXPECT_EQ(0, pdv(Index::XXZ, Index::XZ) -= 2 * x);
+  EXPECT_EQ(0, pdv(Index::XXZ, Index::XXZ) -= 2);
+  // minus non-zero pdvs of xyy
+  EXPECT_EQ(0, pdv(Index::XYY, Index::X) -= y * y);
+  EXPECT_EQ(0, pdv(Index::XYY, Index::Y) -= 2 * x * y);
+  EXPECT_EQ(0, pdv(Index::XYY, Index::XY) -= 2 * y);
+  EXPECT_EQ(0, pdv(Index::XYY, Index::YY) -= 2 * x);
+  EXPECT_EQ(0, pdv(Index::XYY, Index::XYY) -= 2);
+  // minus non-zero pdvs of xyz
+  EXPECT_EQ(0, pdv(Index::XYZ, Index::X) -= y * z);
+  EXPECT_EQ(0, pdv(Index::XYZ, Index::Y) -= x * z);
+  EXPECT_EQ(0, pdv(Index::XYZ, Index::Z) -= x * y);
+  EXPECT_EQ(0, pdv(Index::XYZ, Index::XY) -= z);
+  EXPECT_EQ(0, pdv(Index::XYZ, Index::XZ) -= y);
+  EXPECT_EQ(0, pdv(Index::XYZ, Index::YZ) -= x);
+  EXPECT_EQ(0, pdv(Index::XYZ, Index::XYZ) -= 1);
+  // minus non-zero pdvs of xzz
+  EXPECT_EQ(0, pdv(Index::XZZ, Index::X) -= z * z);
+  EXPECT_EQ(0, pdv(Index::XZZ, Index::Z) -= 2 * x * z);
+  EXPECT_EQ(0, pdv(Index::XZZ, Index::XZ) -= 2 * z);
+  EXPECT_EQ(0, pdv(Index::XZZ, Index::ZZ) -= 2 * x);
+  EXPECT_EQ(0, pdv(Index::XZZ, Index::XZZ) -= 2);
+  // minus non-zero pdvs of yyy
+  EXPECT_EQ(0, pdv(Index::YYY, Index::Y) -= 3 * (y * y));
+  EXPECT_EQ(0, pdv(Index::YYY, Index::YY) -= 3 * 2 * y);
+  EXPECT_EQ(0, pdv(Index::YYY, Index::YYY) -= 3 * 2 * 1);
+  // minus non-zero pdvs of yyz
+  EXPECT_EQ(0, pdv(Index::YYZ, Index::Y) -= 2 * y * z);
+  EXPECT_EQ(0, pdv(Index::YYZ, Index::Z) -= y * y);
+  EXPECT_EQ(0, pdv(Index::YYZ, Index::YY) -= 2 * z);
+  EXPECT_EQ(0, pdv(Index::YYZ, Index::YZ) -= 2 * y);
+  EXPECT_EQ(0, pdv(Index::YYZ, Index::YYZ) -= 2);
+  // minus non-zero pdvs of yzz
+  EXPECT_EQ(0, pdv(Index::YZZ, Index::Y) -= z * z);
+  EXPECT_EQ(0, pdv(Index::YZZ, Index::Z) -= 2 * y * z);
+  EXPECT_EQ(0, pdv(Index::YZZ, Index::YZ) -= 2 * z);
+  EXPECT_EQ(0, pdv(Index::YZZ, Index::ZZ) -= 2 * y);
+  EXPECT_EQ(0, pdv(Index::YZZ, Index::YZZ) -= 2);
+  // minus non-zero pdvs of zzz
+  EXPECT_EQ(0, pdv(Index::ZZZ, Index::Z) -= 3 * (z * z));
+  EXPECT_EQ(0, pdv(Index::ZZZ, Index::ZZ) -= 3 * 2 * z);
+  EXPECT_EQ(0, pdv(Index::ZZZ, Index::ZZZ) -= 3 * 2 * 1);
+  // assert all zeros
+  EXPECT_NEAR(pdv.norm(), 0, 1e-14);
+}
 
 int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
