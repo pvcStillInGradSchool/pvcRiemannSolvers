@@ -30,6 +30,7 @@ class Smoothness {
   static constexpr int K = kComponents;
   static constexpr int N = Taylor::N;
   static constexpr int D = Taylor::D;
+  static constexpr int P = Taylor::P;
   using MatKx1 = algebra::Matrix<Scalar, K, 1>;
   using MatKxN = algebra::Matrix<Scalar, K, N>;
 
@@ -56,34 +57,20 @@ class Smoothness {
     return std::pow(volume, k * 2. / D - 1) / (k_factorial * k_factorial);
   }
 
-  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
-      requires(kDegrees == 1) {
-    MatKx1 smoothness = integral.col(Index::X);
-    smoothness += integral.col(Index::Y);
-    smoothness += integral.col(Index::Z);
-    return smoothness;
-  }
-
-  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
-      requires(kDegrees == 2) {
+  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume) {
+    static_assert(P > 0);
     MatKx1 smoothness = integral.col(Index::X);
     smoothness += integral.col(Index::Y);
     smoothness += integral.col(Index::Z);
     smoothness *= GetWeight(volume, 1);
-    AddSmoothness(integral, GetWeight(volume, 2), Index::XX, Index::XXX,
-        &smoothness);
-    return smoothness;
-  }
-  static MatKx1 GetSmoothness(const MatKxN &integral, Scalar volume)
-      requires(kDegrees == 3) {
-    MatKx1 smoothness = integral.col(Index::X);
-    smoothness += integral.col(Index::Y);
-    smoothness += integral.col(Index::Z);
-    smoothness *= GetWeight(volume, 1);
-    AddSmoothness(integral, GetWeight(volume, 2), Index::XX, Index::XXX,
-        &smoothness);
-    AddSmoothness(integral, GetWeight(volume, 3), Index::XXX, Index::XXXX,
-        &smoothness);
+    static_assert(Taylor::CountBasis(0) == Index::X);
+    static_assert(Taylor::CountBasis(1) == Index::XX);
+    static_assert(Taylor::CountBasis(2) == Index::XXX);
+    static_assert(Taylor::CountBasis(3) == Index::XXXX);
+    for (int p = 2; p <= P; ++p) {
+      AddSmoothness(integral, GetWeight(volume, p),
+          Taylor::CountBasis(p - 1), Taylor::CountBasis(p), &smoothness);
+    }
     return smoothness;
   }
 };

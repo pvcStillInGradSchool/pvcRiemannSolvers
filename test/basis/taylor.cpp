@@ -26,6 +26,12 @@ class TestBasisTaylor : public ::testing::Test {
 TEST_F(TestBasisTaylor, D1P5) {
   using Basis = mini::basis::Taylor<double, 1, 5>;
   using Index = typename Basis::Index;
+  static_assert(Basis::CountBasis(0) == 1);
+  static_assert(Basis::CountBasis(1) == 2);
+  static_assert(Basis::CountBasis(2) == 3);
+  static_assert(Basis::CountBasis(3) == 4);
+  static_assert(Basis::CountBasis(4) == 5);
+  static_assert(Basis::CountBasis(5) == 6);
   static_assert(Basis::N == 6);
   double x = mini::rand::uniform(0., 1.);
   EXPECT_NE(x, 0);
@@ -83,6 +89,9 @@ TEST_F(TestBasisTaylor, D1P5) {
 TEST_F(TestBasisTaylor, D2P2) {
   using Basis = mini::basis::Taylor<double, 2, 2>;
   using Index = typename Basis::Index;
+  static_assert(Basis::CountBasis(0) == 1);
+  static_assert(Basis::CountBasis(1) == 3);
+  static_assert(Basis::CountBasis(2) == 6);
   static_assert(Basis::N == 6);
   double x = mini::rand::uniform(0., 1.);
   double y = mini::rand::uniform(0., 1.);
@@ -106,6 +115,9 @@ TEST_F(TestBasisTaylor, D2P2) {
 TEST_F(TestBasisTaylor, D3P2) {
   using Basis = mini::basis::Taylor<double, 3, 2>;
   using Index = typename Basis::Index;
+  static_assert(Basis::CountBasis(0) == 1);
+  static_assert(Basis::CountBasis(1) == 4);
+  static_assert(Basis::CountBasis(2) == 10);
   static_assert(Basis::N == 10);
   double x = mini::rand::uniform(0., 1.);
   double y = mini::rand::uniform(0., 1.);
@@ -162,6 +174,10 @@ TEST_F(TestBasisTaylor, D3P2) {
 TEST_F(TestBasisTaylor, D3P3) {
   using Basis = mini::basis::Taylor<double, 3, 3>;
   using Index = typename Basis::Index;
+  static_assert(Basis::CountBasis(0) == 1);
+  static_assert(Basis::CountBasis(1) == 4);
+  static_assert(Basis::CountBasis(2) == 10);
+  static_assert(Basis::CountBasis(3) == 20);
   static_assert(Basis::N == 20);
   double x = mini::rand::uniform(1., 2.);
   double y = mini::rand::uniform(1., 2.);

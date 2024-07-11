@@ -90,6 +90,10 @@ class Taylor<S, 1, kDegrees> {
   // the number of terms in this basis
   static constexpr int N = GetN<D>(P);
 
+  static constexpr int CountBasis(int p) {
+    return GetN<D>(p);
+  }
+
   using Scalar = S;
   using Vector = algebra::Vector<Scalar, N>;
 
@@ -148,6 +152,10 @@ class Taylor {
   static constexpr int P = kDegrees;
   static constexpr int D = kDimensions;
   static constexpr int N = GetN<D>(P);  // the number of components
+  static constexpr int CountBasis(int p) {
+    return GetN<D>(p);
+  }
+
   using Scalar = S;
 
   template <int kRows, int kColumns>
