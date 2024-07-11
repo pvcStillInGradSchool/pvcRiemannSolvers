@@ -305,40 +305,40 @@ class Taylor {
     res.col(XX) += coeff.col(XXZ) * z;
     res.col(XX) += coeff.col(XXX) * x * 3;
     res.col(XX) += res.col(XX);
-    assert(res.col(XX) == 2 * (coeff.col(XX) + coeff.col(XXY) * y
-        + coeff.col(XXZ) * z + coeff.col(XXX) * x * 3));
+    assert(1e-10 > (res.col(XX) - 2 * (coeff.col(XXX) * x * 3
+        + coeff.col(XX) + coeff.col(XXY) * y + coeff.col(XXZ) * z)).norm());
     // pdv_xy
     res.col(XY) += coeff.col(XXY) * x * 2;
     res.col(XY) += coeff.col(XYY) * y * 2;
     res.col(XY) += coeff.col(XYZ) * z;
-    assert(res.col(XY) == coeff.col(XY) + coeff.col(XYZ) * z
-        + 2 * (coeff.col(XXY) * x + coeff.col(XYY) * y));
+    assert(1e-10 > (res.col(XY) - (coeff.col(XY) + coeff.col(XYZ) * z
+        + 2 * (coeff.col(XXY) * x + coeff.col(XYY) * y))).norm());
     // pdv_xz
     res.col(XZ) += coeff.col(XXZ) * x * 2;
     res.col(XZ) += coeff.col(XZZ) * z * 2;
     res.col(XZ) += coeff.col(XYZ) * y;
-    assert(res.col(XZ) == coeff.col(XZ) + coeff.col(XYZ) * y
-        + 2 * (coeff.col(XXZ) * x + coeff.col(XZZ) * z));
+    assert(1e-10 > (res.col(XZ) - (coeff.col(XZ) + coeff.col(XYZ) * y
+        + 2 * (coeff.col(XXZ) * x + coeff.col(XZZ) * z))).norm());
     // pdv_yy
     res.col(YY) += coeff.col(XYY) * x;
     res.col(YY) += coeff.col(YYZ) * z;
     res.col(YY) += coeff.col(YYY) * y * 3;
-    res.col(YY) += res.col(XX);
-    assert(res.col(YY) == coeff.col(YYY) * y * 6
-        + 2 * (coeff.col(YY) + coeff.col(XYY) * x + coeff.col(YYZ) * z));
+    res.col(YY) += res.col(YY);
+    assert(1e-10 > (res.col(YY) - 2 * (coeff.col(YYY) * y * 3
+        + coeff.col(YY) + coeff.col(XYY) * x + coeff.col(YYZ) * z)).norm());
     // pdv_yz
     res.col(YZ) += coeff.col(XYZ) * x;
     res.col(YZ) += coeff.col(YYZ) * y * 2;
     res.col(YZ) += coeff.col(YZZ) * z * 2;
-    assert(res.col(YZ) == coeff.col(YZ) + coeff.col(XYZ) * x
-        + 2 * (coeff.col(YYZ) * y + coeff.col(YZZ) * z));
+    assert(1e-10 > (res.col(YZ) - (coeff.col(YZ) + coeff.col(XYZ) * x
+        + 2 * (coeff.col(YYZ) * y + coeff.col(YZZ) * z))).norm());
     // pdv_zz
     res.col(ZZ) += coeff.col(XZZ) * x;
     res.col(ZZ) += coeff.col(YZZ) * y;
     res.col(ZZ) += coeff.col(ZZZ) * z * 3;
     res.col(ZZ) += res.col(ZZ);
-    assert(res.col(ZZ) == coeff.col(ZZZ) * z * 6
-        + 2 * (coeff.col(ZZ) + coeff.col(XZZ) * x + coeff.col(YZZ) * y));
+    assert(1e-10 > (res.col(ZZ) - 2 * (coeff.col(ZZZ) * z * 3
+        + coeff.col(ZZ) + coeff.col(XZZ) * x + coeff.col(YZZ) * y)).norm());
     // pdv_xxx
     res.col(XXX) *= 6;
     assert(res.col(XXX) == coeff.col(XXX) * 6);
@@ -367,7 +367,7 @@ class Taylor {
     assert(res.col(YZZ) == coeff.col(YZZ) * 2);
     // pdv_zzz
     res.col(ZZZ) *= 6;
-    assert(res.col(ZZZ) == coeff.col(ZZZ) * 2);
+    assert(res.col(ZZZ) == coeff.col(ZZZ) * 6);
     return res;
   }
 
