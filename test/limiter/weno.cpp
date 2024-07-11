@@ -46,8 +46,11 @@ TEST_F(TestWenoLimiters, Smoothness) {
   using Coordinate = mini::coordinate::Hexahedron8<double>;
   using Gx = mini::integrator::Legendre<double, 5>;
   using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
-  using Projection = mini::polynomial::Projection<double, 3, 2, 10>;
+  constexpr int D = 3, P = 2, N = 10;
+  using Smoothness = mini::limiter::weno::Smoothness<double, N, P>;
+  using Projection = mini::polynomial::Projection<double, D, P, N>;
   using Taylor = typename Projection::Taylor;
+  using Index = typename Taylor::Index;
   using Value = typename Projection::Value;
   using Global = typename Projection::Global;
   auto coordinate = Coordinate {
@@ -57,22 +60,31 @@ TEST_F(TestWenoLimiters, Smoothness) {
       Global{+1, +1, +1}, Global{-1, +1, +1}
   };
   auto integrator = Integrator(coordinate);
+  auto volume = integrator.volume();
   auto func = [](Coord const &point) {
     return Taylor::GetValue(point);
   };
   auto projection = Projection(integrator);
-  projection.Approximate(func);
+  projection.Approximate(func);  // almost exactly approximated
   auto s_actual = mini::limiter::weno::GetSmoothness(projection);
   EXPECT_NEAR(s_actual[0], 0.0, 1e-14);
-  EXPECT_NEAR(s_actual[1], 4.0, 1e-13);
-  EXPECT_NEAR(s_actual[2], 4.0, 1e-13);
-  EXPECT_NEAR(s_actual[3], 4.0, 1e-13);
-  EXPECT_NEAR(s_actual[4], 16./3 + 64, 1e-12);
-  EXPECT_NEAR(s_actual[5], 8.0/3 + 16, 1e-13);
-  EXPECT_NEAR(s_actual[6], 8.0/3 + 16, 1e-13);
-  EXPECT_NEAR(s_actual[7], 16./3 + 64, 1e-12);
-  EXPECT_NEAR(s_actual[8], 8.0/3 + 16, 1e-13);
-  EXPECT_NEAR(s_actual[9], 16./3 + 64, 1e-12);
+  // 1st-order pdvs of x, y, z == 1, whose L2 integrals == volume * 1,
+  auto w1 = Smoothness::GetWeight(volume, 1);
+  EXPECT_NEAR(s_actual[Index::X], volume * w1, 1e-13);
+  EXPECT_NEAR(s_actual[Index::Y], volume * w1, 1e-13);
+  EXPECT_NEAR(s_actual[Index::Z], volume * w1, 1e-13);
+  auto w2 = Smoothness::GetWeight(volume, 2);
+  // \pdv{xx}{x} == 2x, whose L2 integrals == 8/3 * 4,
+  // \pdv{xx}{x}{x} == 2, whose L2 integrals == 8 * 4,
+  EXPECT_NEAR(s_actual[Index::XX], 32./3 * w1 + 32 * w2, 1e-12);
+  EXPECT_NEAR(s_actual[Index::YY], 32./3 * w1 + 32 * w2, 1e-13);
+  EXPECT_NEAR(s_actual[Index::ZZ], 32./3 * w1 + 32 * w2, 1e-15);
+  // \pdv{xy}{x} == y, whose L2 integrals == 2/3 * 4,
+  // \pdv{xy}{y} == x, whose L2 integrals == 2/3 * 4,
+  // \pdv{xy}{x}{y} == 1, whose L2 integrals == 8 * 1,
+  EXPECT_NEAR(s_actual[Index::XY], 16./3 * w1 + 8 * w2, 1e-15);
+  EXPECT_NEAR(s_actual[Index::XZ], 16./3 * w1 + 8 * w2, 1e-15);
+  EXPECT_NEAR(s_actual[Index::YZ], 16./3 * w1 + 8 * w2, 1e-14);
 }
 TEST_F(TestWenoLimiters, ReconstructScalar) {
   auto case_name = std::string("simple_cube");
