@@ -108,8 +108,13 @@ class Taylor {
   static constexpr int D = kDimensions;
   static constexpr int N = GetN<D>(P);  // the number of components
   using Scalar = S;
-  using MatNx1 = algebra::Matrix<Scalar, N, 1>;
-  using Coord = algebra::Matrix<Scalar, D, 1>;
+
+  template <int kRows, int kColumns>
+  using Matrix = algebra::Matrix<Scalar, kRows, kColumns>;
+
+  using MatNx1 = Matrix<N, 1>;
+  using Coord = Matrix<D, 1>;
+
 
   static MatNx1 GetValue(const Coord &coord) {
     return _GetValue(coord);

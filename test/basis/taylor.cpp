@@ -131,6 +131,29 @@ TEST_F(TestBasisTaylor, In3dSpace) {
   EXPECT_EQ(res[7], y * y);
   EXPECT_EQ(res[8], y * z);
   EXPECT_EQ(res[9], z * z);
+  using Coeff = typename Basis::Matrix<Basis::N, Basis::N>;
+  Coeff pdv_expect = Coeff::Zero();
+  pdv_expect(1, 1) = 1;  // (∂/∂x)(x)
+  pdv_expect(2, 2) = 1;  // (∂/∂y)(y)
+  pdv_expect(3, 3) = 1;  // (∂/∂z)(z)
+  pdv_expect(4, 1) = 2*x;  //     (∂/∂x)(x*x)
+  pdv_expect(4, 4) = 2;  // (∂/∂x)(∂/∂x)(x*x)
+  pdv_expect(5, 1) = y;  //       (∂/∂x)(x*y)
+  pdv_expect(5, 2) = x;  //       (∂/∂y)(x*y)
+  pdv_expect(5, 5) = 1;  // (∂/∂x)(∂/∂y)(x*y)
+  pdv_expect(6, 1) = z;  //       (∂/∂x)(x*z)
+  pdv_expect(6, 3) = x;  //       (∂/∂z)(x*z)
+  pdv_expect(6, 6) = 1;  // (∂/∂x)(∂/∂z)(x*z)
+  pdv_expect(7, 2) = 2*y;  //     (∂/∂y)(y*y)
+  pdv_expect(7, 7) = 2;  // (∂/∂y)(∂/∂y)(y*y)
+  pdv_expect(8, 2) = z;  //       (∂/∂y)(y*z)
+  pdv_expect(8, 3) = y;  //       (∂/∂z)(y*z)
+  pdv_expect(8, 8) = 1;  // (∂/∂y)(∂/∂z)(y*z)
+  pdv_expect(9, 3) = 2*z;  //     (∂/∂z)(z*z)
+  pdv_expect(9, 9) = 2;  // (∂/∂z)(∂/∂z)(z*z)
+  Coeff coeff = Coeff::Identity();
+  auto pdv_actual = Basis::GetPartialDerivatives({ x, y, z }, coeff);
+  EXPECT_EQ(pdv_expect, pdv_actual);
 }
 
 int main(int argc, char* argv[]) {

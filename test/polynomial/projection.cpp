@@ -101,32 +101,13 @@ TEST_F(TestProjection, PartialDerivatives) {
   static_assert(ProjFunc::N == 10);
   auto x = 0.3, y = 0.4, z = 0.5;
   auto point = Coord{ x, y, z };
-  auto pdv_actual = Taylor::GetPartialDerivatives(point - projection.center(),
+  EXPECT_EQ(projection.center(), Coord::Zero());
+  auto pdv_actual = Taylor::GetPartialDerivatives(point,
       projection.GetCoeffOnTaylorBasis());
   auto coeff = ProjFunc::Coeff(); coeff.setIdentity();
   auto pdv_expect = Taylor::GetPartialDerivatives(point, coeff);
   ProjFunc::Coeff diff = pdv_actual - pdv_expect;
   EXPECT_NEAR(diff.norm(), 0.0, 1e-13);
-  auto pdv_values = ProjFunc::Coeff(); pdv_values.setZero();
-  pdv_values(1, 1) = 1;  // (∂/∂x)(x)
-  pdv_values(2, 2) = 1;  // (∂/∂y)(y)
-  pdv_values(3, 3) = 1;  // (∂/∂z)(z)
-  pdv_values(4, 1) = 2*x;  //     (∂/∂x)(x*x)
-  pdv_values(4, 4) = 2;  // (∂/∂x)(∂/∂x)(x*x)
-  pdv_values(5, 1) = y;  //       (∂/∂x)(x*y)
-  pdv_values(5, 2) = x;  //       (∂/∂y)(x*y)
-  pdv_values(5, 5) = 1;  // (∂/∂x)(∂/∂y)(x*y)
-  pdv_values(6, 1) = z;  //       (∂/∂x)(x*z)
-  pdv_values(6, 3) = x;  //       (∂/∂z)(x*z)
-  pdv_values(6, 6) = 1;  // (∂/∂x)(∂/∂z)(x*z)
-  pdv_values(7, 2) = 2*y;  //     (∂/∂y)(y*y)
-  pdv_values(7, 7) = 2;  // (∂/∂y)(∂/∂y)(y*y)
-  pdv_values(8, 2) = z;  //       (∂/∂y)(y*z)
-  pdv_values(8, 3) = y;  //       (∂/∂z)(y*z)
-  pdv_values(8, 8) = 1;  // (∂/∂y)(∂/∂z)(y*z)
-  pdv_values(9, 3) = 2*z;  //     (∂/∂z)(z*z)
-  pdv_values(9, 9) = 2;  // (∂/∂z)(∂/∂z)(z*z)
-  EXPECT_EQ(pdv_expect, pdv_values);
 }
 TEST_F(TestProjection, ArithmaticOperations) {
   using ProjFunc = mini::polynomial::Projection<double, 3, 2, 10>;
