@@ -23,6 +23,10 @@ if __name__ == '__main__':
     parser.add_argument('--show', action='store_true')
     parser.add_argument('-o', '--output', default='cylinder.cgns', type=str,
         help='name of the output file')
+    parser.add_argument('--n_layer', default=4, type=int,
+        help='number of layers around the cylinder')
+    parser.add_argument('--n_z', default=1, type=int,
+        help='number of layers along the z-axis')
     args = parser.parse_args()
     print(args)
 
@@ -59,13 +63,13 @@ if __name__ == '__main__':
     input = gmsh.model.getEntities(2)
     print(input)
     output = gmsh.model.occ.extrude(input, dx=0.0, dy=0.0, dz=r * 2,
-        numElements=[3], heights=[1], recombine=True)
+        numElements=[args.n_z], heights=[1], recombine=True)
     print(f"{input}.extrude() = {output}")
     gmsh.model.geo.synchronize()
     gmsh.model.occ.synchronize()
 
     # inner circle (boundary layer)
-    n_layer = 32
+    n_layer = args.n_layer
     ratio = 0.9
     numElements = [1] * n_layer
     print("numElements =", numElements)
@@ -77,7 +81,7 @@ if __name__ == '__main__':
     for i in range(1, n_layer):
         delta_h *= ratio
         heights[i] = heights[i - 1] + delta_h
-    assert heights[-1] == h_outer
+    np.testing.assert_approx_equal(heights[-1], h_outer)
     print("heights =", heights, h_outer)
     input = [(2, 12)]
     output = gmsh.model.geo.extrudeBoundaryLayer(input,
