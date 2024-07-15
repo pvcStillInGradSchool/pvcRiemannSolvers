@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib_wrapper import savefig
 from matplotlib import pyplot as plt
+import sys
 
 
 class Quadrangle4():
@@ -80,12 +81,11 @@ if __name__ == '__main__':
     quad.plot_grid(np.linspace(-5, 5, 11), np.linspace(-5, 5, 11))
     quad.plot()
     plt.plot(2.05723, 0.777978, 'rx')
-    history = np.loadtxt('history.txt', delimiter=' ')
+    history = np.loadtxt(sys.argv[1], delimiter=' ')
     quad.plot_history(history)
     plt.axis('equal')
     plt.xlim(1.90, 2.10)
     plt.ylim(0.75, 1.05)
     plt.legend()
     plt.tight_layout()
-    savefig('quad4')
-
+    savefig('failed_extrapolation', sys.argv[2])
