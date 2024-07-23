@@ -4,6 +4,8 @@
 #define MINI_RIEMANN_ROTATED_EULER_HPP_
 
 #include <concepts>
+
+#include <algorithm>
 #include <type_traits>
 #include <utility>
 #include <iostream>

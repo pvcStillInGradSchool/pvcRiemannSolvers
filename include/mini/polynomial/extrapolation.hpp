@@ -4,6 +4,8 @@
 
 #include <concepts>
 
+#include <utility>
+
 #include "mini/polynomial/projection.hpp"
 
 namespace mini {

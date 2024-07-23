@@ -2,6 +2,7 @@
 #ifndef MINI_RIEMANN_ROTATED_DOUBLE_HPP_
 #define MINI_RIEMANN_ROTATED_DOUBLE_HPP_
 
+#include <algorithm>
 #include <cmath>
 
 #include "mini/riemann/rotated/simple.hpp"

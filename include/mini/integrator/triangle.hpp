@@ -4,12 +4,12 @@
 
 #include <concepts>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
-
-#include <algorithm>
 #include <cstring>
 #include <type_traits>
+#include <memory>
 
 #include "mini/integrator/face.hpp"
 #include "mini/coordinate/triangle.hpp"

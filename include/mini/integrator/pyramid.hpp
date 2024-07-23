@@ -4,10 +4,10 @@
 
 #include <concepts>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
-
-#include <algorithm>
+#include <memory>
 #include <type_traits>
 
 #include "mini/integrator/jacobi.hpp"

@@ -4,6 +4,9 @@
 
 #include <concepts>
 
+#include <algorithm>
+#include <utility>
+
 #include "mini/spatial/fem.hpp"
 
 namespace mini {

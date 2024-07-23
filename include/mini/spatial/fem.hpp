@@ -2,6 +2,7 @@
 #ifndef MINI_SPATIAL_FEM_HPP_
 #define MINI_SPATIAL_FEM_HPP_
 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <functional>
@@ -11,6 +12,7 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 
 #include "mini/riemann/concept.hpp"
 #include "mini/temporal/ode.hpp"

@@ -4,10 +4,10 @@
 
 #include <concepts>
 
-#include <cassert>
-
 #include <array>
+#include <cassert>
 #include <initializer_list>
+#include <memory>
 #include <vector>
 
 #include "mini/coordinate/element.hpp"

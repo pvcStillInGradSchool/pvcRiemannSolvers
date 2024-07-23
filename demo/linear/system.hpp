@@ -2,6 +2,7 @@
 #ifndef DEMO_LINEAR_DIFFUSION_HPP_
 #define DEMO_LINEAR_DIFFUSION_HPP_
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>

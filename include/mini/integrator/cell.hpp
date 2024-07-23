@@ -4,6 +4,8 @@
 
 #include <concepts>
 
+#include <memory>
+
 #include "mini/coordinate/cell.hpp"
 #include "mini/integrator/element.hpp"
 #include "mini/integrator/function.hpp"

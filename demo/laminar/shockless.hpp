@@ -2,6 +2,7 @@
 #ifndef DEMO_LAMINAR_SHOCKLESS_HPP_
 #define DEMO_LAMINAR_SHOCKLESS_HPP_
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>

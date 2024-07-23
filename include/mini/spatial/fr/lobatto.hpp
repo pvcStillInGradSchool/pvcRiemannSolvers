@@ -5,6 +5,7 @@
 #include <concepts>
 #include <ranges>
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <functional>

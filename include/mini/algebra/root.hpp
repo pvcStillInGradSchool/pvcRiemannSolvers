@@ -5,7 +5,6 @@
 #include <vector>
 #include <iostream>
 #include <type_traits>
-#include <vector>
 
 namespace mini {
 namespace algebra {

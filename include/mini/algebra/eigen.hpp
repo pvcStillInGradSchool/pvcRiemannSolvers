@@ -2,6 +2,7 @@
 #ifndef MINI_ALGEBRA_EIGEN_HPP_
 #define MINI_ALGEBRA_EIGEN_HPP_
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 
