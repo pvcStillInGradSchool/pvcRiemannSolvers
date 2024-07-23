@@ -1,6 +1,6 @@
 // Copyright 2023 PEI Weicheng
-#ifndef MINI_RIEMANN_DIFFUSIVE_SCALAR_HPP_
-#define MINI_RIEMANN_DIFFUSIVE_SCALAR_HPP_
+#ifndef MINI_RIEMANN_DIFFUSIVE_LINEAR_HPP_
+#define MINI_RIEMANN_DIFFUSIVE_LINEAR_HPP_
 
 #include "mini/algebra/eigen.hpp"
 #include "mini/constant/index.hpp"
@@ -124,4 +124,4 @@ class Isotropic : public Anisotropic<S, K> {
 }  // namespace riemann
 }  // namespace mini
 
-#endif  // MINI_RIEMANN_DIFFUSIVE_SCALAR_HPP_
+#endif  // MINI_RIEMANN_DIFFUSIVE_LINEAR_HPP_

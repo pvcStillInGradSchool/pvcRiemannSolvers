@@ -187,4 +187,4 @@ class Extrapolation : public Interpolation {
 }  // namespace polynomial
 }  // namespace mini
 
-#endif  // MINI_POLYNOMIAL_HEXAHEDRON_HPP_
+#endif  // MINI_POLYNOMIAL_EXTRAPOLATION_HPP_

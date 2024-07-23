@@ -1,6 +1,6 @@
 //  Copyright 2024 PEI Weicheng
-#ifndef DEMO_LINEAR_DIFFUSION_HPP_
-#define DEMO_LINEAR_DIFFUSION_HPP_
+#ifndef DEMO_LINEAR_SYSTEM_HPP_
+#define DEMO_LINEAR_SYSTEM_HPP_
 
 #include <algorithm>
 #include <cmath>
@@ -84,4 +84,4 @@ using BC = void(*)(const std::string &, Spatial *);
 
 int Main(int argc, char* argv[], IC ic, BC bc);
 
-#endif  // DEMO_LINEAR_DIFFUSION_HPP_
+#endif  // DEMO_LINEAR_SYSTEM_HPP_
