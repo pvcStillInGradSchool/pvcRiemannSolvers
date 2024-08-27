@@ -71,8 +71,49 @@ class EnergyBasedViscosity : public R {
     return properties_.at(i_cell).at(i_node);
   }
 
+ private:
+  static void _MinusViscousFluxByBase(FluxMatrix *flux,
+      Conservative const &value,
+      Gradient const &gradient) requires(!mini::riemann::Diffusive<Base>) {
+  }
+  static void _MinusViscousFluxByBase(FluxMatrix *flux,
+      Conservative const &value,
+      Gradient const &gradient) requires(mini::riemann::Diffusive<Base>) {
+    auto const &property = Base::Diffusion::GetProperty();
+    Base::Diffusion::MinusViscousFlux(flux, property, value, gradient);
+  }
+  static void _MinusViscousFluxByBase(Flux *flux,
+      Conservative const &value, Gradient const &gradient,
+      Vector const &normal) requires(!mini::riemann::Diffusive<Base>) {
+  }
+  static void _MinusViscousFluxByBase(Flux *flux,
+      Conservative const &value, Gradient const &gradient,
+      Vector const &normal) requires(mini::riemann::Diffusive<Base>) {
+    auto const &property = Base::Diffusion::GetProperty();
+    Base::Diffusion::MinusViscousFlux(flux, property, value, gradient, normal);
+  }
+
+  static void MinusViscousFluxOnNoSlipWallByBase(Flux *flux,
+      Value const &wall_value,
+      Conservative const &c_val, Gradient const &c_grad,
+      Vector const &normal,
+      Scalar value_penalty) requires(!mini::riemann::Diffusive<Base>) {
+  }
+  static void MinusViscousFluxOnNoSlipWallByBase(Flux *flux,
+      Value const &wall_value,
+      Conservative const &c_val, Gradient const &c_grad,
+      Vector const &normal,
+      Scalar value_penalty) requires(mini::riemann::Diffusive<Base>) {
+    auto const &property = Base::Diffusion::GetProperty();
+    Base::Diffusion::MinusViscousFluxOnNoSlipWall(flux, property, wall_value,
+        c_val, c_grad, normal, value_penalty);
+  }
+
+
+ public:
   static void MinusViscousFlux(FluxMatrix *flux, Property const &nu,
       Conservative const &value, Gradient const &gradient) {
+    _MinusViscousFluxByBase(flux, value, gradient);
     for (int k = 0; k < kComponents; ++k) {
       flux->row(k) -= nu[k] * gradient.col(k);
     }
@@ -81,6 +122,7 @@ class EnergyBasedViscosity : public R {
   static void MinusViscousFlux(Flux *flux, Property const &nu,
       Conservative const &value, Gradient const &gradient,
       Vector const &normal) {
+    _MinusViscousFluxByBase(flux, value, gradient, normal);
     for (int k = 0; k < kComponents; ++k) {
       (*flux)[k] -= nu[k] * normal.dot(gradient.col(k));
     }
@@ -90,11 +132,14 @@ class EnergyBasedViscosity : public R {
       Property const &nu, Value const &wall_value,
       Conservative const &c_val, Gradient const &c_grad,
       Vector const &normal, Scalar value_penalty) {
+    MinusViscousFluxOnNoSlipWallByBase(flux, wall_value,
+        c_val, c_grad, normal, value_penalty);
     MinusViscousFlux(flux, nu, c_val, c_grad, normal);
   }
 
   void MinusViscousFluxOnNeumannWall(Flux *flux, Property const &nu,
       Conservative const &c_val) const {
+    return;
     typename Convection::Conservative value_jump =
         this->Convection::MinusMirroredValue(c_val);
     Scalar penalty = this->Diffusion::GetValuePenalty();
