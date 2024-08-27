@@ -22,10 +22,10 @@ class NavierStokes {
   using Gas = G;
   using Scalar = typename Gas::Scalar;
   using Gradient = algebra::Matrix<Scalar, kDimensions, kComponents>;
-  using Flux = euler::FluxTuple<Scalar, kDimensions>;
-  using FluxMatrix = typename Flux::FluxMatrix;
+  using FluxVector = euler::FluxTuple<Scalar, kDimensions>;
+  using FluxMatrix = typename FluxVector::FluxMatrix;
   using Value = algebra::Vector<Scalar, kComponents>;
-  using FluxVector = Value;
+  using Flux = Value;
   using Conservative = euler::Conservatives<Scalar, kDimensions>;
   using Primitive = euler::Primitives<Scalar, kDimensions>;
   using Vector = typename Primitive::Vector;
@@ -179,36 +179,34 @@ class NavierStokes {
       Scalar rho, Gradient const &grad_primitive,
       Vector const &normal, Vector const &uvw, Scalar normal_dot_grad_T) {
     Tensor tau = GetViscousStressTensor(grad_primitive, rho, property.nu);
-    flux->momentumX() -= Dot(tau[XX], tau[XY], tau[XZ], normal);
-    flux->momentumY() -= Dot(tau[YX], tau[YY], tau[YZ], normal);
-    flux->momentumZ() -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
+    (*flux)[U] -= Dot(tau[XX], tau[XY], tau[XZ], normal);
+    (*flux)[V] -= Dot(tau[YX], tau[YY], tau[YZ], normal);
+    (*flux)[W] -= Dot(tau[ZX], tau[ZY], tau[ZZ], normal);
     Scalar kappa = GetThermalConductivity(rho, property);
     Scalar work_x = Dot(tau[XX], tau[XY], tau[XZ], uvw);
     Scalar work_y = Dot(tau[YX], tau[YY], tau[YZ], uvw);
     Scalar work_z = Dot(tau[ZX], tau[ZY], tau[ZZ], uvw);
-    flux->energy() -= Dot(work_x, work_y, work_z, normal)
+    (*flux)[kEnergy] -= Dot(work_x, work_y, work_z, normal)
         + kappa * normal_dot_grad_T;
   }
 
  public:
-  static void MinusViscousFlux(FluxVector *flux_vector, Property const &property,
+  static void MinusViscousFlux(Flux *flux, Property const &property,
       Conservative const &conservative, Gradient const &grad_conservative, Vector const &normal) {
     auto [primitive, grad_primitive]
         = ConservativeToPrimitive(conservative, grad_conservative);
-    auto *flux = static_cast<Flux *>(flux_vector);
     auto const &uvw = primitive.velocity();
     auto const &grad_T = grad_primitive.col(kTemperature);
     _MinusViscousFlux(flux, property, conservative.mass(), grad_primitive, normal, uvw,
         normal.dot(grad_T));
   }
 
-  static void MinusViscousFluxOnNoSlipWall(FluxVector *flux_vector,
+  static void MinusViscousFluxOnNoSlipWall(Flux *flux,
       Property const &property, Value const &wall_value,
       Conservative const &conservative, Gradient const &grad_conservative,
       Vector const &normal, Scalar value_penalty) {
     auto [primitive, grad_primitive]
         = ConservativeToPrimitive(conservative, grad_conservative);
-    auto *flux = static_cast<Flux *>(flux_vector);
     auto const &wall_value_ref = static_cast<Primitive const &>(wall_value);
     auto const &uvw = wall_value_ref.velocity();
     Vector penalty = value_penalty * (uvw - primitive.velocity());
