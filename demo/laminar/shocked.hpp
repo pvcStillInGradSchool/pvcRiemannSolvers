@@ -35,30 +35,33 @@ constexpr int kDimensions = 3;
 #include "mini/riemann/euler/exact.hpp"
 #include "mini/riemann/rotated/euler.hpp"
 #include "mini/riemann/diffusive/navier_stokes.hpp"
-extern template class mini::riemann::euler::IdealGas<Scalar, 1.4>;
+// extern template class mini::riemann::euler::IdealGas<Scalar, 1.4>;
 using Gas = mini::riemann::euler::IdealGas<Scalar, 1.4>;
 
-extern template class mini::riemann::euler::Primitives<Scalar, kDimensions>;
+// extern template class mini::riemann::euler::Primitives<Scalar, kDimensions>;
 using Primitive = mini::riemann::euler::Primitives<Scalar, kDimensions>;
 
-extern template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
+// extern template class mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 using Conservative = mini::riemann::euler::Conservatives<Scalar, kDimensions>;
 
-extern template class mini::riemann::euler::HartenLaxLeerContact<Gas, kDimensions>;
+// extern template class mini::riemann::euler::HartenLaxLeerContact<Gas, kDimensions>;
 using Unrotated = mini::riemann::euler::HartenLaxLeerContact<Gas, kDimensions>;
 
-extern template class mini::riemann::rotated::Euler<Unrotated>;
+// extern template class mini::riemann::rotated::Euler<Unrotated>;
 using Convection = mini::riemann::rotated::Euler<Unrotated>;
 
-extern template class mini::riemann::diffusive::NavierStokes<Gas>;
+// extern template class mini::riemann::diffusive::NavierStokes<Gas>;
 using NavierStokes =  mini::riemann::diffusive::NavierStokes<Gas>;
 
-extern template class mini::riemann::diffusive::Direct<NavierStokes>;
+// extern template class mini::riemann::diffusive::Direct<NavierStokes>;
 using Diffusion = mini::riemann::diffusive::Direct<NavierStokes>;
+
+// extern template class mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
+using Riemann = mini::riemann::ConvectionDiffusion<Convection, Diffusion>;
 
 /* Define polynomial approximation. */
 constexpr int kDegrees = 2;
-constexpr int kComponents = Convection::kComponents;
+constexpr int kComponents = Riemann::kComponents;
 #ifdef DGFEM
 #include "mini/integrator/legendre.hpp"
 using Gx = mini::integrator::Legendre<Scalar, kDegrees + 1>;
@@ -96,10 +99,8 @@ static void InstallIntegratorPrototypes(Part *part_ptr);
 #include "mini/riemann/concept.hpp"
 #include "mini/spatial/viscosity.hpp"
 #include "mini/spatial/with_viscosity.hpp"
-extern template class mini::spatial::EnergyBasedViscosity<Part,
-    mini::riemann::ConvectionDiffusion<Convection, Diffusion>>;
-using RiemannWithViscosity = mini::spatial::EnergyBasedViscosity<Part,
-    mini::riemann::ConvectionDiffusion<Convection, Diffusion>>;
+// extern template class mini::spatial::EnergyBasedViscosity<Part, Riemann>;
+using RiemannWithViscosity = mini::spatial::EnergyBasedViscosity<Part, Riemann>;
 static_assert(mini::riemann::ConvectiveDiffusive<RiemannWithViscosity>);
 
 #if defined(FR)
