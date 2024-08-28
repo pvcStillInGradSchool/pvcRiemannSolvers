@@ -7,11 +7,21 @@ auto primitive_right = Primitive(0.125, 0.0, 0.0, 0.0, 0.1);
 auto value_left = Gas::PrimitiveToConservative(primitive_left);
 auto value_right = Gas::PrimitiveToConservative(primitive_right);
 
+/* Modify values by parsing JSON. */
+void ModifyInitialValues(nlohmann::json const &json_object) {
+  primitive_left.rho() = json_object.at("rho_left");
+  primitive_left.u() = json_object.at("u_left");
+  primitive_left.p() = json_object.at("p_left");
+  value_left = Gas::PrimitiveToConservative(primitive_left);
+  primitive_right.rho() = json_object.at("rho_right");
+  primitive_right.u() = json_object.at("u_right");
+  primitive_right.p() = json_object.at("p_right");
+  value_right = Gas::PrimitiveToConservative(primitive_right);
+}
+
+
 Value MyIC(const Global &xyz) {
   auto x = xyz[0];
-  if (x == 2.5) {
-    return (value_left + value_right) / 2;
-  }
   return (x < 2.5) ? value_left : value_right;
 }
 
@@ -58,5 +68,5 @@ void MyBC(const std::string &suffix, Spatial *spatial) {
 }
 
 int main(int argc, char* argv[]) {
-  return Main(argc, argv, MyIC, MyBC);
+  return Main(argc, argv, MyIC, MyBC, ModifyInitialValues);
 }

@@ -113,7 +113,10 @@ using Temporal = mini::temporal::RungeKutta<kOrders, Scalar>;
 /* Define the types of IC and BCs. */
 using IC = Value(*)(const Global &);
 using BC = void(*)(const std::string &, Spatial *);
+// Modify values by parsing JSON.
+#include <nlohmann/json.hpp>
+using MIV = void(*)(nlohmann::json const &);
 
-int Main(int argc, char* argv[], IC ic, BC bc);
+int Main(int argc, char* argv[], IC ic, BC bc, MIV miv = nullptr);
 
 #endif  // DEMO_EULER_SOURCELESS_HPP_

@@ -43,9 +43,8 @@ using VtkWriter = mini::mesh::vtk::Writer<Part>;
 #endif
 
 #include <fstream>
-#include <nlohmann/json.hpp>
 
-int Main(int argc, char* argv[], IC ic, BC bc) {
+int Main(int argc, char* argv[], IC ic, BC bc, MIV miv) {
   MPI_Init(NULL, NULL);
   int n_core, i_core;
   MPI_Comm_size(MPI_COMM_WORLD, &n_core);
@@ -129,6 +128,9 @@ int Main(int argc, char* argv[], IC ic, BC bc) {
 
   /* Initialization. */
   if (i_frame_prev < 0) {
+    if (miv) {
+      miv(json_object);
+    }
     spatial.Approximate(ic);
     if (i_core == 0) {
       std::printf("[Done] Approximate() on %d cores at %f sec\n",
