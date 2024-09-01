@@ -34,6 +34,12 @@ target_link_libraries(test_mesh_cgal ${CGNS_LIB})
 set_target_properties(test_mesh_cgal PROPERTIES OUTPUT_NAME cgal)
 add_test(NAME test_mesh_cgal COMMAND cgal)
 
+add_executable(test_mesh_distance distance.cpp)
+target_include_directories(test_mesh_distance PRIVATE ${CGAL_INCLUDE_DIRS} ${CGNS_INC})
+target_link_libraries(test_mesh_distance ${CGNS_LIB})
+set_target_properties(test_mesh_distance PROPERTIES OUTPUT_NAME distance)
+add_test(NAME test_mesh_distance COMMAND distance)
+
 add_executable(test_mesh_overset overset.cpp)
 target_include_directories(test_mesh_overset PRIVATE ${CGNS_INC} ${METIS_INC} ${CGAL_INCLUDE_DIRS})
 target_link_libraries(test_mesh_overset ${CGNS_LIB} metis)
