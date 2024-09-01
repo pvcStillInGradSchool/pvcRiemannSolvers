@@ -15,26 +15,58 @@ namespace vtk {
 
 using Byte = char;
 
+constexpr char base[]
+    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+void Encode(Byte *out, Byte const *in) {
+  out[0] = base[((in[0] & 0xFC/* 1111 1100 */) >> 2)];
+  out[1] = base[((in[0] & 0x03/* 0000 0011 */) << 4)
+              + ((in[1] & 0xF0/* 1111 0000 */) >> 4)];
+  out[2] = base[((in[1] & 0x0F/* 0000 1111 */) << 2)
+              + ((in[2] & 0xC0/* 1100 0000 */) >> 6)];
+  out[3] = base[((in[2] & 0x3F/* 0011 1111 */))];
+}
+
+int CharToIndex(char c) {
+  int i = -1;
+  if ('A' <= c && c <= 'Z') {
+    i = c - 'A';
+  } else if ('a' <= c && c <= 'z') {
+    i = c - 'a' + 26;
+  } else if ('0' <= c && c <= '9') {
+    i = c - '0' + 52;
+  } else if ('+' == c) {
+    i = 63;
+  } else {
+    assert('=' == c);
+  }
+  assert(i == -1 || base[i] == c);
+  return i;
+}
+
+void Decode(Byte *out, Byte const *in) {
+  int i_0 = CharToIndex(in[0]);
+  int i_1 = CharToIndex(in[1]);
+  int i_2 = CharToIndex(in[2]);
+  int i_3 = CharToIndex(in[3]);
+  out[0] = ((i_0/* & 0x3F 0011 1111 */) << 2)
+         + ((i_1 & 0x30/* 0011 0000 */) >> 4);
+  out[1] = ((i_1 & 0x0F/* 0000 1111 */) << 4)
+         + ((i_2 & 0x3C/* 0011 1100 */) >> 2);
+  out[2] = ((i_2 & 0x03/* 0000 0011 */) << 6)
+         + ((i_3/* & 0x3F 0011 1111 */));
+}
+
 std::string EncodeBase64(Byte const *input_data, std::size_t n_char) {
   auto output = std::string();
   output.resize((n_char / 3 + (n_char % 3 != 0)) * 4);
   auto *output_data = output.data();
   auto *output_end = output_data + output.size();
   auto *input_end = input_data + n_char;
-  constexpr char base[]
-      = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  auto encode = [&base](Byte *out, Byte const *in) {
-    out[0] = base[((in[0] & 0xFC/* 1111 1100 */) >> 2)];
-    out[1] = base[((in[0] & 0x03/* 0000 0011 */) << 4)
-                + ((in[1] & 0xF0/* 1111 0000 */) >> 4)];
-    out[2] = base[((in[1] & 0x0F/* 0000 1111 */) << 2)
-                + ((in[2] & 0xC0/* 1100 0000 */) >> 6)];
-    out[3] = base[((in[2] & 0x3F/* 0011 1111 */))];
-  };
   for (std::size_t i_triplet = 0, n_triplet = n_char / 3;
       i_triplet < n_triplet; i_triplet++) {
     // for each (char[3]) input_data, convert it to (char[4]) output_data:
-    encode(output_data, input_data);
+    Encode(output_data, input_data);
     input_data += 3;
     output_data += 4;
   }
@@ -47,7 +79,7 @@ std::string EncodeBase64(Byte const *input_data, std::size_t n_char) {
     }
     assert(i == 1 || i == 2);
     i++;  // 1 in input -> 2 in output, 2 in input -> 3 in output
-    encode(output_data, triplet);
+    Encode(output_data, triplet);
     output_data += i;
     while (output_data != output_end) {
       *output_data++ = '=';
@@ -63,6 +95,28 @@ std::pair<std::string, std::size_t> EncodeBase64(Iter first, Iter last) {
   auto *input_data = reinterpret_cast<Byte const *>(&first[0]);
   std::size_t n_char = (last - first) * sizeof(decltype(*first));
   return {EncodeBase64(input_data, n_char), n_char};
+}
+
+void DecodeBase64(std::string const &input, std::size_t n_byte,
+      Byte *output_data) {
+  auto *output_end = output_data + n_byte;
+  auto *input_data = input.data();
+  auto *input_end = input_data + input.size();
+  for (std::size_t i_triplet = 0, n_triplet = n_byte / 3;
+      i_triplet < n_triplet; i_triplet++) {
+    // for each (char[4]) input_data, convert it to (char[3]) output_data:
+    Decode(output_data, input_data);
+    input_data += 4;
+    output_data += 3;
+  }
+  assert(input_data <= input_end);
+  if (output_data != output_end) {  // has padding
+    Byte triplet[3];
+    Decode(triplet, input_data);
+    for (int i = 0; output_data != output_end; ++i) {
+      *output_data++ = triplet[i];
+    }
+  }
 }
 
 /**

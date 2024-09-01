@@ -54,6 +54,58 @@ TEST_F(TestMeshVtk, EncodeBase64) {
   encoded = EncodeBase64(origin.data(), origin.size());
   EXPECT_EQ(encoded, "MTIzNDU2");
 }
+TEST_F(TestMeshVtk, DecodeBase64) {
+  using mini::mesh::vtk::DecodeBase64;
+  std::string origin, decoded;
+  origin = "A";
+  decoded.resize(origin.size());
+  DecodeBase64("QQ==", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "AB";
+  decoded.resize(origin.size());
+  DecodeBase64("QUI=", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "ABC";
+  decoded.resize(origin.size());
+  DecodeBase64("QUJD", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "ABCD";
+  decoded.resize(origin.size());
+  DecodeBase64("QUJDRA==", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "ABCDE";
+  decoded.resize(origin.size());
+  DecodeBase64("QUJDREU=", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "ABCDEF";
+  decoded.resize(origin.size());
+  DecodeBase64("QUJDREVG", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "1";
+  decoded.resize(origin.size());
+  DecodeBase64("MQ==", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "12";
+  decoded.resize(origin.size());
+  DecodeBase64("MTI=", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "123";
+  decoded.resize(origin.size());
+  DecodeBase64("MTIz", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "1234";
+  decoded.resize(origin.size());
+  DecodeBase64("MTIzNA==", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "12345";
+  decoded.resize(origin.size());
+  DecodeBase64("MTIzNDU=", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+  origin = "123456";
+  decoded.resize(origin.size());
+  DecodeBase64("MTIzNDU2", decoded.size(), decoded.data());
+  EXPECT_EQ(origin, decoded);
+}
 
 template <class Part>
 void Write(std::string const &case_name, std::string const &solution_name) {
