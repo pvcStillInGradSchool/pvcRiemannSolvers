@@ -10,10 +10,9 @@ import pycuda.autoinit
 from pycuda.compiler import SourceModule
 
 
-def warp_by_host(filename: str, component: str, scale: float, axis: int):
-    """Warp a single VTU file by CPU.
+def read_vtu(filename: str, component: str) -> tuple[vtk.vtkUnstructuredGrid, int, vtk.vtkDataArray, vtk.vtkDataArray]:
+    """Read a given VTU file.
     """
-    # read the given mesh
     reader = vtk.vtkXMLUnstructuredGridReader()
     reader.SetFileName(filename)
     reader.Update()
@@ -28,12 +27,12 @@ def warp_by_host(filename: str, component: str, scale: float, axis: int):
     data_array = point_data.GetArray(component)
     assert isinstance(data_array, vtk.vtkDataArray)
     assert n_point == data_array.GetNumberOfTuples()
-    # shift nodes
-    for p in range(n_point):
-        coord = vtk_points_data.GetTuple(p)[axis] \
-            + scale * data_array.GetTuple(p)[0]
-        vtk_points_data.SetComponent(p, axis, coord)
-    # write the modified mesh
+    return grid, n_point, vtk_points_data, data_array
+
+
+def write_vtu(filename: str, grid: vtk.vtkUnstructuredGrid):
+    """Write the modified mesh.
+    """
     writer = vtk.vtkXMLDataSetWriter()
     writer.SetInputData(grid)
     writer.SetFileName(filename)
@@ -41,24 +40,21 @@ def warp_by_host(filename: str, component: str, scale: float, axis: int):
     writer.Write()
 
 
+def warp_by_host(filename: str, component: str, scale: float, axis: int):
+    """Warp a single VTU file by CPU.
+    """
+    grid, n_point, vtk_points_data, data_array = read_vtu(filename, component)
+    for p in range(n_point):
+        coord = vtk_points_data.GetTuple(p)[axis] \
+            + scale * data_array.GetTuple(p)[0]
+        vtk_points_data.SetComponent(p, axis, coord)
+    write_vtu(filename, grid)
+
+
 def warp_by_device(filename: str, component: str, scale: float, axis: int):
     """Warp a single VTU file by GPU.
     """
-    # read the given mesh
-    reader = vtk.vtkXMLUnstructuredGridReader()
-    reader.SetFileName(filename)
-    reader.Update()
-    grid = reader.GetOutput()
-    assert isinstance(grid, vtk.vtkUnstructuredGrid)
-    n_point = grid.GetNumberOfPoints()
-    vtk_points = grid.GetPoints()
-    assert isinstance(vtk_points, vtk.vtkPoints)
-    vtk_points_data = vtk_points.GetData()
-    assert isinstance(vtk_points_data, vtk.vtkDataArray)
-    point_data = grid.GetPointData()
-    data_array = point_data.GetArray(component)
-    assert isinstance(data_array, vtk.vtkDataArray)
-    assert n_point == data_array.GetNumberOfTuples()
+    grid, n_point, vtk_points_data, data_array = read_vtu(filename, component)
     # read data for shifting
     pairs_on_host = np.ndarray((n_point, 2))
     for p in range(n_point):
@@ -86,12 +82,7 @@ def warp_by_device(filename: str, component: str, scale: float, axis: int):
     # update coords in grid
     for p in range(n_point):
         vtk_points_data.SetComponent(p, axis, pairs_on_host[p][0])
-    # write the modified mesh
-    writer = vtk.vtkXMLDataSetWriter()
-    writer.SetInputData(grid)
-    writer.SetFileName(filename)
-    writer.SetDataModeToAscii()
-    writer.Write()
+    write_vtu(filename, grid)
 
 
 def traverse(folder: str, action: callable):
