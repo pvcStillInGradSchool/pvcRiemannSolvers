@@ -125,6 +125,7 @@ void DecodeBase64(std::string const &input, std::size_t n_byte,
  * See [vtkCellType.h](https://vtk.org/doc/nightly/html/vtkCellType_8h.html) for details.
   */
 enum class CellType {
+  kLine2 = 3,
   kTriangle3 = 5,
   kQuadrangle4 = 9,
   kTetrahedron4 = 10,
@@ -136,6 +137,49 @@ enum class CellType {
   kHexahedron27 = 29,
   kHexahedron64 = 72,
 };
+
+constexpr int CountNodes(CellType cell_type) {
+  int n_nodes;
+  switch (cell_type) {
+    case CellType::kLine2:
+      n_nodes = 2;
+      break;
+    case CellType::kTriangle3:
+      n_nodes = 3;
+      break;
+    case CellType::kQuadrangle4:
+      n_nodes = 4;
+      break;
+    case CellType::kTetrahedron4:
+      n_nodes = 4;
+      break;
+    case CellType::kTetrahedron10:
+      n_nodes = 10;
+      break;
+    case CellType::kWedge6:
+      n_nodes = 6;
+      break;
+    case CellType::kWedge15:
+      n_nodes = 15;
+      break;
+    case CellType::kHexahedron8:
+      n_nodes = 8;
+      break;
+    case CellType::kHexahedron20:
+      n_nodes = 20;
+      break;
+    case CellType::kHexahedron27:
+      n_nodes = 27;
+      break;
+    case CellType::kHexahedron64:
+      n_nodes = 64;
+      break;
+    default:
+      assert(false);
+      break;
+  }
+  return n_nodes;
+}
 
 /**
  * @brief Mimic VTK's cells.
@@ -370,39 +414,6 @@ class Writer {
         break;
     }
     return cell_type;
-  }
-  static int CountNodes(CellType cell_type) {
-    int n_nodes;
-    switch (cell_type) {
-      case CellType::kTetrahedron4:
-        n_nodes = 4;
-        break;
-      case CellType::kTetrahedron10:
-        n_nodes = 10;
-        break;
-      case CellType::kWedge6:
-        n_nodes = 6;
-        break;
-      case CellType::kWedge15:
-        n_nodes = 15;
-        break;
-      case CellType::kHexahedron8:
-        n_nodes = 8;
-        break;
-      case CellType::kHexahedron20:
-        n_nodes = 20;
-        break;
-      case CellType::kHexahedron27:
-        n_nodes = 27;
-        break;
-      case CellType::kHexahedron64:
-        n_nodes = 64;
-        break;
-      default:
-        assert(false);
-        break;
-    }
-    return n_nodes;
   }
 
   /**
