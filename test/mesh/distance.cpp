@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <fstream>
+#include <unordered_map>
 
 #include "mini/algebra/eigen.hpp"
 #include "mini/mesh/vtk.hpp"
@@ -11,14 +12,15 @@
 #include <CGAL/Projection_traits_xy_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 
-template <std::floating_point Real>
+template <std::floating_point Real, typename Delaunay>
 void WriteVtu(std::string const &filename, bool binary,
     int n_point, Real const *x, Real const *y,  Real const *z,
-    int n_cell) {
+    Delaunay const &delaunay) {
   std::string endianness
       = (std::endian::native == std::endian::little)
       ? "\"LittleEndian\"" : "\"BigEndian\"";
   auto format = binary ? "\"binary\"" : "\"ascii\"";
+  int n_cell = delaunay.number_of_faces();
   // Initialize the VTU file:
   auto vtu = std::ofstream(filename,
       std::ios::out | (binary ? (std::ios::binary) : std::ios::out));
@@ -37,10 +39,21 @@ void WriteVtu(std::string const &filename, bool binary,
   vtu << "\n        </DataArray>\n";
   vtu << "      </Points>\n";
   vtu << "      <Cells>\n";
+  // prepare the vertex_handle-to-vertex_index map:
+  auto vertex_map = std::unordered_map<
+      typename Delaunay::Vertex_handle, int>();
+  int i = 0;  // index of vertex
+  for (auto vertex_handle : delaunay.finite_vertex_handles()) {
+    vertex_map[vertex_handle] = i++;
+  }
+  assert(delaunay.number_of_vertices() == i);
   // Write cell connectivities:
   vtu << "        <DataArray type=\"Int32\" Name=\"connectivity\" "
       << "format=" << format << ">\n";
-  for (int i = 0; i < n_cell; ++i) {
+  for (auto face_handle : delaunay.finite_face_handles()) {
+    vtu << vertex_map.at(face_handle->vertex(0)) << ' '
+        << vertex_map.at(face_handle->vertex(1)) << ' '
+        << vertex_map.at(face_handle->vertex(2)) << ' ';
   }
   vtu << "\n        </DataArray>\n";
   // Write cell connectivity offsets:
@@ -56,7 +69,7 @@ void WriteVtu(std::string const &filename, bool binary,
   vtu << "        <DataArray type=\"UInt8\" Name=\"types\" "
       << "format=" << format << ">\n";
   for (int i = 0; i < n_cell; ++i) {
-    vtu << static_cast<int>(mini::mesh::vtk::CellType::kTetrahedron4) << ' ';
+    vtu << static_cast<int>(mini::mesh::vtk::CellType::kTriangle3) << ' ';
   }
   vtu << "\n        </DataArray>\n";
   vtu << "      </Cells>\n";
@@ -84,11 +97,8 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < n_point; i++) {
     delaunay.insert(Point(x[i], y[i], z[i]));
   }
-  std::cout << delaunay.number_of_vertices() << std::endl;
-  std::cout << delaunay.number_of_faces() << std::endl;
-  std::cout << delaunay << std::endl;
 
   // Write the points and triangles.
-  WriteVtu("test.vtu", false, n_point, x.data(), y.data(), z.data(), 0);
+  WriteVtu("test.vtu", false, n_point, x.data(), y.data(), z.data(), delaunay);
   return 0;
 }

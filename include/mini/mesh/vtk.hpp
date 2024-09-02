@@ -125,6 +125,8 @@ void DecodeBase64(std::string const &input, std::size_t n_byte,
  * See [vtkCellType.h](https://vtk.org/doc/nightly/html/vtkCellType_8h.html) for details.
   */
 enum class CellType {
+  kTriangle3 = 5,
+  kQuadrangle4 = 9,
   kTetrahedron4 = 10,
   kHexahedron8 = 12,
   kWedge6 = 13,
