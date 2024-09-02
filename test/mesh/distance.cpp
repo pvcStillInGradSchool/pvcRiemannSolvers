@@ -80,6 +80,51 @@ auto Difference(Real a, Real b) {
   return std::max(a, -b);
 }
 
+template <class Vector, class Distance>
+int RejectPoints(Vector *x, Vector *y, Distance &&distance) {
+  int n = x->size();
+  assert(n == y->size());
+  auto valid = std::vector<int>();
+  for (int i = 0; i < n; i++) {
+    if (distance((*x)[i], (*y)[i]) <= 0) {
+      valid.push_back(i);
+    }
+  }
+  int n_new = valid.size();
+  Vector x_new(n_new), y_new(n_new);
+  for (int i_new = 0; i_new < n_new; i_new++) {
+    int i = valid[i_new];
+    x_new[i_new] = (*x)[i];
+    y_new[i_new] = (*y)[i];
+  }
+  std::swap(x_new, *x);
+  std::swap(y_new, *y);
+  return n_new;
+}
+
+template <class Vector, class Distance>
+int RejectFaces(std::vector<std::array<int, 3>> *faces,
+    Vector const &x, Vector const &y, Distance &&distance,
+    decltype(x[0]) eps) {
+  int n = faces->size();
+  auto valid = std::vector<int>();
+  for (int i = 0; i < n; i++) {
+    auto [a, b, c] = faces->at(i);
+    auto x_center = (x[a] + x[b] + x[c]) / 3.;
+    auto y_center = (y[a] + y[b] + y[c]) / 3.;
+    if (distance(x_center, y_center) + eps <= 0.) {
+      valid.push_back(i);
+    }
+  }
+  int n_new = valid.size();
+  std::vector<std::array<int, 3>> faces_new(n_new);
+  for (int i_new = 0; i_new < n_new; i_new++) {
+    faces_new[i_new] = faces->at(valid[i_new]);
+  }
+  std::swap(faces_new, *faces);
+  return n_new;
+}
+
 template <std::floating_point Real, int kNodes, class Distance>
 void WriteVtu(std::string const &filename, bool binary,
     int n_point, Real const *x, Real const *y,  Real const *z,
@@ -175,6 +220,11 @@ int main(int argc, char *argv[]) {
         Circle(a, b, x_center, y_center, radius));
   };
 
+  // Reject out-of-domain (d > 0) points:
+  n_point = RejectPoints(&x, &y, distance);
+  assert(n_point == x.size());
+  assert(n_point == y.size());
+
   // Triangulate the points.
   using Kernel = CGAL::Simple_cartesian<Real>;
   using Point = Kernel::Point_3;
@@ -187,6 +237,8 @@ int main(int argc, char *argv[]) {
   }
 
   auto faces = GetFaces(delaunay);
+  int n_face = RejectFaces(&faces, x, y, distance, radius * 1.0e-2);
+  assert(n_face <= delaunay.number_of_faces());
   auto edges = GetEdges(faces);
 
   // Write the points and triangles.
