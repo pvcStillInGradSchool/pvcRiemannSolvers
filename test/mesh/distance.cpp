@@ -52,11 +52,40 @@ std::vector<std::array<int, 2>> GetEdges(std::vector<std::array<int, 3>> const &
   return edges;
 }
 
-template <std::floating_point Real, int kNodes>
+/**
+ * @brief The distance function of a rectangle.
+ * 
+ */
+template <std::floating_point Real>
+Real Rectangle(Real x, Real y, Real x_min, Real x_max, Real y_min, Real y_max) {
+  return -std::min(std::min(y - y_min, y_max - y),
+                   std::min(x - x_min, x_max - x));
+}
+
+/**
+ * @brief The distance function of a circle.
+ * 
+ */
+template <std::floating_point Real>
+Real Circle(Real x, Real y, Real x_center, Real y_center, Real radius) {
+  return std::hypot(x - x_center, y - y_center) - radius;
+}
+
+/**
+ * @brief The distance function of \f$ A \setminus B \f$.
+ * 
+ */
+template <std::floating_point Real>
+auto Difference(Real a, Real b) {
+  return std::max(a, -b);
+}
+
+template <std::floating_point Real, int kNodes, class Distance>
 void WriteVtu(std::string const &filename, bool binary,
     int n_point, Real const *x, Real const *y,  Real const *z,
     std::vector<std::array<int, kNodes>> const &cells,
-    mini::mesh::vtk::CellType vtk_cell_type) {
+    mini::mesh::vtk::CellType vtk_cell_type,
+    Distance &&distance) {
   std::string endianness
       = (std::endian::native == std::endian::little)
       ? "\"LittleEndian\"" : "\"BigEndian\"";
@@ -71,6 +100,15 @@ void WriteVtu(std::string const &filename, bool binary,
   vtu << "  <UnstructuredGrid>\n";
   vtu << "    <Piece NumberOfPoints=\"" << n_point
       << "\" NumberOfCells=\"" << n_cell << "\">\n";
+  // Write the value of distance(x, y) as PointData:
+  vtu << "      <PointData>\n";
+  vtu << "        <DataArray type=\"Float64\" Name=\""
+      << "DistanceToBoundary" << "\" format=" << format << ">\n";
+  for (int i = 0; i < n_point; ++i) {
+    vtu << distance(x[i], y[i]) << ' ';
+  }
+  vtu << "\n        </DataArray>\n";
+  vtu << "      </PointData>\n";
   // Write point coordinates:
   vtu << "      <Points>\n";
   vtu << "        <DataArray type=\"Float64\" Name=\"Points\" "
@@ -121,8 +159,21 @@ int main(int argc, char *argv[]) {
   mini::algebra::DynamicVector<Real> x(n_point), y(n_point), z(n_point);
   x.setRandom(); y.setRandom(); z.setZero();
   // Fix corner points:
-  x[0] = x[2] = y[0] = y[1] = -1.;
-  x[1] = x[3] = y[2] = y[3] = +1.;
+  Real x_center = 0.0, y_center = 0.0, radius = 0.5;
+  Real x_min = x_center - 1.0;
+  Real x_max = -x_min;
+  Real y_min = y_center - 1.0;
+  Real y_max = -y_min;
+  x[0] = x[2] = x_min;
+  x[1] = x[3] = x_max;
+  y[0] = y[1] = y_min;
+  y[2] = y[3] = y_max;
+
+  auto distance = [&](Real a, Real b) {
+    return Difference(
+        Rectangle(a, b, x_min, x_max, y_min, y_max),
+        Circle(a, b, x_center, y_center, radius));
+  };
 
   // Triangulate the points.
   using Kernel = CGAL::Simple_cartesian<Real>;
@@ -140,8 +191,8 @@ int main(int argc, char *argv[]) {
 
   // Write the points and triangles.
   WriteVtu<Real, 3>("cells.vtu", false, n_point, x.data(), y.data(), z.data(),
-      faces, mini::mesh::vtk::CellType::kTriangle3);
+      faces, mini::mesh::vtk::CellType::kTriangle3, distance);
   WriteVtu<Real, 2>("edges.vtu", false, n_point, x.data(), y.data(), z.data(),
-      edges, mini::mesh::vtk::CellType::kLine2);
+      edges, mini::mesh::vtk::CellType::kLine2, distance);
   return 0;
 }
