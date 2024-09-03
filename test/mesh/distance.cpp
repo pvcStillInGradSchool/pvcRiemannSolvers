@@ -200,10 +200,16 @@ int main(int argc, char *argv[]) {
   // ./distance <n_point>
   int n_point = std::atoi(argv[1]);
 
+  Real const h_0 = 0.005;
+  Real const eps = 0.005;
+  auto g_eps = h_0 * 0.001;  // for rejecting out-of-domain faces
+  auto d_eps = h_0 * std::sqrt(eps);  // for finite-differencing d(x, y)
+
   // Build random points in \f$ [-1, 1]^2 \times 0 \f$
   mini::algebra::DynamicVector<Real> x(n_point), y(n_point), z(n_point);
   x.setRandom(); y.setRandom(); z.setZero();
   // Fix corner points:
+  int n_fixed = 4;
   Real x_center = 0.0, y_center = 0.0, radius = 0.5;
   Real x_min = x_center - 1.0;
   Real x_max = -x_min;
@@ -218,6 +224,10 @@ int main(int argc, char *argv[]) {
     return Difference(
         Rectangle(a, b, x_min, x_max, y_min, y_max),
         Circle(a, b, x_center, y_center, radius));
+  };
+
+  auto scaling = [&](Real a, Real b) {
+    return 0.05 + 0.3 * Circle(a, b, x_center, y_center, radius);
   };
 
   // Reject out-of-domain (d > 0) points:
@@ -237,9 +247,60 @@ int main(int argc, char *argv[]) {
   }
 
   auto faces = GetFaces(delaunay);
-  int n_face = RejectFaces(&faces, x, y, distance, radius * 1.0e-2);
+  int n_face = RejectFaces(&faces, x, y, distance, g_eps);
   assert(n_face <= delaunay.number_of_faces());
   auto edges = GetEdges(faces);
+  int n_edge = edges.size();
+
+  // Build actual and expect lengths:
+  mini::algebra::DynamicVector<Real> bar_x(n_edge), bar_y(n_edge),
+      center_x(n_edge), center_y(n_edge),
+      actual_l(n_edge), expect_l(n_edge);
+  for (int i = 0; i < n_edge; i++) {
+    auto [u, v] = edges[i];
+    Real x_u = x[u], x_v = x[v];
+    Real y_u = y[u], y_v = y[v];
+    actual_l[i] = std::hypot(bar_x[i] = x_v - x_u, bar_y[i] = y_v - y_u);
+    expect_l[i] = scaling((x_u + x_v) / 2, (y_u + y_v) / 2);
+  }
+  expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
+
+  // Get forces at nodes:
+  mini::algebra::DynamicVector<Real> force_x(n_point), force_y(n_point);
+  for (int i = 0; i < n_edge; i++) {
+    // repulsive force for compressed bars
+    Real force = /* 1.0 * */std::max(0., expect_l[i] - actual_l[i]);
+    auto [u, v] = edges[i];
+    force_x[u] = -(force_x[v] = force * bar_x[i]);
+    force_y[u] = -(force_y[v] = force * bar_y[i]);
+  }
+  // No force at fixed points:
+  for (int i = 0; i < n_fixed; i++) {
+    force_x[i] = force_y[i] = 0.;
+  }
+
+  // Move points:
+  Real delta_t = 0.2;
+  mini::algebra::DynamicVector<Real> shift_x(n_point), shift_y(n_point);
+  for (int i = n_fixed; i < n_point; i++) {
+    x[i] += (shift_x[i] = delta_t * force_x[i]);
+    y[i] += (shift_y[i] = delta_t * force_y[i]);
+  }
+
+  // Project back out-of-domain points:
+  auto out = std::vector<int>();
+  for (int i = n_fixed; i < n_point; i++) {
+    Real d = distance(x[i], y[i]);
+    if (d <= 0) {
+      continue;
+    }
+    // Numerical gradient of d(x, y):
+    Real grad_x = (distance(x[i] + d_eps, y[i]) - d) / d_eps;
+    Real grad_y = (distance(x[i], y[i] + d_eps) - d) / d_eps;
+    x[i] -= grad_x * d;
+    y[i] -= grad_y * d;
+    shift_x[i] = shift_y[i] = 0.;
+  }
 
   // Write the points and triangles.
   WriteVtu<Real, 3>("cells.vtu", false, n_point, x.data(), y.data(), z.data(),
