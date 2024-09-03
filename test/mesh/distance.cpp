@@ -197,6 +197,8 @@ void WriteVtu(std::string const &filename, bool binary,
 
 int main(int argc, char *argv[]) {
   using Real = double;
+  using Column = mini::algebra::DynamicVector<Real>;
+
   // ./distance <n_point> <n_frame> <n_step_per_frame>
   int n_point = std::atoi(argv[1]);
   int n_frame = std::atoi(argv[2]);  // maximum writing step
@@ -209,7 +211,7 @@ int main(int argc, char *argv[]) {
   auto d_eps = h_0 * std::sqrt(eps);  // for finite-differencing d(x, y)
 
   // Build random points in \f$ [-1, 1]^2 \times 0 \f$
-  mini::algebra::DynamicVector<Real> x(n_point), y(n_point), z(n_point);
+  Column x(n_point), y(n_point), z(n_point);
   x.setRandom(); y.setRandom(); z.setZero();
   // Fix corner points:
   int n_fixed = 4;
@@ -246,7 +248,6 @@ int main(int argc, char *argv[]) {
   using GeoTraits = CGAL::Projection_traits_xy_3<Kernel>;
   using Delaunay = CGAL::Delaunay_triangulation_2<GeoTraits>;
 
-  Real const delaunay_tol = 1.e-2;  // re-triangluate if max_shift_square > this value
   Real const max_shift_tol = 1.e-6;  // terminate if max_shift_square < this value
   Real max_shift_square = 1.e100;
 
@@ -266,8 +267,30 @@ int main(int argc, char *argv[]) {
     n_edge = edges.size();
   };
 
+  Real delaunay_tol = 1.e-1;  // re-triangluate if it is < max_shift
+  Column x_old = x;
+  Column y_old = y;
+  // Eigen does not support `Vector += double` ?
+  // x_old += delaunay_tol;
+  // y_old += delaunay_tol;
+  for (int i = 0; i < n_point; ++i) {
+    x_old[i] += delaunay_tol * 2;
+  }
+
+  auto HasLargeShift = [](Real delaunay_tol,
+      Column const &x_old, Column const &x,
+      Column const &y_old, Column const &y) {
+    Column norms = (
+        (x_old - x).array().square() +
+        (y_old - y).array().square()).sqrt();
+    return norms.maxCoeff() > delaunay_tol;
+  };
+
+  // The main loop:
   for (int i_step = 0; i_step <= n_step; i_step++) {
-    if (max_shift_square > delaunay_tol) {
+    if (HasLargeShift(delaunay_tol, x_old, x, y_old, y)) {
+      x_old = x;
+      y_old = y;
       Triangulate();
     }
 
@@ -283,7 +306,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Build actual and expect lengths:
-    mini::algebra::DynamicVector<Real> bar_x(n_edge), bar_y(n_edge),
+    Column bar_x(n_edge), bar_y(n_edge),
         center_x(n_edge), center_y(n_edge),
         actual_l(n_edge), expect_l(n_edge);
     for (int i = 0; i < n_edge; i++) {
@@ -298,7 +321,7 @@ int main(int argc, char *argv[]) {
     expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
 
     // Get forces at nodes:
-    mini::algebra::DynamicVector<Real> force_x(n_point), force_y(n_point);
+    Column force_x(n_point), force_y(n_point);
     force_x.setZero(); force_y.setZero();
     for (int i = 0; i < n_edge; i++) {
       // repulsive force for compressed bars
@@ -315,8 +338,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Move points:
-    Real delta_t = 0.1;
-    mini::algebra::DynamicVector<Real> shift_x(n_point), shift_y(n_point);
+    Real delta_t = 0.2;
+    Column shift_x(n_point), shift_y(n_point);
     for (int i = n_fixed; i < n_point; i++) {
       x[i] += (shift_x[i] = delta_t * force_x[i]);
       y[i] += (shift_y[i] = delta_t * force_y[i]);
