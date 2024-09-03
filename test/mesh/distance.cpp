@@ -197,11 +197,14 @@ void WriteVtu(std::string const &filename, bool binary,
 
 int main(int argc, char *argv[]) {
   using Real = double;
-  // ./distance <n_point>
+  // ./distance <n_point> <n_frame> <n_step_per_frame>
   int n_point = std::atoi(argv[1]);
+  int n_frame = std::atoi(argv[2]);  // maximum writing step
+  int n_step_per_frame = std::atoi(argv[3]);
+  int n_step = n_step_per_frame * n_frame;  // maximum iteration step
 
   Real const h_0 = 0.005;
-  Real const eps = 0.005;
+  Real const eps = 1e-16;
   auto g_eps = h_0 * 0.001;  // for rejecting out-of-domain faces
   auto d_eps = h_0 * std::sqrt(eps);  // for finite-differencing d(x, y)
 
@@ -221,12 +224,14 @@ int main(int argc, char *argv[]) {
   y[2] = y[3] = y_max;
 
   auto distance = [&](Real a, Real b) {
+    // return Rectangle(a, b, x_min, x_max, y_min, y_max);
     return Difference(
         Rectangle(a, b, x_min, x_max, y_min, y_max),
         Circle(a, b, x_center, y_center, radius));
   };
 
   auto scaling = [&](Real a, Real b) {
+    // return 1.0;
     return 0.05 + 0.3 * Circle(a, b, x_center, y_center, radius);
   };
 
@@ -241,71 +246,117 @@ int main(int argc, char *argv[]) {
   using GeoTraits = CGAL::Projection_traits_xy_3<Kernel>;
   using Delaunay = CGAL::Delaunay_triangulation_2<GeoTraits>;
 
-  auto delaunay = Delaunay();
-  for (int i = 0; i < n_point; i++) {
-    delaunay.insert(Point(x[i], y[i], z[i]));
-  }
+  Real const delaunay_tol = 1.e-2;  // re-triangluate if max_shift_square > this value
+  Real const max_shift_tol = 1.e-6;  // terminate if max_shift_square < this value
+  Real max_shift_square = 1.e100;
 
-  auto faces = GetFaces(delaunay);
-  int n_face = RejectFaces(&faces, x, y, distance, g_eps);
-  assert(n_face <= delaunay.number_of_faces());
-  auto edges = GetEdges(faces);
-  int n_edge = edges.size();
+  std::vector<std::array<int, 3>> faces; int n_face;
+  std::vector<std::array<int, 2>> edges; int n_edge;
 
-  // Build actual and expect lengths:
-  mini::algebra::DynamicVector<Real> bar_x(n_edge), bar_y(n_edge),
-      center_x(n_edge), center_y(n_edge),
-      actual_l(n_edge), expect_l(n_edge);
-  for (int i = 0; i < n_edge; i++) {
-    auto [u, v] = edges[i];
-    Real x_u = x[u], x_v = x[v];
-    Real y_u = y[u], y_v = y[v];
-    actual_l[i] = std::hypot(bar_x[i] = x_v - x_u, bar_y[i] = y_v - y_u);
-    expect_l[i] = scaling((x_u + x_v) / 2, (y_u + y_v) / 2);
-  }
-  expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
-
-  // Get forces at nodes:
-  mini::algebra::DynamicVector<Real> force_x(n_point), force_y(n_point);
-  for (int i = 0; i < n_edge; i++) {
-    // repulsive force for compressed bars
-    Real force = /* 1.0 * */std::max(0., expect_l[i] - actual_l[i]);
-    auto [u, v] = edges[i];
-    force_x[u] = -(force_x[v] = force * bar_x[i]);
-    force_y[u] = -(force_y[v] = force * bar_y[i]);
-  }
-  // No force at fixed points:
-  for (int i = 0; i < n_fixed; i++) {
-    force_x[i] = force_y[i] = 0.;
-  }
-
-  // Move points:
-  Real delta_t = 0.2;
-  mini::algebra::DynamicVector<Real> shift_x(n_point), shift_y(n_point);
-  for (int i = n_fixed; i < n_point; i++) {
-    x[i] += (shift_x[i] = delta_t * force_x[i]);
-    y[i] += (shift_y[i] = delta_t * force_y[i]);
-  }
-
-  // Project back out-of-domain points:
-  auto out = std::vector<int>();
-  for (int i = n_fixed; i < n_point; i++) {
-    Real d = distance(x[i], y[i]);
-    if (d <= 0) {
-      continue;
+  auto Triangulate = [&faces, &edges, &x, &y, &z, n_point, &n_face, &n_edge, &distance, g_eps]() {
+    std::cout << "Re-triangulate.\n";
+    auto delaunay = Delaunay();
+    for (int i = 0; i < n_point; i++) {
+      delaunay.insert(Point(x[i], y[i], z[i]));
     }
-    // Numerical gradient of d(x, y):
-    Real grad_x = (distance(x[i] + d_eps, y[i]) - d) / d_eps;
-    Real grad_y = (distance(x[i], y[i] + d_eps) - d) / d_eps;
-    x[i] -= grad_x * d;
-    y[i] -= grad_y * d;
-    shift_x[i] = shift_y[i] = 0.;
-  }
+    faces = GetFaces(delaunay);
+    n_face = RejectFaces(&faces, x, y, distance, g_eps);
+    assert(n_face <= delaunay.number_of_faces());
+    edges = GetEdges(faces);
+    n_edge = edges.size();
+  };
 
-  // Write the points and triangles.
-  WriteVtu<Real, 3>("cells.vtu", false, n_point, x.data(), y.data(), z.data(),
-      faces, mini::mesh::vtk::CellType::kTriangle3, distance);
-  WriteVtu<Real, 2>("edges.vtu", false, n_point, x.data(), y.data(), z.data(),
-      edges, mini::mesh::vtk::CellType::kLine2, distance);
+  for (int i_step = 0; i_step <= n_step; i_step++) {
+    if (max_shift_square > delaunay_tol) {
+      Triangulate();
+    }
+
+    // Write the points and triangles.
+    if (i_step % n_step_per_frame == 0) {
+      auto vtu_name = std::string("Frame");
+      vtu_name += std::to_string(i_step / n_step_per_frame);
+      vtu_name += ".vtu";
+      WriteVtu<Real, 3>(vtu_name, false, n_point, x.data(), y.data(), z.data(),
+          faces, mini::mesh::vtk::CellType::kTriangle3, distance);
+      
+      std::cout << "Step " << i_step << " written\n";
+    }
+
+    // Build actual and expect lengths:
+    mini::algebra::DynamicVector<Real> bar_x(n_edge), bar_y(n_edge),
+        center_x(n_edge), center_y(n_edge),
+        actual_l(n_edge), expect_l(n_edge);
+    for (int i = 0; i < n_edge; i++) {
+      auto [u, v] = edges[i];
+      Real x_u = x[u], x_v = x[v];
+      Real y_u = y[u], y_v = y[v];
+      actual_l[i] = std::hypot(bar_x[i] = x_v - x_u, bar_y[i] = y_v - y_u);
+      expect_l[i] = scaling((x_u + x_v) / 2, (y_u + y_v) / 2);
+      assert(actual_l[i] >= 0);
+      assert(expect_l[i] >= 0);
+    }
+    expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
+
+    // Get forces at nodes:
+    mini::algebra::DynamicVector<Real> force_x(n_point), force_y(n_point);
+    force_x.setZero(); force_y.setZero();
+    for (int i = 0; i < n_edge; i++) {
+      // repulsive force for compressed bars
+      Real force = /* 1.0 * */std::max(0., expect_l[i] - actual_l[i]);
+      auto [u, v] = edges[i];
+      force_x[u] -= force * bar_x[i];
+      force_x[v] += force * bar_x[i];
+      force_y[u] -= force * bar_y[i];
+      force_y[v] += force * bar_y[i];
+    }
+    // No force at fixed points:
+    for (int i = 0; i < n_fixed; i++) {
+      force_x[i] = force_y[i] = 0.;
+    }
+
+    // Move points:
+    Real delta_t = 0.1;
+    mini::algebra::DynamicVector<Real> shift_x(n_point), shift_y(n_point);
+    for (int i = n_fixed; i < n_point; i++) {
+      x[i] += (shift_x[i] = delta_t * force_x[i]);
+      y[i] += (shift_y[i] = delta_t * force_y[i]);
+    }
+
+    // Project back out-of-domain points:
+    auto out = std::vector<int>();
+    for (int i = n_fixed; i < n_point; i++) {
+      Real d = distance(x[i], y[i]);
+      if (d <= 0) {
+        continue;
+      }
+      // Numerical gradient of d(x, y):
+      Real grad_x = (distance(x[i] + d_eps, y[i]) - d) / d_eps;
+      Real grad_y = (distance(x[i], y[i] + d_eps) - d) / d_eps;
+      auto fix_x = grad_x * d;
+      auto fix_y = grad_y * d;
+      x[i] -= fix_x;
+      y[i] -= fix_y;
+      shift_x[i] -= fix_x;
+      shift_y[i] -= fix_y;
+    }
+
+    // Update the maximum shift:
+    max_shift_square = 0.;
+    for (int i = n_fixed; i < n_point; i++) {
+      if (distance(x[i], y[i]) > -g_eps) {
+        continue;
+      }
+      max_shift_square = std::max(max_shift_square,
+          shift_x[i] * shift_x[i] + shift_y[i] * shift_y[i]);
+    }
+    max_shift_square /= h_0 * h_0;
+
+    std::cout << "Step " << i_step << ", max_shift = " << std::sqrt(max_shift_square) << "\n";
+
+    if (max_shift_square < max_shift_tol) {
+      std::cout << "Converged.\n";
+      // break;
+    }
+  }
   return 0;
 }
