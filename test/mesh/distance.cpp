@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
   std::vector<std::array<int, 3>> faces; int n_face;
   std::vector<std::array<int, 2>> edges; int n_edge;
 
-  auto Triangulate = [&faces, &edges, &x, &y, &z, n_point, &n_face, &n_edge, &distance, g_eps]() {
+  auto Triangulate = [&faces, &edges, &x, &y, &z, &n_point, &n_face, &n_edge, &distance, g_eps]() {
     std::cout << "Re-triangulate.\n";
     auto delaunay = Delaunay();
     for (int i = 0; i < n_point; i++) {
@@ -286,9 +286,35 @@ int main(int argc, char *argv[]) {
     return norms.maxCoeff() > delaunay_tol;
   };
 
+  int too_close_freq = 25;
+  auto too_close = std::unordered_set<int>();
+
+  auto RemoveTooClosePoints = [&too_close, &x, &y](int n)
+      -> int {
+    if (too_close.empty()) {
+      return n;
+    }
+    int n_new = n - too_close.size();
+    Column x_new(n_new), y_new(n_new);
+    int i_new = 0;
+    for (int i = 0; i < n; i++) {
+      if (too_close.find(i) == too_close.end()) {
+        x_new[i_new] = x[i];
+        y_new[i_new] = y[i];
+        i_new++;
+      }
+    }
+    x = x_new;
+    y = y_new;
+    return n_new;
+  };
+
   // The main loop:
   for (int i_step = 0; i_step <= n_step; i_step++) {
-    if (HasLargeShift(delaunay_tol, x_old, x, y_old, y)) {
+    n_point = RemoveTooClosePoints(n_point);
+    if (too_close.size() || HasLargeShift(delaunay_tol, x_old, x, y_old, y)
+        || i_step % n_step_per_frame == 0) {
+      too_close.clear();
       x_old = x;
       y_old = y;
       Triangulate();
@@ -319,6 +345,23 @@ int main(int argc, char *argv[]) {
       assert(expect_l[i] >= 0);
     }
     expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
+
+    // Label too-close points:
+    if ((i_step + 1) % too_close_freq == 0) {
+      assert(too_close.empty());
+      for (int i = 0; i < n_edge; ++i) {
+        if (expect_l[i] > 2 * actual_l[i]) {
+          auto [u, v] = edges[i];
+          // if (u >= n_fixed) {
+          //   too_close.emplace(u);
+          // }
+          // if (v >= n_fixed) {
+          //   too_close.emplace(v);
+          // }
+        }
+      }
+      std::cout << too_close.size() << " points should be removed.\n";
+    }
 
     // Get forces at nodes:
     Column force_x(n_point), force_y(n_point);
