@@ -2,6 +2,7 @@
 #ifndef MINI_MESH_VTK_HPP_
 #define MINI_MESH_VTK_HPP_
 
+#include <cassert>
 #include <bit>
 #include <fstream>
 #include <functional>

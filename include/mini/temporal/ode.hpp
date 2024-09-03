@@ -2,6 +2,8 @@
 #ifndef MINI_TEMPORAL_ODE_HPP_
 #define MINI_TEMPORAL_ODE_HPP_
 
+#include <cassert>
+
 #include "mini/algebra/eigen.hpp"
 
 namespace mini {
