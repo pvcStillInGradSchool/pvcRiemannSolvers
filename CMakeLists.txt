@@ -133,6 +133,8 @@ configure_file(
 )
 include_directories("${PROJECT_BINARY_DIR}/include")
 
+find_package(CUDA REQUIRED)
+
 option(${PROJECT_NAME}_BUILD_TESTS "Build tests for this project." "ON")
 if (${PROJECT_NAME}_BUILD_TESTS)
   include(CTest)

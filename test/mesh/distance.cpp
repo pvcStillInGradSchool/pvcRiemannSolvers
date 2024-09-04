@@ -13,6 +13,8 @@
 #include <CGAL/Projection_traits_xy_3.h>
 #include <CGAL/Delaunay_triangulation_2.h>
 
+#include <cuda_runtime_api.h>
+
 template <typename Delaunay>
 std::vector<std::array<int, 3>> GetFaces(Delaunay const &delaunay) {
   // prepare the vertex_handle-to-vertex_index map:
@@ -210,6 +212,12 @@ int main(int argc, char *argv[]) {
   auto g_eps = h_0 * 0.001;  // for rejecting out-of-domain faces
   auto d_eps = h_0 * std::sqrt(eps);  // for finite-differencing d(x, y)
 
+  float elapsed_time = 0.0;
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop); 
+
+  cudaEventRecord(start);  // timing the initialization
   // Build random points in \f$ [-1, 1]^2 \times 0 \f$
   Column x(n_point), y(n_point), z(n_point);
   x.setRandom(); y.setRandom(); z.setZero();
@@ -309,6 +317,12 @@ int main(int argc, char *argv[]) {
     return n_new;
   };
 
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+  cudaEventElapsedTime(&elapsed_time, start, stop);
+  printf("Initialization costs %.2f ms\n", elapsed_time);
+
+  cudaEventRecord(start);  // timing the main loop
   // The main loop:
   for (int i_step = 0; i_step <= n_step; i_step++) {
     n_point = RemoveTooClosePoints(n_point);
@@ -424,5 +438,10 @@ int main(int argc, char *argv[]) {
       // break;
     }
   }
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+  cudaEventElapsedTime(&elapsed_time, start, stop);
+  printf("The main loop costs %.2f ms\n", elapsed_time);
+
   return 0;
 }
