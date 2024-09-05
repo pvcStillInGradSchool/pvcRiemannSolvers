@@ -224,8 +224,6 @@ class HostMemory {
  public:
   Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
 
-  HostMemory() = default;
-
   void Malloc(int n_edge) {
     x_u = new Real[n_edge];
     x_v = new Real[n_edge];
@@ -242,7 +240,42 @@ class HostMemory {
 };
 
 template <std::floating_point Real>
-void HostGetLengths(int i, HostMemory<Real> &host_memory,
+class HostMemoryPinned : public HostMemory<Real> {
+ public:
+  Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
+
+  void Malloc(int n_edge) {
+    cudaHostAlloc((void **)&x_u, n_edge * sizeof(Real), cudaHostAllocDefault);
+    cudaHostAlloc((void **)&x_v, n_edge * sizeof(Real), cudaHostAllocDefault);
+    cudaHostAlloc((void **)&y_u, n_edge * sizeof(Real), cudaHostAllocDefault);
+    cudaHostAlloc((void **)&y_v, n_edge * sizeof(Real), cudaHostAllocDefault);
+  }
+
+  void Free() {
+    cudaFreeHost(x_u);
+    cudaFreeHost(x_v);
+    cudaFreeHost(y_u);
+    cudaFreeHost(y_v);
+  }
+};
+
+template <std::floating_point Real>
+void HostGetLengths(int i, HostMemory<Real> const &host_memory,
+    Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
+  Real x_u = host_memory.x_u[i];
+  Real x_v = host_memory.x_v[i];
+  Real y_u = host_memory.y_u[i];
+  Real y_v = host_memory.y_v[i];
+  actual_l[i] = std::hypot(bar_x[i] = x_v - x_u,
+                           bar_y[i] = y_v - y_u);
+  expect_l[i] = scaling((x_u + x_v) / 2,
+                        (y_u + y_v) / 2);
+  assert(actual_l[i] >= 0);
+  assert(expect_l[i] >= 0);
+}
+
+template <std::floating_point Real>
+void HostGetLengths(int i, HostMemoryPinned<Real> const &host_memory,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   Real x_u = host_memory.x_u[i];
   Real x_v = host_memory.x_v[i];
@@ -293,6 +326,10 @@ int main(int argc, char *argv[]) {
   assert(n_point == x.size());
   assert(n_point == y.size());
 
+  // Pre-allocate memory:
+  auto host_memory = HostMemoryPinned<Real>();
+  host_memory.Malloc(n_point * 4);
+
   // Triangulate the points.
   using Kernel = CGAL::Simple_cartesian<Real>;
   using Point = Kernel::Point_3;
@@ -305,7 +342,7 @@ int main(int argc, char *argv[]) {
   std::vector<std::array<int, 3>> faces; int n_face;
   std::vector<std::array<int, 2>> edges; int n_edge;
 
-  auto Triangulate = [&faces, &edges, &x, &y, &z, &n_point, &n_face, &n_edge, g_eps]() {
+  auto Triangulate = [&faces, &edges, &x, &y, &z, n_point, &n_face, &n_edge, g_eps]() {
     std::cout << "Re-triangulate.\n";
     auto delaunay = Delaunay();
     for (int i = 0; i < n_point; i++) {
@@ -316,6 +353,7 @@ int main(int argc, char *argv[]) {
     assert(n_face <= delaunay.number_of_faces());
     edges = GetEdges(faces);
     n_edge = edges.size();
+    assert(n_edge <= n_point * 4);
   };
 
   Real delaunay_tol = 1.e-1;  // re-triangluate if it is < max_shift
@@ -389,8 +427,6 @@ int main(int argc, char *argv[]) {
     }
 
     // Collect point data:
-    auto host_memory = HostMemory<Real>();
-    host_memory.Malloc(n_edge);
     for (int i = 0; i < n_edge; i++) {
       auto [u, v] = edges[i];
       host_memory.x_u[i] = x[u];
@@ -408,7 +444,6 @@ int main(int argc, char *argv[]) {
           bar_x.data(), bar_y.data(), actual_l.data(), expect_l.data());
     }
     expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
-    host_memory.Free();
 
     // Label too-close points:
     if ((i_step + 1) % too_close_freq == 0) {
@@ -481,13 +516,16 @@ int main(int argc, char *argv[]) {
     }
     max_shift_square /= h_0 * h_0;
 
-    std::cout << "Step " << i_step << ", max_shift = " << std::sqrt(max_shift_square) << "\n";
+    std::cout << "Step " << i_step << ", n_edge = " << n_edge << ", max_shift = " << std::sqrt(max_shift_square) << "\n";
 
     if (max_shift_square < max_shift_tol) {
       std::cout << "Converged.\n";
       // break;
     }
-  }
+  }  // main loop
+
+  host_memory.Free();
+
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&elapsed_time, start, stop);
