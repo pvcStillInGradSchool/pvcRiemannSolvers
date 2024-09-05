@@ -82,6 +82,25 @@ auto Difference(Real a, Real b) {
   return std::max(a, -b);
 }
 
+int n_fixed = 4;
+double x_center = 0.0, y_center = 0.0, radius = 0.5;
+double x_min = x_center - 1.0;
+double x_max = -x_min;
+double y_min = y_center - 1.0;
+double y_max = -y_min;
+
+template <std::floating_point Real>
+Real distance(Real a, Real b) {
+  return Difference(
+      Rectangle(a, b, x_min, x_max, y_min, y_max),
+      Circle(a, b, x_center, y_center, radius));
+}
+
+template <std::floating_point Real>
+Real scaling(Real a, Real b) {
+  return 0.05 + 0.3 * Circle(a, b, x_center, y_center, radius);
+};
+
 template <class Vector, class Distance>
 int RejectPoints(Vector *x, Vector *y, Distance &&distance) {
   int n = x->size();
@@ -197,9 +216,51 @@ void WriteVtu(std::string const &filename, bool binary,
   vtu << "</VTKFile>\n";
 }
 
+template <std::floating_point Real>
+using HostDynamicVector = mini::algebra::DynamicVector<Real>;
+
+template <std::floating_point Real>
+class HostMemory {
+ public:
+  Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
+
+  HostMemory() = default;
+
+  void Malloc(int n_edge) {
+    x_u = new Real[n_edge];
+    x_v = new Real[n_edge];
+    y_u = new Real[n_edge];
+    y_v = new Real[n_edge];
+  }
+
+  void Free() {
+    delete[] x_u;
+    delete[] x_v;
+    delete[] y_u;
+    delete[] y_v;
+  }
+};
+
+template <std::floating_point Real>
+void HostGetLengths(int i, HostMemory<Real> &host_memory,
+    Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
+  Real x_u = host_memory.x_u[i];
+  Real x_v = host_memory.x_v[i];
+  Real y_u = host_memory.y_u[i];
+  Real y_v = host_memory.y_v[i];
+  actual_l[i] = std::hypot(bar_x[i] = x_v - x_u,
+                           bar_y[i] = y_v - y_u);
+  expect_l[i] = scaling((x_u + x_v) / 2,
+                        (y_u + y_v) / 2);
+  assert(actual_l[i] >= 0);
+  assert(expect_l[i] >= 0);
+}
+
 int main(int argc, char *argv[]) {
+  std::srand(31415926);
+
   using Real = double;
-  using Column = mini::algebra::DynamicVector<Real>;
+  using Column = HostDynamicVector<Real>;
 
   // ./distance <n_point> <n_frame> <n_step_per_frame>
   int n_point = std::atoi(argv[1]);
@@ -222,31 +283,13 @@ int main(int argc, char *argv[]) {
   Column x(n_point), y(n_point), z(n_point);
   x.setRandom(); y.setRandom(); z.setZero();
   // Fix corner points:
-  int n_fixed = 4;
-  Real x_center = 0.0, y_center = 0.0, radius = 0.5;
-  Real x_min = x_center - 1.0;
-  Real x_max = -x_min;
-  Real y_min = y_center - 1.0;
-  Real y_max = -y_min;
   x[0] = x[2] = x_min;
   x[1] = x[3] = x_max;
   y[0] = y[1] = y_min;
   y[2] = y[3] = y_max;
 
-  auto distance = [&](Real a, Real b) {
-    // return Rectangle(a, b, x_min, x_max, y_min, y_max);
-    return Difference(
-        Rectangle(a, b, x_min, x_max, y_min, y_max),
-        Circle(a, b, x_center, y_center, radius));
-  };
-
-  auto scaling = [&](Real a, Real b) {
-    // return 1.0;
-    return 0.05 + 0.3 * Circle(a, b, x_center, y_center, radius);
-  };
-
   // Reject out-of-domain (d > 0) points:
-  n_point = RejectPoints(&x, &y, distance);
+  n_point = RejectPoints(&x, &y, distance<Real>);
   assert(n_point == x.size());
   assert(n_point == y.size());
 
@@ -262,14 +305,14 @@ int main(int argc, char *argv[]) {
   std::vector<std::array<int, 3>> faces; int n_face;
   std::vector<std::array<int, 2>> edges; int n_edge;
 
-  auto Triangulate = [&faces, &edges, &x, &y, &z, &n_point, &n_face, &n_edge, &distance, g_eps]() {
+  auto Triangulate = [&faces, &edges, &x, &y, &z, &n_point, &n_face, &n_edge, g_eps]() {
     std::cout << "Re-triangulate.\n";
     auto delaunay = Delaunay();
     for (int i = 0; i < n_point; i++) {
       delaunay.insert(Point(x[i], y[i], z[i]));
     }
     faces = GetFaces(delaunay);
-    n_face = RejectFaces(&faces, x, y, distance, g_eps);
+    n_face = RejectFaces(&faces, x, y, distance<Real>, g_eps);
     assert(n_face <= delaunay.number_of_faces());
     edges = GetEdges(faces);
     n_edge = edges.size();
@@ -340,9 +383,20 @@ int main(int argc, char *argv[]) {
       vtu_name += std::to_string(i_step / n_step_per_frame);
       vtu_name += ".vtu";
       WriteVtu<Real, 3>(vtu_name, false, n_point, x.data(), y.data(), z.data(),
-          faces, mini::mesh::vtk::CellType::kTriangle3, distance);
+          faces, mini::mesh::vtk::CellType::kTriangle3, distance<Real>);
       
       std::cout << "Step " << i_step << " written\n";
+    }
+
+    // Collect point data:
+    auto host_memory = HostMemory<Real>();
+    host_memory.Malloc(n_edge);
+    for (int i = 0; i < n_edge; i++) {
+      auto [u, v] = edges[i];
+      host_memory.x_u[i] = x[u];
+      host_memory.x_v[i] = x[v];
+      host_memory.y_u[i] = y[u];
+      host_memory.y_v[i] = y[v];
     }
 
     // Build actual and expect lengths:
@@ -350,15 +404,11 @@ int main(int argc, char *argv[]) {
         center_x(n_edge), center_y(n_edge),
         actual_l(n_edge), expect_l(n_edge);
     for (int i = 0; i < n_edge; i++) {
-      auto [u, v] = edges[i];
-      Real x_u = x[u], x_v = x[v];
-      Real y_u = y[u], y_v = y[v];
-      actual_l[i] = std::hypot(bar_x[i] = x_v - x_u, bar_y[i] = y_v - y_u);
-      expect_l[i] = scaling((x_u + x_v) / 2, (y_u + y_v) / 2);
-      assert(actual_l[i] >= 0);
-      assert(expect_l[i] >= 0);
+      HostGetLengths(i, host_memory,
+          bar_x.data(), bar_y.data(), actual_l.data(), expect_l.data());
     }
     expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
+    host_memory.Free();
 
     // Label too-close points:
     if ((i_step + 1) % too_close_freq == 0) {
