@@ -1,7 +1,9 @@
 // Copyright 2024 PEI Weicheng
 
+#include <algorithm>
 #include <concepts>
 #include <fstream>
+#include <numeric>
 #include <unordered_map>
 #include <vector>
 
@@ -223,12 +225,17 @@ template <std::floating_point Real>
 class HostMemory {
  public:
   Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
+  Real *bar_x{nullptr}, *bar_y{nullptr}, *actual_l{nullptr}, *expect_l{nullptr};
 
   void Malloc(int n_edge) {
     x_u = new Real[n_edge];
     x_v = new Real[n_edge];
     y_u = new Real[n_edge];
     y_v = new Real[n_edge];
+    bar_x = new Real[n_edge];
+    bar_y = new Real[n_edge];
+    actual_l = new Real[n_edge];
+    expect_l = new Real[n_edge];
   }
 
   void Free() {
@@ -236,6 +243,10 @@ class HostMemory {
     delete[] x_v;
     delete[] y_u;
     delete[] y_v;
+    delete[] bar_x;
+    delete[] bar_y;
+    delete[] actual_l;
+    delete[] expect_l;
   }
 };
 
@@ -243,12 +254,17 @@ template <std::floating_point Real>
 class HostMemoryPinned : public HostMemory<Real> {
  public:
   Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
+  Real *bar_x{nullptr}, *bar_y{nullptr}, *actual_l{nullptr}, *expect_l{nullptr};
 
   void Malloc(int n_edge) {
     cudaHostAlloc((void **)&x_u, n_edge * sizeof(Real), cudaHostAllocDefault);
     cudaHostAlloc((void **)&x_v, n_edge * sizeof(Real), cudaHostAllocDefault);
     cudaHostAlloc((void **)&y_u, n_edge * sizeof(Real), cudaHostAllocDefault);
     cudaHostAlloc((void **)&y_v, n_edge * sizeof(Real), cudaHostAllocDefault);
+    cudaHostAlloc((void **)&bar_x, n_edge * sizeof(Real), cudaHostAllocDefault);
+    cudaHostAlloc((void **)&bar_y, n_edge * sizeof(Real), cudaHostAllocDefault);
+    cudaHostAlloc((void **)&actual_l, n_edge * sizeof(Real), cudaHostAllocDefault);
+    cudaHostAlloc((void **)&expect_l, n_edge * sizeof(Real), cudaHostAllocDefault);
   }
 
   void Free() {
@@ -256,6 +272,10 @@ class HostMemoryPinned : public HostMemory<Real> {
     cudaFreeHost(x_v);
     cudaFreeHost(y_u);
     cudaFreeHost(y_v);
+    cudaFreeHost(bar_x);
+    cudaFreeHost(bar_y);
+    cudaFreeHost(actual_l);
+    cudaFreeHost(expect_l);
   }
 };
 
@@ -329,6 +349,10 @@ int main(int argc, char *argv[]) {
   // Pre-allocate memory:
   auto host_memory = HostMemoryPinned<Real>();
   host_memory.Malloc(n_point * 4);
+  Real *bar_x = host_memory.bar_x;
+  Real *bar_y = host_memory.bar_y;
+  Real *actual_l = host_memory.actual_l;
+  Real *expect_l = host_memory.expect_l;
 
   // Triangulate the points.
   using Kernel = CGAL::Simple_cartesian<Real>;
@@ -436,14 +460,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Build actual and expect lengths:
-    Column bar_x(n_edge), bar_y(n_edge),
-        center_x(n_edge), center_y(n_edge),
-        actual_l(n_edge), expect_l(n_edge);
     for (int i = 0; i < n_edge; i++) {
-      HostGetLengths(i, host_memory,
-          bar_x.data(), bar_y.data(), actual_l.data(), expect_l.data());
+      HostGetLengths(i, host_memory, bar_x, bar_y, actual_l, expect_l);
     }
-    expect_l *= 1.2 * std::sqrt(actual_l.squaredNorm() / expect_l.squaredNorm());
+    Real norm_ratio = 1.2 * std::sqrt(
+        std::inner_product(actual_l, actual_l + n_edge, actual_l, 0.) /
+        std::inner_product(expect_l, expect_l + n_edge, expect_l, 0.));
+    std::for_each_n(expect_l, n_edge,
+        [norm_ratio](Real &x) { x *= norm_ratio; });
 
     // Label too-close points:
     if ((i_step + 1) % too_close_freq == 0) {
