@@ -16,6 +16,8 @@
 #include <CGAL/Delaunay_triangulation_2.h>
 
 #include <cuda_runtime_api.h>
+#include <device_launch_parameters.h>
+#define NSTREAMS 4
 
 template <typename Delaunay>
 std::vector<std::array<int, 3>> GetFaces(Delaunay const &delaunay) {
@@ -251,20 +253,21 @@ class HostMemory {
 };
 
 template <std::floating_point Real>
-class HostMemoryPinned : public HostMemory<Real> {
+class HostMemoryPinned {
  public:
   Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
   Real *bar_x{nullptr}, *bar_y{nullptr}, *actual_l{nullptr}, *expect_l{nullptr};
 
   void Malloc(int n_edge) {
-    cudaHostAlloc((void **)&x_u, n_edge * sizeof(Real), cudaHostAllocDefault);
-    cudaHostAlloc((void **)&x_v, n_edge * sizeof(Real), cudaHostAllocDefault);
-    cudaHostAlloc((void **)&y_u, n_edge * sizeof(Real), cudaHostAllocDefault);
-    cudaHostAlloc((void **)&y_v, n_edge * sizeof(Real), cudaHostAllocDefault);
-    cudaHostAlloc((void **)&bar_x, n_edge * sizeof(Real), cudaHostAllocDefault);
-    cudaHostAlloc((void **)&bar_y, n_edge * sizeof(Real), cudaHostAllocDefault);
-    cudaHostAlloc((void **)&actual_l, n_edge * sizeof(Real), cudaHostAllocDefault);
-    cudaHostAlloc((void **)&expect_l, n_edge * sizeof(Real), cudaHostAllocDefault);
+    auto n_byte = n_edge * sizeof(Real);
+    cudaHostAlloc((void **)&x_u, n_byte, cudaHostAllocDefault);
+    cudaHostAlloc((void **)&x_v, n_byte, cudaHostAllocDefault);
+    cudaHostAlloc((void **)&y_u, n_byte, cudaHostAllocDefault);
+    cudaHostAlloc((void **)&y_v, n_byte, cudaHostAllocDefault);
+    cudaHostAlloc((void **)&bar_x, n_byte, cudaHostAllocDefault);
+    cudaHostAlloc((void **)&bar_y, n_byte, cudaHostAllocDefault);
+    cudaHostAlloc((void **)&actual_l, n_byte, cudaHostAllocDefault);
+    cudaHostAlloc((void **)&expect_l, n_byte, cudaHostAllocDefault);
   }
 
   void Free() {
@@ -280,12 +283,44 @@ class HostMemoryPinned : public HostMemory<Real> {
 };
 
 template <std::floating_point Real>
-void HostGetLengths(int i, HostMemory<Real> const &host_memory,
+class DeviceMemory {
+ public:
+  Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
+  Real *bar_x{nullptr}, *bar_y{nullptr}, *actual_l{nullptr}, *expect_l{nullptr};
+
+  void Malloc(int n_edge) {
+    auto n_byte = n_edge * sizeof(Real);
+    cudaMalloc((void **)&x_u, n_byte);
+    cudaMalloc((void **)&x_v, n_byte);
+    cudaMalloc((void **)&y_u, n_byte);
+    cudaMalloc((void **)&y_v, n_byte);
+    cudaMalloc((void **)&bar_x, n_byte);
+    cudaMalloc((void **)&bar_y, n_byte);
+    cudaMalloc((void **)&actual_l, n_byte);
+    cudaMalloc((void **)&expect_l, n_byte);
+  }
+
+  void Free() {
+    cudaFree(x_u);
+    cudaFree(x_v);
+    cudaFree(y_u);
+    cudaFree(y_v);
+    cudaFree(bar_x);
+    cudaFree(bar_y);
+    cudaFree(actual_l);
+    cudaFree(expect_l);
+  }
+};
+
+template <std::floating_point Real>
+void GetLength(int i,
+    Real const *memory_x_u, Real const *memory_x_v,
+    Real const *memory_y_u, Real const *memory_y_v,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
-  Real x_u = host_memory.x_u[i];
-  Real x_v = host_memory.x_v[i];
-  Real y_u = host_memory.y_u[i];
-  Real y_v = host_memory.y_v[i];
+  Real x_u = memory_x_u[i];
+  Real x_v = memory_x_v[i];
+  Real y_u = memory_y_u[i];
+  Real y_v = memory_y_v[i];
   actual_l[i] = std::hypot(bar_x[i] = x_v - x_u,
                            bar_y[i] = y_v - y_u);
   expect_l[i] = scaling((x_u + x_v) / 2,
@@ -295,18 +330,75 @@ void HostGetLengths(int i, HostMemory<Real> const &host_memory,
 }
 
 template <std::floating_point Real>
-void HostGetLengths(int i, HostMemoryPinned<Real> const &host_memory,
+void HostGetLengths(int n_edge, HostMemory<Real> const &host_memory,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
-  Real x_u = host_memory.x_u[i];
-  Real x_v = host_memory.x_v[i];
-  Real y_u = host_memory.y_u[i];
-  Real y_v = host_memory.y_v[i];
-  actual_l[i] = std::hypot(bar_x[i] = x_v - x_u,
-                           bar_y[i] = y_v - y_u);
-  expect_l[i] = scaling((x_u + x_v) / 2,
-                        (y_u + y_v) / 2);
-  assert(actual_l[i] >= 0);
-  assert(expect_l[i] >= 0);
+  for (int i = 0; i < n_edge; i++) {
+    GetLength(i,
+        host_memory.x_u, host_memory.x_v,
+        host_memory.y_u, host_memory.y_v,
+        bar_x, bar_y, actual_l, expect_l);
+  }
+}
+
+
+template <std::floating_point Real>
+__global__ void DeviceGetLength(
+    Real const *device_memory_x_u, Real const *device_memory_x_v,
+    Real const *device_memory_y_u, Real const *device_memory_y_v,
+    Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  GetLength(i,
+      device_memory_x_u, device_memory_x_v,
+      device_memory_y_u, device_memory_y_v,
+      bar_x, bar_y, actual_l, expect_l);
+}
+
+template <std::floating_point Real>
+void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory,
+    DeviceMemory<Real> *device_memory,
+    Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
+  // Initialize streams for concurrency:
+  auto streams = new cudaStream_t[NSTREAMS];
+  for (int i = 0; i < NSTREAMS; i++) {
+    cudaStreamCreate(&streams[i]);
+  } 
+  int n_edge_per_stream = n_edge / NSTREAMS;
+  int n_byte = n_edge_per_stream * sizeof(Real);
+  // Dispatch comm and comp for n_edge_per_stream edges to NSTREAMS streams:
+  for (int i_stream = 0; i_stream < NSTREAMS; i_stream++) {
+    int offset = i_stream * n_edge_per_stream;
+    if (i_stream + 1 == NSTREAMS) {
+      n_edge_per_stream = n_edge % NSTREAMS;
+      n_byte = n_edge_per_stream * sizeof(Real);
+    }
+    dim3 block = std::min(1024, n_edge_per_stream);
+    dim3 grid = n_edge_per_stream / block.x; 
+    auto stream_i = streams[i_stream];
+    // copy input data from host to device
+    cudaMemcpyAsync(device_memory->x_u + offset, host_memory.x_u + offset,
+        n_byte, cudaMemcpyHostToDevice, stream_i);
+    cudaMemcpyAsync(device_memory->x_v + offset, host_memory.x_v + offset,
+        n_byte, cudaMemcpyHostToDevice, stream_i);
+    cudaMemcpyAsync(device_memory->y_u + offset, host_memory.y_u + offset,
+        n_byte, cudaMemcpyHostToDevice, stream_i);
+    cudaMemcpyAsync(device_memory->y_v + offset, host_memory.y_v + offset,
+        n_byte, cudaMemcpyHostToDevice, stream_i);
+    // execute the kernel
+    DeviceGetLength<<< grid, block, 0, stream_i >>>(
+        device_memory->x_u + offset, device_memory->x_v + offset,
+        device_memory->y_u + offset, device_memory->y_v + offset,
+        device_memory->bar_x + offset, device_memory->bar_y + offset,
+        device_memory->actual_l + offset, device_memory->expect_l + offset);
+    // copy output data from device to host
+    cudaMemcpyAsync(bar_x, device_memory->bar_x + offset,
+        n_byte, cudaMemcpyDeviceToHost, stream_i);
+    cudaMemcpyAsync(bar_y, device_memory->bar_y + offset,
+        n_byte, cudaMemcpyDeviceToHost, stream_i);
+    cudaMemcpyAsync(actual_l, device_memory->actual_l + offset,
+        n_byte, cudaMemcpyDeviceToHost, stream_i);
+    cudaMemcpyAsync(expect_l, device_memory->expect_l + offset,
+        n_byte, cudaMemcpyDeviceToHost, stream_i);
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -353,6 +445,9 @@ int main(int argc, char *argv[]) {
   Real *bar_y = host_memory.bar_y;
   Real *actual_l = host_memory.actual_l;
   Real *expect_l = host_memory.expect_l;
+
+  auto device_memory = DeviceMemory<Real>();
+  device_memory.Malloc(n_point * 4);
 
   // Triangulate the points.
   using Kernel = CGAL::Simple_cartesian<Real>;
@@ -460,9 +555,10 @@ int main(int argc, char *argv[]) {
     }
 
     // Build actual and expect lengths:
-    for (int i = 0; i < n_edge; i++) {
-      HostGetLengths(i, host_memory, bar_x, bar_y, actual_l, expect_l);
-    }
+    // HostGetLengths(n_edge, host_memory, bar_x, bar_y, actual_l, expect_l);
+    DeviceGetLengths(n_edge, host_memory, &device_memory,
+        bar_x, bar_y, actual_l, expect_l);
+
     Real norm_ratio = 1.2 * std::sqrt(
         std::inner_product(actual_l, actual_l + n_edge, actual_l, 0.) /
         std::inner_product(expect_l, expect_l + n_edge, expect_l, 0.));
@@ -549,6 +645,7 @@ int main(int argc, char *argv[]) {
   }  // main loop
 
   host_memory.Free();
+  device_memory.Free();
 
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
