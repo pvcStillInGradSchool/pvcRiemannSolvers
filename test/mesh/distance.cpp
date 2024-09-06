@@ -73,6 +73,7 @@ Real Rectangle(Real x, Real y, Real x_min, Real x_max, Real y_min, Real y_max) {
  * 
  */
 template <std::floating_point Real>
+__device__ __host__
 Real Circle(Real x, Real y, Real x_center, Real y_center, Real radius) {
   return std::hypot(x - x_center, y - y_center) - radius;
 }
@@ -101,8 +102,9 @@ Real distance(Real a, Real b) {
 }
 
 template <std::floating_point Real>
+__device__ __host__
 Real scaling(Real a, Real b) {
-  return 0.05 + 0.3 * Circle(a, b, x_center, y_center, radius);
+  return 0.05 + 0.3 * Circle(a, b, 0.0, 0.0, 0.5);
 };
 
 template <class Vector, class Distance>
@@ -313,7 +315,7 @@ class DeviceMemory {
 };
 
 template <std::floating_point Real>
-void GetLength(int i,
+__device__ __host__ void GetLength(int i,
     Real const *memory_x_u, Real const *memory_x_v,
     Real const *memory_y_u, Real const *memory_y_v,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
@@ -330,19 +332,20 @@ void GetLength(int i,
 }
 
 template <std::floating_point Real>
-void HostGetLengths(int n_edge, HostMemory<Real> const &host_memory,
+void HostGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory_pinned,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   for (int i = 0; i < n_edge; i++) {
     GetLength(i,
-        host_memory.x_u, host_memory.x_v,
-        host_memory.y_u, host_memory.y_v,
+        host_memory_pinned.x_u, host_memory_pinned.x_v,
+        host_memory_pinned.y_u, host_memory_pinned.y_v,
         bar_x, bar_y, actual_l, expect_l);
   }
 }
 
 
 template <std::floating_point Real>
-__global__ void DeviceGetLength(
+__global__
+void DeviceGetLength(
     Real const *device_memory_x_u, Real const *device_memory_x_v,
     Real const *device_memory_y_u, Real const *device_memory_y_v,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
@@ -358,7 +361,7 @@ void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory,
     DeviceMemory<Real> *device_memory,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   // Initialize streams for concurrency:
-  auto streams = new cudaStream_t[NSTREAMS];
+  auto *streams = new cudaStream_t[NSTREAMS];
   for (int i = 0; i < NSTREAMS; i++) {
     cudaStreamCreate(&streams[i]);
   } 
@@ -390,15 +393,17 @@ void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory,
         device_memory->bar_x + offset, device_memory->bar_y + offset,
         device_memory->actual_l + offset, device_memory->expect_l + offset);
     // copy output data from device to host
-    cudaMemcpyAsync(bar_x, device_memory->bar_x + offset,
+    cudaMemcpyAsync(bar_x + offset, device_memory->bar_x + offset,
         n_byte, cudaMemcpyDeviceToHost, stream_i);
-    cudaMemcpyAsync(bar_y, device_memory->bar_y + offset,
+    cudaMemcpyAsync(bar_y + offset, device_memory->bar_y + offset,
         n_byte, cudaMemcpyDeviceToHost, stream_i);
-    cudaMemcpyAsync(actual_l, device_memory->actual_l + offset,
+    cudaMemcpyAsync(actual_l + offset, device_memory->actual_l + offset,
         n_byte, cudaMemcpyDeviceToHost, stream_i);
-    cudaMemcpyAsync(expect_l, device_memory->expect_l + offset,
+    cudaMemcpyAsync(expect_l + offset, device_memory->expect_l + offset,
         n_byte, cudaMemcpyDeviceToHost, stream_i);
   }
+  cudaDeviceSynchronize();
+  delete[] streams;
 }
 
 int main(int argc, char *argv[]) {
@@ -555,13 +560,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Build actual and expect lengths:
-    // HostGetLengths(n_edge, host_memory, bar_x, bar_y, actual_l, expect_l);
+    // HostGetLengths(n_edge, host_memory,
     DeviceGetLengths(n_edge, host_memory, &device_memory,
         bar_x, bar_y, actual_l, expect_l);
 
-    Real norm_ratio = 1.2 * std::sqrt(
-        std::inner_product(actual_l, actual_l + n_edge, actual_l, 0.) /
-        std::inner_product(expect_l, expect_l + n_edge, expect_l, 0.));
+    auto actual_norm = std::inner_product(actual_l, actual_l + n_edge, actual_l, 0.);
+    auto expect_norm = std::inner_product(expect_l, expect_l + n_edge, expect_l, 0.);
+    Real norm_ratio = 1.2 * std::sqrt(actual_norm / expect_norm);
+    std::cout << actual_norm << " " << expect_norm << " " << norm_ratio << "\n";
     std::for_each_n(expect_l, n_edge,
         [norm_ratio](Real &x) { x *= norm_ratio; });
 
