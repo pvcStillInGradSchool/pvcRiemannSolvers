@@ -430,7 +430,7 @@ int main(int argc, char *argv[]) {
   std::vector<std::array<int, 3>> faces; int n_face;
   std::vector<std::array<int, 2>> edges; int n_edge;
 
-  auto Triangulate = [&faces, &edges, &x, &y, &z, n_point, &n_face, &n_edge, g_eps]() {
+  auto Triangulate = [&faces, &edges, &x, &y, &z, &n_face, &n_edge, g_eps](int n_point) {
     std::cout << "Re-triangulate.\n";
     auto delaunay = Delaunay();
     for (int i = 0; i < n_point; i++) {
@@ -499,7 +499,7 @@ int main(int argc, char *argv[]) {
       too_close.clear();
       x_old = x;
       y_old = y;
-      Triangulate();
+      Triangulate(n_point);
     }
 
     // Write the points and triangles.
@@ -566,15 +566,16 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < n_edge; ++i) {
         if (expect_l[i] > 2 * actual_l[i]) {
           auto [u, v] = edges[i];
-          // if (u >= n_fixed) {
-          //   too_close.emplace(u);
-          // }
-          // if (v >= n_fixed) {
-          //   too_close.emplace(v);
-          // }
+          if (u >= n_fixed) {
+            too_close.emplace(u);
+          }
+          if (v >= n_fixed) {
+            too_close.emplace(v);
+          }
         }
       }
       std::cout << too_close.size() << " points should be removed.\n";
+      continue;
     }
 
     // Get forces at nodes:
@@ -582,7 +583,7 @@ int main(int argc, char *argv[]) {
     force_x.setZero(); force_y.setZero();
     for (int i = 0; i < n_edge; i++) {
       // repulsive force for compressed bars
-      Real force = /* 1.0 * */std::max(0., expect_l[i] - actual_l[i]);
+      Real force = /* 1.0 * */std::max(0., expect_l[i] / actual_l[i] - 1);
       auto [u, v] = edges[i];
       force_x[u] -= force * bar_x[i];
       force_x[v] += force * bar_x[i];
