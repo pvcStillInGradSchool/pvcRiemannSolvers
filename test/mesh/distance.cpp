@@ -344,12 +344,14 @@ void HostGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory_pinned
 
 
 template <std::floating_point Real>
-__global__
-void DeviceGetLength(
+__global__ void DeviceGetLength(int n_edge,
     Real const *device_memory_x_u, Real const *device_memory_x_v,
     Real const *device_memory_y_u, Real const *device_memory_y_v,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i >= n_edge) {
+    return;
+  }
   GetLength(i,
       device_memory_x_u, device_memory_x_v,
       device_memory_y_u, device_memory_y_v,
@@ -357,11 +359,11 @@ void DeviceGetLength(
 }
 
 template <std::floating_point Real>
-void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory,
+void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory_pinned,
     DeviceMemory<Real> *device_memory,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   // Initialize streams for concurrency:
-  auto *streams = new cudaStream_t[NSTREAMS];
+  auto streams = new cudaStream_t[NSTREAMS];
   for (int i = 0; i < NSTREAMS; i++) {
     cudaStreamCreate(&streams[i]);
   } 
@@ -371,23 +373,28 @@ void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory,
   for (int i_stream = 0; i_stream < NSTREAMS; i_stream++) {
     int offset = i_stream * n_edge_per_stream;
     if (i_stream + 1 == NSTREAMS) {
-      n_edge_per_stream = n_edge % NSTREAMS;
+      n_edge_per_stream = n_edge - i_stream * n_edge_per_stream;
       n_byte = n_edge_per_stream * sizeof(Real);
     }
-    dim3 block = std::min(1024, n_edge_per_stream);
-    dim3 grid = n_edge_per_stream / block.x; 
+    // std::cout << "i_stream = " << i_stream << "\n";
+    // std::cout << "  n_edge_per_stream = " << n_edge_per_stream << ", ";
+    // std::cout << "  n_byte = " << n_byte << "\n";
+    dim3 block = std::min(256, n_edge_per_stream);
+    dim3 grid = (n_edge_per_stream + block.x - 1) / block.x;
+    // std::cout << "  block.x = " << block.x << ", ";
+    // std::cout << "  grid.x = " << grid.x << "\n";
     auto stream_i = streams[i_stream];
     // copy input data from host to device
-    cudaMemcpyAsync(device_memory->x_u + offset, host_memory.x_u + offset,
+    cudaMemcpyAsync(device_memory->x_u + offset, host_memory_pinned.x_u + offset,
         n_byte, cudaMemcpyHostToDevice, stream_i);
-    cudaMemcpyAsync(device_memory->x_v + offset, host_memory.x_v + offset,
+    cudaMemcpyAsync(device_memory->x_v + offset, host_memory_pinned.x_v + offset,
         n_byte, cudaMemcpyHostToDevice, stream_i);
-    cudaMemcpyAsync(device_memory->y_u + offset, host_memory.y_u + offset,
+    cudaMemcpyAsync(device_memory->y_u + offset, host_memory_pinned.y_u + offset,
         n_byte, cudaMemcpyHostToDevice, stream_i);
-    cudaMemcpyAsync(device_memory->y_v + offset, host_memory.y_v + offset,
+    cudaMemcpyAsync(device_memory->y_v + offset, host_memory_pinned.y_v + offset,
         n_byte, cudaMemcpyHostToDevice, stream_i);
     // execute the kernel
-    DeviceGetLength<<< grid, block, 0, stream_i >>>(
+    DeviceGetLength<<< grid, block, 0, stream_i >>>(n_edge_per_stream,
         device_memory->x_u + offset, device_memory->x_v + offset,
         device_memory->y_u + offset, device_memory->y_v + offset,
         device_memory->bar_x + offset, device_memory->bar_y + offset,
@@ -403,6 +410,9 @@ void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory,
         n_byte, cudaMemcpyDeviceToHost, stream_i);
   }
   cudaDeviceSynchronize();
+  for (int i = 0; i < NSTREAMS; i++) {
+    cudaStreamDestroy(streams[i]);
+  }
   delete[] streams;
 }
 
@@ -423,7 +433,7 @@ int main(int argc, char *argv[]) {
   auto g_eps = h_0 * 0.001;  // for rejecting out-of-domain faces
   auto d_eps = h_0 * std::sqrt(eps);  // for finite-differencing d(x, y)
 
-  float elapsed_time = 0.0;
+  float elapsed_time = 0.0, host_cost = 0.0, device_cost = 0.0;
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
   cudaEventCreate(&stop); 
@@ -444,12 +454,20 @@ int main(int argc, char *argv[]) {
   assert(n_point == y.size());
 
   // Pre-allocate memory:
-  auto host_memory = HostMemoryPinned<Real>();
+
+  auto host_memory = HostMemory<Real>();
   host_memory.Malloc(n_point * 4);
-  Real *bar_x = host_memory.bar_x;
-  Real *bar_y = host_memory.bar_y;
-  Real *actual_l = host_memory.actual_l;
-  Real *expect_l = host_memory.expect_l;
+  Real *host_bar_x = host_memory.bar_x;
+  Real *host_bar_y = host_memory.bar_y;
+  Real *host_actual_l = host_memory.actual_l;
+  Real *host_expect_l = host_memory.expect_l;
+
+  auto host_memory_pinned = HostMemoryPinned<Real>();
+  host_memory_pinned.Malloc(n_point * 4);
+  Real *bar_x = host_memory_pinned.bar_x;
+  Real *bar_y = host_memory_pinned.bar_y;
+  Real *actual_l = host_memory_pinned.actual_l;
+  Real *expect_l = host_memory_pinned.expect_l;
 
   auto device_memory = DeviceMemory<Real>();
   device_memory.Malloc(n_point * 4);
@@ -527,7 +545,6 @@ int main(int argc, char *argv[]) {
   cudaEventElapsedTime(&elapsed_time, start, stop);
   printf("Initialization costs %.2f ms\n", elapsed_time);
 
-  cudaEventRecord(start);  // timing the main loop
   // The main loop:
   for (int i_step = 0; i_step <= n_step; i_step++) {
     n_point = RemoveTooClosePoints(n_point);
@@ -553,16 +570,42 @@ int main(int argc, char *argv[]) {
     // Collect point data:
     for (int i = 0; i < n_edge; i++) {
       auto [u, v] = edges[i];
-      host_memory.x_u[i] = x[u];
-      host_memory.x_v[i] = x[v];
-      host_memory.y_u[i] = y[u];
-      host_memory.y_v[i] = y[v];
+      host_memory_pinned.x_u[i] = x[u];
+      host_memory_pinned.x_v[i] = x[v];
+      host_memory_pinned.y_u[i] = y[u];
+      host_memory_pinned.y_v[i] = y[v];
     }
 
     // Build actual and expect lengths:
-    // HostGetLengths(n_edge, host_memory,
-    DeviceGetLengths(n_edge, host_memory, &device_memory,
+    cudaEventRecord(start);
+    HostGetLengths(n_edge, host_memory_pinned,
+        host_bar_x, host_bar_y, host_actual_l, host_expect_l);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&elapsed_time, start, stop);
+    host_cost += elapsed_time;
+
+    cudaEventRecord(start);
+    DeviceGetLengths(n_edge, host_memory_pinned, &device_memory,
         bar_x, bar_y, actual_l, expect_l);
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&elapsed_time, start, stop);
+    device_cost += elapsed_time;
+
+    for (int i = 0; i < n_edge; i++) {
+      host_bar_x[i] = std::abs(host_bar_x[i] - bar_x[i]);
+      host_bar_y[i] = std::abs(host_bar_y[i] - bar_y[i]);
+      host_actual_l[i] = std::abs(host_actual_l[i] - actual_l[i]);
+      host_expect_l[i] = std::abs(host_expect_l[i] - expect_l[i]);
+    }
+
+    std::cout << "|diff_bar_x| + |diff_bar_y| = " <<
+        std::accumulate(host_bar_x, host_bar_x + n_edge, 0.) +
+        std::accumulate(host_bar_y, host_bar_y + n_edge, 0.) << "\n";
+    std::cout << "|diff_actual_l| + |diff_expect_l| = " <<
+        std::accumulate(host_actual_l, host_actual_l + n_edge, 0.) +
+        std::accumulate(host_expect_l, host_expect_l + n_edge, 0.) << "\n";
 
     auto actual_norm = std::inner_product(actual_l, actual_l + n_edge, actual_l, 0.);
     auto expect_norm = std::inner_product(expect_l, expect_l + n_edge, expect_l, 0.);
@@ -651,12 +694,11 @@ int main(int argc, char *argv[]) {
   }  // main loop
 
   host_memory.Free();
+  host_memory_pinned.Free();
   device_memory.Free();
 
-  cudaEventRecord(stop);
-  cudaEventSynchronize(stop);
-  cudaEventElapsedTime(&elapsed_time, start, stop);
-  printf("The main loop costs %.2f ms\n", elapsed_time);
+  printf("The host costs %.2f ms\n", host_cost);
+  printf("The device costs %.2f ms\n", device_cost);
 
   return 0;
 }
