@@ -223,6 +223,18 @@ void WriteVtu(std::string const &filename, bool binary,
 }
 
 template <std::floating_point Real>
+void WriteFrame(int i_frame, int n_point,
+    Real const *x, Real const *y, Real const *z,
+    std::vector<std::array<int, 3>> const &faces) {
+  auto vtu_name = std::string("Frame");
+  vtu_name += std::to_string(i_frame);
+  vtu_name += ".vtu";
+  WriteVtu<Real, 3>(vtu_name, false, n_point, x, y, z,
+      faces, mini::mesh::vtk::CellType::kTriangle3, distance<Real>);
+  std::cout << vtu_name << " written\n";
+}
+
+template <std::floating_point Real>
 using HostDynamicVector = mini::algebra::DynamicVector<Real>;
 
 template <std::floating_point Real>
@@ -424,7 +436,7 @@ int main(int argc, char *argv[]) {
   using GeoTraits = CGAL::Projection_traits_xy_3<Kernel>;
   using Delaunay = CGAL::Delaunay_triangulation_2<GeoTraits>;
 
-  Real const max_shift_tol = 1.e-6;  // terminate if max_shift_square < this value
+  Real const max_shift_tol = 1.e-3;  // terminate if max_shift / h_0 < this value
   Real max_shift_square = 1.e100;
 
   std::vector<std::array<int, 3>> faces; int n_face;
@@ -504,13 +516,8 @@ int main(int argc, char *argv[]) {
 
     // Write the points and triangles.
     if (i_step % n_step_per_frame == 0) {
-      auto vtu_name = std::string("Frame");
-      vtu_name += std::to_string(i_step / n_step_per_frame);
-      vtu_name += ".vtu";
-      WriteVtu<Real, 3>(vtu_name, false, n_point, x.data(), y.data(), z.data(),
-          faces, mini::mesh::vtk::CellType::kTriangle3, distance<Real>);
-      
-      std::cout << "Step " << i_step << " written\n";
+      int i_frame = i_step / n_step_per_frame;
+      WriteFrame(i_frame, n_point, x.data(), y.data(), z.data(), faces);
     }
 
     // Collect point data:
@@ -630,13 +637,15 @@ int main(int argc, char *argv[]) {
       max_shift_square = std::max(max_shift_square,
           shift_x[i] * shift_x[i] + shift_y[i] * shift_y[i]);
     }
-    max_shift_square /= h_0 * h_0;
+    auto max_shift = std::sqrt(max_shift_square) / h_0;
 
-    std::cout << "Step " << i_step << ", n_edge = " << n_edge << ", max_shift = " << std::sqrt(max_shift_square) << "\n";
+    std::cout << "Step " << i_step << ", n_edge = " << n_edge << ", max_shift = " << max_shift << "\n";
 
-    if (max_shift_square < max_shift_tol) {
-      std::cout << "Converged.\n";
-      // break;
+    if (max_shift < max_shift_tol) {
+      int i_frame = (i_step + n_step_per_frame - 1) / n_step_per_frame;
+      WriteFrame(i_frame, n_point, x.data(), y.data(), z.data(), faces);
+      std::cout << "Converged at Step " << i_step << ", Frame " << i_frame << ".\n";
+      break;
     }
   }  // main loop
 
