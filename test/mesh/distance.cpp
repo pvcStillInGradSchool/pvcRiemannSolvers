@@ -226,91 +226,33 @@ template <std::floating_point Real>
 using HostDynamicVector = mini::algebra::DynamicVector<Real>;
 
 template <std::floating_point Real>
-class HostMemory {
+class Memory {
  public:
   Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
   Real *bar_x{nullptr}, *bar_y{nullptr}, *actual_l{nullptr}, *expect_l{nullptr};
 
-  void Malloc(int n_edge) {
-    x_u = new Real[n_edge];
-    x_v = new Real[n_edge];
-    y_u = new Real[n_edge];
-    y_v = new Real[n_edge];
-    bar_x = new Real[n_edge];
-    bar_y = new Real[n_edge];
-    actual_l = new Real[n_edge];
-    expect_l = new Real[n_edge];
+  template <std::invocable<void **, int> M>
+  void Malloc(int n_byte, M &&malloc) {
+    malloc((void **)&x_u, n_byte);
+    malloc((void **)&x_v, n_byte);
+    malloc((void **)&y_u, n_byte);
+    malloc((void **)&y_v, n_byte);
+    malloc((void **)&bar_x, n_byte);
+    malloc((void **)&bar_y, n_byte);
+    malloc((void **)&actual_l, n_byte);
+    malloc((void **)&expect_l, n_byte);
   }
 
-  void Free() {
-    delete[] x_u;
-    delete[] x_v;
-    delete[] y_u;
-    delete[] y_v;
-    delete[] bar_x;
-    delete[] bar_y;
-    delete[] actual_l;
-    delete[] expect_l;
-  }
-};
-
-template <std::floating_point Real>
-class HostMemoryPinned {
- public:
-  Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
-  Real *bar_x{nullptr}, *bar_y{nullptr}, *actual_l{nullptr}, *expect_l{nullptr};
-
-  void Malloc(int n_edge) {
-    auto n_byte = n_edge * sizeof(Real);
-    cudaHostAlloc((void **)&x_u, n_byte, cudaHostAllocDefault);
-    cudaHostAlloc((void **)&x_v, n_byte, cudaHostAllocDefault);
-    cudaHostAlloc((void **)&y_u, n_byte, cudaHostAllocDefault);
-    cudaHostAlloc((void **)&y_v, n_byte, cudaHostAllocDefault);
-    cudaHostAlloc((void **)&bar_x, n_byte, cudaHostAllocDefault);
-    cudaHostAlloc((void **)&bar_y, n_byte, cudaHostAllocDefault);
-    cudaHostAlloc((void **)&actual_l, n_byte, cudaHostAllocDefault);
-    cudaHostAlloc((void **)&expect_l, n_byte, cudaHostAllocDefault);
-  }
-
-  void Free() {
-    cudaFreeHost(x_u);
-    cudaFreeHost(x_v);
-    cudaFreeHost(y_u);
-    cudaFreeHost(y_v);
-    cudaFreeHost(bar_x);
-    cudaFreeHost(bar_y);
-    cudaFreeHost(actual_l);
-    cudaFreeHost(expect_l);
-  }
-};
-
-template <std::floating_point Real>
-class DeviceMemory {
- public:
-  Real *x_u{nullptr}, *x_v{nullptr}, *y_u{nullptr}, *y_v{nullptr};
-  Real *bar_x{nullptr}, *bar_y{nullptr}, *actual_l{nullptr}, *expect_l{nullptr};
-
-  void Malloc(int n_edge) {
-    auto n_byte = n_edge * sizeof(Real);
-    cudaMalloc((void **)&x_u, n_byte);
-    cudaMalloc((void **)&x_v, n_byte);
-    cudaMalloc((void **)&y_u, n_byte);
-    cudaMalloc((void **)&y_v, n_byte);
-    cudaMalloc((void **)&bar_x, n_byte);
-    cudaMalloc((void **)&bar_y, n_byte);
-    cudaMalloc((void **)&actual_l, n_byte);
-    cudaMalloc((void **)&expect_l, n_byte);
-  }
-
-  void Free() {
-    cudaFree(x_u);
-    cudaFree(x_v);
-    cudaFree(y_u);
-    cudaFree(y_v);
-    cudaFree(bar_x);
-    cudaFree(bar_y);
-    cudaFree(actual_l);
-    cudaFree(expect_l);
+  template <std::invocable<void *> F>
+  void Free(F &&free) {
+    free(x_u);
+    free(x_v);
+    free(y_u);
+    free(y_v);
+    free(bar_x);
+    free(bar_y);
+    free(actual_l);
+    free(expect_l);
   }
 };
 
@@ -332,7 +274,7 @@ __device__ __host__ void GetLength(int i,
 }
 
 template <std::floating_point Real>
-void HostGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory_pinned,
+void HostGetLengths(int n_edge, Memory<Real> const &host_memory_pinned,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   for (int i = 0; i < n_edge; i++) {
     GetLength(i,
@@ -359,8 +301,8 @@ __global__ void DeviceGetLength(int n_edge,
 }
 
 template <std::floating_point Real>
-void DeviceGetLengths(int n_edge, HostMemoryPinned<Real> const &host_memory_pinned,
-    DeviceMemory<Real> *device_memory,
+void DeviceGetLengths(int n_edge, Memory<Real> const &host_memory_pinned,
+    Memory<Real> *device_memory,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   // Initialize streams for concurrency:
   auto streams = new cudaStream_t[NSTREAMS];
@@ -454,23 +396,27 @@ int main(int argc, char *argv[]) {
   assert(n_point == y.size());
 
   // Pre-allocate memory:
-
-  auto host_memory = HostMemory<Real>();
-  host_memory.Malloc(n_point * 4);
+  int n_edge_max = n_point * 4;
+  auto host_memory = Memory<Real>();
+  host_memory.Malloc(n_edge_max * sizeof(Real),
+      [](void **ptr, int n_byte) { *ptr = std::malloc(n_byte); });
   Real *host_bar_x = host_memory.bar_x;
   Real *host_bar_y = host_memory.bar_y;
   Real *host_actual_l = host_memory.actual_l;
   Real *host_expect_l = host_memory.expect_l;
 
-  auto host_memory_pinned = HostMemoryPinned<Real>();
-  host_memory_pinned.Malloc(n_point * 4);
+  auto host_memory_pinned = Memory<Real>();
+  host_memory_pinned.Malloc(n_edge_max * sizeof(Real),
+      [](void **ptr, int n_byte) { cudaHostAlloc(ptr, n_byte,
+          cudaHostAllocDefault); });
   Real *bar_x = host_memory_pinned.bar_x;
   Real *bar_y = host_memory_pinned.bar_y;
   Real *actual_l = host_memory_pinned.actual_l;
   Real *expect_l = host_memory_pinned.expect_l;
 
-  auto device_memory = DeviceMemory<Real>();
-  device_memory.Malloc(n_point * 4);
+  auto device_memory = Memory<Real>();
+  device_memory.Malloc(n_edge_max * sizeof(Real),
+      [](void **ptr, int n_byte) { cudaMalloc(ptr, n_byte); });
 
   // Triangulate the points.
   using Kernel = CGAL::Simple_cartesian<Real>;
@@ -693,9 +639,9 @@ int main(int argc, char *argv[]) {
     }
   }  // main loop
 
-  host_memory.Free();
-  host_memory_pinned.Free();
-  device_memory.Free();
+  host_memory.Free([](void *ptr) { std::free(ptr); });
+  host_memory_pinned.Free([](void *ptr) { cudaFreeHost(ptr); });
+  device_memory.Free([](void *ptr) { cudaFree(ptr); });
 
   printf("The host costs %.2f ms\n", host_cost);
   printf("The device costs %.2f ms\n", device_cost);
