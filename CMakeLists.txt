@@ -133,7 +133,8 @@ configure_file(
 )
 include_directories("${PROJECT_BINARY_DIR}/include")
 
-find_package(CUDA REQUIRED)
+enable_language(CUDA)
+set(CMAKE_CUDA_FLAGS "--std c++20" CACHE STRING "C++ standard version" FORCE)
 
 option(${PROJECT_NAME}_BUILD_TESTS "Build tests for this project." "ON")
 if (${PROJECT_NAME}_BUILD_TESTS)
