@@ -1,6 +1,7 @@
 # miniCFD
 
-![](https://github.com/pvc1989/miniCFD/workflows/Build/badge.svg)
+[![](https://github.com/pvc1989/miniCFD/workflows/Build/badge.svg)](https://github.com/pvc1989/miniCFD/actions/workflows/build.yml)
+[![](https://github.com/pvc1989/miniCFD/workflows/Doxygen/badge.svg)](https://github.com/pvc1989/miniCFD/actions/workflows/doxygen.yml)
 
 ## Intention
 This repo is a minimum implementation of *Data Structures and Algorithms (DSA)* used in *Computational Fluid Dynamics (CFD)*.

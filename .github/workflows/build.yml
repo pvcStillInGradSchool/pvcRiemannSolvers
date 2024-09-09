@@ -10,15 +10,22 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [ubuntu-latest]
+        # os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }} # For each os, run this job on it.
     steps:
     - name: Install Dependencies on Linux
       if: startsWith(runner.os, 'Linux')
       run: sudo apt update && sudo apt install libhdf5-mpi-dev libboost-all-dev gcc-12 libglu1-mesa && pip install --upgrade gmsh
-    - name: Install Dependencies on macOS
-      if: startsWith(runner.os, 'macOS')
-      run: brew install hdf5-mpi boost gcc@12 && pip install --upgrade gmsh
+    # - name: Install Dependencies on macOS
+    #   if: startsWith(runner.os, 'macOS')
+    #   run: brew install hdf5-mpi boost gcc@12 && pip install --upgrade gmsh
+    - uses: Jimver/cuda-toolkit@v0.2.16
+      id: cuda-toolkit
+      with:
+        cuda: '12.5.0'
+        method: 'network'
+        linux-local-args: '["--toolkit"]'
     - uses: actions/checkout@main
       with:
         submodules: 'recursive'
