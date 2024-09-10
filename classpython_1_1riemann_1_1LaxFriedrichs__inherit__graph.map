@@ -1,0 +1,8 @@
+<map id="python.riemann.LaxFriedrichs" name="python.riemann.LaxFriedrichs">
+<area shape="rect" id="node1" title=" " alt="" coords="11,393,225,420"/>
+<area shape="rect" id="node2" href="$classpython_1_1riemann_1_1ApproximateEuler.html" title=" " alt="" coords="11,304,225,345"/>
+<area shape="rect" id="node3" href="$classpython_1_1riemann_1_1Euler.html" title=" " alt="" coords="37,229,199,256"/>
+<area shape="rect" id="node4" href="$classpython_1_1riemann_1_1Solver.html" title=" " alt="" coords="33,155,203,181"/>
+<area shape="rect" id="node5" href="$classpython_1_1concept_1_1RiemannSolver.html" title="An exact or approximate solver for the Riemann problem of an Equation." alt="" coords="5,80,231,107"/>
+<area shape="rect" id="node6" title=" " alt="" coords="80,5,156,32"/>
+</map>

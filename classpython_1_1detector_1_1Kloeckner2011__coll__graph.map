@@ -1,0 +1,6 @@
+<map id="python.detector.Kloeckner2011" name="python.detector.Kloeckner2011">
+<area shape="rect" id="node1" title="A jump detector based on decay of modal coefficients." alt="" coords="5,244,231,271"/>
+<area shape="rect" id="node2" href="$classpython_1_1detector_1_1SmoothnessBased.html" title=" " alt="" coords="14,155,222,196"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1Detector.html" title="An object that detects jumps on an element." alt="" coords="27,80,209,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="80,5,156,32"/>
+</map>

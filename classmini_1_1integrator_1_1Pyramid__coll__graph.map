@@ -1,0 +1,5 @@
+<map id="mini::integrator::Pyramid&lt; Gx, Gy, Qz &gt;" name="mini::integrator::Pyramid&lt; Gx, Gy, Qz &gt;">
+<area shape="rect" id="node1" title="Numerical integrators on pyramidal elements." alt="" coords="30,184,215,225"/>
+<area shape="rect" id="node2" href="$classmini_1_1integrator_1_1Cell.html" title=" " alt="" coords="45,95,201,136"/>
+<area shape="rect" id="node3" href="$classmini_1_1integrator_1_1Element.html" title="Abstract numerical integrators on elements." alt="" coords="5,5,240,47"/>
+</map>

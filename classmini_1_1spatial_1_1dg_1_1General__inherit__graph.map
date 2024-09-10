@@ -1,0 +1,7 @@
+<map id="mini::spatial::dg::General&lt; P, R &gt;" name="mini::spatial::dg::General&lt; P, R &gt;">
+<area shape="rect" id="node1" title=" " alt="" coords="92,184,227,225"/>
+<area shape="rect" id="node4" href="$classmini_1_1spatial_1_1dg_1_1Lobatto.html" title="A specialized version of DG using a Lagrange expansion on Lobatto roots." alt="" coords="5,273,140,315"/>
+<area shape="rect" id="node5" href="$classmini_1_1spatial_1_1dg_1_1WithSource.html" title=" " alt="" coords="164,273,331,315"/>
+<area shape="rect" id="node2" href="$classmini_1_1spatial_1_1FiniteElement.html" title=" " alt="" coords="59,95,260,136"/>
+<area shape="rect" id="node3" href="$classmini_1_1temporal_1_1System.html" title=" " alt="" coords="72,5,247,47"/>
+</map>

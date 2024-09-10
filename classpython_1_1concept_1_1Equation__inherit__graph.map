@@ -1,0 +1,12 @@
+<map id="python.concept.Equation" name="python.concept.Equation">
+<area shape="rect" id="node1" title="A PDE in the form of ." alt="" coords="129,85,312,112"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1EquationSystem.html" title=" " alt="" coords="360,56,592,83"/>
+<area shape="rect" id="node6" href="$classpython_1_1concept_1_1ScalarEquation.html" title=" " alt="" coords="365,115,587,141"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,85,81,112"/>
+<area shape="rect" id="node4" href="$classpython_1_1equation_1_1Coupled.html" title="A system of two linearly coupled scalar equations." alt="" coords="666,5,851,32"/>
+<area shape="rect" id="node5" href="$classpython_1_1equation_1_1Euler.html" title=" " alt="" coords="676,56,841,83"/>
+<area shape="rect" id="node7" href="$classpython_1_1equation_1_1InviscidBurgers.html" title=" " alt="" coords="667,107,850,149"/>
+<area shape="rect" id="node9" href="$classpython_1_1equation_1_1LinearAdvection.html" title=" " alt="" coords="640,173,877,200"/>
+<area shape="rect" id="node8" href="$classpython_1_1equation_1_1Burgers.html" title=" " alt="" coords="953,115,1135,141"/>
+<area shape="rect" id="node10" href="$classpython_1_1equation_1_1LinearAdvectionDiffusion.html" title=" " alt="" coords="925,166,1163,207"/>
+</map>

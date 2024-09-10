@@ -1,0 +1,7 @@
+<map id="python.spatial.FiniteVolume" name="python.spatial.FiniteVolume">
+<area shape="rect" id="node1" title="An ODE system given by some FiniteVolume scheme." alt="" coords="80,229,284,256"/>
+<area shape="rect" id="node2" href="$classpython_1_1concept_1_1SpatialScheme.html" title="An ODE system given by some FiniteElement scheme." alt="" coords="71,155,293,181"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1Grid.html" title=" " alt="" coords="5,80,159,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="144,5,220,32"/>
+<area shape="rect" id="node5" href="$classpython_1_1concept_1_1OdeSystem.html" title="A system of ODEs in the form of dU/∂t = R." alt="" coords="183,80,384,107"/>
+</map>

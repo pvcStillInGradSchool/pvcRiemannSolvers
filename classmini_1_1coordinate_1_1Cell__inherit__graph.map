@@ -1,0 +1,20 @@
+<map id="mini::coordinate::Cell&lt; Scalar &gt;" name="mini::coordinate::Cell&lt; Scalar &gt;">
+<area shape="rect" id="node1" title="Abstract coordinate map on volume elements." alt="" coords="244,397,405,439"/>
+<area shape="rect" id="node3" href="$classmini_1_1coordinate_1_1Hexahedron.html" title="Abstract coordinate map on hexahedral elements." alt="" coords="453,136,668,177"/>
+<area shape="rect" id="node8" href="$classmini_1_1coordinate_1_1Pyramid.html" title="Abstract coordinate map on pyramidal elements." alt="" coords="465,364,656,405"/>
+<area shape="rect" id="node12" href="$classmini_1_1coordinate_1_1Tetrahedron.html" title="Abstract coordinate map on tetrahedral elements." alt="" coords="454,463,667,504"/>
+<area shape="rect" id="node15" href="$classmini_1_1coordinate_1_1Wedge.html" title="Abstract coordinate map on wedge elements." alt="" coords="471,625,651,667"/>
+<area shape="rect" id="node2" href="$classmini_1_1coordinate_1_1Element.html" title=" " alt="" coords="5,397,196,439"/>
+<area shape="rect" id="node4" href="$classmini_1_1coordinate_1_1Hexahedron20.html" title="Coordinate map on 20&#45;node hexahedral elements." alt="" coords="716,5,947,47"/>
+<area shape="rect" id="node5" href="$classmini_1_1coordinate_1_1Hexahedron26.html" title="Coordinate map on 26&#45;node hexahedral elements." alt="" coords="716,71,947,112"/>
+<area shape="rect" id="node6" href="$classmini_1_1coordinate_1_1Hexahedron27.html" title="Coordinate map on 27&#45;node hexahedral elements." alt="" coords="716,136,947,177"/>
+<area shape="rect" id="node7" href="$classmini_1_1coordinate_1_1Hexahedron8.html" title="Coordinate map on 8&#45;node hexahedral elements." alt="" coords="720,201,943,243"/>
+<area shape="rect" id="node9" href="$classmini_1_1coordinate_1_1Pyramid13.html" title="Coordinate map on 13&#45;node pyramidal elements." alt="" coords="728,267,935,308"/>
+<area shape="rect" id="node10" href="$classmini_1_1coordinate_1_1Pyramid14.html" title="Coordinate map on 14&#45;node pyramidal elements." alt="" coords="728,332,935,373"/>
+<area shape="rect" id="node11" href="$classmini_1_1coordinate_1_1Pyramid5.html" title="Coordinate map on 5&#45;node pyramidal elements." alt="" coords="732,397,931,439"/>
+<area shape="rect" id="node13" href="$classmini_1_1coordinate_1_1Tetrahedron10.html" title="Coordinate map on 10&#45;node tetrahedral elements." alt="" coords="717,463,946,504"/>
+<area shape="rect" id="node14" href="$classmini_1_1coordinate_1_1Tetrahedron4.html" title="Coordinate map on 4&#45;node tetrahedral elements." alt="" coords="721,528,942,569"/>
+<area shape="rect" id="node16" href="$classmini_1_1coordinate_1_1Wedge15.html" title="Coordinate map on 15&#45;node wedge elements." alt="" coords="733,593,929,635"/>
+<area shape="rect" id="node17" href="$classmini_1_1coordinate_1_1Wedge18.html" title="Coordinate map on 18&#45;node wedge elements." alt="" coords="733,659,929,700"/>
+<area shape="rect" id="node18" href="$classmini_1_1coordinate_1_1Wedge6.html" title="Coordinate map on 6&#45;node wedge elements." alt="" coords="737,724,925,765"/>
+</map>

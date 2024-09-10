@@ -1,0 +1,5 @@
+<map id="python.test_temporal.Pendulum" name="python.test_temporal.Pendulum">
+<area shape="rect" id="node1" title="A simple ODE system obtained from u&#39;&#39; + u = 0." alt="" coords="5,155,236,181"/>
+<area shape="rect" id="node2" href="$classpython_1_1concept_1_1OdeSystem.html" title="A system of ODEs in the form of dU/∂t = R." alt="" coords="20,80,221,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="83,5,159,32"/>
+</map>

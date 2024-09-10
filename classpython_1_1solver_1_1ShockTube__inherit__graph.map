@@ -1,0 +1,7 @@
+<map id="python.solver.ShockTube" name="python.solver.ShockTube">
+<area shape="rect" id="node1" title="Demo the usage of Euler related classes." alt="" coords="64,155,247,181"/>
+<area shape="rect" id="node4" href="$classpython_1_1solver_1_1Lax.html" title=" " alt="" coords="5,229,143,256"/>
+<area shape="rect" id="node5" href="$classpython_1_1solver_1_1Sod.html" title=" " alt="" coords="167,229,306,256"/>
+<area shape="rect" id="node2" href="$classpython_1_1solver_1_1SolverBase.html" title="Define common methods for all solvers." alt="" coords="62,80,249,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="117,5,193,32"/>
+</map>

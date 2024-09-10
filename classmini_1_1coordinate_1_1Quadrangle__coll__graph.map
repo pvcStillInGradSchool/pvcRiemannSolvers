@@ -1,0 +1,5 @@
+<map id="mini::coordinate::Quadrangle&lt; Scalar, kPhysDim &gt;" name="mini::coordinate::Quadrangle&lt; Scalar, kPhysDim &gt;">
+<area shape="rect" id="node1" title="Abstract coordinate map on quadrilateral elements." alt="" coords="5,184,216,225"/>
+<area shape="rect" id="node2" href="$classmini_1_1coordinate_1_1Face.html" title="Abstract coordinate map on surface elements." alt="" coords="27,95,194,136"/>
+<area shape="rect" id="node3" href="$classmini_1_1coordinate_1_1Element.html" title=" " alt="" coords="15,5,206,47"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="python.spatial.FRonLegendreRoots" name="python.spatial.FRonLegendreRoots">
+<area shape="rect" id="node1" title="The ODE system given by the FR method using a Lagrange expansion on Legendre roots." alt="" coords="76,379,288,420"/>
+<area shape="rect" id="node2" href="$classpython_1_1spatial_1_1FluxReconstruction.html" title="An mid&#45;level class that defines common methods for all FR schemes." alt="" coords="60,304,304,331"/>
+<area shape="rect" id="node3" href="$classpython_1_1spatial_1_1FiniteElement.html" title="An ODE system given by some FiniteElement scheme." alt="" coords="77,229,287,256"/>
+<area shape="rect" id="node4" href="$classpython_1_1concept_1_1SpatialScheme.html" title="An ODE system given by some FiniteElement scheme." alt="" coords="71,155,293,181"/>
+<area shape="rect" id="node5" href="$classpython_1_1concept_1_1Grid.html" title=" " alt="" coords="5,80,159,107"/>
+<area shape="rect" id="node6" title=" " alt="" coords="144,5,220,32"/>
+<area shape="rect" id="node7" href="$classpython_1_1concept_1_1OdeSystem.html" title="A system of ODEs in the form of dU/∂t = R." alt="" coords="183,80,384,107"/>
+</map>

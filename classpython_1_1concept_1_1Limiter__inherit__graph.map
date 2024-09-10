@@ -1,0 +1,8 @@
+<map id="python.concept.Limiter" name="python.concept.Limiter">
+<area shape="rect" id="node1" title="An object that limits oscillations on an element." alt="" coords="129,56,301,83"/>
+<area shape="rect" id="node3" href="$classpython_1_1limiter_1_1CompactWENO.html" title="A high&#45;order WENO limiter, which is compact (using only immediate neighbors)." alt="" coords="349,56,565,83"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,56,81,83"/>
+<area shape="rect" id="node4" href="$classpython_1_1limiter_1_1LiWanAi2020.html" title="A high&#45;order compact WENO limiter, whose linear weights are related to candidates&#39; degrees." alt="" coords="621,5,822,32"/>
+<area shape="rect" id="node5" href="$classpython_1_1limiter_1_1XuXiaoRui2023.html" title="A limiter using min&#45;max compression." alt="" coords="613,56,829,83"/>
+<area shape="rect" id="node6" href="$classpython_1_1limiter_1_1ZhongXingHui2013.html" title="A high&#45;order compact WENO limiter, which is simple (just borrowing immediate neighbors&#39; expansions)." alt="" coords="628,107,815,149"/>
+</map>

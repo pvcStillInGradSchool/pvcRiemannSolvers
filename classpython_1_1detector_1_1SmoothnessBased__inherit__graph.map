@@ -1,0 +1,10 @@
+<map id="python.detector.SmoothnessBased" name="python.detector.SmoothnessBased">
+<area shape="rect" id="node1" title=" " alt="" coords="360,99,568,141"/>
+<area shape="rect" id="node4" href="$classpython_1_1detector_1_1Kloeckner2011.html" title="A jump detector based on decay of modal coefficients." alt="" coords="625,5,850,32"/>
+<area shape="rect" id="node5" href="$classpython_1_1detector_1_1Krivodonova2004.html" title="A jump detector for high&#45;order DG schemes." alt="" coords="616,56,859,83"/>
+<area shape="rect" id="node6" href="$classpython_1_1detector_1_1LiWanAi2011.html" title="A jump detector for high&#45;order finite volume schemes." alt="" coords="631,107,843,133"/>
+<area shape="rect" id="node7" href="$classpython_1_1detector_1_1Persson2006.html" title="A jump detector based on decay of modal coefficients." alt="" coords="632,157,843,184"/>
+<area shape="rect" id="node8" href="$classpython_1_1detector_1_1ZhuJun2021.html" title="A jump detector for high&#45;order DG schemes." alt="" coords="635,208,840,235"/>
+<area shape="rect" id="node2" href="$classpython_1_1concept_1_1Detector.html" title="An object that detects jumps on an element." alt="" coords="129,107,312,133"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,107,81,133"/>
+</map>

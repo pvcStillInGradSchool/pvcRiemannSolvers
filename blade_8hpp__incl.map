@@ -1,0 +1,20 @@
+<map id="include/mini/aircraft/blade.hpp" name="include/mini/aircraft/blade.hpp">
+<area shape="rect" id="node1" title=" " alt="" coords="607,5,759,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,244,85,271"/>
+<area shape="rect" id="node3" title=" " alt="" coords="600,244,680,271"/>
+<area shape="rect" id="node4" title=" " alt="" coords="721,95,807,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="831,95,894,121"/>
+<area shape="rect" id="node6" href="$section_8hpp.html" title=" " alt="" coords="317,95,497,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="525,169,595,196"/>
+<area shape="rect" id="node8" title=" " alt="" coords="265,319,325,345"/>
+<area shape="rect" id="node9" href="$airfoil_8hpp.html" title=" " alt="" coords="67,169,237,196"/>
+<area shape="rect" id="node12" href="$frame_8hpp.html" title=" " alt="" coords="312,169,501,196"/>
+<area shape="rect" id="node10" title=" " alt="" coords="331,393,394,420"/>
+<area shape="rect" id="node11" title=" " alt="" coords="124,244,180,271"/>
+<area shape="rect" id="node13" href="$algebra_2eigen_8hpp.html" title=" " alt="" coords="503,319,675,345"/>
+<area shape="rect" id="node17" href="$pi_8hpp.html" title=" " alt="" coords="363,244,525,271"/>
+<area shape="rect" id="node14" title=" " alt="" coords="663,393,748,420"/>
+<area shape="rect" id="node15" title=" " alt="" coords="450,393,515,420"/>
+<area shape="rect" id="node16" title=" " alt="" coords="540,393,639,420"/>
+<area shape="rect" id="node18" title=" " alt="" coords="401,319,479,345"/>
+</map>

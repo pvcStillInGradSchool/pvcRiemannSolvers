@@ -1,0 +1,6 @@
+<map id="python.concept.Face" name="python.concept.Face">
+<area shape="rect" id="node1" title="An object for carrying a given state or the Riemann solution between two elements." alt="" coords="101,80,256,107"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1Inlet.html" title="A Face object at the boundary with a given state." alt="" coords="5,155,160,181"/>
+<area shape="rect" id="node4" href="$classpython_1_1concept_1_1Interface.html" title="The common interface of two elements." alt="" coords="184,155,368,181"/>
+<area shape="rect" id="node2" title=" " alt="" coords="141,5,217,32"/>
+</map>

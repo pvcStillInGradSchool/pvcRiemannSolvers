@@ -1,0 +1,6 @@
+<map id="python.limiter.XuXiaoRui2023" name="python.limiter.XuXiaoRui2023">
+<area shape="rect" id="node1" title="A limiter using min&#45;max compression." alt="" coords="5,229,221,256"/>
+<area shape="rect" id="node2" href="$classpython_1_1limiter_1_1CompactWENO.html" title="A high&#45;order WENO limiter, which is compact (using only immediate neighbors)." alt="" coords="5,155,221,181"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1Limiter.html" title="An object that limits oscillations on an element." alt="" coords="27,80,199,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="75,5,151,32"/>
+</map>

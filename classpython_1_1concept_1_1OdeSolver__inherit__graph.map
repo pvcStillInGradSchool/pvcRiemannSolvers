@@ -1,0 +1,6 @@
+<map id="python.concept.OdeSolver" name="python.concept.OdeSolver">
+<area shape="rect" id="node1" title="A solver for the standard ODE system dU/dt = R." alt="" coords="109,80,303,107"/>
+<area shape="rect" id="node3" href="$classpython_1_1temporal_1_1ExplicitEuler.html" title="The explicit Euler method." alt="" coords="5,155,188,196"/>
+<area shape="rect" id="node4" href="$classpython_1_1temporal_1_1RungeKutta.html" title="The explicit Runge–Kutta methods." alt="" coords="212,162,421,189"/>
+<area shape="rect" id="node2" title=" " alt="" coords="168,5,244,32"/>
+</map>

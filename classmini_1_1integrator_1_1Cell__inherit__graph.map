@@ -1,0 +1,5 @@
+<map id="mini::integrator::Cell&lt; Scalar &gt;" name="mini::integrator::Cell&lt; Scalar &gt;">
+<area shape="rect" id="node1" title="Abstract numerical integrators on volume elements." alt="" coords="45,95,201,136"/>
+<area shape="rect" id="node3" href="$classmini_1_1integrator_1_1Tetrahedron.html" title="Numerical integrators on tetrahedral elements." alt="" coords="19,184,227,225"/>
+<area shape="rect" id="node2" href="$classmini_1_1integrator_1_1Element.html" title="Abstract numerical integrators on elements." alt="" coords="5,5,240,47"/>
+</map>

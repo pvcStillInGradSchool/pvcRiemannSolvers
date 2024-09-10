@@ -1,0 +1,6 @@
+<map id="mini::coordinate::Triangle3&lt; Scalar, kPhysDim &gt;" name="mini::coordinate::Triangle3&lt; Scalar, kPhysDim &gt;">
+<area shape="rect" id="node1" title="Coordinate map on 3&#45;node triangular elements." alt="" coords="5,273,200,315"/>
+<area shape="rect" id="node2" href="$classmini_1_1coordinate_1_1Triangle.html" title="Abstract coordinate map on triangular elements." alt="" coords="9,184,196,225"/>
+<area shape="rect" id="node3" href="$classmini_1_1coordinate_1_1Face.html" title="Abstract coordinate map on surface elements." alt="" coords="19,95,186,136"/>
+<area shape="rect" id="node4" href="$classmini_1_1coordinate_1_1Element.html" title=" " alt="" coords="7,5,198,47"/>
+</map>

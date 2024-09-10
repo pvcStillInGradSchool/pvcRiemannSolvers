@@ -1,0 +1,8 @@
+<map id="mini::coordinate::Pyramid&lt; Scalar &gt;" name="mini::coordinate::Pyramid&lt; Scalar &gt;">
+<area shape="rect" id="node1" title="Abstract coordinate map on pyramidal elements." alt="" coords="453,71,644,112"/>
+<area shape="rect" id="node4" href="$classmini_1_1coordinate_1_1Pyramid13.html" title="Coordinate map on 13&#45;node pyramidal elements." alt="" coords="692,5,899,47"/>
+<area shape="rect" id="node5" href="$classmini_1_1coordinate_1_1Pyramid14.html" title="Coordinate map on 14&#45;node pyramidal elements." alt="" coords="692,71,899,112"/>
+<area shape="rect" id="node6" href="$classmini_1_1coordinate_1_1Pyramid5.html" title="Coordinate map on 5&#45;node pyramidal elements." alt="" coords="696,136,895,177"/>
+<area shape="rect" id="node2" href="$classmini_1_1coordinate_1_1Cell.html" title="Abstract coordinate map on volume elements." alt="" coords="244,71,405,112"/>
+<area shape="rect" id="node3" href="$classmini_1_1coordinate_1_1Element.html" title=" " alt="" coords="5,71,196,112"/>
+</map>

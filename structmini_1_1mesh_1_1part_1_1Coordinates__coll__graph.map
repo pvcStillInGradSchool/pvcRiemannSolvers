@@ -1,0 +1,7 @@
+<map id="mini::mesh::part::Coordinates&lt; Int, Scalar &gt;" name="mini::mesh::part::Coordinates&lt; Int, Scalar &gt;">
+<area shape="rect" id="node1" title="Mimic CGNS&#39;s GridCoordinates_t, but partitioned." alt="" coords="487,69,701,111"/>
+<area shape="rect" id="node2" href="$classmini_1_1mesh_1_1cgns_1_1ShiftedVector.html" title=" " alt="" coords="184,5,371,47"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,46,135,73"/>
+<area shape="rect" id="node4" href="$classmini_1_1mesh_1_1cgns_1_1ShiftedVector.html" title=" " alt="" coords="184,71,371,112"/>
+<area shape="rect" id="node5" title=" " alt="" coords="258,137,297,163"/>
+</map>

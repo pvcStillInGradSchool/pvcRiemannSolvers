@@ -1,0 +1,12 @@
+<map id="python.expansion.Taylor" name="python.expansion.Taylor">
+<area shape="rect" id="node1" title="The Taylor expansion of a general function." alt="" coords="371,130,552,157"/>
+<area shape="rect" id="node4" href="$classpython_1_1expansion_1_1Lagrange.html" title="The Lagrange expansion of a general function." alt="" coords="601,79,804,106"/>
+<area shape="rect" id="node9" href="$classpython_1_1expansion_1_1Legendre.html" title="Approximate a general function based on Legendre polynomials." alt="" coords="601,130,804,157"/>
+<area shape="rect" id="node10" href="$classpython_1_1expansion_1_1TruncatedLegendre.html" title="A lower&#45;order view of a higher&#45;order Legendre expansion." alt="" coords="600,181,805,223"/>
+<area shape="rect" id="node2" href="$classpython_1_1concept_1_1Expansion.html" title="The polynomial approximation of a general function." alt="" coords="129,130,323,157"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,130,81,157"/>
+<area shape="rect" id="node5" href="$classpython_1_1expansion_1_1LagrangeOnGaussPoints.html" title="Specialized Lagrange expansion using Gauss points as nodes." alt="" coords="853,39,1056,80"/>
+<area shape="rect" id="node8" href="$classpython_1_1expansion_1_1LagrangeOnUniformRoots.html" title="Specialized Lagrange expansion using uniform roots as nodes." alt="" coords="853,104,1056,145"/>
+<area shape="rect" id="node6" href="$classpython_1_1expansion_1_1LagrangeOnLegendreRoots.html" title="Specialized Lagrange expansion using Legendre roots as nodes." alt="" coords="1104,5,1307,47"/>
+<area shape="rect" id="node7" href="$classpython_1_1expansion_1_1LagrangeOnLobattoRoots.html" title="Specialized Lagrange expansion using Lobatto roots as nodes." alt="" coords="1104,71,1307,112"/>
+</map>

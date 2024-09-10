@@ -1,0 +1,6 @@
+<map id="python.concept.Integrator" name="python.concept.Integrator">
+<area shape="rect" id="node1" title="A cell&#45;like object that performs integrations on it." alt="" coords="157,80,348,107"/>
+<area shape="rect" id="node3" href="$classpython_1_1integrator_1_1GaussLegendre.html" title=" " alt="" coords="5,155,244,181"/>
+<area shape="rect" id="node4" href="$classpython_1_1integrator_1_1GaussLobatto.html" title=" " alt="" coords="269,155,495,181"/>
+<area shape="rect" id="node2" title=" " alt="" coords="215,5,291,32"/>
+</map>

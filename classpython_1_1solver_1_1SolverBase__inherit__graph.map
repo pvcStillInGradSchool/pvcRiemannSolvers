@@ -1,0 +1,14 @@
+<map id="python.solver.SolverBase" name="python.solver.SolverBase">
+<area shape="rect" id="node1" title="Define common methods for all solvers." alt="" coords="129,81,316,108"/>
+<area shape="rect" id="node3" href="$classpython_1_1solver_1_1InviscidBurgers.html" title="Demo the usage of InviscidBurgers related classes." alt="" coords="364,5,579,32"/>
+<area shape="rect" id="node4" href="$classpython_1_1solver_1_1LinearSmooth.html" title="Demo the usage of LinearAdvection related classes for smooth IC." alt="" coords="369,56,573,83"/>
+<area shape="rect" id="node6" href="$classpython_1_1solver_1_1OtherEuler.html" title="Demo the usage of Euler related classes." alt="" coords="380,107,563,133"/>
+<area shape="rect" id="node10" href="$classpython_1_1solver_1_1ShockTube.html" title="Demo the usage of Euler related classes." alt="" coords="380,208,563,235"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,81,81,108"/>
+<area shape="rect" id="node5" href="$classpython_1_1solver_1_1LinearJumps.html" title="Demo the usage of LinearAdvection related classes for IC with jumps." alt="" coords="627,5,821,32"/>
+<area shape="rect" id="node7" href="$classpython_1_1solver_1_1BlastWaves.html" title="Demo the usage of Euler related classes." alt="" coords="629,56,819,83"/>
+<area shape="rect" id="node8" href="$classpython_1_1solver_1_1Sedov.html" title="Demo the usage of Euler related classes." alt="" coords="647,107,801,133"/>
+<area shape="rect" id="node9" href="$classpython_1_1solver_1_1ShuOsher.html" title="Demo the usage of Euler related classes." alt="" coords="636,157,812,184"/>
+<area shape="rect" id="node11" href="$classpython_1_1solver_1_1Lax.html" title=" " alt="" coords="655,208,793,235"/>
+<area shape="rect" id="node12" href="$classpython_1_1solver_1_1Sod.html" title=" " alt="" coords="655,259,793,285"/>
+</map>

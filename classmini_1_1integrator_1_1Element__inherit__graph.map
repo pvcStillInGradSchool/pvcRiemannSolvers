@@ -1,0 +1,13 @@
+<map id="mini::integrator::Element&lt; Scalar, kPhysDim, kCellDim &gt;" name="mini::integrator::Element&lt; Scalar, kPhysDim, kCellDim &gt;">
+<area shape="rect" id="node1" title="Abstract numerical integrators on elements." alt="" coords="5,235,240,276"/>
+<area shape="rect" id="node2" href="$classmini_1_1integrator_1_1Cell.html" title=" " alt="" coords="306,104,462,145"/>
+<area shape="rect" id="node6" href="$classmini_1_1integrator_1_1Face.html" title=" " alt="" coords="288,201,480,243"/>
+<area shape="rect" id="node8" href="$classmini_1_1integrator_1_1Cell.html" title="Abstract numerical integrators on volume elements." alt="" coords="306,267,462,308"/>
+<area shape="rect" id="node10" href="$classmini_1_1integrator_1_1Face.html" title="Abstract numerical integrators on surface elements." alt="" coords="301,332,467,373"/>
+<area shape="rect" id="node3" href="$classmini_1_1integrator_1_1Hexahedron.html" title="Numerical integrators on hexahedral elements." alt="" coords="534,5,745,47"/>
+<area shape="rect" id="node4" href="$classmini_1_1integrator_1_1Pyramid.html" title="Numerical integrators on pyramidal elements." alt="" coords="547,71,732,112"/>
+<area shape="rect" id="node5" href="$classmini_1_1integrator_1_1Wedge.html" title="Numerical integrators on hexahedral elements." alt="" coords="552,136,727,177"/>
+<area shape="rect" id="node7" href="$classmini_1_1integrator_1_1Quadrangle.html" title="Numerical integrators on quadrilateral elements." alt="" coords="536,201,743,243"/>
+<area shape="rect" id="node9" href="$classmini_1_1integrator_1_1Tetrahedron.html" title="Numerical integrators on tetrahedral elements." alt="" coords="535,267,743,308"/>
+<area shape="rect" id="node11" href="$classmini_1_1integrator_1_1Triangle.html" title="Numerical integrators on triangular elements." alt="" coords="528,332,751,373"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="python.concept.Polynomial" name="python.concept.Polynomial">
+<area shape="rect" id="node1" title="Polynomial functions defined on [&#45;1, 1]." alt="" coords="129,115,328,141"/>
+<area shape="rect" id="node3" href="$classpython_1_1polynomial_1_1Huynh.html" title="The left and right &#160;in Huynh&#39;s FR schemes." alt="" coords="393,5,584,32"/>
+<area shape="rect" id="node4" href="$classpython_1_1polynomial_1_1IthLagrange.html" title="The Ith Lagrange polynomial for N given points." alt="" coords="376,56,601,83"/>
+<area shape="rect" id="node5" href="$classpython_1_1polynomial_1_1LagrangeBasis.html" title="All Lagrange polynomials, which form a basis." alt="" coords="385,107,593,149"/>
+<area shape="rect" id="node6" href="$classpython_1_1polynomial_1_1Radau.html" title="The left and right Radau polynomials." alt="" coords="394,173,583,200"/>
+<area shape="rect" id="node7" href="$classpython_1_1polynomial_1_1Vincent.html" title="The left and right &#160;in Vincent&#39;s ESFR schemes." alt="" coords="390,224,587,251"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,115,81,141"/>
+</map>

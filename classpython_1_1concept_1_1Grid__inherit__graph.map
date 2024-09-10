@@ -1,0 +1,17 @@
+<map id="python.concept.Grid" name="python.concept.Grid">
+<area shape="rect" id="node1" title=" " alt="" coords="129,259,283,286"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1SpatialScheme.html" title="An ODE system given by some FiniteElement scheme." alt="" coords="331,259,553,286"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,259,81,286"/>
+<area shape="rect" id="node4" href="$classpython_1_1spatial_1_1FiniteElement.html" title="An ODE system given by some FiniteElement scheme." alt="" coords="601,234,811,261"/>
+<area shape="rect" id="node15" href="$classpython_1_1spatial_1_1FiniteVolume.html" title="An ODE system given by some FiniteVolume scheme." alt="" coords="604,285,808,311"/>
+<area shape="rect" id="node5" href="$classpython_1_1spatial_1_1DiscontinuousGalerkin.html" title="An mid&#45;level class that defines common methods for all DG schemes." alt="" coords="875,136,1086,177"/>
+<area shape="rect" id="node10" href="$classpython_1_1spatial_1_1FluxReconstruction.html" title="An mid&#45;level class that defines common methods for all FR schemes." alt="" coords="859,326,1103,353"/>
+<area shape="rect" id="node6" href="$classpython_1_1spatial_1_1DGonLegendreRoots.html" title="The ODE system given by the DG method using a Lagrange expansion on Legendre roots." alt="" coords="1151,5,1365,47"/>
+<area shape="rect" id="node7" href="$classpython_1_1spatial_1_1DGonLobattoRoots.html" title="The ODE system given by the DG method using a Lagrange expansion on Lobatto roots." alt="" coords="1156,71,1360,112"/>
+<area shape="rect" id="node8" href="$classpython_1_1spatial_1_1DGonUniformRoots.html" title="The ODE system given by the DG method using a Lagrange expansion on uniform roots." alt="" coords="1154,136,1362,177"/>
+<area shape="rect" id="node9" href="$classpython_1_1spatial_1_1LegendreDG.html" title="The ODE system given by the DG method using a Legendre expansion." alt="" coords="1159,202,1357,229"/>
+<area shape="rect" id="node11" href="$classpython_1_1spatial_1_1FRonLegendreRoots.html" title="The ODE system given by the FR method using a Lagrange expansion on Legendre roots." alt="" coords="1152,253,1364,295"/>
+<area shape="rect" id="node12" href="$classpython_1_1spatial_1_1FRonLobattoRoots.html" title="The ODE system given by the FR method using a Lagrange expansion on Lobatto roots." alt="" coords="1157,319,1359,360"/>
+<area shape="rect" id="node13" href="$classpython_1_1spatial_1_1FRonUniformRoots.html" title="The ODE system given by the DG method using a Lagrange expansion on uniform roots." alt="" coords="1155,384,1361,425"/>
+<area shape="rect" id="node14" href="$classpython_1_1spatial_1_1LegendreFR.html" title="The ODE system given by the FR method using a Legendre expansion." alt="" coords="1160,450,1356,477"/>
+</map>

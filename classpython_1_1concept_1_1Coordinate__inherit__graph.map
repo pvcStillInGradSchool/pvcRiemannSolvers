@@ -1,0 +1,6 @@
+<map id="python.concept.Coordinate" name="python.concept.Coordinate">
+<area shape="rect" id="node1" title="A cell&#45;like object that performs coordinate maps on it." alt="" coords="104,80,301,107"/>
+<area shape="rect" id="node3" href="$classpython_1_1coordinate_1_1Linear.html" title="A linear map between local and global coordinates." alt="" coords="5,155,189,181"/>
+<area shape="rect" id="node4" href="$classpython_1_1coordinate_1_1Shifted.html" title="An wrapper that acts as if a given coordinate is shifted along x&#45;axis by a given amount." alt="" coords="213,155,403,181"/>
+<area shape="rect" id="node2" title=" " alt="" coords="163,5,243,32"/>
+</map>

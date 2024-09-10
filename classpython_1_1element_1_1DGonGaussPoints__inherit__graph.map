@@ -1,0 +1,9 @@
+<map id="python.element.DGonGaussPoints" name="python.element.DGonGaussPoints">
+<area shape="rect" id="node1" title="Specialized LagrangeDG using Gauss points as solution points." alt="" coords="137,319,342,360"/>
+<area shape="rect" id="node6" href="$classpython_1_1element_1_1DGonLegendreRoots.html" title="Specialized DGonGaussPoints using Legendre roots as solution points." alt="" coords="5,408,231,449"/>
+<area shape="rect" id="node7" href="$classpython_1_1element_1_1DGonLobattoRoots.html" title="Specialized DGonGaussPoints using Lobatto roots as solution points." alt="" coords="255,408,469,449"/>
+<area shape="rect" id="node2" href="$classpython_1_1element_1_1LagrangeDG.html" title="Element for implement the DG scheme using a Lagrange expansion." alt="" coords="135,244,344,271"/>
+<area shape="rect" id="node3" href="$classpython_1_1element_1_1DiscontinuousGalerkin.html" title="Element for implement DG schemes." alt="" coords="129,155,350,196"/>
+<area shape="rect" id="node4" href="$classpython_1_1concept_1_1Element.html" title="A cell&#45;like object that carries some expansion of the solution." alt="" coords="149,80,329,107"/>
+<area shape="rect" id="node5" title=" " alt="" coords="201,5,277,32"/>
+</map>

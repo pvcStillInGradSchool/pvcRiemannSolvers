@@ -1,0 +1,5 @@
+<map id="python.temporal.ExplicitEuler" name="python.temporal.ExplicitEuler">
+<area shape="rect" id="node1" title="The explicit Euler method." alt="" coords="11,155,193,196"/>
+<area shape="rect" id="node2" href="$classpython_1_1concept_1_1OdeSolver.html" title="A solver for the standard ODE system dU/dt = R." alt="" coords="5,80,199,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="64,5,140,32"/>
+</map>

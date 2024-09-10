@@ -1,0 +1,4 @@
+<map id="mini::mesh::vtk::Tetrahedron10&lt; Local &gt;" name="mini::mesh::vtk::Tetrahedron10&lt; Local &gt;">
+<area shape="rect" id="node1" title="Mimic VTK&#39;s vtkQuadraticTetra." alt="" coords="5,80,231,121"/>
+<area shape="rect" id="node2" href="$classmini_1_1mesh_1_1vtk_1_1Element.html" title="Mimic VTK&#39;s cells." alt="" coords="25,5,211,32"/>
+</map>

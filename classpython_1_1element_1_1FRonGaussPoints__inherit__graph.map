@@ -1,0 +1,9 @@
+<map id="python.element.FRonGaussPoints" name="python.element.FRonGaussPoints">
+<area shape="rect" id="node1" title="Specialized LagrangeFR using Gauss points as solution points." alt="" coords="135,304,338,345"/>
+<area shape="rect" id="node6" href="$classpython_1_1element_1_1FRonLegendreRoots.html" title="Specialized LagrangeFR using Legendre roots as solution points." alt="" coords="5,393,228,435"/>
+<area shape="rect" id="node7" href="$classpython_1_1element_1_1FRonLobattoRoots.html" title="Specialized LagrangeFR using Lobatto roots as solution points." alt="" coords="251,393,462,435"/>
+<area shape="rect" id="node2" href="$classpython_1_1element_1_1LagrangeFR.html" title="Element for implement the FR scheme using a Lagrange expansion." alt="" coords="133,229,340,256"/>
+<area shape="rect" id="node3" href="$classpython_1_1element_1_1FluxReconstruction.html" title="Element for implement FR schemes." alt="" coords="109,155,364,181"/>
+<area shape="rect" id="node4" href="$classpython_1_1concept_1_1Element.html" title="A cell&#45;like object that carries some expansion of the solution." alt="" coords="147,80,327,107"/>
+<area shape="rect" id="node5" title=" " alt="" coords="199,5,275,32"/>
+</map>

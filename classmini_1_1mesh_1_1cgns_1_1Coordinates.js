@@ -1,0 +1,28 @@
+var classmini_1_1mesh_1_1cgns_1_1Coordinates =
+[
+    [ "Coordinates", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a8eedc44176cbfc9f5d0c67ef74bfda65", null ],
+    [ "Coordinates", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a30e43b9d4761145e91d432b5664f4b0d", null ],
+    [ "Coordinates", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a8fc16dbff98c497f8a6d557e4aa1a980", null ],
+    [ "~Coordinates", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a298377eb7088405b1408cb3fa1602e2a", null ],
+    [ "base", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a152746051dffb319bafd392d806a48fc", null ],
+    [ "CountNodes", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#abbd68a998b1c238cb498cc377f0bae1c", null ],
+    [ "Dilate", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a76305969a82619bf5438dfc1a3bd376c", null ],
+    [ "file", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a3c950d355d25589d54c7b4784609dc7c", null ],
+    [ "name", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a880a07494233def817d277962f13c9d0", null ],
+    [ "operator=", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a42d8039ab3df3b241e61fce415d80f82", null ],
+    [ "operator=", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#ae80b591cd8a37ce50aae4c51f5a1de4e", null ],
+    [ "Read", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a1742f77d5c94022c62e11caac8f9cb11", null ],
+    [ "RotateZ", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#ac809c56548eeaa0a5e7d3c0ef1390c2c", null ],
+    [ "Translate", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a2517700d38a165c14d39b0c22077621a", null ],
+    [ "Write", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#ac9c768272f36fb73bc459aca73413cbc", null ],
+    [ "x", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#af0bf10383d4e0d3cfe081b15711d6a13", null ],
+    [ "x", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a930d74e48fd733a2317b95825742751b", null ],
+    [ "x", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a02f4fae9354c9698fdf7c769b48f4727", null ],
+    [ "y", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a1839128a1bfc2a109f82f9fa21984976", null ],
+    [ "y", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a42eb3c5d1e6f6716f1b751e8822efc05", null ],
+    [ "y", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#aa9f96699d018a7fb1a4186736f2a1153", null ],
+    [ "z", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#aa372275e3b43510aae4ecb52b443cb79", null ],
+    [ "z", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a03693c3540952ecf4bc9965de5751d11", null ],
+    [ "z", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#afdcaca55bd3d0692b97705b33bc1a584", null ],
+    [ "zone", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a05e1470c9c6a3bb7da3730c702276879", null ]
+];

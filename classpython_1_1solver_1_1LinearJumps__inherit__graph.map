@@ -1,0 +1,6 @@
+<map id="python.solver.LinearJumps" name="python.solver.LinearJumps">
+<area shape="rect" id="node1" title="Demo the usage of LinearAdvection related classes for IC with jumps." alt="" coords="10,229,205,256"/>
+<area shape="rect" id="node2" href="$classpython_1_1solver_1_1LinearSmooth.html" title="Demo the usage of LinearAdvection related classes for smooth IC." alt="" coords="5,155,209,181"/>
+<area shape="rect" id="node3" href="$classpython_1_1solver_1_1SolverBase.html" title="Define common methods for all solvers." alt="" coords="14,80,201,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="69,5,145,32"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="mini::coordinate::Face&lt; Scalar, kPhysDim &gt;" name="mini::coordinate::Face&lt; Scalar, kPhysDim &gt;">
+<area shape="rect" id="node1" title="Abstract coordinate map on surface elements." alt="" coords="244,169,411,211"/>
+<area shape="rect" id="node3" href="$classmini_1_1coordinate_1_1Quadrangle.html" title="Abstract coordinate map on quadrilateral elements." alt="" coords="459,104,669,145"/>
+<area shape="rect" id="node7" href="$classmini_1_1coordinate_1_1Triangle.html" title="Abstract coordinate map on triangular elements." alt="" coords="471,201,657,243"/>
+<area shape="rect" id="node2" href="$classmini_1_1coordinate_1_1Element.html" title=" " alt="" coords="5,169,196,211"/>
+<area shape="rect" id="node4" href="$classmini_1_1coordinate_1_1Quadrangle4.html" title="Coordinate map on 4&#45;node quadrilateral elements." alt="" coords="717,5,936,47"/>
+<area shape="rect" id="node5" href="$classmini_1_1coordinate_1_1Quadrangle8.html" title="Coordinate map on 8&#45;node quadrilateral elements." alt="" coords="717,71,936,112"/>
+<area shape="rect" id="node6" href="$classmini_1_1coordinate_1_1Quadrangle9.html" title="Coordinate map on 9&#45;node quadrilateral elements." alt="" coords="717,136,936,177"/>
+<area shape="rect" id="node8" href="$classmini_1_1coordinate_1_1Triangle3.html" title="Coordinate map on 3&#45;node triangular elements." alt="" coords="729,201,924,243"/>
+<area shape="rect" id="node9" href="$classmini_1_1coordinate_1_1Triangle6.html" title="Coordinate map on 6&#45;node triangular elements." alt="" coords="729,267,924,308"/>
+</map>

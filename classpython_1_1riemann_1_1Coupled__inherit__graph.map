@@ -1,0 +1,6 @@
+<map id="python.riemann.Coupled" name="python.riemann.Coupled">
+<area shape="rect" id="node1" title="A system of two linearly coupled scalar equations." alt="" coords="27,229,209,256"/>
+<area shape="rect" id="node2" href="$classpython_1_1riemann_1_1Solver.html" title=" " alt="" coords="33,155,203,181"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1RiemannSolver.html" title="An exact or approximate solver for the Riemann problem of an Equation." alt="" coords="5,80,231,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="80,5,156,32"/>
+</map>

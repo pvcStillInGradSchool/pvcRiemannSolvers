@@ -1,0 +1,5 @@
+<map id="mini::integrator::Face&lt; Scalar, kPhysDim &gt;" name="mini::integrator::Face&lt; Scalar, kPhysDim &gt;">
+<area shape="rect" id="node1" title="Abstract numerical integrators on surface elements." alt="" coords="39,95,206,136"/>
+<area shape="rect" id="node3" href="$classmini_1_1integrator_1_1Triangle.html" title="Numerical integrators on triangular elements." alt="" coords="11,184,234,225"/>
+<area shape="rect" id="node2" href="$classmini_1_1integrator_1_1Element.html" title="Abstract numerical integrators on elements." alt="" coords="5,5,240,47"/>
+</map>

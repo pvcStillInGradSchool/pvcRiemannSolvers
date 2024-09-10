@@ -1,0 +1,6 @@
+<map id="python.element.LegendreFR" name="python.element.LegendreFR">
+<area shape="rect" id="node1" title="Element for implement the FR scheme using a Legendre expansion." alt="" coords="29,229,236,256"/>
+<area shape="rect" id="node2" href="$classpython_1_1element_1_1FluxReconstruction.html" title="Element for implement FR schemes." alt="" coords="5,155,260,181"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1Element.html" title="A cell&#45;like object that carries some expansion of the solution." alt="" coords="43,80,223,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="95,5,171,32"/>
+</map>

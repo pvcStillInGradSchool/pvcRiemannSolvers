@@ -1,0 +1,5 @@
+<map id="mini::temporal::Solver&lt; Scalar &gt;" name="mini::temporal::Solver&lt; Scalar &gt;">
+<area shape="rect" id="node1" title="The abstract base of all ODE solvers." alt="" coords="103,5,269,47"/>
+<area shape="rect" id="node2" href="$classmini_1_1temporal_1_1Euler.html" title="The simplest ODE Solver: ." alt="" coords="5,95,164,136"/>
+<area shape="rect" id="node3" href="$structmini_1_1temporal_1_1RungeKutta.html" title=" " alt="" coords="188,95,389,136"/>
+</map>

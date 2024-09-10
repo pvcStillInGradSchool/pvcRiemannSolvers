@@ -1,0 +1,5 @@
+<map id="python.temporal.RungeKutta" name="python.temporal.RungeKutta">
+<area shape="rect" id="node1" title="The explicit Runge–Kutta methods." alt="" coords="5,155,215,181"/>
+<area shape="rect" id="node2" href="$classpython_1_1concept_1_1OdeSolver.html" title="A solver for the standard ODE system dU/dt = R." alt="" coords="13,80,207,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="72,5,148,32"/>
+</map>

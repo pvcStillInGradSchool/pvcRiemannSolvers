@@ -1,0 +1,6 @@
+<map id="mini::coordinate::Wedge18&lt; Scalar &gt;" name="mini::coordinate::Wedge18&lt; Scalar &gt;">
+<area shape="rect" id="node1" title="Coordinate map on 18&#45;node wedge elements." alt="" coords="5,273,201,315"/>
+<area shape="rect" id="node2" href="$classmini_1_1coordinate_1_1Wedge.html" title="Abstract coordinate map on wedge elements." alt="" coords="13,184,193,225"/>
+<area shape="rect" id="node3" href="$classmini_1_1coordinate_1_1Cell.html" title="Abstract coordinate map on volume elements." alt="" coords="23,95,184,136"/>
+<area shape="rect" id="node4" href="$classmini_1_1coordinate_1_1Element.html" title=" " alt="" coords="8,5,199,47"/>
+</map>

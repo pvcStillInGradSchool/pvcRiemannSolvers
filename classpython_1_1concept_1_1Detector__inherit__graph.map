@@ -1,0 +1,12 @@
+<map id="python.concept.Detector" name="python.concept.Detector">
+<area shape="rect" id="node1" title="An object that detects jumps on an element." alt="" coords="129,56,312,83"/>
+<area shape="rect" id="node3" href="$classpython_1_1detector_1_1All.html" title="A jump detector that reports all cells as troubled." alt="" coords="395,5,540,32"/>
+<area shape="rect" id="node4" href="$classpython_1_1detector_1_1LiYanHui2022.html" title="A jump detector for high&#45;order FD schemes." alt="" coords="360,56,575,83"/>
+<area shape="rect" id="node5" href="$classpython_1_1detector_1_1SmoothnessBased.html" title=" " alt="" coords="363,107,571,149"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,56,81,83"/>
+<area shape="rect" id="node6" href="$classpython_1_1detector_1_1Kloeckner2011.html" title="A jump detector based on decay of modal coefficients." alt="" coords="631,13,857,40"/>
+<area shape="rect" id="node7" href="$classpython_1_1detector_1_1Krivodonova2004.html" title="A jump detector for high&#45;order DG schemes." alt="" coords="623,64,865,91"/>
+<area shape="rect" id="node8" href="$classpython_1_1detector_1_1LiWanAi2011.html" title="A jump detector for high&#45;order finite volume schemes." alt="" coords="638,115,850,141"/>
+<area shape="rect" id="node9" href="$classpython_1_1detector_1_1Persson2006.html" title="A jump detector based on decay of modal coefficients." alt="" coords="639,165,849,192"/>
+<area shape="rect" id="node10" href="$classpython_1_1detector_1_1ZhuJun2021.html" title="A jump detector for high&#45;order DG schemes." alt="" coords="641,216,847,243"/>
+</map>

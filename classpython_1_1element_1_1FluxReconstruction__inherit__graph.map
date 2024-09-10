@@ -1,0 +1,11 @@
+<map id="python.element.FluxReconstruction" name="python.element.FluxReconstruction">
+<area shape="rect" id="node1" title="Element for implement FR schemes." alt="" coords="340,155,595,181"/>
+<area shape="rect" id="node4" href="$classpython_1_1element_1_1LagrangeFR.html" title="Element for implement the FR scheme using a Lagrange expansion." alt="" coords="249,229,456,256"/>
+<area shape="rect" id="node9" href="$classpython_1_1element_1_1LegendreFR.html" title="Element for implement the FR scheme using a Legendre expansion." alt="" coords="480,229,687,256"/>
+<area shape="rect" id="node2" href="$classpython_1_1concept_1_1Element.html" title="A cell&#45;like object that carries some expansion of the solution." alt="" coords="377,80,557,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="429,5,505,32"/>
+<area shape="rect" id="node5" href="$classpython_1_1element_1_1FRonGaussPoints.html" title="Specialized LagrangeFR using Gauss points as solution points." alt="" coords="135,304,338,345"/>
+<area shape="rect" id="node8" href="$classpython_1_1element_1_1FRonUniformRoots.html" title="Specialized LagrangeFR using uniform (internal) roots as solution points." alt="" coords="363,304,577,345"/>
+<area shape="rect" id="node6" href="$classpython_1_1element_1_1FRonLegendreRoots.html" title="Specialized LagrangeFR using Legendre roots as solution points." alt="" coords="5,393,228,435"/>
+<area shape="rect" id="node7" href="$classpython_1_1element_1_1FRonLobattoRoots.html" title="Specialized LagrangeFR using Lobatto roots as solution points." alt="" coords="251,393,462,435"/>
+</map>

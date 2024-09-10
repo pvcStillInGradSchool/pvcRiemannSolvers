@@ -1,0 +1,12 @@
+<map id="python.spatial.DiscontinuousGalerkin" name="python.spatial.DiscontinuousGalerkin">
+<area shape="rect" id="node1" title="An mid&#45;level class that defines common methods for all DG schemes." alt="" coords="907,104,1117,145"/>
+<area shape="rect" id="node7" href="$classpython_1_1spatial_1_1DGonLegendreRoots.html" title="The ODE system given by the DG method using a Lagrange expansion on Legendre roots." alt="" coords="1165,5,1380,47"/>
+<area shape="rect" id="node8" href="$classpython_1_1spatial_1_1DGonLobattoRoots.html" title="The ODE system given by the DG method using a Lagrange expansion on Lobatto roots." alt="" coords="1171,71,1375,112"/>
+<area shape="rect" id="node9" href="$classpython_1_1spatial_1_1DGonUniformRoots.html" title="The ODE system given by the DG method using a Lagrange expansion on uniform roots." alt="" coords="1169,136,1377,177"/>
+<area shape="rect" id="node10" href="$classpython_1_1spatial_1_1LegendreDG.html" title="The ODE system given by the DG method using a Legendre expansion." alt="" coords="1173,202,1372,229"/>
+<area shape="rect" id="node2" href="$classpython_1_1spatial_1_1FiniteElement.html" title="An ODE system given by some FiniteElement scheme." alt="" coords="649,111,859,138"/>
+<area shape="rect" id="node3" href="$classpython_1_1concept_1_1SpatialScheme.html" title="An ODE system given by some FiniteElement scheme." alt="" coords="379,111,601,138"/>
+<area shape="rect" id="node4" href="$classpython_1_1concept_1_1Grid.html" title=" " alt="" coords="153,86,307,113"/>
+<area shape="rect" id="node5" title=" " alt="" coords="5,111,81,138"/>
+<area shape="rect" id="node6" href="$classpython_1_1concept_1_1OdeSystem.html" title="A system of ODEs in the form of dU/∂t = R." alt="" coords="129,137,331,163"/>
+</map>

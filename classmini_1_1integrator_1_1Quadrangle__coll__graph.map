@@ -1,0 +1,5 @@
+<map id="mini::integrator::Quadrangle&lt; kPhysDim, Gx, Gy &gt;" name="mini::integrator::Quadrangle&lt; kPhysDim, Gx, Gy &gt;">
+<area shape="rect" id="node1" title="Numerical integrators on quadrilateral elements." alt="" coords="19,184,226,225"/>
+<area shape="rect" id="node2" href="$classmini_1_1integrator_1_1Face.html" title=" " alt="" coords="27,95,219,136"/>
+<area shape="rect" id="node3" href="$classmini_1_1integrator_1_1Element.html" title="Abstract numerical integrators on elements." alt="" coords="5,5,240,47"/>
+</map>

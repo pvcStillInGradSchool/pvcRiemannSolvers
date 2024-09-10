@@ -1,0 +1,25 @@
+var classmini_1_1riemann_1_1rotated_1_1Simple =
+[
+    [ "Base", "classmini_1_1riemann_1_1rotated_1_1Simple.html#ac62428ce994db7956cf2de2e331e6e3f", null ],
+    [ "Coefficient", "classmini_1_1riemann_1_1rotated_1_1Simple.html#ad7bc49369ec1d0fc39980e529c8ffd79", null ],
+    [ "Conservative", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a1bee3918f15f37346d8dcde64281d7a0", null ],
+    [ "Flux", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a3eb1f0ff4160575d496f4234a15b4a0a", null ],
+    [ "FluxMatrix", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a91b5fb73dd9f5112c02217b2c5e0ea6f", null ],
+    [ "Frame", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a70a920bf21258c944f4bb14f105c265d", null ],
+    [ "Jacobian", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a18124eb28f2a1574b65ebe389c55b7c7", null ],
+    [ "MatKx1", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a768c366e1b99f011849039b8124da7c1", null ],
+    [ "Scalar", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a9eed28af313439ed3e553b8b27344e27", null ],
+    [ "Vector", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a2db09e65be267b80a07664bea4034aa1", null ],
+    [ "GetFluxOnInviscidWall", "classmini_1_1riemann_1_1rotated_1_1Simple.html#acc520b4451238ccf57ae12ddbe5f2063", null ],
+    [ "GetFluxOnSmartBoundary", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a63a1d6ccc14af2d6526563ae28c79131", null ],
+    [ "GetFluxOnSubsonicInlet", "classmini_1_1riemann_1_1rotated_1_1Simple.html#abad26993b80b59b9ed3735550f5b02a5", null ],
+    [ "GetFluxOnSubsonicOutlet", "classmini_1_1riemann_1_1rotated_1_1Simple.html#aed4efc2f9388588e6c840a71e6f45a34", null ],
+    [ "GetFluxOnSupersonicInlet", "classmini_1_1riemann_1_1rotated_1_1Simple.html#aa8d9d24ab6608601543ec376e298ba85", null ],
+    [ "GetFluxOnSupersonicOutlet", "classmini_1_1riemann_1_1rotated_1_1Simple.html#abfc7df86a7f7886617646a3eea62bc48", null ],
+    [ "GetFluxUpwind", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a050c71f681356038bcac7456bafc6af4", null ],
+    [ "MinusMirroredValue", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a7b8a7f5ea25bb3e269d564a7edcb7ff0", null ],
+    [ "normal", "classmini_1_1riemann_1_1rotated_1_1Simple.html#acf7a249c895ea9d0d4b47d4428774ae0", null ],
+    [ "Rotate", "classmini_1_1riemann_1_1rotated_1_1Simple.html#aa428cbe642d00520bbbba6928be8d1c5", null ],
+    [ "frame_", "classmini_1_1riemann_1_1rotated_1_1Simple.html#a2afcdac1ff02fc50e086361cd97ce19a", null ],
+    [ "unrotated_simple_", "classmini_1_1riemann_1_1rotated_1_1Simple.html#ae4891f39fe7a639ed627e24fceae19ea", null ]
+];

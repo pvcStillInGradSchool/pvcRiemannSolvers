@@ -1,0 +1,6 @@
+<map id="mini::spatial::fr::General&lt; P, R &gt;" name="mini::spatial::fr::General&lt; P, R &gt;">
+<area shape="rect" id="node1" title="A general version of FR using a Lagrange expansion whose flux points are also solution points." alt="" coords="41,184,171,225"/>
+<area shape="rect" id="node4" href="$classmini_1_1spatial_1_1fr_1_1Lobatto.html" title="A specialized version of FR using a Lagrange expansion on Lobatto roots with the &quot;Lumping Lobatto&quot; co..." alt="" coords="41,273,171,315"/>
+<area shape="rect" id="node2" href="$classmini_1_1spatial_1_1FiniteElement.html" title=" " alt="" coords="5,95,207,136"/>
+<area shape="rect" id="node3" href="$classmini_1_1temporal_1_1System.html" title=" " alt="" coords="19,5,193,47"/>
+</map>

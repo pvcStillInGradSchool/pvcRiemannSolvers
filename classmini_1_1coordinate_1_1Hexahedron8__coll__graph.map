@@ -1,0 +1,6 @@
+<map id="mini::coordinate::Hexahedron8&lt; Scalar &gt;" name="mini::coordinate::Hexahedron8&lt; Scalar &gt;">
+<area shape="rect" id="node1" title="Coordinate map on 8&#45;node hexahedral elements." alt="" coords="5,273,228,315"/>
+<area shape="rect" id="node2" href="$classmini_1_1coordinate_1_1Hexahedron.html" title="Abstract coordinate map on hexahedral elements." alt="" coords="9,184,224,225"/>
+<area shape="rect" id="node3" href="$classmini_1_1coordinate_1_1Cell.html" title="Abstract coordinate map on volume elements." alt="" coords="36,95,197,136"/>
+<area shape="rect" id="node4" href="$classmini_1_1coordinate_1_1Element.html" title=" " alt="" coords="21,5,212,47"/>
+</map>

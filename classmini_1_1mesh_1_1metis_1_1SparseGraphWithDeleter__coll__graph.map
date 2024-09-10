@@ -1,0 +1,5 @@
+<map id="mini::mesh::metis::SparseGraphWithDeleter&lt; Int &gt;" name="mini::mesh::metis::SparseGraphWithDeleter&lt; Int &gt;">
+<area shape="rect" id="node1" title="A wrapper, which holds arrays allocated by METIS, on SparseGraph." alt="" coords="5,215,188,271"/>
+<area shape="rect" id="node2" href="$classmini_1_1mesh_1_1metis_1_1SparseGraph.html" title="A CSR (Compressed Sparse Row) representation of sparse graphs." alt="" coords="21,124,173,165"/>
+<area shape="rect" id="node3" title=" " alt="" coords="77,5,116,32"/>
+</map>
