@@ -1,0 +1,4 @@
+n_frame: 50
+n_step_per_frame: 100
+n_point: 1000
+h_0: 0.005

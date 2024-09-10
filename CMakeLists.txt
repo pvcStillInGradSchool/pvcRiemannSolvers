@@ -136,6 +136,14 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 enable_language(CUDA)
 set(CMAKE_CUDA_FLAGS "--std c++20" CACHE STRING "C++ standard version" FORCE)
 
+include(FetchContent)
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG master
+)
+FetchContent_MakeAvailable(yaml-cpp)
+
 option(${PROJECT_NAME}_BUILD_TESTS "Build tests for this project." "ON")
 if (${PROJECT_NAME}_BUILD_TESTS)
   include(CTest)

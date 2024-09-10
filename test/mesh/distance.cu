@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <concepts>
+#include <cstdio>
 #include <fstream>
 #include <numeric>
 #include <unordered_map>
@@ -17,6 +18,9 @@
 
 #include <cuda_runtime_api.h>
 #include <device_launch_parameters.h>
+
+#include "yaml-cpp/yaml.h"
+
 #define NSTREAMS 4
 
 template <typename Delaunay>
@@ -370,19 +374,34 @@ void DeviceGetLengths(int n_edge, Memory<Real> const &host_memory_pinned,
   delete[] streams;
 }
 
+template <typename T>
+T Get(YAML::Node const &config, char const *key) {
+  try {
+    return config[key].as<T>();
+  } catch (...) {
+    std::fprintf(stderr, "Failed to parse the key \"%s\"\n", key);
+    throw;
+  }
+}
+
 int main(int argc, char *argv[]) {
   std::srand(31415926);
 
   using Real = double;
   using Column = HostDynamicVector<Real>;
 
-  // ./distance <n_point> <n_frame> <n_step_per_frame>
-  int n_point = std::atoi(argv[1]);
-  int n_frame = std::atoi(argv[2]);  // maximum writing step
-  int n_step_per_frame = std::atoi(argv[3]);
+  if (argc < 2) {
+    std::cout << "usage:\n    ./distance <config.yaml>\n";
+    return -1;
+  }
+  YAML::Node config = YAML::LoadFile(argv[1]);
+
+  int n_point = Get<int>(config, "n_point");
+  int n_frame = Get<int>(config, "n_frame");  // maximum writing step
+  int n_step_per_frame = Get<int>(config, "n_step_per_frame");
   int n_step = n_step_per_frame * n_frame;  // maximum iteration step
 
-  Real const h_0 = 0.005;
+  Real const h_0 = Get<Real>(config, "h_0");
   Real const eps = 1e-16;
   auto g_eps = h_0 * 0.001;  // for rejecting out-of-domain faces
   auto d_eps = h_0 * std::sqrt(eps);  // for finite-differencing d(x, y)
