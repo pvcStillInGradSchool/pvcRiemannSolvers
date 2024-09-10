@@ -485,13 +485,13 @@ int main(int argc, char *argv[]) {
     x_old[i] += delaunay_tol * 2;
   }
 
-  auto HasLargeShift = [](Real delaunay_tol,
+  auto HasLargeShift = [h_0](Real delaunay_tol,
       Column const &x_old, Column const &x,
       Column const &y_old, Column const &y) {
     Column norms = (
         (x_old - x).array().square() +
         (y_old - y).array().square()).sqrt();
-    return norms.maxCoeff() > delaunay_tol;
+    return norms.maxCoeff() / h_0 > delaunay_tol;
   };
 
   int too_close_freq = 25;
@@ -586,16 +586,19 @@ int main(int argc, char *argv[]) {
     std::for_each_n(expect_l, n_edge,
         [norm_ratio](Real &x) { x *= norm_ratio; });
 
-    // Label too-close points:
+    // Label too-close points on boundaries:
     if ((i_step + 1) % too_close_freq == 0) {
       assert(too_close.empty());
       for (int i = 0; i < n_edge; ++i) {
         if (expect_l[i] > 2 * actual_l[i]) {
           auto [u, v] = edges[i];
-          if (u >= n_fixed) {
+          auto TooClose = [g_eps, &x, &y](int p) -> bool {
+            return p >= n_fixed && distance(x[p], y[p]) > -g_eps;
+          };
+          if (TooClose(u)) {
             too_close.emplace(u);
           }
-          if (v >= n_fixed) {
+          if (TooClose(v)) { 
             too_close.emplace(v);
           }
         }
@@ -631,8 +634,12 @@ int main(int argc, char *argv[]) {
 
     // Project back out-of-domain points:
     auto out = std::vector<int>();
+    Column distances(n_point);
+    for (int i = 0; i < n_fixed; i++) {
+      distances[i] = 0;
+    }
     for (int i = n_fixed; i < n_point; i++) {
-      Real d = distance(x[i], y[i]);
+      Real d = (distances[i] = distance(x[i], y[i]));
       if (d <= 0) {
         continue;
       }
@@ -650,7 +657,7 @@ int main(int argc, char *argv[]) {
     // Update the maximum shift:
     max_shift_square = 0.;
     for (int i = n_fixed; i < n_point; i++) {
-      if (distance(x[i], y[i]) > -g_eps) {
+      if (distances[i] > -g_eps) {
         continue;
       }
       max_shift_square = std::max(max_shift_square,
@@ -658,7 +665,8 @@ int main(int argc, char *argv[]) {
     }
     auto max_shift = std::sqrt(max_shift_square) / h_0;
 
-    std::cout << "Step " << i_step << ", n_edge = " << n_edge << ", max_shift = " << max_shift << "\n";
+    std::cout << "Step " << i_step << ", n_point = " << n_point
+        << ", n_edge = " << n_edge << ", max_shift = " << max_shift << "\n";
 
     if (max_shift < max_shift_tol) {
       int i_frame = (i_step + n_step_per_frame - 1) / n_step_per_frame;
