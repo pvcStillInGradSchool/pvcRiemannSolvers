@@ -21,8 +21,6 @@
 
 #include "yaml-cpp/yaml.h"
 
-#define NSTREAMS 4
-
 template <typename Delaunay>
 std::vector<std::array<int, 3>> GetFaces(Delaunay const &delaunay) {
   // prepare the vertex_handle-to-vertex_index map:
@@ -317,27 +315,27 @@ __global__ void DeviceGetLength(int n_edge,
 }
 
 template <std::floating_point Real>
-void DeviceGetLengths(int n_edge, Memory<Real> const &host_memory_pinned,
-    Memory<Real> *device_memory,
+void DeviceGetLengths(int n_stream, int n_thread, int n_edge,
+    Memory<Real> const &host_memory_pinned, Memory<Real> *device_memory,
     Real *bar_x, Real *bar_y, Real *actual_l, Real *expect_l) {
   // Initialize streams for concurrency:
-  auto streams = new cudaStream_t[NSTREAMS];
-  for (int i = 0; i < NSTREAMS; i++) {
+  auto streams = new cudaStream_t[n_stream];
+  for (int i = 0; i < n_stream; i++) {
     cudaStreamCreate(&streams[i]);
   } 
-  int n_edge_per_stream = n_edge / NSTREAMS;
+  int n_edge_per_stream = n_edge / n_stream;
   int n_byte = n_edge_per_stream * sizeof(Real);
-  // Dispatch comm and comp for n_edge_per_stream edges to NSTREAMS streams:
-  for (int i_stream = 0; i_stream < NSTREAMS; i_stream++) {
+  // Dispatch comm and comp for n_edge_per_stream edges to n_stream streams:
+  for (int i_stream = 0; i_stream < n_stream; i_stream++) {
     int offset = i_stream * n_edge_per_stream;
-    if (i_stream + 1 == NSTREAMS) {
+    if (i_stream + 1 == n_stream) {
       n_edge_per_stream = n_edge - i_stream * n_edge_per_stream;
       n_byte = n_edge_per_stream * sizeof(Real);
     }
     // std::cout << "i_stream = " << i_stream << "\n";
     // std::cout << "  n_edge_per_stream = " << n_edge_per_stream << ", ";
     // std::cout << "  n_byte = " << n_byte << "\n";
-    dim3 block = std::min(256, n_edge_per_stream);
+    dim3 block = std::min(n_thread, n_edge_per_stream);
     dim3 grid = (n_edge_per_stream + block.x - 1) / block.x;
     // std::cout << "  block.x = " << block.x << ", ";
     // std::cout << "  grid.x = " << grid.x << "\n";
@@ -368,7 +366,7 @@ void DeviceGetLengths(int n_edge, Memory<Real> const &host_memory_pinned,
         n_byte, cudaMemcpyDeviceToHost, stream_i);
   }
   cudaDeviceSynchronize();
-  for (int i = 0; i < NSTREAMS; i++) {
+  for (int i = 0; i < n_stream; i++) {
     cudaStreamDestroy(streams[i]);
   }
   delete[] streams;
@@ -396,6 +394,8 @@ int main(int argc, char *argv[]) {
   }
   YAML::Node config = YAML::LoadFile(argv[1]);
 
+  int n_stream = Get<int>(config, "n_stream");
+  int n_thread = Get<int>(config, "n_thread");
   int n_point = Get<int>(config, "n_point");
   int n_frame = Get<int>(config, "n_frame");  // maximum writing step
   int n_step_per_frame = Get<int>(config, "n_step_per_frame");
@@ -558,7 +558,8 @@ int main(int argc, char *argv[]) {
     host_cost += elapsed_time;
 
     cudaEventRecord(start);
-    DeviceGetLengths(n_edge, host_memory_pinned, &device_memory,
+    DeviceGetLengths(n_stream, n_thread, n_edge,
+        host_memory_pinned, &device_memory,
         bar_x, bar_y, actual_l, expect_l);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
@@ -682,6 +683,7 @@ int main(int argc, char *argv[]) {
 
   printf("The host costs %.2f ms\n", host_cost);
   printf("The device costs %.2f ms\n", device_cost);
+  printf("The speed-up ratio is %.2f\n", host_cost / device_cost);
 
   return 0;
 }
