@@ -349,6 +349,10 @@ class WaveNumberDisplayer:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='python3 wave_number.py')
+    parser.add_argument('--task',
+        choices=['AllModes', 'DGvsFR', 'HuynhFR', 'CompareDDG'],
+        default='AllModes',
+        help='task to be run')
     parser.add_argument('-m', '--method',
         choices=['DGonLegendreRoots', 'DGonLobattoRoots', 'DGonUniformRoots', 'LegendreDG',
                  'FRonLegendreRoots', 'FRonLobattoRoots', 'FRonUniformRoots',],
@@ -391,13 +395,6 @@ if __name__ == '__main__':
     else:
         assert False
     wnd = WaveNumberDisplayer(args.x_left, args.x_right, args.n_element)
-    wnd.plot_modified_wavenumbers(SpatialClass, args.degree,
-        Vincent(args.degree + 1, Vincent.huynh_lumping_lobatto), args.n_sample)
-    wnd.compare_wave_numbers([spatial.LegendreDG,
-        spatial.DGonLegendreRoots, spatial.DGonLobattoRoots,
-        spatial.FRonLegendreRoots, spatial.FRonUniformRoots,],
-        [args.degree], [lambda p: Huynh(p + 1, 2)],
-        args.n_sample, args.compressed, 'DGvsFR')
     degree_to_corrections = [
         lambda p: Vincent(p + 1, Vincent.discontinuous_galerkin),
         lambda p: Vincent(p + 1, Vincent.huynh_lumping_lobatto),
@@ -407,9 +404,22 @@ if __name__ == '__main__':
         lambda p: Huynh(p + 1, 4),
         lambda p: Huynh(p + 1, 5),
     ]
-    wnd.compare_wave_numbers([spatial.FRonLobattoRoots],
-        [5], degree_to_corrections,
-        args.n_sample, args.compressed, 'HuynhFR')
-    wnd.compare_diffusive_schemes(spatial.FRonLobattoRoots,
-        3, degree_to_corrections[1],
-        args.n_sample, args.compressed, 'CompareDDG')
+    if args.task == 'AllModes':
+        wnd.plot_modified_wavenumbers(SpatialClass, args.degree,
+            Vincent(args.degree + 1, Vincent.huynh_lumping_lobatto), args.n_sample)
+    elif args.task == 'DGvsFR':
+        wnd.compare_wave_numbers([spatial.LegendreDG,
+            spatial.DGonLegendreRoots, spatial.DGonLobattoRoots,
+            spatial.FRonLegendreRoots, spatial.FRonUniformRoots,],
+            [args.degree], [lambda p: Huynh(p + 1, 2)],
+            args.n_sample, args.compressed, args.task)
+    elif args.task == 'HuynhFR':
+        wnd.compare_wave_numbers([spatial.FRonLobattoRoots],
+            [5], degree_to_corrections,
+            args.n_sample, args.compressed, args.task)
+    elif args.task == 'CompareDDG':
+        wnd.compare_diffusive_schemes(spatial.FRonLobattoRoots,
+            3, degree_to_corrections[1],
+            args.n_sample, args.compressed, args.task)
+    else:
+        pass
