@@ -112,18 +112,24 @@ class WaveNumberDisplayer:
         s_curr += s_next * np.exp(+1j * kappa_h)
         return s_curr
 
+    def get_spatial_matrix_eigvals(self, scheme: spatial.FiniteElement, kappa_h: float):
+        """Get the eigenvalues of a scheme at a given wavenumber.
+        """
+        matrix = self.get_spatial_matrix_fast(scheme, kappa_h)
+        return np.linalg.eigvals(matrix)
+
     def get_modified_wavenumbers(self, scheme: spatial.FiniteElement,
             sampled_wavenumbers: np.ndarray):
-        """Get the eigenvalues of a scheme at a given set of wavenumbers.
+        """Get the modified wavenumbers of a scheme at a given set of wavenumbers.
         """
         n_sample = len(sampled_wavenumbers)
         n_term = scheme.degree() + 1
         modified_wavenumbers = np.ndarray((n_sample, n_term), dtype=complex)
         for i_sample in range(n_sample):
             kappa_h = sampled_wavenumbers[i_sample]
-            matrix = self.get_spatial_matrix_fast(scheme, kappa_h)
-            matrix *= 1j * scheme.delta_x(0) / self._a
-            modified_wavenumbers[i_sample, :] = np.linalg.eigvals(matrix)
+            modified_wavenumbers[i_sample, :] = \
+                1j * scheme.delta_x(0) / self._a * \
+                self.get_spatial_matrix_eigvals(scheme, kappa_h)
         return modified_wavenumbers
 
     def get_physical_mode(self, sampled_wavenumbers: np.ndarray,
