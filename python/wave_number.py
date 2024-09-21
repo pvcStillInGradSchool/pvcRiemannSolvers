@@ -352,11 +352,67 @@ class WaveNumberDisplayer:
         # plt.show()
         savefig(f'{name}')
 
+    def compare_scheme_orders(self, method, degree, degree_to_correction,
+            n_sample: int, compressed: bool, name: str):
+        print("compare_scheme_orders")
+        print("  method =", method)
+        print("  degree =", degree)
+        print("  degree_to_correction =", degree_to_correction)
+        print("  n_sample =", n_sample)
+        print("  compressed =", compressed)
+        print("  name =", name)
+        plt.figure(figsize=(6,6))
+        # plt.subplot(2,1,1)
+        plt.ylabel(r'$|\tilde{\kappa}h - \kappa h|$')
+        plt.xlabel(r'$\kappa h$')
+        # plt.subplot(2,1,2)
+        # plt.ylabel(r'$\Im(\tilde{\kappa}h - \kappa h)\,/\,$'+divisor)
+        # plt.xlabel(r'$\kappa h\,/\,$'+divisor)
+        i = 0
+        g = degree_to_correction(degree)
+        scheme = self.build_scheme(method, degree, g)
+        n_element_vec = 4 ** np.arange(2, 8)
+        print(n_element_vec)
+        sampled_wavenumbers = 2 * np.pi / n_element_vec
+        print(sampled_wavenumbers)
+        # scale = (degree * compressed + 1) * np.pi
+        b_backup = self._riemann.equation()._b
+        beta_backup = (riemann.Solver._beta_0, riemann.Solver._beta_1)
+        self._riemann.equation()._b = 1e-1
+        exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
+        for beta_0 in (0.5, 2.0, 4.0):
+            riemann.Solver._beta_0 = beta_0
+            for beta_1 in (0.0, 1.0/12, 1.0):
+                riemann.Solver._beta_1 = beta_1
+                modified_wavenumbers = self.get_modified_wavenumbers(
+                    scheme, sampled_wavenumbers)
+                eigvals = self.get_physical_mode(sampled_wavenumbers,
+                    modified_wavenumbers)
+                eigvals -= exact
+                norms = np.sqrt(eigvals.real**2 + eigvals.imag**2)
+                # plt.subplot(2,1,1)
+                plt.plot(sampled_wavenumbers, norms,
+                    label=self._riemann.diffusive_name(),
+                    linestyle=line_styles[i][1], marker='o')
+                i += 1
+        self._riemann.equation()._b = b_backup
+        riemann.Solver._beta_0, riemann.Solver._beta_1 = beta_backup
+        # plt.subplot(2,1,1)
+        plt.plot([1e-2, 1e-1], [1e-15, 1e-12], label=r'$p=3$')
+        plt.plot([1e-2, 1e-1], [1e-15, 1e-11], label=r'$p=4$')
+        plt.plot([1e-2, 1e-1], [1e-15, 1e-10], label=r'$p=5$')
+        plt.grid()
+        plt.legend(handlelength=4)
+        plt.loglog()
+        plt.tight_layout()
+        # plt.show()
+        savefig(f'{name}')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='python3 wave_number.py')
     parser.add_argument('--task',
-        choices=['AllModes', 'DGvsFR', 'HuynhFR', 'CompareDDG'],
+        choices=['AllModes', 'DGvsFR', 'HuynhFR', 'CompareDDG', 'CompareOrders'],
         default='AllModes',
         help='task to be run')
     parser.add_argument('-m', '--method',
@@ -425,6 +481,10 @@ if __name__ == '__main__':
             args.n_sample, args.compressed, args.task)
     elif args.task == 'CompareDDG':
         wnd.compare_diffusive_schemes(spatial.FRonLobattoRoots,
+            3, degree_to_corrections[1],
+            args.n_sample, args.compressed, args.task)
+    elif args.task == 'CompareOrders':
+        wnd.compare_scheme_orders(spatial.FRonLobattoRoots,
             3, degree_to_corrections[1],
             args.n_sample, args.compressed, args.task)
     else:
