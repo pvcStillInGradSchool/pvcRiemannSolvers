@@ -361,24 +361,20 @@ class WaveNumberDisplayer:
         print("  n_sample =", n_sample)
         print("  compressed =", compressed)
         print("  name =", name)
-        plt.figure(figsize=(6,6))
-        # plt.subplot(2,1,1)
-        plt.ylabel(r'$|\tilde{\kappa}h - \kappa h|$')
+        plt.figure(figsize=(8,6))
+        plt.ylabel(r'$\Delta(\tilde{\kappa}h)=O(h^{p+1})$')
         plt.xlabel(r'$\kappa h$')
-        # plt.subplot(2,1,2)
-        # plt.ylabel(r'$\Im(\tilde{\kappa}h - \kappa h)\,/\,$'+divisor)
-        # plt.xlabel(r'$\kappa h\,/\,$'+divisor)
         i = 0
         g = degree_to_correction(degree)
         scheme = self.build_scheme(method, degree, g)
-        n_element_vec = 4 ** np.arange(2, 8)
+        n_element_vec = 4 ** np.arange(1, 8)
         print(n_element_vec)
         sampled_wavenumbers = 2 * np.pi / n_element_vec
         print(sampled_wavenumbers)
-        # scale = (degree * compressed + 1) * np.pi
         b_backup = self._riemann.equation()._b
         beta_backup = (riemann.Solver._beta_0, riemann.Solver._beta_1)
-        self._riemann.equation()._b = 1e-1
+        self._riemann.equation()._b = 1e+2
+        plt.title(f'{scheme.name()}, a/b={self._a / self._riemann.equation()._b}')
         exact = self.get_exact_modified_wavenumbers(sampled_wavenumbers)
         for beta_0 in (0.5, 2.0, 4.0):
             riemann.Solver._beta_0 = beta_0
@@ -390,23 +386,20 @@ class WaveNumberDisplayer:
                     modified_wavenumbers)
                 eigvals -= exact
                 norms = np.sqrt(eigvals.real**2 + eigvals.imag**2)
-                # plt.subplot(2,1,1)
                 plt.plot(sampled_wavenumbers, norms,
                     label=self._riemann.diffusive_name(),
                     linestyle=line_styles[i][1], marker='o')
                 i += 1
         self._riemann.equation()._b = b_backup
         riemann.Solver._beta_0, riemann.Solver._beta_1 = beta_backup
-        # plt.subplot(2,1,1)
-        plt.plot([1e-2, 1e-1], [1e-15, 1e-12], label=r'$p=3$')
-        plt.plot([1e-2, 1e-1], [1e-15, 1e-11], label=r'$p=4$')
-        plt.plot([1e-2, 1e-1], [1e-15, 1e-10], label=r'$p=5$')
+        for p in range(degree, degree + 3):
+            plt.plot([1e-1, 1e-0], [1e-9, 1e-9 * 10**(p+1)], label=r'$p=$'+f'{p}')
         plt.grid()
         plt.legend(handlelength=4)
         plt.loglog()
         plt.tight_layout()
         # plt.show()
-        savefig(f'{name}')
+        savefig(f'{name}_p={degree}')
 
 
 if __name__ == '__main__':
@@ -485,7 +478,7 @@ if __name__ == '__main__':
             args.n_sample, args.compressed, args.task)
     elif args.task == 'CompareOrders':
         wnd.compare_scheme_orders(spatial.FRonLobattoRoots,
-            3, degree_to_corrections[1],
+            args.degree, degree_to_corrections[3],
             args.n_sample, args.compressed, args.task)
     else:
         pass
