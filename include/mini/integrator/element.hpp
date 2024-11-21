@@ -107,7 +107,7 @@ class Element {
       auto mat_j = coordinate().LocalToJacobian(local_i);
       auto det_j = CellDim() < PhysDim()
           ? std::sqrt((mat_j * mat_j.transpose()).determinant())
-          : std::abs(mat_j.determinant());
+          : mat_j.determinant();
       GetGlobalWeight(i) = GetLocalWeight(i) * det_j;
       sum += GetGlobalWeight(i);
     }

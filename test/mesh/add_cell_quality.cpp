@@ -1,6 +1,7 @@
 // Copyright 2024 PEI Weicheng
 
 #include <cstdio>
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -103,9 +104,15 @@ int main(int argc, char* argv[]) {
         min_jacobians.at(i_cell) = min_jacobian;
         max_jacobians.at(i_cell) = max_jacobian;
         volumes.at(i_cell) = integrator.volume();
+        std::printf("%d / %d\n", i_cell, n_cell);
       }
     }
   }
+  auto is_negative = [](double value) { return value < 0; };
+  std::printf("%ld cells have negative determinants of Jacobians\n",
+      std::ranges::count_if(min_jacobians, is_negative));
+  std::printf("%ld cells have negative volumes\n",
+      std::ranges::count_if(volumes, is_negative));
 
   // write the augmented file
   for (int i = 0; i < 5; ++i) {

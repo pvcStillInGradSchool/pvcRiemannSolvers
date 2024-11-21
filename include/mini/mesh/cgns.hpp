@@ -603,6 +603,12 @@ class Field {
   Real *data() {
     return data_.data();
   }
+  auto begin() {
+    return data_.begin();
+  }
+  auto end() {
+    return data_.end();
+  }
 
  private:
   std::vector<Real> data_;
