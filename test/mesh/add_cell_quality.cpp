@@ -17,8 +17,17 @@ using mini::mesh::cgns::ElementType;
 using mini::mesh::cgns::DataType;
 
 using File = mini::mesh::cgns::File<double>;
+using Coordinates = mini::mesh::cgns::Coordinates<double>;
 using Solution = mini::mesh::cgns::Solution<double>;
-using Field = std::vector<double>;
+
+using Coordinate = mini::coordinate::Hexahedron8<double>;
+using Global = typename Coordinate::Global;
+using Gx = mini::integrator::Lobatto<double, 3>;
+using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
+
+inline Global GetGlobal(Coordinates const &coordinates, cgsize_t i_node/* 1-based */) {
+  return { coordinates.x(i_node), coordinates.y(i_node), coordinates.z(i_node) };
+}
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {
@@ -44,6 +53,7 @@ int main(int argc, char* argv[]) {
   auto &zone = base.GetZone(1);
   auto n_node = zone.CountNodes();
   auto n_cell = zone.CountCells();
+  std::printf("n_node = %d, n_cell = %d\n", n_node, n_cell);
 
   // read GridCoodinates_t
   auto &coordinates = zone.GetCoordinates();
@@ -73,36 +83,26 @@ int main(int argc, char* argv[]) {
   // read Elements_t's
   auto n_sect = zone.CountSections();
   for (int i_sect = 1; i_sect <= n_sect; ++i_sect) {
-    auto &section = zone.GetSection(1);
+    auto &section = zone.GetSection(i_sect);
     if (section.type() == CGNS_ENUMV(HEXA_8)) {
-      using Coordinate = mini::coordinate::Hexahedron8<double>;
-      using Global = typename Coordinate::Global;
-      using Gx = mini::integrator::Lobatto<double, 3>;
-      using Gy = mini::integrator::Lobatto<double, 3>;
-      using Gz = mini::integrator::Lobatto<double, 3>;
-      using Integrator = mini::integrator::Hexahedron<Gx, Gy, Gz>;
-      for (int i_cell = section.CellIdMin(); i_cell <= section.CellIdMin(); ++i_cell) {
-        auto *nodes = section.GetNodeIdList(i_cell);
+      for (int i_cell = section.CellIdMin(); i_cell <= section.CellIdMax(); ++i_cell) {
+        auto const *nodes = section.GetNodeIdList(i_cell);
         auto coordinate = Coordinate{
-          Global(x[nodes[0]], y[nodes[0]], z[nodes[0]]),
-          Global(x[nodes[1]], y[nodes[1]], z[nodes[1]]),
-          Global(x[nodes[2]], y[nodes[2]], z[nodes[2]]),
-          Global(x[nodes[3]], y[nodes[3]], z[nodes[3]]),
-          Global(x[nodes[4]], y[nodes[4]], z[nodes[4]]),
-          Global(x[nodes[5]], y[nodes[5]], z[nodes[5]]),
-          Global(x[nodes[6]], y[nodes[6]], z[nodes[6]]),
-          Global(x[nodes[7]], y[nodes[7]], z[nodes[7]]) };
-        auto integrator = Integrator(coordinate);
-        double min_jacobian = DBL_MAX, max_jacobian = -DBL_MAX, volume = 0.0;
+            GetGlobal(coordinates, nodes[0]), GetGlobal(coordinates, nodes[1]),
+            GetGlobal(coordinates, nodes[2]), GetGlobal(coordinates, nodes[3]),
+            GetGlobal(coordinates, nodes[4]), GetGlobal(coordinates, nodes[5]),
+            GetGlobal(coordinates, nodes[6]), GetGlobal(coordinates, nodes[7]) };
+            // Global(x[nodes[7] - 1], y[nodes[7] - 1], z[nodes[7] - 1]) };
+        auto const &integrator = Integrator(coordinate);
+        double min_jacobian = DBL_MAX, max_jacobian = -DBL_MAX;
         for (int q = 0; q < Integrator::Q; q++) {
           double jacobian = integrator.GetJacobianDeterminant(q);
           min_jacobian = std::min(min_jacobian, jacobian);
-          max_jacobian = std::min(max_jacobian, jacobian);
-          volume += jacobian;
+          max_jacobian = std::max(max_jacobian, jacobian);
         }
         min_jacobians.at(i_cell) = min_jacobian;
         max_jacobians.at(i_cell) = max_jacobian;
-        volumes.at(i_cell) = volume;
+        volumes.at(i_cell) = integrator.volume();
       }
     }
   }
