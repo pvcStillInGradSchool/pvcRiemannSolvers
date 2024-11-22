@@ -2,16 +2,20 @@
 
 #include <cstdio>
 #include <algorithm>
+#include <chrono>
 #include <limits>
 #include <string>
 #include <vector>
 
 #include "cgnslib.h"
+#include "omp.h"
 
 #include "mini/mesh/cgns.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/integrator/hexahedron.hpp"
 #include "mini/integrator/lobatto.hpp"
+
+using Clock = std::chrono::high_resolution_clock;
 
 using mini::mesh::cgns::GridLocation;
 using mini::mesh::cgns::ElementType;
@@ -83,10 +87,14 @@ int main(int argc, char* argv[]) {
 
   // read Elements_t's
   auto n_sect = zone.CountSections();
+
   for (int i_sect = 1; i_sect <= n_sect; ++i_sect) {
-    auto &section = zone.GetSection(i_sect);
+    auto const &section = zone.GetSection(i_sect);
     if (section.type() == CGNS_ENUMV(HEXA_8)) {
-      for (int i_cell = section.CellIdMin(); i_cell <= section.CellIdMax(); ++i_cell) {
+      auto start = Clock::now();
+      int i_cell_max = section.CellIdMax();
+#     pragma omp parallel for num_threads(n_thread)
+      for (int i_cell = section.CellIdMin(); i_cell <= i_cell_max; ++i_cell) {
         auto const *nodes = section.GetNodeIdList(i_cell);
         auto coordinate = Coordinate{
             GetGlobal(coordinates, nodes[0]), GetGlobal(coordinates, nodes[1]),
@@ -105,8 +113,12 @@ int main(int argc, char* argv[]) {
         min_jacobians.at(i_cell) = min_jacobian;
         max_jacobians.at(i_cell) = max_jacobian;
         volumes.at(i_cell) = integrator.volume();
-        std::printf("%d / %d\n", i_cell, n_cell);
+        // std::printf("%d / %d\n", i_cell, n_cell);
       }
+      auto stop = Clock::now();
+      auto cost = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+      std::printf("Adding cell quality to section %s by %d threads costs %ld seconds\n",
+          section.name().c_str(), n_thread, cost.count());
     }
   }
   auto is_negative = [](double value) { return value < 0; };

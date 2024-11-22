@@ -3,6 +3,8 @@ project(miniCFD)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_FLAGS "-Wno-format")
 
+cmake_policy(SET CMP0057 NEW)  # for interpreting IN_LIST as an operator
+
 enable_testing()
 
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries." FORCE)
@@ -70,6 +72,11 @@ if (${PROJECT_NAME}_ENABLE_MPI)
   message("MPI_CXX_LIBRARIES = ${MPI_CXX_LIBRARIES}")
   set(GTestMPI_INC "${PROJECT_SOURCE_DIR}/ThirdParty/GTestMPI/include")
 endif (${PROJECT_NAME}_ENABLE_MPI)
+
+option(${PROJECT_NAME}_ENABLE_OpenMP "Enable OpenMP-based parallel computating." "ON")
+if (${PROJECT_NAME}_ENABLE_OpenMP)
+  find_package(OpenMP REQUIRED)
+endif (${PROJECT_NAME}_ENABLE_OpenMP)
 
 option(${PROJECT_NAME}_64BIT_INDEX "Enable 64-bit indexing." "ON")
 set(CGNS_ENABLE_64BIT ${${PROJECT_NAME}_64BIT_INDEX} CACHE BOOL "Let `cgsize_t` in CGNS be 64-bit." FORCE)

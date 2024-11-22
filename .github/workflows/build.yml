@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Install Dependencies on Linux
       if: startsWith(runner.os, 'Linux')
-      run: sudo apt update && sudo apt install libhdf5-mpi-dev libboost-all-dev gcc-12 libglu1-mesa && pip install --upgrade gmsh
+      run: sudo apt update && sudo apt install libomp-dev libhdf5-mpi-dev libboost-all-dev gcc-12 libglu1-mesa && pip install --upgrade gmsh
     # - name: Install Dependencies on macOS
     #   if: startsWith(runner.os, 'macOS')
     #   run: brew install hdf5-mpi boost gcc@12 && pip install --upgrade gmsh
