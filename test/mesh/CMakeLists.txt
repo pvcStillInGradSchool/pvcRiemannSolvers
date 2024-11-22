@@ -40,11 +40,6 @@ target_include_directories(test_mesh_distance PRIVATE ${CGAL_INCLUDE_DIRS})
 target_link_libraries(test_mesh_distance PUBLIC yaml-cpp::yaml-cpp)
 set_target_properties(test_mesh_distance PROPERTIES OUTPUT_NAME distance)
 
-add_executable(test_mesh_add_cell_quality add_cell_quality.cpp)
-target_include_directories(test_mesh_add_cell_quality PRIVATE ${CGNS_INC})
-target_link_libraries(test_mesh_add_cell_quality ${CGNS_LIB})
-set_target_properties(test_mesh_add_cell_quality PROPERTIES OUTPUT_NAME add_cell_quality)
-
 add_executable(test_mesh_overset overset.cpp)
 target_include_directories(test_mesh_overset PRIVATE ${CGNS_INC} ${METIS_INC} ${CGAL_INCLUDE_DIRS})
 target_link_libraries(test_mesh_overset ${CGNS_LIB} metis)

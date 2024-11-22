@@ -1,5 +1,6 @@
 set (tools
   add_iterative_data
+  add_cell_quality
   delete_node
 )
 

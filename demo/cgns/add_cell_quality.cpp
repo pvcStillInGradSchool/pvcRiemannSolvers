@@ -2,11 +2,11 @@
 
 #include <cstdio>
 #include <algorithm>
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "cgnslib.h"
-#include "gtest/gtest.h"
 
 #include "mini/mesh/cgns.hpp"
 #include "mini/coordinate/hexahedron.hpp"
@@ -95,7 +95,8 @@ int main(int argc, char* argv[]) {
             GetGlobal(coordinates, nodes[6]), GetGlobal(coordinates, nodes[7]) };
             // Global(x[nodes[7] - 1], y[nodes[7] - 1], z[nodes[7] - 1]) };
         auto const &integrator = Integrator(coordinate);
-        double min_jacobian = DBL_MAX, max_jacobian = -DBL_MAX;
+        double min_jacobian = std::numeric_limits<double>::max();
+        double max_jacobian = std::numeric_limits<double>::lowest();
         for (int q = 0; q < Integrator::Q; q++) {
           double jacobian = integrator.GetJacobianDeterminant(q);
           min_jacobian = std::min(min_jacobian, jacobian);
