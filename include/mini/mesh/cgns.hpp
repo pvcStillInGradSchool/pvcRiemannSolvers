@@ -1101,6 +1101,9 @@ class Base {
   const Zone<Real> &GetZone(int id) const {
     return *(zones_.at(id-1));
   }
+  Zone<Real> const &GetUniqueBase() const {
+    return const_cast<Base *>(this)->GetUniqueZone();
+  }
   void Write(int min_dim, int max_dim) const {
     int i_base;
     cg_base_write(file_->id(), name_.c_str(), cell_dim_, phys_dim_, &i_base);
@@ -1113,6 +1116,12 @@ class Base {
  public:  // Mutators:
   Zone<Real> &GetZone(int id) {
     return *(zones_.at(id-1));
+  }
+  Zone<Real> &GetUniqueZone() {
+    if (CountZones() != 1) {
+      throw std::runtime_error("This method can only be called by a 1-Zone_t CGNSBase_t object.");
+    }
+    return GetZone(1);
   }
   void ReadZones() {
     int n_zones;
@@ -1204,10 +1213,19 @@ class File {
   Base<Real> const &GetBase(int id) const {
     return *(bases_.at(id-1));
   }
+  Base<Real> const &GetUniqueBase() const {
+    return const_cast<File *>(this)->GetUniqueBase();
+  }
 
  public:  // Mutators:
   Base<Real> &GetBase(int id) {
     return *(bases_.at(id-1));
+  }
+  Base<Real> &GetUniqueBase() {
+    if (CountBases() != 1) {
+      throw std::runtime_error("This method can only be called by a 1-CGNSBase_t CGNSTree_t object.");
+    }
+    return GetBase(1);
   }
   void ReadBases() {
     if (cg_open(name_.c_str(), CG_MODE_READ, &i_file_)) {

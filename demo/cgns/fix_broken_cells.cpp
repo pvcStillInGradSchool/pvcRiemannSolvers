@@ -94,18 +94,12 @@ int main(int argc, char* argv[]) {
   // read the unique CGNSBase_t
   old_tree.ReadBases();
   new_tree.ReadBases();
-  if (old_tree.CountBases() != 1 || new_tree.CountBases() != 1) {
-    throw std::runtime_error("Only 1-CGNSBase_t CGNSTree_t's are supported!");
-  }
-  auto &old_base = old_tree.GetBase(1);
-  auto &new_base = new_tree.GetBase(1);
+  auto &old_base = old_tree.GetUniqueBase();
+  auto &new_base = new_tree.GetUniqueBase();
 
   // read the unique Zone_t
-  if (old_base.CountZones() != 1 || new_base.CountZones() != 1) {
-    throw std::runtime_error("Only 1-Zone_t CGNSBase_t's are supported!");
-  }
-  auto &old_zone = old_base.GetZone(1);
-  auto &new_zone = new_base.GetZone(1);
+  auto &old_zone = old_base.GetUniqueZone();
+  auto &new_zone = new_base.GetUniqueZone();
   auto n_node = old_zone.CountNodes();
   auto n_cell = old_zone.CountCells();
   assert(n_node == new_zone.CountNodes());

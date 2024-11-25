@@ -46,16 +46,10 @@ int main(int argc, char* argv[]) {
 
   // read the unique CGNSBase_t
   file.ReadBases();
-  if (file.CountBases() != 1) {
-    throw std::runtime_error("Only 1-CGNSBase_t file is supported!");
-  }
-  auto &base = file.GetBase(1);
+  auto &base = file.GetUniqueBase();
 
   // read the unique Zone_t
-  if (base.CountZones() != 1) {
-    throw std::runtime_error("Only 1-Zone_t CGNSBase_t is supported!");
-  }
-  auto &zone = base.GetZone(1);
+  auto &zone = base.GetUniqueZone();
   auto n_node = zone.CountNodes();
   auto n_cell = zone.CountCells();
   std::printf("n_node = %d, n_cell = %d\n", n_node, n_cell);
