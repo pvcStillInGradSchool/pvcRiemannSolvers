@@ -262,6 +262,15 @@ class Coordinates {
   std::vector<Real> &z() {
     return z_;
   }
+  Real &x(cgsize_t i_node/* 1-based */) {
+    return x_[i_node - 1];
+  }
+  Real &y(cgsize_t i_node/* 1-based */) {
+    return y_[i_node - 1];
+  }
+  Real &z(cgsize_t i_node/* 1-based */) {
+    return z_[i_node - 1];
+  }
 
   void Translate(Real dx, Real dy, Real dz) {
     std::ranges::for_each(x_, [dx](Real &x){ x += dx; });

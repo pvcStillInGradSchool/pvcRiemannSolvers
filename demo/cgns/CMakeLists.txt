@@ -1,11 +1,13 @@
 set (tools
   add_iterative_data
   add_cell_quality
+  fix_broken_cells
   delete_node
 )
 
 set (use_omp
   add_cell_quality
+  fix_broken_cells
 )
 
 foreach(tool ${tools})
