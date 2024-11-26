@@ -547,6 +547,9 @@ class ZoneBC {
   Zone<Real> const &zone() const {
     return *zone_ptr_;
   }
+  // std::vector<BC<Real>> &bocos() {
+  //   return bocos_;
+  // }
 
   void Read(bool verbose = false) {
     int n_bocos;
@@ -1086,6 +1089,12 @@ class Zone {
   int i_zone_;
 
   void SortSectionsByDim() {
+    // auto range_pair_to_data =
+    //     std::map<std::pair<cgsize_t, cgsize_t>, cgsize_t *>();
+    // for (auto &boco : zone_bc_.bocos()) {
+    //   range_pair_to_data.emplace(
+    //       std::make_pair(boco.ptset[0], boco.ptset[1]), boco.ptset);
+    // }
     int n = sections_.size();
     auto dim_then_oldid = std::vector<std::pair<int, int>>();
     for (auto &sect : sections_) {
@@ -1109,12 +1118,18 @@ class Zone {
       auto &sect = *sections_[i_sect-1];
       sect.i_sect_ = i_sect;
       auto n_cell = sect.CountCells();
+      // auto iter = range_pair_to_data.find(std::make_pair(sect.first_, sect.last_));
       sect.first_ = i_next;
       sect.last_ = sect.first_ + n_cell - 1;
       assert(n_cell == sect.CountCells());
       i_next += n_cell;
+      // if (iter != range_pair_to_data.end()) {
+      //   iter->second[0] = sect.first_;
+      //   iter->second[1] = sect.last_;
+      // }
     }
     assert(i_next - 1 == CountAllCells());
+    UpdateSectionRanges();
   }
 };
 
@@ -1281,8 +1296,8 @@ class Base {
           *this, i_zone, zone_name,
           /* n_cells */zone_size[1][0], /* n_nodes */zone_size[0][0]));
       zone->ReadCoordinates();
-      zone->ReadAllSections();
       zone->ReadZoneBC(verbose);
+      zone->ReadAllSections();
       zone->ReadSolutions();
     }
   }
