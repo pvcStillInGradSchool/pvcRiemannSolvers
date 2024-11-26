@@ -75,9 +75,9 @@ int main(int argc, char* argv[]) {
     cell_data = &solution;
   }
   // add the fields
-  auto &min_jacobians = cell_data->AddField("MinDetJac");
-  auto &max_jacobians = cell_data->AddField("MaxDetJac");
   auto &volumes = cell_data->AddField("Volume");
+  auto &det_jac_mins = cell_data->AddField("DetJacMin");
+  auto &det_jac_ratios = cell_data->AddField("DetJacRatio");
 
   // read Elements_t's
   auto n_sect = zone.CountSections();
@@ -97,16 +97,16 @@ int main(int argc, char* argv[]) {
             GetGlobal(coordinates, nodes[6]), GetGlobal(coordinates, nodes[7]) };
             // Global(x[nodes[7] - 1], y[nodes[7] - 1], z[nodes[7] - 1]) };
         auto const &integrator = Integrator(coordinate);
-        double min_jacobian = std::numeric_limits<double>::max();
-        double max_jacobian = std::numeric_limits<double>::lowest();
+        double det_jac_min = std::numeric_limits<double>::max();
+        double det_jac_max = std::numeric_limits<double>::lowest();
         for (int q = 0; q < Integrator::Q; q++) {
-          double jacobian = integrator.GetJacobianDeterminant(q);
-          min_jacobian = std::min(min_jacobian, jacobian);
-          max_jacobian = std::max(max_jacobian, jacobian);
+          double det_jac = integrator.GetJacobianDeterminant(q);
+          det_jac_min = std::min(det_jac_min, det_jac);
+          det_jac_max = std::max(det_jac_max, det_jac);
         }
-        min_jacobians.at(i_cell) = min_jacobian;
-        max_jacobians.at(i_cell) = max_jacobian;
         volumes.at(i_cell) = integrator.volume();
+        det_jac_mins.at(i_cell) = det_jac_min;
+        det_jac_ratios.at(i_cell) = det_jac_min / det_jac_max;
         // std::printf("%d / %d\n", i_cell, n_cell);
       }
       auto stop = Clock::now();
@@ -116,10 +116,13 @@ int main(int argc, char* argv[]) {
     }
   }
   auto is_negative = [](double value) { return value < 0; };
-  std::printf("%ld cells have negative determinants of Jacobians\n",
-      std::ranges::count_if(min_jacobians, is_negative));
-  std::printf("%ld cells have negative volumes\n",
+  std::printf("%ld cells have volume < 0\n",
       std::ranges::count_if(volumes, is_negative));
+  std::printf("%ld cells have min(det(J)) < 0\n",
+      std::ranges::count_if(det_jac_mins, is_negative));
+  std::printf("%ld cells have min(det(J)) < max(det(J)) * 0.01\n",
+      std::ranges::count_if(det_jac_ratios,
+          [](double value) { return value < 0.01; }));
 
   // write the augmented file
   for (int i = 0; i < 5; ++i) {
