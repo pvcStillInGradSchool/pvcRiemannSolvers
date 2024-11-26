@@ -93,11 +93,21 @@ int dim(ElementType type) {
   case CGNS_ENUMV(BAR_2):
     return 1;
   case CGNS_ENUMV(TRI_3):
+  case CGNS_ENUMV(TRI_6):
   case CGNS_ENUMV(QUAD_4):
+  case CGNS_ENUMV(QUAD_8):
+  case CGNS_ENUMV(QUAD_9):
     return 2;
   case CGNS_ENUMV(TETRA_4):
+  case CGNS_ENUMV(TETRA_10):
+  case CGNS_ENUMV(PYRA_5):
+  case CGNS_ENUMV(PYRA_13):
+  case CGNS_ENUMV(PYRA_14):
   case CGNS_ENUMV(PENTA_6):
+  case CGNS_ENUMV(PENTA_15):
+  case CGNS_ENUMV(PENTA_18):
   case CGNS_ENUMV(HEXA_8):
+  case CGNS_ENUMV(HEXA_27):
     return 3;
   default:
     assert(type == CGNS_ENUMV(MIXED));
@@ -441,7 +451,8 @@ class Section {
    */
   void Write(bool verbose = false) const {
     if (verbose) {
-      std::cout << "    Write Section[" << id() << "] " << name() << "\n";
+      std::printf("    Write Elements_t(%s) with range = [%ld, %ld]\n",
+          name().c_str(), first_, last_);
     }
     int i_sect;
     if (mixed()) {
