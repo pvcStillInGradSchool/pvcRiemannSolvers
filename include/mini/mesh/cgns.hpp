@@ -148,6 +148,7 @@ struct CellIndex {
 
 template <std::floating_point Real> class File;
 template <std::floating_point Real> class Base;
+template <std::floating_point Real> class Family;
 template <std::floating_point Real> class Zone;
 template <std::floating_point Real> class Coordinates;
 template <std::floating_point Real> class Section;
@@ -508,6 +509,7 @@ class Section {
 template <std::floating_point Real>
 struct BC {
   char name[32];
+  char family[32];
   cgsize_t ptset[2];
   cgsize_t n_pnts, normal_list_flag, normal_list_size;
   int normal_index, n_mesh;
@@ -548,13 +550,18 @@ class ZoneBC {
       assert(boco.n_pnts == 2);
       cg_boco_read(file().id(), base().id(), zone().id(), i_boco,
           boco.ptset, nullptr);
-      if (verbose) {
-        std::cout << "Read BC[" << i_boco << "] " << boco.name << ' '
-            << boco.ptset[0] << ' ' << boco.ptset[1] << std::endl;
-      }
       cg_goto(file().id(), base().id(), "Zone_t", zone().id(),
           "ZoneBC_t", 1, "BC_t", i_boco, "end");
       cg_gridlocation_read(&boco.location);
+      if (boco.type == CGNS_ENUMV(FamilySpecified)) {
+        cg_famname_read(boco.family);
+      } else {
+        boco.family[0] = '\0';
+      }
+      if (verbose) {
+        std::printf("      Read BC_t(%s) with type = %d, family = %s, location = %d, range = [%ld, %ld]\n",
+            boco.name, boco.type, boco.family, boco.location, boco.ptset[0], boco.ptset[1]);
+      }
     }
   }
   void UpdateRanges() {
@@ -574,8 +581,8 @@ class ZoneBC {
     for (int i_boco = 1; i_boco <= n_bocos; ++i_boco) {
       auto &boco = bocos_.at(i_boco);
       if (verbose) {
-        std::cout << "      Write BC[" << i_boco << "] " << boco.name << ' '
-            << boco.ptset[0] << ' ' << boco.ptset[1] << std::endl;
+        std::printf("      Write BC_t(%s) with type = %d, family = %s, location = %d, range = [%ld, %ld]\n",
+            boco.name, boco.type, boco.family, boco.location, boco.ptset[0], boco.ptset[1]);
       }
       int boco_i;
       cg_boco_write(file().id(), base().id(), zone().id(), boco.name,
@@ -585,6 +592,9 @@ class ZoneBC {
           "ZoneBC_t", 1, "BC_t", i_boco, "end");
       cg_boco_gridlocation_write(file().id(), base().id(), zone().id(), i_boco,
           boco.location);
+      if (boco.type == CGNS_ENUMV(FamilySpecified)) {
+        cg_famname_write(boco.family);
+      }
     }
   }
 
@@ -919,8 +929,11 @@ class Zone {
     }
     SortSectionsByDim();
   }
-  void ReadZoneBC() {
-    zone_bc_.Read();
+  void ReadZoneBC(bool verbose = false) {
+    if (verbose) {
+      std::printf("    Read ZoneBC_t\n");
+    }
+    zone_bc_.Read(verbose);
   }
   void UpdateSectionRanges() {
     zone_bc_.UpdateRanges();
@@ -1095,6 +1108,61 @@ class Zone {
 };
 
 template <std::floating_point Real>
+class Family {
+ public:  // Constructors:
+  /**
+   * @brief Construct a new Family object
+   * 
+   * @param base the reference to the parent
+   * @param i_family the id of this Family
+   * @param name the name of this Family
+   */
+  Family(Base<Real> const &base, int i_family, char const *name, char const *child)
+      : base_(&base), i_family_(i_family), name_(name), child_(child) {
+  }
+
+ public:  // Copy Control:
+  Family(const Family &) = delete;
+  Family &operator=(const Family &) = delete;
+  Family(Family &&) noexcept = default;
+  Family &operator=(Family &&) noexcept = default;
+  ~Family() noexcept = default;
+
+ public:  // Accessors:
+  File<Real> const &file() const {
+    return base().file();
+  }
+  Base<Real> const &base() const {
+    return *base_;
+  }
+  int id() const {
+    return i_family_;
+  }
+  const std::string &name() const {
+    return name_;
+  }
+  const std::string &child() const {
+    return child_;
+  }
+  void Write(bool verbose = false) const {
+    if (verbose) {
+      std::printf("  Write Family_t(%s)\n", name().c_str());
+      std::printf("    Write FamilyName_t(%s)\n", child().c_str());
+    }
+    int i_family;
+    cg_family_write(file().id(), base().id(), name().c_str(), &i_family);
+    cg_family_name_write(file().id(), base().id(), id(), child().c_str(), name().c_str());
+  }
+
+ public:  // Mutators:
+
+ private:
+  std::string name_, child_;
+  Base<Real> const *base_{nullptr};
+  int i_family_;
+};
+
+template <std::floating_point Real>
 class Base {
  public:  // Constructors:
   Base(File<Real> const &file, int bid, char const *name,
@@ -1145,6 +1213,9 @@ class Base {
     for (auto &zone : zones_) {
       zone->Write(min_dim, max_dim, verbose);
     }
+    for (auto &family : families_) {
+      family->Write(verbose);
+    }
   }
 
  public:  // Mutators:
@@ -1157,7 +1228,34 @@ class Base {
     }
     return GetZone(1);
   }
-  void ReadZones() {
+  void ReadFamilies(bool verbose = false) {
+    int n_family;
+    cg_nfamilies(file().id(), id(), &n_family);
+    families_.reserve(n_family);
+    for (int i_family = 1; i_family <= n_family; ++i_family) {
+      char family_name[33];
+      int n_boco = 0, n_geom = 0;
+      cg_family_read(file().id(), id(), i_family, family_name, &n_boco, &n_geom);
+      if (verbose) {
+        std::printf("  Read Family_t(%s) with n_boco = %d, n_geom = %d\n",
+            family_name, n_boco, n_geom);
+      }
+      int n_child = 0;
+      cg_nfamily_names(file().id(), id(), i_family, &n_child);
+      if (n_child != 1) {
+        throw std::runtime_error("Currently, each Family_t object can only have 1 FamilyName_t child.");
+      }
+      char child_name[33], child_family_name[33];
+      cg_family_name_read(file().id(), id(), i_family, n_child,
+          child_name, child_family_name);
+      if (verbose) {
+        std::printf("    Read FamilyName_t(%s)\n", child_name);
+      }
+      families_.emplace_back(std::make_unique<Family<Real>>(
+          *this, i_family, family_name, child_name));
+    }
+  }
+  void ReadZones(bool verbose = false) {
     int n_zones;
     cg_nzones(file().id(), i_base_, &n_zones);
     zones_.reserve(n_zones);
@@ -1165,12 +1263,15 @@ class Base {
       char zone_name[33];
       cgsize_t zone_size[3][1];
       cg_zone_read(file().id(), i_base_, i_zone, zone_name, zone_size[0]);
+      if (verbose) {
+        std::printf("  Read Zone_t(%s)\n", zone_name);
+      }
       auto &zone = zones_.emplace_back(std::make_unique<Zone<Real>>(
           *this, i_zone, zone_name,
           /* n_cells */zone_size[1][0], /* n_nodes */zone_size[0][0]));
       zone->ReadCoordinates();
       zone->ReadAllSections();
-      zone->ReadZoneBC();
+      zone->ReadZoneBC(verbose);
       zone->ReadSolutions();
     }
   }
@@ -1209,6 +1310,7 @@ class Base {
 
  private:
   std::vector<std::unique_ptr<Zone<Real>>> zones_;
+  std::vector<std::unique_ptr<Family<Real>>> families_;
   std::string name_;
   File<Real> const *file_{nullptr};
   int i_base_, cell_dim_, phys_dim_;
@@ -1261,7 +1363,7 @@ class File {
     }
     return GetBase(1);
   }
-  void ReadBases() {
+  void ReadBases(bool verbose = false) {
     if (cg_open(name_.c_str(), CG_MODE_READ, &i_file_)) {
       cg_error_exit();
     }
@@ -1273,9 +1375,13 @@ class File {
       char base_name[33];
       int cell_dim{-1}, phys_dim{-1};
       cg_base_read(i_file_, i_base, base_name, &cell_dim, &phys_dim);
+      if (verbose) {
+        std::printf("Read Base_t(%s)\n", base_name);
+      }
       auto &base = bases_.emplace_back(std::make_unique<Base<Real>>(
           *this, i_base, base_name, cell_dim, phys_dim));
-      base->ReadZones();
+      base->ReadZones(verbose);
+      base->ReadFamilies(verbose);
     }
     cg_close(i_file_);
   }
