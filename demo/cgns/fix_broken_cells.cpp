@@ -25,6 +25,7 @@ using File = mini::mesh::cgns::File<double>;
 using Zone = mini::mesh::cgns::Zone<double>;
 using Coordinates = mini::mesh::cgns::Coordinates<double>;
 using Solution = mini::mesh::cgns::Solution<double>;
+using Field = mini::mesh::cgns::Field<double>;
 
 using Coordinate = mini::coordinate::Hexahedron8<double>;
 using Global = typename Coordinate::Global;
@@ -122,6 +123,35 @@ int main(int argc, char* argv[]) {
       auto shift_z = new_coordinates.z(i_node) - old_coordinates.z(i_node);
       new_coordinates.z(i_node) -= shift_z * 0.5;
     }
+  }
+
+  // update the vector field of point shift
+  Field *shift_x{nullptr}, *shift_y{nullptr}, *shift_z{nullptr};
+  for (int i_sol = 1, n_sol = new_zone.CountSolutions(); i_sol <= n_sol; i_sol++) {
+    auto &solution = new_zone.GetSolution(i_sol);
+    if (solution.localtion() == CGNS_ENUMV(Vertex)) {
+      for (int i_field = 1, n_field = solution.CountFields(); i_field <= n_field; ++i_field) {
+        auto &field = solution.GetField(i_field);
+        if (field.name() == "ShiftX") {
+          shift_x = &field;
+          continue;
+        }
+        if (field.name() == "ShiftY") {
+          shift_y = &field;
+          continue;
+        }
+        if (field.name() == "ShiftZ") {
+          shift_z = &field;
+          continue;
+        }
+      }
+    }
+  }
+  assert(shift_x && shift_y && shift_z);
+  for (cgsize_t i_node = 1; i_node <= n_node; ++i_node) {
+    shift_x->at(i_node) = new_coordinates.x(i_node) - old_coordinates.x(i_node);
+    shift_y->at(i_node) = new_coordinates.y(i_node) - old_coordinates.y(i_node);
+    shift_z->at(i_node) = new_coordinates.z(i_node) - old_coordinates.z(i_node);
   }
 
   // write the fixed cgns out
