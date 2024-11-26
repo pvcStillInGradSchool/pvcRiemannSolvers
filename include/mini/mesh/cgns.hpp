@@ -1266,14 +1266,24 @@ class Base {
         std::printf("  Read Family_t(%s) with n_boco = %d, n_geom = %d\n",
             family_name, n_boco, n_geom);
       }
+      char child_name[33], child_family_name[33];
       int n_child = 0;
       cg_nfamily_names(file().id(), id(), i_family, &n_child);
-      if (n_child != 1) {
-        throw std::runtime_error("Currently, each Family_t object can only have 1 FamilyName_t child.");
+      if (n_child == 0) {
+        std::cerr << family_name << " has no FamilyName_t child." << std::endl;
+        child_name[0] = child_family_name[0] = '\0';
+      } else if (n_child == 1) {
+        cg_family_name_read(file().id(), id(), i_family, n_child,
+            child_name, child_family_name);
+      } else {
+        std::cerr << family_name << " has more than one FamilyName_t children:" << std::endl;
+        for (int i_child = 1; i_child <= n_child; i_child++) {
+          cg_family_name_read(file().id(), id(), i_family, i_child,
+              child_name, child_family_name);
+          std::cerr << "  " << child_name << " " << child_family_name << std::endl;
+        }
+        throw std::runtime_error("Currently, each Family_t object can have at most one FamilyName_t child.");
       }
-      char child_name[33], child_family_name[33];
-      cg_family_name_read(file().id(), id(), i_family, n_child,
-          child_name, child_family_name);
       if (verbose) {
         std::printf("    Read FamilyName_t(%s)\n", child_name);
       }
