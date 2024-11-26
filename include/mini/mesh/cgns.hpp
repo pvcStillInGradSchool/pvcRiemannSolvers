@@ -240,14 +240,26 @@ class Coordinates {
   /**
    * Write coordinates to a given `(file, base, zone)` tuple.
    */
-  void Write() const {
+  void Write(bool verbose = false) const {
+    if (verbose) {
+      std::cout << "    Write GridCoordinates\n";
+    }
     int i_coord;
     auto data_type = std::is_same_v<Real, double> ?
         CGNS_ENUMV(RealDouble) : CGNS_ENUMV(RealSingle);
+    if (verbose) {
+      std::cout << "      Write CoordinateX\n";
+    }
     cg_coord_write(file().id(), base().id(), zone_->id(),
                    data_type, "CoordinateX", x_.data(), &i_coord);
+    if (verbose) {
+      std::cout << "      Write CoordinateY\n";
+    }
     cg_coord_write(file().id(), base().id(), zone_->id(),
                    data_type, "CoordinateY", y_.data(), &i_coord);
+    if (verbose) {
+      std::cout << "      Write CoordinateZ\n";
+    }
     cg_coord_write(file().id(), base().id(), zone_->id(),
                    data_type, "CoordinateZ", z_.data(), &i_coord);
   }
@@ -426,7 +438,10 @@ class Section {
   /**
    * @brief Write the connectivity_ (and possibly the start_offset_) from the file.
    */
-  void Write() const {
+  void Write(bool verbose = false) const {
+    if (verbose) {
+      std::cout << "    Write Section[" << id() << "] " << name() << "\n";
+    }
     int i_sect;
     if (mixed()) {
       cg_poly_section_write(file().id(), base().id(), zone().id(),
@@ -520,7 +535,7 @@ class ZoneBC {
     return *zone_ptr_;
   }
 
-  void Read() {
+  void Read(bool verbose = false) {
     int n_bocos;
     cg_nbocos(file().id(), base().id(), zone().id(), &n_bocos);
     bocos_.resize(n_bocos + 1);
@@ -533,8 +548,10 @@ class ZoneBC {
       assert(boco.n_pnts == 2);
       cg_boco_read(file().id(), base().id(), zone().id(), i_boco,
           boco.ptset, nullptr);
-      std::cout << "Read BC[" << i_boco << "] " << boco.name << ' '
-          << boco.ptset[0] << ' ' << boco.ptset[1] << std::endl;
+      if (verbose) {
+        std::cout << "Read BC[" << i_boco << "] " << boco.name << ' '
+            << boco.ptset[0] << ' ' << boco.ptset[1] << std::endl;
+      }
       cg_goto(file().id(), base().id(), "Zone_t", zone().id(),
           "ZoneBC_t", 1, "BC_t", i_boco, "end");
       cg_gridlocation_read(&boco.location);
@@ -549,10 +566,17 @@ class ZoneBC {
       boco.ptset[1] = sect.CellIdMax();
     }
   }
-  void Write() const {
+  void Write(bool verbose = false) const {
+    if (verbose) {
+      std::cout << "    Write ZoneBC\n";
+    }
     int n_bocos = CountBCs();
     for (int i_boco = 1; i_boco <= n_bocos; ++i_boco) {
       auto &boco = bocos_.at(i_boco);
+      if (verbose) {
+        std::cout << "      Write BC[" << i_boco << "] " << boco.name << ' '
+            << boco.ptset[0] << ' ' << boco.ptset[1] << std::endl;
+      }
       int boco_i;
       cg_boco_write(file().id(), base().id(), zone().id(), boco.name,
           boco.type, boco.ptset_type, boco.n_pnts, boco.ptset, &boco_i);
@@ -561,8 +585,6 @@ class ZoneBC {
           "ZoneBC_t", 1, "BC_t", i_boco, "end");
       cg_boco_gridlocation_write(file().id(), base().id(), zone().id(), i_boco,
           boco.location);
-      std::cout << "Write BC[" << i_boco << "] " << boco.name << ' '
-          << boco.ptset[0] << ' ' << boco.ptset[1] << std::endl;
     }
   }
 
@@ -597,7 +619,10 @@ class Field {
   std::string const &name() const {
     return name_;
   }
-  void Write() const {
+  void Write(bool verbose = false) const {
+    if (verbose) {
+      std::cout << "      Write Field[" << name() << "]\n";
+    }
     int i_field;
     cg_field_write(solution_->file().id(), solution_->base().id(),
         solution_->zone().id(), solution_->id(), CGNS_ENUMV(RealDouble),
@@ -679,13 +704,16 @@ class Solution {
   int CountFields() const {
     return fields_.size();
   }
-  void Write() const {
+  void Write(bool verbose = false) const {
+    if (verbose) {
+      std::cout << "    Write Solution[" << id() << "] " << name() << " on " << location_ << "\n";
+    }
     int i_soln;
     cg_sol_write(file().id(), base().id(), zone_->id(),
                  name_.c_str(), location_, &i_soln);
     assert(i_soln == i_soln_);
     for (auto &field : fields_) {
-      field->Write();
+      field->Write(verbose);
     }
   }
 
@@ -822,20 +850,23 @@ class Zone {
     throw std::invalid_argument("There is no solution named \"" + name + "\".");
     return *(solutions_.back());
   }
-  void Write(int min_dim, int max_dim) const {
+  void Write(int min_dim, int max_dim, bool verbose = false) const {
+    if (verbose) {
+      std::cout << "  Write Zone[" << id() << "] " << name() << "\n";
+    }
     int i_zone;
     cgsize_t zone_size[3] = {CountNodes(), CountCells(), 0};
     cg_zone_write(file().id(), base().id(), name_.c_str(), zone_size,
                   CGNS_ENUMV(Unstructured), &i_zone);
     assert(i_zone == i_zone_);
-    coordinates_.Write();
-    zone_bc_.Write();
+    coordinates_.Write(verbose);
+    zone_bc_.Write(verbose);
     for (auto &section : sections_) {
       if (min_dim <= section->dim() && section->dim() <= max_dim)
-        section->Write();
+        section->Write(verbose);
     }
     for (auto &solution : solutions_) {
-      solution->Write();
+      solution->Write(verbose);
     }
   }
   /**
@@ -1104,12 +1135,15 @@ class Base {
   Zone<Real> const &GetUniqueBase() const {
     return const_cast<Base *>(this)->GetUniqueZone();
   }
-  void Write(int min_dim, int max_dim) const {
+  void Write(int min_dim, int max_dim, bool verbose = false) const {
+    if (verbose) {
+      std::cout << "Write Base[" << name() << "]\n";
+    }
     int i_base;
     cg_base_write(file_->id(), name_.c_str(), cell_dim_, phys_dim_, &i_base);
     assert(i_base == i_base_);
     for (auto &zone : zones_) {
-      zone->Write(min_dim, max_dim);
+      zone->Write(min_dim, max_dim, verbose);
     }
   }
 
@@ -1263,13 +1297,13 @@ class File {
     }
     cg_close(i_file_);
   }
-  void Write(const std::string &file_name, int min_dim = 0, int max_dim = 3) {
+  void Write(const std::string &file_name, int min_dim = 0, int max_dim = 3, bool verbose = false) {
     name_ = file_name;
     if (cg_open(file_name.c_str(), CG_MODE_WRITE, &i_file_)) {
       cg_error_exit();
     }
     for (auto &base : bases_) {
-      base->Write(min_dim, max_dim);
+      base->Write(min_dim, max_dim, verbose);
     }
     cg_close(i_file_);
   }
