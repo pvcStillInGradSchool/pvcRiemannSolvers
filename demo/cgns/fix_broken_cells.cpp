@@ -11,15 +11,12 @@
 #include "omp.h"
 
 #include "mini/mesh/cgns.hpp"
+#include "mini/mesh/quality.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/integrator/hexahedron.hpp"
 #include "mini/integrator/lobatto.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
-
-using mini::mesh::cgns::GridLocation;
-using mini::mesh::cgns::ElementType;
-using mini::mesh::cgns::DataType;
 
 using File = mini::mesh::cgns::File<double>;
 using Zone = mini::mesh::cgns::Zone<double>;
@@ -27,55 +24,7 @@ using Coordinates = mini::mesh::cgns::Coordinates<double>;
 using Solution = mini::mesh::cgns::Solution<double>;
 using Field = mini::mesh::cgns::Field<double>;
 
-using Gx = mini::integrator::Lobatto<double, 3>;
-using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
-using Global = typename Integrator::Global;
-
-inline Global GetGlobal(Coordinates const &coordinates, cgsize_t i_node/* 1-based */) {
-  return { coordinates.x(i_node), coordinates.y(i_node), coordinates.z(i_node) };
-}
-
-Integrator BuildHexa8(Coordinates const &coordinates, cgsize_t const *nodes) {
-  auto coordinate = mini::coordinate::Hexahedron8<double>{
-      GetGlobal(coordinates, nodes[0]), GetGlobal(coordinates, nodes[1]),
-      GetGlobal(coordinates, nodes[2]), GetGlobal(coordinates, nodes[3]),
-      GetGlobal(coordinates, nodes[4]), GetGlobal(coordinates, nodes[5]),
-      GetGlobal(coordinates, nodes[6]), GetGlobal(coordinates, nodes[7]) };
-  return Integrator(coordinate);
-}
-
-Integrator BuildHexa27(Coordinates const &coordinates, cgsize_t const *nodes) {
-  auto coordinate = mini::coordinate::Hexahedron27<double>{
-      GetGlobal(coordinates, nodes[0]), GetGlobal(coordinates, nodes[1]),
-      GetGlobal(coordinates, nodes[2]), GetGlobal(coordinates, nodes[3]),
-      GetGlobal(coordinates, nodes[4]), GetGlobal(coordinates, nodes[5]),
-      GetGlobal(coordinates, nodes[6]), GetGlobal(coordinates, nodes[7]),
-      GetGlobal(coordinates, nodes[8]), GetGlobal(coordinates, nodes[9]),
-      GetGlobal(coordinates, nodes[10]), GetGlobal(coordinates, nodes[11]),
-      GetGlobal(coordinates, nodes[12]), GetGlobal(coordinates, nodes[13]),GetGlobal(coordinates, nodes[14]), GetGlobal(coordinates, nodes[15]),
-      GetGlobal(coordinates, nodes[16]), GetGlobal(coordinates, nodes[17]),
-      GetGlobal(coordinates, nodes[18]), GetGlobal(coordinates, nodes[19]),
-      GetGlobal(coordinates, nodes[20]), GetGlobal(coordinates, nodes[21]),
-      GetGlobal(coordinates, nodes[22]), GetGlobal(coordinates, nodes[23]),
-      GetGlobal(coordinates, nodes[24]), GetGlobal(coordinates, nodes[25]),
-      GetGlobal(coordinates, nodes[26]) };
-  return Integrator(coordinate);
-}
-
-auto *SelectBuilder(CGNS_ENUMT(ElementType_t) type) {
-  Integrator (*ptr)(Coordinates const &, cgsize_t const *);
-  switch (type) {
-  case CGNS_ENUMV(HEXA_8):
-    ptr = BuildHexa8;
-    break;
-  case CGNS_ENUMV(HEXA_27):
-    ptr = BuildHexa27;
-    break;
-  default:
-    ptr = nullptr;
-  }
-  return ptr;
-}
+using Measure = mini::mesh::QualityMeasure<double>;
 
 inline bool Invalid(double det_jac_min, double det_jac_max) {
   return det_jac_min <= 0 || det_jac_min < det_jac_max * 0.01;
@@ -87,7 +36,7 @@ bool FindBrokenPoints(Zone const &zone, Coordinates const &coordinates, int n_th
   broken_points->clear();
   for (int i_sect = 1, n_sect = zone.CountSections(); i_sect <= n_sect; ++i_sect) {
     auto const &section = zone.GetSection(i_sect);
-    auto *Build = SelectBuilder(section.type());
+    auto *Build = Measure::SelectBuilder(section.type());
     if (Build) {
       int i_cell_max = section.CellIdMax();
       int npe = mini::mesh::cgns::CountNodesByType(section.type());
@@ -97,7 +46,7 @@ bool FindBrokenPoints(Zone const &zone, Coordinates const &coordinates, int n_th
         auto const &integrator = Build(coordinates, nodes);
         double det_jac_min = std::numeric_limits<double>::max();
         double det_jac_max = std::numeric_limits<double>::lowest();
-        for (int q = 0; q < Integrator::Q; q++) {
+        for (int q = 0; q < Measure::Integrator::Q; q++) {
           double jacobian = integrator.GetJacobianDeterminant(q);
           det_jac_min = std::min(det_jac_min, jacobian);
           det_jac_max = std::max(det_jac_max, jacobian);
@@ -112,8 +61,8 @@ bool FindBrokenPoints(Zone const &zone, Coordinates const &coordinates, int n_th
     }
   }
   auto stop = Clock::now();
-  auto cost = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-  std::printf("Finding %ld broken points by %d threads costs %ld seconds\n",
+  auto cost = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+  std::printf("Finding %ld broken points by %d threads costs %ld milliseconds\n",
       broken_points->size(), n_thread, cost.count());
   return broken_points->size();
 }

@@ -11,28 +11,18 @@
 #include "omp.h"
 
 #include "mini/mesh/cgns.hpp"
+#include "mini/mesh/quality.hpp"
 #include "mini/coordinate/hexahedron.hpp"
 #include "mini/integrator/hexahedron.hpp"
 #include "mini/integrator/lobatto.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
 
-using mini::mesh::cgns::GridLocation;
-using mini::mesh::cgns::ElementType;
-using mini::mesh::cgns::DataType;
-
 using File = mini::mesh::cgns::File<double>;
 using Coordinates = mini::mesh::cgns::Coordinates<double>;
 using Solution = mini::mesh::cgns::Solution<double>;
 
-using Coordinate = mini::coordinate::Hexahedron8<double>;
-using Global = typename Coordinate::Global;
-using Gx = mini::integrator::Lobatto<double, 3>;
-using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
-
-inline Global GetGlobal(Coordinates const &coordinates, cgsize_t i_node/* 1-based */) {
-  return { coordinates.x(i_node), coordinates.y(i_node), coordinates.z(i_node) };
-}
+using Measure = mini::mesh::QualityMeasure<double>;
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {
@@ -84,22 +74,18 @@ int main(int argc, char* argv[]) {
 
   for (int i_sect = 1; i_sect <= n_sect; ++i_sect) {
     auto const &section = zone.GetSection(i_sect);
-    if (section.type() == CGNS_ENUMV(HEXA_8)) {
+    auto *Build = Measure::SelectBuilder(section.type());
+    if (Build) {
       auto start = Clock::now();
       int i_cell_max = section.CellIdMax();
+      int npe = mini::mesh::cgns::CountNodesByType(section.type());
 #     pragma omp parallel for num_threads(n_thread)
       for (int i_cell = section.CellIdMin(); i_cell <= i_cell_max; ++i_cell) {
         auto const *nodes = section.GetNodeIdList(i_cell);
-        auto coordinate = Coordinate{
-            GetGlobal(coordinates, nodes[0]), GetGlobal(coordinates, nodes[1]),
-            GetGlobal(coordinates, nodes[2]), GetGlobal(coordinates, nodes[3]),
-            GetGlobal(coordinates, nodes[4]), GetGlobal(coordinates, nodes[5]),
-            GetGlobal(coordinates, nodes[6]), GetGlobal(coordinates, nodes[7]) };
-            // Global(x[nodes[7] - 1], y[nodes[7] - 1], z[nodes[7] - 1]) };
-        auto const &integrator = Integrator(coordinate);
+        auto const &integrator = Build(coordinates, nodes);
         double det_jac_min = std::numeric_limits<double>::max();
         double det_jac_max = std::numeric_limits<double>::lowest();
-        for (int q = 0; q < Integrator::Q; q++) {
+        for (int q = 0; q < Measure::Integrator::Q; q++) {
           double det_jac = integrator.GetJacobianDeterminant(q);
           det_jac_min = std::min(det_jac_min, det_jac);
           det_jac_max = std::max(det_jac_max, det_jac);
@@ -110,8 +96,8 @@ int main(int argc, char* argv[]) {
         // std::printf("%d / %d\n", i_cell, n_cell);
       }
       auto stop = Clock::now();
-      auto cost = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
-      std::printf("Adding cell quality to section %s by %d threads costs %ld seconds\n",
+      auto cost = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+      std::printf("Adding cell quality to section %s by %d threads costs %ld milliseconds\n",
           section.name().c_str(), n_thread, cost.count());
     }
   }
