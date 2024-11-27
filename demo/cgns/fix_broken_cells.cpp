@@ -30,41 +30,83 @@ inline bool Invalid(double det_jac_min, double det_jac_max) {
   return det_jac_min <= 0 || det_jac_min < det_jac_max * 0.01;
 }
 
-bool FindBrokenPoints(Zone const &zone, Coordinates const &coordinates, int n_thread,
-    std::unordered_set<cgsize_t> *broken_points) {
-  auto start = Clock::now();
-  broken_points->clear();
+using CellWithBuilder = std::pair<cgsize_t const *, typename Measure::Builder>;
+
+std::pair<
+    std::vector<std::vector<CellWithBuilder>>,
+    std::vector<CellWithBuilder>
+> Initialize(Zone const &zone, int n_thread) {
+  auto n_node = zone.CountNodes();
+  auto node_to_cells = std::vector<std::vector<CellWithBuilder>>(1 + n_node);
+  auto broken_cells = std::vector<CellWithBuilder>();
   for (int i_sect = 1, n_sect = zone.CountSections(); i_sect <= n_sect; ++i_sect) {
     auto const &section = zone.GetSection(i_sect);
-    auto *Build = Measure::SelectBuilder(section.type());
-    if (Build) {
+    auto *Builder = Measure::SelectBuilder(section.type());
+    if (Builder) {
       int i_cell_max = section.CellIdMax();
       int npe = mini::mesh::cgns::CountNodesByType(section.type());
 #     pragma omp parallel for num_threads(n_thread)
       for (int i_cell = section.CellIdMin(); i_cell <= i_cell_max; ++i_cell) {
         auto const *nodes = section.GetNodeIdList(i_cell);
-        auto const &integrator = Build(coordinates, nodes);
-        double det_jac_min = std::numeric_limits<double>::max();
-        double det_jac_max = std::numeric_limits<double>::lowest();
-        for (int q = 0; q < Measure::Integrator::Q; q++) {
-          double jacobian = integrator.GetJacobianDeterminant(q);
-          det_jac_min = std::min(det_jac_min, jacobian);
-          det_jac_max = std::max(det_jac_max, jacobian);
-        }
-        if (Invalid(det_jac_min, det_jac_max)) {
-#         pragma omp critical
-          for (int i = 0; i < npe; ++i) {
-            broken_points->emplace(nodes[i]);
+#       pragma omp critical
+        for (int i = 0; i < npe; ++i) {
+          node_to_cells.at(nodes[i]).emplace_back(nodes, Builder);
+          if (i == 0) {
+            // initially, all cells are marked as broken
+            broken_cells.emplace_back(nodes, Builder);
           }
         }
       }
     }
   }
+  // ensure uniqueness of cells
+  std::ranges::sort(broken_cells);
+  const auto [first, last] = std::ranges::unique(broken_cells);
+  broken_cells.erase(first, last);
+  std::printf("Initially, %ld cells are broken\n", broken_cells.size());
+  return { node_to_cells, broken_cells };
+}
+
+bool FindBrokenPoints(Coordinates const &coordinates,
+    std::vector<std::vector<CellWithBuilder>> const &node_to_cells,
+    int n_thread,
+    std::unordered_set<cgsize_t> *broken_points,
+    std::vector<CellWithBuilder> *broken_cells) {
+  auto start = Clock::now();
+  broken_points->clear();
+  auto broken_cells_new = std::vector<CellWithBuilder>();
+  auto n_cell = broken_cells->size();
+# pragma omp parallel for num_threads(n_thread)
+  for (int i_cell = 0; i_cell < n_cell; ++i_cell) {
+    auto [nodes, Builder] = broken_cells->at(i_cell);
+    auto const &integrator = Builder(coordinates, nodes);
+    int npe = integrator.coordinate().CountNodes();
+    double det_jac_min = std::numeric_limits<double>::max();
+    double det_jac_max = std::numeric_limits<double>::lowest();
+    for (int q = 0; q < Measure::Integrator::Q; q++) {
+      double jacobian = integrator.GetJacobianDeterminant(q);
+      det_jac_min = std::min(det_jac_min, jacobian);
+      det_jac_max = std::max(det_jac_max, jacobian);
+    }
+    if (Invalid(det_jac_min, det_jac_max)) {
+#     pragma omp critical
+      for (int i = 0; i < npe; ++i) {
+        broken_points->emplace(nodes[i]);
+        for (auto &cell_with_builder : node_to_cells[nodes[i]]) {
+          broken_cells_new.emplace_back(cell_with_builder);
+        }
+      }
+    }
+  }
+  std::ranges::sort(broken_cells_new);
+  const auto [first, last] = std::ranges::unique(broken_cells_new);
+  broken_cells_new.erase(first, last);
+  std::swap(*broken_cells, broken_cells_new);
   auto stop = Clock::now();
   auto cost = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-  std::printf("Finding %ld broken points by %d threads costs %ld milliseconds\n",
-      broken_points->size(), n_thread, cost.count());
-  return broken_points->size();
+  std::printf("Finding %ld broken points in %ld broken cells by %d threads costs %ld milliseconds\n",
+      broken_points->size(), broken_cells->size(), n_thread, cost.count());
+  return broken_points->size() || broken_cells->size();
 }
 
 int main(int argc, char* argv[]) {
@@ -100,7 +142,9 @@ int main(int argc, char* argv[]) {
 
   // the main loop
   auto broken_points = std::unordered_set<cgsize_t>();
-  while (FindBrokenPoints(new_zone, new_coordinates, n_thread, &broken_points)) {
+  auto [nodes_to_cells, broken_cells] = Initialize(new_zone, n_thread);
+  while (FindBrokenPoints(new_coordinates, nodes_to_cells, n_thread,
+        &broken_points, &broken_cells)) {
     for (auto i_node : broken_points) {
       // half the shift of this point
       auto shift_x = new_coordinates.x(i_node) - old_coordinates.x(i_node);

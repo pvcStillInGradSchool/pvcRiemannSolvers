@@ -26,6 +26,7 @@ class QualityMeasure {
   using Gx = mini::integrator::Lobatto<Real, 3>;
   using Integrator = mini::integrator::Hexahedron<Gx, Gx, Gx>;
   using Global = typename Integrator::Global;
+  using Builder = Integrator(*)(Coordinates const &, cgsize_t const *);
 
   static Global GetGlobal(Coordinates const &coordinates, cgsize_t i_node/* 1-based */) {
     return { coordinates.x(i_node), coordinates.y(i_node), coordinates.z(i_node) };
@@ -58,8 +59,8 @@ class QualityMeasure {
     return Integrator(coordinate);
   }
 
-  static auto *SelectBuilder(CGNS_ENUMT(ElementType_t) type) {
-    Integrator (*ptr)(Coordinates const &, cgsize_t const *);
+  static Builder SelectBuilder(CGNS_ENUMT(ElementType_t) type) {
+    Builder ptr;
     switch (type) {
     case CGNS_ENUMV(HEXA_8):
       ptr = BuildHexa8;
