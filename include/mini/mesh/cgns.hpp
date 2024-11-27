@@ -1173,11 +1173,15 @@ class Family {
   void Write(bool verbose = false) const {
     if (verbose) {
       std::printf("  Write Family_t(%s)\n", name().c_str());
-      std::printf("    Write FamilyName_t(%s)\n", child().c_str());
     }
     int i_family;
     cg_family_write(file().id(), base().id(), name().c_str(), &i_family);
-    cg_family_name_write(file().id(), base().id(), id(), child().c_str(), name().c_str());
+    if (child().size()) {
+      if (verbose) {
+        std::printf("    Write FamilyName_t(%s)\n", child().c_str());
+      }
+      cg_family_name_write(file().id(), base().id(), id(), child().c_str(), name().c_str());
+    }
   }
 
  public:  // Mutators:
@@ -1419,7 +1423,9 @@ class File {
       base->ReadZones(verbose);
       base->ReadFamilies(verbose);
     }
-    cg_close(i_file_);
+    if (cg_close(i_file_)) {
+      cg_error_exit();
+    }
   }
   void ReadNodeIdList() {
     if (cg_open(name_.c_str(), CG_MODE_READ, &i_file_)) {
@@ -1437,7 +1443,9 @@ class File {
           *this, i_base, base_name, cell_dim, phys_dim));
       base->ReadNodeIdList(i_file_);
     }
-    cg_close(i_file_);
+    if (cg_close(i_file_)) {
+      cg_error_exit();
+    }
   }
   void Write(const std::string &file_name, int min_dim = 0, int max_dim = 3, bool verbose = false) {
     name_ = file_name;
@@ -1447,7 +1455,9 @@ class File {
     for (auto &base : bases_) {
       base->Write(min_dim, max_dim, verbose);
     }
-    cg_close(i_file_);
+    if (cg_close(i_file_)) {
+      cg_error_exit();
+    }
   }
 
   void Translate(Real dx, Real dy, Real dz) {
