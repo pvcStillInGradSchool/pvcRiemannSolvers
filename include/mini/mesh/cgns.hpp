@@ -1176,12 +1176,11 @@ class Family {
     }
     int i_family;
     cg_family_write(file().id(), base().id(), name().c_str(), &i_family);
-    if (child().size()) {
-      if (verbose) {
-        std::printf("    Write FamilyName_t(%s)\n", child().c_str());
-      }
-      cg_family_name_write(file().id(), base().id(), id(), child().c_str(), name().c_str());
+    char const *child_name = child().size() ? child().c_str() : name().c_str();
+    if (verbose) {
+      std::printf("    Write FamilyName_t(%s)\n", child_name);
     }
+    cg_family_name_write(file().id(), base().id(), id(), child_name, name().c_str());
   }
 
  public:  // Mutators:
