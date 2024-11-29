@@ -3,6 +3,7 @@ set (tools
   add_cell_quality
   fix_broken_cells
   delete_node
+  sort_sections
 )
 
 set (use_omp

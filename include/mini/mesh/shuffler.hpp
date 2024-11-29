@@ -310,7 +310,7 @@ void Shuffler<Int, Real>::Shuffle() {
         }
       }
     }
-    zone.UpdateSectionRanges();
+    zone.UpdateRangesInBCs();
   }
 }
 

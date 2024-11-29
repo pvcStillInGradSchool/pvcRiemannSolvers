@@ -949,7 +949,7 @@ class Zone {
     }
     zone_bc_.Read(verbose);
   }
-  void UpdateSectionRanges() {
+  void UpdateRangesInBCs() {
     zone_bc_.UpdateRanges();
   }
   void ReadSolutions() {
@@ -1078,17 +1078,7 @@ class Zone {
     SortSectionsByDim();
   }
 
- private:
-  std::string name_;
-  Coordinates<Real> coordinates_;
-  std::vector<std::unique_ptr<Section<Real>>> sections_;
-  std::vector<std::unique_ptr<Solution<Real>>> solutions_;
-  ZoneBC<Real> zone_bc_;
-  Base<Real> const *base_{nullptr};
-  cgsize_t n_cells_;
-  int i_zone_;
-
-  void SortSectionsByDim() {
+  void SortSectionsByDim(bool higher_dim_first = true) {
     // auto range_pair_to_data =
     //     std::map<std::pair<cgsize_t, cgsize_t>, cgsize_t *>();
     // for (auto &boco : zone_bc_.bocos()) {
@@ -1103,10 +1093,14 @@ class Zone {
     auto order = std::vector<int>(n);
     // TODO(PVC): use std::ranges::view in C++23
     std::iota(order.begin(), order.end(), 0);
-    sort(order.begin(), order.end(), [&dim_then_oldid](int lid, int rid) {
-      return dim_then_oldid[lid].first > dim_then_oldid[rid].first || (
-          dim_then_oldid[lid].first == dim_then_oldid[rid].first &&
-          dim_then_oldid[lid].second < dim_then_oldid[rid].second);
+    std::ranges::sort(order, [&dim_then_oldid, higher_dim_first](int l, int r) {
+      auto [l_dim, l_oldid] = dim_then_oldid[l];
+      auto [r_dim, r_oldid] = dim_then_oldid[r];
+      if (higher_dim_first) {
+        return l_dim > r_dim || ( l_dim == r_dim && l_oldid < r_oldid);
+      } else {
+        return l_dim < r_dim || ( l_dim == r_dim && l_oldid < r_oldid);
+      }
     });
     auto sorted_sections = std::vector<std::unique_ptr<Section<Real>>>(n);
     for (int i = 0; i < n; ++i) {
@@ -1129,8 +1123,18 @@ class Zone {
       // }
     }
     assert(i_next - 1 == CountAllCells());
-    UpdateSectionRanges();
+    UpdateRangesInBCs();
   }
+
+ private:
+  std::string name_;
+  Coordinates<Real> coordinates_;
+  std::vector<std::unique_ptr<Section<Real>>> sections_;
+  std::vector<std::unique_ptr<Solution<Real>>> solutions_;
+  ZoneBC<Real> zone_bc_;
+  Base<Real> const *base_{nullptr};
+  cgsize_t n_cells_;
+  int i_zone_;
 };
 
 template <std::floating_point Real>
