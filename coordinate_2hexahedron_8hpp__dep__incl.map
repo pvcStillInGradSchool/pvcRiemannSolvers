@@ -1,8 +1,9 @@
 <map id="include/mini/coordinate/hexahedron.hpp" name="include/mini/coordinate/hexahedron.hpp">
-<area shape="rect" id="node1" title=" " alt="" coords="168,5,343,47"/>
-<area shape="rect" id="node2" href="$integrator_2hexahedron_8hpp.html" title=" " alt="" coords="170,95,341,136"/>
-<area shape="rect" id="node3" href="$polynomial_2hexahedron_8hpp.html" title=" " alt="" coords="166,184,345,225"/>
-<area shape="rect" id="node4" href="$spatial_2dg_2lobatto_8hpp.html" title=" " alt="" coords="5,273,156,315"/>
-<area shape="rect" id="node5" href="$fr_2general_8hpp.html" title=" " alt="" coords="180,273,331,315"/>
-<area shape="rect" id="node6" href="$spatial_2fr_2lobatto_8hpp.html" title=" " alt="" coords="236,363,387,404"/>
+<area shape="rect" id="node1" title=" " alt="" coords="88,5,263,47"/>
+<area shape="rect" id="node2" href="$integrator_2hexahedron_8hpp.html" title=" " alt="" coords="151,95,322,136"/>
+<area shape="rect" id="node3" href="$quality_8hpp.html" title=" " alt="" coords="5,191,223,218"/>
+<area shape="rect" id="node4" href="$polynomial_2hexahedron_8hpp.html" title=" " alt="" coords="247,184,426,225"/>
+<area shape="rect" id="node5" href="$spatial_2dg_2lobatto_8hpp.html" title=" " alt="" coords="87,273,237,315"/>
+<area shape="rect" id="node6" href="$fr_2general_8hpp.html" title=" " alt="" coords="261,273,412,315"/>
+<area shape="rect" id="node7" href="$spatial_2fr_2lobatto_8hpp.html" title=" " alt="" coords="317,363,468,404"/>
 </map>

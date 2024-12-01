@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structmini_1_1type_1_1select_3_010_00_01T_00_01Types_8_8_8_01_4.html" title=" " alt="" coords="5,5,140,47"/>
+<area shape="rect" id="node1" href="$classmini_1_1temporal_1_1System.html" title=" " alt="" coords="5,104,180,145"/>
+<area shape="rect" id="node2" href="$classmini_1_1spatial_1_1FiniteElement.html" title=" " alt="" coords="228,104,429,145"/>
+<area shape="rect" id="node3" href="$classmini_1_1spatial_1_1dg_1_1General.html" title=" " alt="" coords="477,71,612,112"/>
+<area shape="rect" id="node6" href="$classmini_1_1spatial_1_1fr_1_1General.html" title="A general version of FR using a Lagrange expansion whose flux points are also solution points." alt="" coords="480,136,609,177"/>
+<area shape="rect" id="node4" href="$classmini_1_1spatial_1_1dg_1_1Lobatto.html" title="A specialized version of DG using a Lagrange expansion on Lobatto roots." alt="" coords="676,5,811,47"/>
+<area shape="rect" id="node5" href="$classmini_1_1spatial_1_1dg_1_1WithSource.html" title=" " alt="" coords="660,71,827,112"/>
+<area shape="rect" id="node7" href="$classmini_1_1spatial_1_1fr_1_1Lobatto.html" title="A specialized version of FR using a Lagrange expansion on Lobatto roots with the &quot;Lumping Lobatto&quot; co..." alt="" coords="679,136,808,177"/>
 </map>

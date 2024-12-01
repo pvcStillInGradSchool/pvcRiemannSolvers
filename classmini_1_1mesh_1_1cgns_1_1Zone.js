@@ -29,8 +29,9 @@ var classmini_1_1mesh_1_1cgns_1_1Zone =
     [ "ReadAllSections", "classmini_1_1mesh_1_1cgns_1_1Zone.html#aee54ea9174c9cf3f63906ebb97f34375", null ],
     [ "ReadCoordinates", "classmini_1_1mesh_1_1cgns_1_1Zone.html#a65ee0a40e688f5a602263b092b8fbc1e", null ],
     [ "ReadSolutions", "classmini_1_1mesh_1_1cgns_1_1Zone.html#ad4728f2fbfb6653375655e4d92cc3992", null ],
-    [ "ReadZoneBC", "classmini_1_1mesh_1_1cgns_1_1Zone.html#a6fe6857c6f3ecd5272d8e8b9f7d8ecb7", null ],
+    [ "ReadZoneBC", "classmini_1_1mesh_1_1cgns_1_1Zone.html#a8dcd2d568dc153133a184c2cc315bc3a", null ],
+    [ "SortSectionsByDim", "classmini_1_1mesh_1_1cgns_1_1Zone.html#a11b75968ef9816ec6d11e4974597c1fb", null ],
     [ "SplitSections", "classmini_1_1mesh_1_1cgns_1_1Zone.html#a916856468074a5a4f7cf0235c9f54fc7", null ],
-    [ "UpdateSectionRanges", "classmini_1_1mesh_1_1cgns_1_1Zone.html#ac16b349129fd66ca374b530e9c4e19ac", null ],
-    [ "Write", "classmini_1_1mesh_1_1cgns_1_1Zone.html#ad8bb47fa69b15c579d95bfb99c8bc040", null ]
+    [ "UpdateRangesInBCs", "classmini_1_1mesh_1_1cgns_1_1Zone.html#a6af28bcac67c103e5002cfc980961181", null ],
+    [ "Write", "classmini_1_1mesh_1_1cgns_1_1Zone.html#a04ffb7c909a2a3643725ce719ab3bf4a", null ]
 ];

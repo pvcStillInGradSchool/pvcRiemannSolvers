@@ -59,18 +59,18 @@ var NAVTREEINDEX =
 "classmini_1_1coordinate_1_1Cell.html#a4fe5e2faebc262401db37900400db4e5",
 "classmini_1_1coordinate_1_1Wedge15.html",
 "classmini_1_1limiter_1_1weno_1_1Eigen.html#ab008a0940209c78417d781f5e862c9fe",
-"classmini_1_1mesh_1_1overset_1_1Mapping.html#ae7c3fcf2820517f9fffe8aeff6576897",
-"classmini_1_1riemann_1_1diffusive_1_1Anisotropic.html#a351d1d1f9b3b3fa9f3cfc7f49db58908",
-"classmini_1_1spatial_1_1EnergyBasedViscosity.html",
-"classmini_1_1spatial_1_1fr_1_1General.html#a64f1bec17594c3df42960957435af422",
-"classpython_1_1concept_1_1OdeSystem.html#aa202b8bd27e93232500751236e44b6fb",
-"classpython_1_1expansion_1_1LagrangeOnLobattoRoots.html",
-"classpython_1_1spatial_1_1FRonLobattoRoots.html",
-"compare__errors_8py_source.html",
-"mat__to__vtu_8py.html",
-"namespacepython_1_1mat__to__vtu.html#af3d3540b4b6309f3c854272d0a84faef",
-"section_8hpp_source.html",
-"structmini_1_1spatial_1_1fr_1_1General_1_1FluxPointCache.html#aabf751d4254dbbc58fa6d3337ceec4b4"
+"classmini_1_1mesh_1_1metis_1_1Mesh.html",
+"classmini_1_1polynomial_1_1ProjectionWrapper.html#aa5bdd53a2a0d18f6be02ddc7f6d7bea7",
+"classmini_1_1riemann_1_1simple_1_1Double.html#adea4e7eadf4711e41e7d002c6d3deb2d",
+"classmini_1_1spatial_1_1dg_1_1WithSource.html#a4542e9c2a22c8a937f069a0b5a67d5f8",
+"classpython_1_1concept_1_1Grid.html#ab9c1671118fd99fefbde01b2fe35601c",
+"classpython_1_1equation_1_1LinearAdvection.html#a0ca3ac2a94832fb431352a59d1690653",
+"classpython_1_1solver_1_1Sedov.html#a5a3785055665c38eaf9c227bb498e8c1",
+"classpython_1_1viscosity_1_1Persson2006.html#a5331db03b1e40a4ee21f40795db78fda",
+"integrator_2face_8hpp.html",
+"namespacepython_1_1discrete__fourier.html#a2c5bee8aa220587ea812b14fc77ecf35",
+"riemann_8py.html#a0296fc5ebd3d84cca96d3dcebdb9eb01",
+"structmini_1_1mesh_1_1part_1_1Part.html#a7ebb07e6a56f1731d5925d3a553f8a0c"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -16,6 +16,9 @@ var dir_63af4d6d5f6d067ae1e80c5ce681974a =
       [ "Part", "structmini_1_1mesh_1_1part_1_1Part.html", "structmini_1_1mesh_1_1part_1_1Part" ],
       [ "Section", "classmini_1_1mesh_1_1part_1_1Section.html", "classmini_1_1mesh_1_1part_1_1Section" ]
     ] ],
+    [ "quality.hpp", "quality_8hpp.html", [
+      [ "QualityMeasure", "classmini_1_1mesh_1_1QualityMeasure.html", "classmini_1_1mesh_1_1QualityMeasure" ]
+    ] ],
     [ "shuffler.hpp", "shuffler_8hpp.html", "shuffler_8hpp" ],
     [ "vtk.hpp", "vtk_8hpp.html", "vtk_8hpp" ]
 ];

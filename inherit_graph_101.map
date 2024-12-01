@@ -1,3 +1,29 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classpython_1_1wave__number_1_1WaveNumberDisplayer.html" title="Plot modified&#45;wavenumbers for various spatial schemes." alt="" coords="5,5,260,47"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,819,140,846"/>
+<area shape="rect" id="node2" href="$classpython_1_1test__coordinate_1_1TestLinear.html" title=" " alt="" coords="193,5,396,47"/>
+<area shape="rect" id="node3" href="$classpython_1_1test__detector_1_1TestDetectors.html" title="Test various jump detectors." alt="" coords="201,71,388,112"/>
+<area shape="rect" id="node4" href="$classpython_1_1test__element_1_1TestDGonGaussPoints.html" title="Test elements for implementing discontinuous Galerkin schemes." alt="" coords="201,136,388,177"/>
+<area shape="rect" id="node5" href="$classpython_1_1test__element_1_1TestFRonGaussPoints.html" title="Test elements for implementing flux reconstruction schemes." alt="" coords="201,201,388,243"/>
+<area shape="rect" id="node6" href="$classpython_1_1test__element_1_1TestFRonLegendreRoots.html" title="Test the element for implementing flux reconstruction schemes." alt="" coords="201,267,388,308"/>
+<area shape="rect" id="node7" href="$classpython_1_1test__equation_1_1TestEquations.html" title="Test methods for getting fluxes and Jacobians of various PDEs." alt="" coords="199,332,390,373"/>
+<area shape="rect" id="node8" href="$classpython_1_1test__expansion_1_1TestLagrangeOnLegendreRoots.html" title="Test the expansion.LagrangeOnLegendreRoots class." alt="" coords="195,397,395,439"/>
+<area shape="rect" id="node9" href="$classpython_1_1test__expansion_1_1TestLagrangeOnLobattoRoots.html" title="Test the expansion.LagrangeOnLobattoRoots class." alt="" coords="195,463,395,504"/>
+<area shape="rect" id="node10" href="$classpython_1_1test__expansion_1_1TestLagrangeOnUniformRoots.html" title="Test the expansion.LagrangeOnUniformRoots class." alt="" coords="195,528,395,569"/>
+<area shape="rect" id="node11" href="$classpython_1_1test__expansion_1_1TestLegendre.html" title="Test the Legendre class." alt="" coords="195,593,395,635"/>
+<area shape="rect" id="node12" href="$classpython_1_1test__expansion_1_1TestTaylor.html" title="Test the expansion.Taylor class." alt="" coords="195,659,395,700"/>
+<area shape="rect" id="node13" href="$classpython_1_1test__expansion_1_1TestTruncatedLegendre.html" title="Test the TruncatedLegendre class." alt="" coords="195,724,395,765"/>
+<area shape="rect" id="node14" href="$classpython_1_1test__gas_1_1TestIdealGas.html" title="Test the IdealGas class." alt="" coords="188,790,401,817"/>
+<area shape="rect" id="node15" href="$classpython_1_1test__integrator_1_1TestGaussOnLinearCoordinate.html" title=" " alt="" coords="197,841,393,883"/>
+<area shape="rect" id="node16" href="$classpython_1_1test__limiter_1_1TestLimiters.html" title="Test various oscillation limiters." alt="" coords="207,907,382,948"/>
+<area shape="rect" id="node17" href="$classpython_1_1test__polynomial_1_1TestHuynh.html" title="Test the Huynh class." alt="" coords="191,972,398,1013"/>
+<area shape="rect" id="node18" href="$classpython_1_1test__polynomial_1_1TestLagrangeBasis.html" title="Test the LagrangeBasis class." alt="" coords="191,1037,398,1079"/>
+<area shape="rect" id="node19" href="$classpython_1_1test__polynomial_1_1TestRadau.html" title="Test the Radau class." alt="" coords="191,1103,398,1144"/>
+<area shape="rect" id="node20" href="$classpython_1_1test__polynomial_1_1TestVincent.html" title="Test the Vincent class." alt="" coords="191,1168,398,1209"/>
+<area shape="rect" id="node21" href="$classpython_1_1test__riemann_1_1TestCoupled.html" title=" " alt="" coords="201,1233,388,1275"/>
+<area shape="rect" id="node22" href="$classpython_1_1test__riemann_1_1TestEuler.html" title=" " alt="" coords="201,1299,388,1340"/>
+<area shape="rect" id="node23" href="$classpython_1_1test__riemann_1_1TestInviscidBurgers.html" title=" " alt="" coords="201,1364,388,1405"/>
+<area shape="rect" id="node24" href="$classpython_1_1test__riemann_1_1TestLinearAdvection.html" title=" " alt="" coords="201,1429,388,1471"/>
+<area shape="rect" id="node25" href="$classpython_1_1test__spatial_1_1TestFRonLegendreRoots.html" title="Test the element for implement flux reconstruction schemes." alt="" coords="206,1495,383,1536"/>
+<area shape="rect" id="node26" href="$classpython_1_1test__temporal_1_1TestExplicitEuler.html" title="Test the ExplicitEuler class." alt="" coords="199,1560,391,1601"/>
+<area shape="rect" id="node27" href="$classpython_1_1test__temporal_1_1TestRungeKutta.html" title="Test the RungeKutta class." alt="" coords="199,1625,391,1667"/>
 </map>

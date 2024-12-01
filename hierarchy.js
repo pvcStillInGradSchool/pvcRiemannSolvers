@@ -263,6 +263,7 @@ var hierarchy =
       [ "mini::polynomial::ProjectionWrapper< S, kDimensions, kDegrees, kComponents >", "classmini_1_1polynomial_1_1ProjectionWrapper.html", null ]
     ] ],
     [ "mini::mesh::part::Face< Int, Polynomial >", "structmini_1_1mesh_1_1part_1_1Face.html", null ],
+    [ "mini::mesh::cgns::Family< Real >", "classmini_1_1mesh_1_1cgns_1_1Family.html", null ],
     [ "mini::mesh::cgns::Field< Real >", "classmini_1_1mesh_1_1cgns_1_1Field.html", null ],
     [ "mini::mesh::cgns::File< Real >", "classmini_1_1mesh_1_1cgns_1_1File.html", null ],
     [ "Base::FluxPointCache", null, [
@@ -304,6 +305,7 @@ var hierarchy =
     [ "mini::riemann::diffusive::Anisotropic< S, K >::Property", "structmini_1_1riemann_1_1diffusive_1_1Anisotropic_1_1Property.html", null ],
     [ "mini::riemann::diffusive::NavierStokes< G >::Property", "structmini_1_1riemann_1_1diffusive_1_1NavierStokes_1_1Property.html", null ],
     [ "python.quadrangle.Quadrangle4", "classpython_1_1quadrangle_1_1Quadrangle4.html", null ],
+    [ "mini::mesh::QualityMeasure< Real >", "classmini_1_1mesh_1_1QualityMeasure.html", null ],
     [ "mini::aircraft::Rotor< Scalar >", "classmini_1_1aircraft_1_1Rotor.html", null ],
     [ "mini::aircraft::Rotorcraft< P >", "classmini_1_1aircraft_1_1Rotorcraft.html", null ],
     [ "mini::aircraft::Section< Scalar >", "classmini_1_1aircraft_1_1Section.html", null ],

@@ -1,4 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classmini_1_1temporal_1_1System.html" title="The abstract base of all ODE systems." alt="" coords="5,5,180,47"/>
-<area shape="rect" id="node2" href="$classmini_1_1temporal_1_1Constant.html" title="The simplest ODE System: , where ." alt="" coords="228,5,412,47"/>
+<area shape="rect" id="node1" href="$classmini_1_1temporal_1_1Solver.html" title="The abstract base of all ODE solvers." alt="" coords="5,39,172,80"/>
+<area shape="rect" id="node2" href="$classmini_1_1temporal_1_1Euler.html" title="The simplest ODE Solver: ." alt="" coords="241,5,400,47"/>
+<area shape="rect" id="node3" href="$structmini_1_1temporal_1_1RungeKutta.html" title=" " alt="" coords="220,71,421,112"/>
 </map>

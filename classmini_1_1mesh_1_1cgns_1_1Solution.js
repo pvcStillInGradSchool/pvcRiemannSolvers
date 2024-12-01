@@ -18,6 +18,6 @@ var classmini_1_1mesh_1_1cgns_1_1Solution =
     [ "OnNodes", "classmini_1_1mesh_1_1cgns_1_1Solution.html#ac228a1eeab769ea5fcf6118fdadcdc42", null ],
     [ "operator=", "classmini_1_1mesh_1_1cgns_1_1Solution.html#a18d2c0a2c33bddd86fdc4dff8ffd8058", null ],
     [ "operator=", "classmini_1_1mesh_1_1cgns_1_1Solution.html#ae1df79ab2cf7aaac200cb8df59967155", null ],
-    [ "Write", "classmini_1_1mesh_1_1cgns_1_1Solution.html#ac21bdb1b6f41629c8df14c8311cfa70a", null ],
+    [ "Write", "classmini_1_1mesh_1_1cgns_1_1Solution.html#aefbced796c78584cebd0882fc39a20fb", null ],
     [ "zone", "classmini_1_1mesh_1_1cgns_1_1Solution.html#ae6c765fb9455fda5674ac395e498a5aa", null ]
 ];

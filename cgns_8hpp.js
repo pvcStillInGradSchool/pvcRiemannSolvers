@@ -4,6 +4,7 @@ var cgns_8hpp =
     [ "BC", "structmini_1_1mesh_1_1cgns_1_1BC.html", "structmini_1_1mesh_1_1cgns_1_1BC" ],
     [ "CellIndex", "structmini_1_1mesh_1_1cgns_1_1CellIndex.html", "structmini_1_1mesh_1_1cgns_1_1CellIndex" ],
     [ "Coordinates", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html", "classmini_1_1mesh_1_1cgns_1_1Coordinates" ],
+    [ "Family", "classmini_1_1mesh_1_1cgns_1_1Family.html", "classmini_1_1mesh_1_1cgns_1_1Family" ],
     [ "Field", "classmini_1_1mesh_1_1cgns_1_1Field.html", "classmini_1_1mesh_1_1cgns_1_1Field" ],
     [ "File", "classmini_1_1mesh_1_1cgns_1_1File.html", "classmini_1_1mesh_1_1cgns_1_1File" ],
     [ "NodeIndex", "structmini_1_1mesh_1_1cgns_1_1NodeIndex.html", "structmini_1_1mesh_1_1cgns_1_1NodeIndex" ],

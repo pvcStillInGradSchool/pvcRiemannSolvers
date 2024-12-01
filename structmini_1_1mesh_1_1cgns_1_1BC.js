@@ -1,5 +1,6 @@
 var structmini_1_1mesh_1_1cgns_1_1BC =
 [
+    [ "family", "structmini_1_1mesh_1_1cgns_1_1BC.html#a5cf34b6748f90cbed48f67d800185570", null ],
     [ "location", "structmini_1_1mesh_1_1cgns_1_1BC.html#a7d755c552101ab269b23dc27a2991f5f", null ],
     [ "n_mesh", "structmini_1_1mesh_1_1cgns_1_1BC.html#aeb4346a1a97060291e91ae8bb9ef915e", null ],
     [ "n_pnts", "structmini_1_1mesh_1_1cgns_1_1BC.html#a9dee054208d667296a13fb5cf084bd32", null ],

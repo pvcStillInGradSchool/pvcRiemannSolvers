@@ -160,7 +160,7 @@ $(document).ready(function(){initNavTree('integrator_2element_8hpp_source.html',
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;      <span class="keyword">auto</span> mat_j = coordinate().LocalToJacobian(local_i);</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;      <span class="keyword">auto</span> det_j = CellDim() &lt; PhysDim()</div>
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;          ? std::sqrt((mat_j * mat_j.transpose()).determinant())</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;          : <a class="code" href="namespacestd.html#a65a647381b7e437b7d803b627ab58770">std::abs</a>(mat_j.determinant());</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;          : mat_j.determinant();</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;      GetGlobalWeight(i) = GetLocalWeight(i) * det_j;</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;      sum += GetGlobalWeight(i);</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    }</div>
@@ -196,7 +196,6 @@ $(document).ready(function(){initNavTree('integrator_2element_8hpp_source.html',
 <div class="ttc" id="anamespacemini_html"><div class="ttname"><a href="namespacemini.html">mini</a></div><div class="ttdef"><b>Definition:</b> <a href="airfoil_8hpp_source.html#l00011">airfoil.hpp:11</a></div></div>
 <div class="ttc" id="anamespacepython_1_1blasius_html_a45fcaa1720c6c76f76a3121779a62f32"><div class="ttname"><a href="namespacepython_1_1blasius.html#a45fcaa1720c6c76f76a3121779a62f32">python.blasius.default</a></div><div class="ttdeci">default</div><div class="ttdef"><b>Definition:</b> <a href="blasius_8py_source.html#l00048">blasius.py:48</a></div></div>
 <div class="ttc" id="anamespacepython_1_1print__stats_html_a115bcc164de1b24f0ec93efbd0c9537a"><div class="ttname"><a href="namespacepython_1_1print__stats.html#a115bcc164de1b24f0ec93efbd0c9537a">python.print_stats.n</a></div><div class="ttdeci">int n</div><div class="ttdef"><b>Definition:</b> <a href="print__stats_8py_source.html#l00007">print_stats.py:7</a></div></div>
-<div class="ttc" id="anamespacestd_html_a65a647381b7e437b7d803b627ab58770"><div class="ttname"><a href="namespacestd.html#a65a647381b7e437b7d803b627ab58770">std::abs</a></div><div class="ttdeci">Matrix abs(Matrix const &amp;matrix) requires(!std</div><div class="ttdef"><b>Definition:</b> <a href="algebra_2eigen_8hpp_source.html#l00102">eigen.hpp:102</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

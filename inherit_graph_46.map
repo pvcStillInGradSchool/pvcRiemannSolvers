@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classmini_1_1mesh_1_1overset_1_1Mapping.html" title=" " alt="" coords="5,5,176,47"/>
+<area shape="rect" id="node1" href="$classmini_1_1mesh_1_1metis_1_1SparseGraph.html" title="A CSR (Compressed Sparse Row) representation of sparse graphs." alt="" coords="5,13,157,54"/>
+<area shape="rect" id="node2" href="$classmini_1_1mesh_1_1metis_1_1SparseGraphWithDeleter.html" title="A wrapper, which holds arrays allocated by METIS, on SparseGraph." alt="" coords="205,5,388,61"/>
 </map>

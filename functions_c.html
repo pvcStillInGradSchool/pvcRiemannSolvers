@@ -187,6 +187,9 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 <li>CheckTypeDim()
 : <a class="el" href="classmini_1_1mesh_1_1cgns_1_1Zone.html#ac8d3d04918bcd1e61eba325eb55b83d3">mini::mesh::cgns::Zone&lt; Real &gt;</a>
 </li>
+<li>child()
+: <a class="el" href="classmini_1_1mesh_1_1cgns_1_1Family.html#a56251ac60cc6260207e7ac37ce6d715a">mini::mesh::cgns::Family&lt; Real &gt;</a>
+</li>
 <li>Clone()
 : <a class="el" href="classmini_1_1coordinate_1_1Cell.html#a98fefe131b62b2559e610181dcc47b8a">mini::coordinate::Cell&lt; Scalar &gt;</a>
 , <a class="el" href="classmini_1_1coordinate_1_1Face.html#a888894c5b41bf898e8609faf7c7be01a">mini::coordinate::Face&lt; Scalar, kPhysDim &gt;</a>
@@ -290,6 +293,9 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 <li>compare_methods()
 : <a class="el" href="classpython_1_1discrete__fourier_1_1DiscreteFourierAnalysis.html#ab55df1ac32db7c2da16408943dedbe31">python.discrete_fourier.DiscreteFourierAnalysis</a>
 </li>
+<li>compare_scheme_orders()
+: <a class="el" href="classpython_1_1wave__number_1_1WaveNumberDisplayer.html#ae427340faebb4e043e4b0a1172e6bafc">python.wave_number.WaveNumberDisplayer</a>
+</li>
 <li>compare_wave_numbers()
 : <a class="el" href="classpython_1_1wave__number_1_1WaveNumberDisplayer.html#afe3be5329ac0c19ed10d2586fa77a7a4">python.wave_number.WaveNumberDisplayer</a>
 </li>
@@ -361,23 +367,23 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 </li>
 <li>coordinate()
 : <a class="el" href="classmini_1_1integrator_1_1Cell.html#af0d38a294d9e069445d2f14a309cd672">mini::integrator::Cell&lt; Scalar &gt;</a>
-, <a class="el" href="classmini_1_1integrator_1_1Element.html#a6ce31ee7958ece33d31f3d54a762d6c6">mini::integrator::Element&lt; Scalar, kPhysDim, kCellDim &gt;</a>
 </li>
 <li>Coordinate
 : <a class="el" href="classmini_1_1integrator_1_1Element.html#a8cc64a2aa55190843fc610ba2a1e0259">mini::integrator::Element&lt; Scalar, kPhysDim, kCellDim &gt;</a>
 </li>
 <li>coordinate()
-: <a class="el" href="classmini_1_1integrator_1_1Face.html#a83578550d13bb7c37d3324ca5b10baba">mini::integrator::Face&lt; Scalar, kPhysDim &gt;</a>
+: <a class="el" href="classmini_1_1integrator_1_1Element.html#a6ce31ee7958ece33d31f3d54a762d6c6">mini::integrator::Element&lt; Scalar, kPhysDim, kCellDim &gt;</a>
 </li>
 <li>Coordinate
 : <a class="el" href="classmini_1_1integrator_1_1Face.html#abe83943d5c5043f508d86615a03081d9">mini::integrator::Face&lt; Scalar, kPhysDim &gt;</a>
-, <a class="el" href="classmini_1_1integrator_1_1Hexahedron.html#a972cc8af225be88d3413010ddb597e09">mini::integrator::Hexahedron&lt; Gx, Gy, Gz &gt;</a>
 </li>
 <li>coordinate()
-: <a class="el" href="classmini_1_1integrator_1_1Hexahedron.html#ac90356b0c61a2d1e954f9271fd40d301">mini::integrator::Hexahedron&lt; Gx, Gy, Gz &gt;</a>
+: <a class="el" href="classmini_1_1integrator_1_1Face.html#a83578550d13bb7c37d3324ca5b10baba">mini::integrator::Face&lt; Scalar, kPhysDim &gt;</a>
+, <a class="el" href="classmini_1_1integrator_1_1Hexahedron.html#ac90356b0c61a2d1e954f9271fd40d301">mini::integrator::Hexahedron&lt; Gx, Gy, Gz &gt;</a>
 </li>
 <li>Coordinate
-: <a class="el" href="classmini_1_1integrator_1_1Pyramid.html#a34a57474541d71b21549d7ec51525cbf">mini::integrator::Pyramid&lt; Gx, Gy, Qz &gt;</a>
+: <a class="el" href="classmini_1_1integrator_1_1Hexahedron.html#a972cc8af225be88d3413010ddb597e09">mini::integrator::Hexahedron&lt; Gx, Gy, Gz &gt;</a>
+, <a class="el" href="classmini_1_1integrator_1_1Pyramid.html#a34a57474541d71b21549d7ec51525cbf">mini::integrator::Pyramid&lt; Gx, Gy, Qz &gt;</a>
 </li>
 <li>coordinate()
 : <a class="el" href="classmini_1_1integrator_1_1Pyramid.html#a1c0ba8b1a96e25ab9cce5b20eba184de">mini::integrator::Pyramid&lt; Gx, Gy, Qz &gt;</a>
@@ -391,45 +397,42 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 </li>
 <li>Coordinate
 : <a class="el" href="classmini_1_1integrator_1_1Tetrahedron.html#a7b7f09942fab6724d52d01c65be9087b">mini::integrator::Tetrahedron&lt; Scalar, kPoints &gt;</a>
+, <a class="el" href="classmini_1_1integrator_1_1Triangle.html#ae7f554ce5bc020ff2d7aa2c565460b1a">mini::integrator::Triangle&lt; Scalar, kPhysDim, kPoints &gt;</a>
 </li>
 <li>coordinate()
 : <a class="el" href="classmini_1_1integrator_1_1Triangle.html#a4645379e01409ab2ec86dadd3b217bef">mini::integrator::Triangle&lt; Scalar, kPhysDim, kPoints &gt;</a>
 </li>
 <li>Coordinate
-: <a class="el" href="classmini_1_1integrator_1_1Triangle.html#ae7f554ce5bc020ff2d7aa2c565460b1a">mini::integrator::Triangle&lt; Scalar, kPhysDim, kPoints &gt;</a>
+: <a class="el" href="classmini_1_1integrator_1_1Wedge.html#a19a43821bdd30e7722461ce795e16701">mini::integrator::Wedge&lt; Qt, Gx &gt;</a>
 </li>
 <li>coordinate()
 : <a class="el" href="classmini_1_1integrator_1_1Wedge.html#a91ee6deb78a26853dda2d2e34a0351f0">mini::integrator::Wedge&lt; Qt, Gx &gt;</a>
 </li>
 <li>Coordinate
-: <a class="el" href="classmini_1_1integrator_1_1Wedge.html#a19a43821bdd30e7722461ce795e16701">mini::integrator::Wedge&lt; Qt, Gx &gt;</a>
+: <a class="el" href="structmini_1_1mesh_1_1part_1_1Cell.html#aa77202f40e7ff17315da610076bc4f21">mini::mesh::part::Cell&lt; Int, Poly &gt;</a>
 </li>
 <li>coordinate()
 : <a class="el" href="structmini_1_1mesh_1_1part_1_1Cell.html#ae4006fbb6ea754f19cb92fe743b4df97">mini::mesh::part::Cell&lt; Int, Poly &gt;</a>
 </li>
 <li>Coordinate
-: <a class="el" href="structmini_1_1mesh_1_1part_1_1Cell.html#aa77202f40e7ff17315da610076bc4f21">mini::mesh::part::Cell&lt; Int, Poly &gt;</a>
+: <a class="el" href="structmini_1_1mesh_1_1part_1_1Face.html#aa1b0a5fb4b57aba6b0a27c528e4463e0">mini::mesh::part::Face&lt; Int, Polynomial &gt;</a>
 </li>
 <li>coordinate()
 : <a class="el" href="structmini_1_1mesh_1_1part_1_1Face.html#ac60d034acd5021088d97fbb137a56a7a">mini::mesh::part::Face&lt; Int, Polynomial &gt;</a>
 </li>
 <li>Coordinate
-: <a class="el" href="structmini_1_1mesh_1_1part_1_1Face.html#aa1b0a5fb4b57aba6b0a27c528e4463e0">mini::mesh::part::Face&lt; Int, Polynomial &gt;</a>
-</li>
-<li>coordinate()
-: <a class="el" href="classmini_1_1polynomial_1_1Hexahedron.html#aea5a04a42778cc6249043a3c5a263b4d">mini::polynomial::Hexahedron&lt; Gx, Gy, Gz, kComponents, kL &gt;</a>
-</li>
-<li>Coordinate
 : <a class="el" href="classmini_1_1polynomial_1_1Hexahedron.html#a79b4b8b06e70aea53b96fbb0f9482cff">mini::polynomial::Hexahedron&lt; Gx, Gy, Gz, kComponents, kL &gt;</a>
 </li>
 <li>coordinate()
-: <a class="el" href="classpython_1_1concept_1_1Element.html#a114aeb7e817362c2900511fd36aa9784">python.concept.Element</a>
+: <a class="el" href="classmini_1_1polynomial_1_1Hexahedron.html#aea5a04a42778cc6249043a3c5a263b4d">mini::polynomial::Hexahedron&lt; Gx, Gy, Gz, kComponents, kL &gt;</a>
+, <a class="el" href="classpython_1_1concept_1_1Element.html#a114aeb7e817362c2900511fd36aa9784">python.concept.Element</a>
 , <a class="el" href="classpython_1_1concept_1_1Expansion.html#a30bc37c0cfd6e746d02abd4a5c95309b">python.concept.Expansion</a>
 , <a class="el" href="classpython_1_1concept_1_1Integrator.html#a7ab3d5852fd0414985441ab5e71d21e2">python.concept.Integrator</a>
 </li>
 <li>Coordinates()
 : <a class="el" href="classmini_1_1mesh_1_1cgns_1_1Coordinates.html#a8eedc44176cbfc9f5d0c67ef74bfda65">mini::mesh::cgns::Coordinates&lt; Real &gt;</a>
-, <a class="el" href="structmini_1_1mesh_1_1part_1_1Coordinates.html#a106547618e9f7cacaa64e21e52f7e4cf">mini::mesh::part::Coordinates&lt; Int, Scalar &gt;</a>
+, <a class="el" href="structmini_1_1mesh_1_1part_1_1Coordinates.html#af75f96434c3d5fc2f864bf7ea92a1ae1">mini::mesh::part::Coordinates&lt; Int, Scalar &gt;</a>
+, <a class="el" href="classmini_1_1mesh_1_1QualityMeasure.html#acee17651a669093a4dbfb2bff648ff05">mini::mesh::QualityMeasure&lt; Real &gt;</a>
 </li>
 <li>CoordinateUptr
 : <a class="el" href="structmini_1_1mesh_1_1part_1_1Cell.html#a8565d58652bee781c8c20b8453519e1f">mini::mesh::part::Cell&lt; Int, Poly &gt;</a>

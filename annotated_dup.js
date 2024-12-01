@@ -85,6 +85,7 @@ var annotated_dup =
           [ "BC", "structmini_1_1mesh_1_1cgns_1_1BC.html", "structmini_1_1mesh_1_1cgns_1_1BC" ],
           [ "CellIndex", "structmini_1_1mesh_1_1cgns_1_1CellIndex.html", "structmini_1_1mesh_1_1cgns_1_1CellIndex" ],
           [ "Coordinates", "classmini_1_1mesh_1_1cgns_1_1Coordinates.html", "classmini_1_1mesh_1_1cgns_1_1Coordinates" ],
+          [ "Family", "classmini_1_1mesh_1_1cgns_1_1Family.html", "classmini_1_1mesh_1_1cgns_1_1Family" ],
           [ "Field", "classmini_1_1mesh_1_1cgns_1_1Field.html", "classmini_1_1mesh_1_1cgns_1_1Field" ],
           [ "File", "classmini_1_1mesh_1_1cgns_1_1File.html", "classmini_1_1mesh_1_1cgns_1_1File" ],
           [ "NodeIndex", "structmini_1_1mesh_1_1cgns_1_1NodeIndex.html", "structmini_1_1mesh_1_1cgns_1_1NodeIndex" ],
@@ -124,6 +125,7 @@ var annotated_dup =
           [ "Wedge6", "classmini_1_1mesh_1_1vtk_1_1Wedge6.html", null ],
           [ "Writer", "classmini_1_1mesh_1_1vtk_1_1Writer.html", "classmini_1_1mesh_1_1vtk_1_1Writer" ]
         ] ],
+        [ "QualityMeasure", "classmini_1_1mesh_1_1QualityMeasure.html", "classmini_1_1mesh_1_1QualityMeasure" ],
         [ "Shuffler", "classmini_1_1mesh_1_1Shuffler.html", "classmini_1_1mesh_1_1Shuffler" ]
       ] ],
       [ "polynomial", "namespacemini_1_1polynomial.html", [

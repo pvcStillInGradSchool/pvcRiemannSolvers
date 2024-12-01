@@ -25,7 +25,7 @@ var classmini_1_1mesh_1_1cgns_1_1Section =
     [ "operator=", "classmini_1_1mesh_1_1cgns_1_1Section.html#a183b33fcb4f70a625aa995f52e36405d", null ],
     [ "Read", "classmini_1_1mesh_1_1cgns_1_1Section.html#a873f1dd9e67d10929bf07245cf7b571a", null ],
     [ "type", "classmini_1_1mesh_1_1cgns_1_1Section.html#ad2e8750c4d58702a5057d5fdf7bcd119", null ],
-    [ "Write", "classmini_1_1mesh_1_1cgns_1_1Section.html#a014b9f0a63c8eb2090e62424c2c95c9b", null ],
+    [ "Write", "classmini_1_1mesh_1_1cgns_1_1Section.html#a920a8bcfc02af1125bdcab289f51ba42", null ],
     [ "zone", "classmini_1_1mesh_1_1cgns_1_1Section.html#a2a59ee97e0db600839f190842b497b61", null ],
     [ "Zone< Real >", "classmini_1_1mesh_1_1cgns_1_1Section.html#a4fe4448480f2c0bffaf9ae5d54e3bfd7", null ]
 ];
